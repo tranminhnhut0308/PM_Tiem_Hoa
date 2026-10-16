@@ -1,0 +1,79 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="ShopHoa.Views.ConfirmationWindow"
+        Width="440"
+        SizeToContent="WidthAndHeight"
+        Title="Xác nhận"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F8F7"
+        CanResize="False">
+  <Window.Styles>
+    <Style Selector="Button">
+      <Setter Property="Padding" Value="18,10"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#087F6E"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderBrush" Value="#087F6E"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style Selector="Button.primary:pointerover">
+      <Setter Property="Background" Value="#056B5D"/>
+    </Style>
+
+    <Style Selector="Button.secondary">
+      <Setter Property="Background" Value="#FFFFFF"/>
+      <Setter Property="Foreground" Value="#263B35"/>
+      <Setter Property="BorderBrush" Value="#C9DCD6"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style Selector="Button.secondary:pointerover">
+      <Setter Property="Background" Value="#E8F5F1"/>
+      <Setter Property="BorderBrush" Value="#8CCFC0"/>
+    </Style>
+  </Window.Styles>
+
+  <Border Margin="16"
+          Background="#FFFFFF"
+          BorderBrush="#D7E7E2"
+          BorderThickness="1"
+          CornerRadius="14">
+    <StackPanel Margin="24" Spacing="18">
+      <TextBlock Text="Thông báo"
+                 FontSize="20"
+                 FontWeight="Bold"
+                 Foreground="#163F38"/>
+
+      <Border Background="#F0F8F5"
+              BorderBrush="#CFE3DD"
+              BorderThickness="1"
+              CornerRadius="10"
+              Padding="16,14">
+        <TextBlock x:Name="MessageTextBlock"
+                   TextWrapping="Wrap"
+                   FontSize="15"
+                   Foreground="#263B35"
+                   LineHeight="24"/>
+      </Border>
+
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+        <Button x:Name="CancelButton"
+                Classes="secondary"
+                Content="Hủy"
+                Click="CancelButton_OnClick"/>
+        <Button x:Name="ConfirmButton"
+                Classes="primary"
+                Content="Xóa"
+                Click="ConfirmButton_OnClick"/>
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</Window>

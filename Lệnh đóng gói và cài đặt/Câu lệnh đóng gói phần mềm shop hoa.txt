@@ -1,0 +1,12 @@
+Câu lệnh đóng gói : cd D:\shophoa ( tùy vào đường dẫn source mỗi máy có đường dẫn khác nhau ) .\pack.ps1 -Version 1.0.3
+
+.\pack.ps1 -Version 1.0.6
+
+./pack.sh -Version 1.0.6  linux 
+
+
+Câu lệnh cài phần mềm trên máy khách : 
+
+win : irm https://raw.githubusercontent.com/tranminhnhut0308/PM_Shop_Hoa/main/install.ps1 | iex
+
+linux : curl -fsSL https://raw.githubusercontent.com/tranminhnhut0308/PM_Shop_Hoa/main/install.sh | bash       ||    wget -qO- https://raw.githubusercontent.com/tranminhnhut0308/PM_Shop_Hoa/main/install.sh | bash

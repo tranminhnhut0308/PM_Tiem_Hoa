@@ -1,0 +1,376 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:ShopHoa.Views"
+        xmlns:models="using:ShopHoa.Models"
+        x:Class="ShopHoa.Views.KhachHangEditorWindow"
+        x:DataType="views:KhachHangEditorWindow"
+        Width="860"
+        Height="820"
+        MinWidth="760"
+        MinHeight="680"
+        WindowStartupLocation="CenterOwner"
+        Title="Khách hàng"
+        Background="#F7FAF9">
+
+    <Window.Styles>
+        <!-- Giữ nguyên toàn bộ Style cũ của em -->
+        <Style Selector="TextBlock.label">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#52645E"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+
+        <Style Selector="TextBlock.hint">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="#98A2B3"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,4,0,0"/>
+        </Style>
+
+        <Style Selector="TextBox.input">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#263B35"/>
+            <Setter Property="BorderBrush" Value="#D8E5E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="TextBox.input:focus">
+            <Setter Property="BorderBrush" Value="#087F6E"/>
+            <Setter Property="BorderThickness" Value="1.6"/>
+            <Setter Property="CaretBrush" Value="#087F6E"/>
+        </Style>
+
+        <Style Selector="TextBox.input[IsReadOnly=True]">
+            <Setter Property="Background" Value="#E8EFEC"/>
+            <Setter Property="Foreground" Value="#6B7280"/>
+            <Setter Property="BorderBrush" Value="#C8D8D2"/>
+        </Style>
+
+        <Style Selector="ComboBox.input">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#263B35"/>
+            <Setter Property="BorderBrush" Value="#D8E5E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#087F6E"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="22,10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style Selector="Button.primary:pointerover">
+            <Setter Property="Background" Value="#069A86"/>
+        </Style>
+
+        <Style Selector="Button.secondary">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="#344B45"/>
+            <Setter Property="BorderBrush" Value="#D8E5E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="22,10"/>
+        </Style>
+
+        <Style Selector="Button.secondary:pointerover">
+            <Setter Property="Background" Value="#F2F8F6"/>
+            <Setter Property="BorderBrush" Value="#087F6E"/>
+        </Style>
+
+        <Style Selector="Button.icon">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Styles>
+
+    <Border Padding="26">
+        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="16">
+
+            <!-- HEADER -->
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel>
+                    <TextBlock Text="{Binding TieuDe}" FontSize="24" FontWeight="Bold" Foreground="#163F38"/>
+                    <TextBlock Text="Thông tin khách hàng" FontSize="13" Foreground="#61736E" Margin="0,4,0,0"/>
+                </StackPanel>
+                <Border Grid.Column="1" Width="48" Height="48" CornerRadius="24" Background="#DFF5F0">
+                    <TextBlock Text="👤" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+            </Grid>
+
+            <!-- FORM -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="14">
+
+                    <!-- Mã + Tên -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                        <StackPanel>
+                            <TextBlock Classes="label" Text="Mã khách hàng *"/>
+                            <TextBox Classes="input" Text="{Binding Customer.MaKhachHang, Mode=OneWay}" IsReadOnly="True" Watermark="Tự động phát sinh"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Classes="label" Text="Tên khách hàng *"/>
+                            <TextBox Classes="input" Name="TenKhachHangBox" Text="{Binding Customer.TenKhachHang, Mode=TwoWay}" Watermark="Nhập tên khách hàng"/>
+                        </StackPanel>
+                    </Grid>
+
+                  <!-- ===== SỐ ĐIỆN THOẠI (HIỆN TIẾN ĐỘ X/10 LINH HOẠT) ===== -->
+<!-- ===== SỐ ĐIỆN THOẠI (ÁP DỤNG ĐẦY ĐỦ CHO TẤT CẢ CÁC Ô) ===== -->
+<StackPanel>
+    <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Classes="label" Text="Số điện thoại liên hệ" VerticalAlignment="Center"/>
+        <Button Grid.Column="1" 
+                Classes="secondary" 
+                Content="+ Thêm số" 
+                Padding="12,6"
+                Name="BtnThemSo"
+                Click="OnThemSoDienThoai"/>
+    </Grid>
+
+    <!-- Ô số 1 -->
+    <TextBox Classes="input" 
+             Name="SoDienThoai1Box"
+             Margin="0,6,0,0"
+             Watermark="0987123456"
+             TextChanged="OnSoDienThoaiTextChanged"
+             LostFocus="OnSoDienThoaiLostFocus"/>
+    <TextBlock Name="Sdt1HintBox" Classes="hint" Text=""/>
+
+  <!-- Ô số 2 -->
+    <TextBox Classes="input" 
+             Name="SoDienThoai2Box"
+             Margin="0,8,0,0"
+             Watermark="Số điện thoại thứ 2"
+             IsVisible="False"
+             TextChanged="OnSoDienThoaiTextChanged"
+             LostFocus="OnSoDienThoaiLostFocus"/>
+    <TextBlock Name="Sdt2HintBox" Classes="hint" Text=""/> <!-- Xóa chữ IsVisible="False" ở đây -->
+
+    <!-- Ô số 3 -->
+    <TextBox Classes="input" 
+             Name="SoDienThoai3Box"
+             Margin="0,8,0,0"
+             Watermark="Số điện thoại thứ 3"
+             IsVisible="False"
+             TextChanged="OnSoDienThoaiTextChanged"
+             LostFocus="OnSoDienThoaiLostFocus"/>
+    <TextBlock Name="Sdt3HintBox" Classes="hint" Text=""/> <!-- Xóa chữ IsVisible="False" ở đây -->
+
+</StackPanel>
+
+                    <!-- Giới tính + Ngày sinh + Email -->
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
+                        <StackPanel>
+                            <TextBlock Classes="label" Text="Giới tính"/>
+                            <ComboBox Classes="input" Name="GioiTinhBox">
+                                <ComboBoxItem Content="Chưa có"/>
+                                <ComboBoxItem Content="Nam"/>
+                                <ComboBoxItem Content="Nữ"/>
+                                <ComboBoxItem Content="Khác"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                       <StackPanel Grid.Column="1">
+                            <TextBlock Classes="label" Text="Ngày sinh"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="45"/>  <!-- Ô Ngày (dd) -->
+                                    <ColumnDefinition Width="20"/>  <!-- Dấu / -->
+                                    <ColumnDefinition Width="45"/>  <!-- Ô Tháng (MM) -->
+                                    <ColumnDefinition Width="20"/>  <!-- Dấu / -->
+                                    <ColumnDefinition Width="70"/>  <!-- Ô Năm (yyyy) -->
+                                    <ColumnDefinition Width="*"/>   <!-- Nút chọn ngày -->
+                                </Grid.ColumnDefinitions>
+
+                                <!-- 1. Ô nhập Ngày -->
+                                <TextBox Grid.Column="0"
+                                        Classes="input"
+                                        Name="NgayBox"
+                                        Watermark="dd"
+                                        MaxLength="2"
+                                        HorizontalContentAlignment="Center"
+                                        TextChanged="OnNgayTextChanged"
+                                        GotFocus="OnDateBoxGotFocus"/>
+
+                                <TextBlock Grid.Column="1" Text="/" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray"/>
+
+                                <!-- 2. Ô nhập Tháng -->
+                                <TextBox Grid.Column="2"
+                                        Classes="input"
+                                        Name="ThangBox"
+                                        Watermark="MM"
+                                        MaxLength="2"
+                                        HorizontalContentAlignment="Center"
+                                        TextChanged="OnThangTextChanged"
+                                        GotFocus="OnDateBoxGotFocus"/>
+
+                                <TextBlock Grid.Column="3" Text="/" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray"/>
+
+                                <!-- 3. Ô nhập Năm -->
+                                <TextBox Grid.Column="4"
+                                        Classes="input"
+                                        Name="NamBox"
+                                        Watermark="yyyy"
+                                        MaxLength="4"
+                                        HorizontalContentAlignment="Center"
+                                        TextChanged="OnNamTextChanged"
+                                        GotFocus="OnDateBoxGotFocus"/>
+
+                                <!-- 4. Nút bấm kèm Flyout mở lịch -->
+                                <Button Grid.Column="5" 
+                                        Content="📅" 
+                                        Margin="5,0,0,0"
+                                        VerticalAlignment="Stretch"
+                                        ToolTip.Tip="Chọn ngày từ lịch">
+                                    <Button.Flyout>
+                                        <Flyout Placement="Bottom">
+                                            <Calendar Name="PopupCalendar" SelectionMode="SingleDate" SelectedDatesChanged="OnCalendarSelectedDatesChanged"/>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </Grid>
+                            <TextBlock Classes="hint" Text="Nhập dd/MM/yyyy hoặc bấm 📅 để chọn lịch"/>
+                        </StackPanel>
+                        <!-- Ô Email chia thành 2 phần: Tên email và phần đuôi domain -->
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Classes="label" Text="Email"/>
+                            <Grid ColumnDefinitions="*, Auto">
+                                <!-- Ô nhập tên tài khoản email trước -->
+                                <TextBox Grid.Column="0"
+                                        Classes="input" 
+                                        Name="EmailUserBox"
+                                        Watermark="nguyenvana"
+                                        TextChanged="OnEmailUserTextChanged"/>
+                                
+                                <!-- Ô phía sau hiển thị phần đuôi @gmail.com mờ (có thể sửa) -->
+                                <TextBox Grid.Column="1"
+                                        Classes="input"
+                                        Name="EmailDomainBox"
+                                        Text="@gmail.com"
+                                        Width="130"
+                                        Margin="4,0,0,0"/>
+                            </Grid>
+                            <TextBlock Classes="hint" Text="Nhập tên tài khoản, phần đuôi có thể tùy chỉnh"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Nhóm khách hàng -->
+                    <StackPanel>
+                        <TextBlock Classes="label" Text="Nhóm khách hàng"/>
+                        <ComboBox Name="NhomKhachHangBox"
+                        ItemsSource="{Binding DanhSachNhom}"
+                        SelectedItem="{Binding NhomKhachHangDaChon, Mode=TwoWay}"
+                        PlaceholderText="Chọn nhóm khách hàng">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding TenNhom}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                    </StackPanel>
+
+                    <!-- ===== ĐỊA CHỈ ===== -->
+                    <Border Background="White" BorderBrush="#D8E5E0" BorderThickness="1" CornerRadius="10" Padding="14">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Địa chỉ" FontWeight="SemiBold" Foreground="#163F38"/>
+
+                            <!-- Chọn loại địa chỉ -->
+                            <StackPanel Orientation="Horizontal" Spacing="16">
+                               <RadioButton Name="RadioDiaChiMoi" 
+                                Content="Địa chỉ mới" 
+                                IsChecked="True" 
+                                GroupName="LoaiDiaChi"
+                                IsCheckedChanged="OnLoaiDiaChiChanged"/>
+                                
+                                <RadioButton Name="RadioDiaChiCu" 
+                                Content="Địa chỉ cũ (trước sáp nhập)" 
+                                GroupName="LoaiDiaChi"
+                                IsCheckedChanged="OnLoaiDiaChiChanged"/>
+                            </StackPanel>
+
+                            <!-- Số nhà, đường -->
+                            <StackPanel>
+                                <TextBlock Classes="label" Text="Số nhà, tên đường"/>
+                                <TextBox Classes="input" Text="{Binding Customer.DiaChi, Mode=TwoWay}" Watermark="Số nhà, đường..."/>
+                            </StackPanel>
+
+                            <!-- Phường/Xã + Tỉnh/Thành (luôn hiện) -->
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                                <StackPanel>
+                                    <TextBlock Classes="label" Text="Phường / Xã *"/>
+                                    <TextBox Classes="input" Text="{Binding Customer.PhuongXa, Mode=TwoWay}" Watermark="Phường / Xã"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Classes="label" Text="Tỉnh / Thành phố *"/>
+                                    <TextBox Classes="input" Text="{Binding Customer.TinhThanh, Mode=TwoWay}" Watermark="Tỉnh / Thành phố"/>
+                                </StackPanel>
+                            </Grid>
+
+                           <!-- Quận/Huyện chỉ hiện khi chọn Địa chỉ cũ -->
+                            <StackPanel Name="PanelQuanHuyen" IsVisible="False" Margin="0,8,0,0">
+                                <TextBlock Classes="label" Text="Quận / Huyện (địa chỉ cũ)"/>
+                                <TextBox Classes="input" 
+                                        Text="{Binding Customer.QuanHuyen, Mode=TwoWay}" 
+                                        Watermark="Quận / Huyện"/>
+                                <TextBlock Classes="hint" 
+                                        Text="Chỉ điền khi đây là địa chỉ cũ trước khi sáp nhập hành chính."/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Thông tin xuất hóa đơn -->
+                    <Border Background="White" BorderBrush="#D8E5E0" BorderThickness="1" CornerRadius="10" Padding="14">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Thông tin xuất hóa đơn" FontWeight="SemiBold" Foreground="#163F38"/>
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="14" RowDefinitions="Auto,Auto" RowSpacing="10">
+                                <StackPanel>
+                                    <TextBlock Classes="label" Text="Tên công ty"/>
+                                    <TextBox Classes="input" Text="{Binding Customer.TenCongTy, Mode=TwoWay}" Watermark="Tên công ty"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Classes="label" Text="Người mua hóa đơn"/>
+                                    <TextBox Classes="input" Text="{Binding Customer.TenNguoiMuaHoaDon, Mode=TwoWay}" Watermark="Tên người mua"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.ColumnSpan="2">
+                                    <TextBlock Classes="label" Text="Địa chỉ xuất hóa đơn"/>
+                                    <TextBox Classes="input" Text="{Binding Customer.DiaChiXuatHoaDon, Mode=TwoWay}" Watermark="Địa chỉ xuất hóa đơn"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Ghi chú -->
+                    <StackPanel>
+                        <TextBlock Classes="label" Text="Ghi chú"/>
+                        <TextBox Classes="input" Text="{Binding Customer.GhiChu, Mode=TwoWay}"
+                                 Watermark="Ghi chú về khách hàng"
+                                 Height="80" AcceptsReturn="True" TextWrapping="Wrap"
+                                 VerticalContentAlignment="Top"/>
+                    </StackPanel>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- BUTTON -->
+            <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+                <TextBlock x:Name="LoiMessageTextBlock" Foreground="#D64545" VerticalAlignment="Center" FontSize="13" TextWrapping="Wrap"/>
+                <Button Grid.Column="1" Classes="secondary" Content="Hủy" Click="OnCancelClicked"/>
+                <Button Grid.Column="2" Classes="primary" Name="NutLuuButton" Content="💾 Lưu khách hàng" Click="OnSaveClicked"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

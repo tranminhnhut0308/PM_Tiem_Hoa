@@ -1,0 +1,117 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:ShopHoa.Models"
+             xmlns:controls="clr-namespace:ShopHoa.Controls"
+             x:Class="ShopHoa.Controls.MultiSelectComboBox"
+             x:DataType="controls:MultiSelectComboBox">
+
+  <UserControl.Styles>
+    <Style Selector="Button.ms-field">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#D7E3DE" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="7" />
+      <Setter Property="Padding" Value="9,0" />
+      <Setter Property="Height" Value="32" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Focusable" Value="False" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Name="PART_BorderElement"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}">
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                              Margin="{TemplateBinding Padding}" />
+          </Border>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+
+    <Style Selector="Button.ms-field:pointerover">
+      <Setter Property="BorderBrush" Value="#9FCDBF" />
+    </Style>
+
+    <Style Selector="Button.ms-field:pointerover /template/ Border#PART_BorderElement">
+      <Setter Property="BorderBrush" Value="#9FCDBF" />
+    </Style>
+
+    <Style Selector="Button.ms-field.ms-open">
+      <Setter Property="Background" Value="#F5FBF9" />
+    </Style>
+
+    <Style Selector="Button.ms-field.ms-open /template/ Border#PART_BorderElement">
+      <Setter Property="Background" Value="#F5FBF9" />
+      <Setter Property="BorderBrush" Value="#0B8F76" />
+    </Style>
+
+    <Style Selector="Border.ms-popup">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#D7E3DE" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="6" />
+      <Setter Property="BoxShadow" Value="0 6 18 0 #330B8F76" />
+    </Style>
+
+    <Style Selector="CheckBox.ms-item">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="#344054" />
+      <Setter Property="MinHeight" Value="24" />
+      <Setter Property="Margin" Value="4,0" />
+    </Style>
+
+    <!-- Chữ mờ dùng khi người dùng chưa chọn mục nào. -->
+    <Style Selector="TextBlock.ms-placeholder">
+      <Setter Property="Foreground" Value="#98A2B3" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid>
+    <!-- Danh sách nổi: hiện ra ngoài cây giao diện nên không làm giãn khoảng lọc. -->
+    <Popup Name="PART_Popup"
+           IsLightDismissEnabled="True"
+           Placement="BottomEdgeAlignedLeft">
+      <Border Classes="ms-popup" MinWidth="200" MaxWidth="260">
+        <ScrollViewer MaxHeight="230"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+          <ItemsControl ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=controls:MultiSelectComboBox}}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="models:SoQuyLuaChonItem">
+                <CheckBox Classes="ms-item"
+                          Content="{Binding HienThi}"
+                          IsChecked="{Binding IsChecked, Mode=TwoWay}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Border>
+    </Popup>
+
+    <!-- Ô bấm được, trông giống ComboBox của hệ thống. -->
+    <Button Name="PART_Button" Classes="ms-field">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+        <TextBlock Name="PART_Text"
+                   Grid.Column="0"
+                   FontSize="12"
+                   Foreground="#344054"
+                   VerticalAlignment="Center"
+                   TextTrimming="CharacterEllipsis" />
+
+        <TextBlock Grid.Column="1"
+                   Text="▾"
+                   FontSize="11"
+                   Foreground="#667085"
+                   VerticalAlignment="Center" />
+      </Grid>
+    </Button>
+  </Grid>
+</UserControl>

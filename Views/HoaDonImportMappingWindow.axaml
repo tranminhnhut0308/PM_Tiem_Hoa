@@ -1,0 +1,118 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="ShopHoa.Views.HoaDonImportMappingWindow"
+        Width="1180"
+        Height="820"
+        MinWidth="900"
+        MinHeight="560"
+        Title="Ánh xạ cột của file hóa đơn"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F8F7"
+        CanResize="True">
+  <Window.Styles>
+    <Style Selector="Button">
+      <Setter Property="Padding" Value="18,10"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#087F6E"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderBrush" Value="#087F6E"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style Selector="Button.primary:pointerover">
+      <Setter Property="Background" Value="#056B5D"/>
+    </Style>
+
+    <Style Selector="Button.primary:disabled">
+      <Setter Property="Background" Value="#B9CFC9"/>
+      <Setter Property="BorderBrush" Value="#B9CFC9"/>
+      <Setter Property="Foreground" Value="#6D807B"/>
+    </Style>
+
+    <Style Selector="Button.secondary">
+      <Setter Property="Background" Value="#FFFFFF"/>
+      <Setter Property="Foreground" Value="#263B35"/>
+      <Setter Property="BorderBrush" Value="#C9DCD6"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style Selector="Button.secondary:pointerover">
+      <Setter Property="Background" Value="#E8F5F1"/>
+      <Setter Property="BorderBrush" Value="#8CCFC0"/>
+    </Style>
+  </Window.Styles>
+
+  <Border Margin="16"
+          Background="#FFFFFF"
+          BorderBrush="#D7E7E2"
+          BorderThickness="1"
+          CornerRadius="14">
+    <DockPanel Margin="24">
+
+      <!-- ======== NÚT ======== -->
+      <StackPanel DockPanel.Dock="Bottom"
+                  Orientation="Horizontal"
+                  HorizontalAlignment="Right"
+                  Spacing="10"
+                  Margin="0,16,0,0">
+        <Button Classes="secondary"
+                Content="Hủy"
+                Click="HuyButton_OnClick"/>
+        <Button x:Name="TienTucButton"
+                Classes="primary"
+                Content="Tiếp tục"
+                Click="TienTucButton_OnClick"/>
+      </StackPanel>
+
+      <TextBlock x:Name="TieudeTrangThaiTextBlock"
+                 DockPanel.Dock="Bottom"
+                 Margin="0,12,0,0"
+                 FontSize="13"
+                 TextWrapping="Wrap"/>
+
+      <!-- ======== TIÊU ĐỀ ======== -->
+      <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="0,0,0,12">
+        <TextBlock Text="Ánh xạ cột của file hóa đơn"
+                   FontSize="20"
+                   FontWeight="Bold"
+                   Foreground="#163F38"/>
+
+        <TextBlock x:Name="TieudeFileTextBlock"
+                   TextWrapping="Wrap"
+                   FontSize="13"
+                   Foreground="#5A7B72"/>
+
+        <Border Background="#F0F8F5"
+                BorderBrush="#CFE3DD"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="14,12">
+          <TextBlock FontSize="13"
+                     Foreground="#163F38"
+                     TextWrapping="Wrap"
+                     LineHeight="20"
+                     Text="Phần mềm đã tự nhận diện những cột tên quen thuộc như &quot;Mã hóa đơn&quot;, &quot;Khách hàng&quot;, &quot;Tổng tiền&quot;, &quot;Mã hàng&quot;, &quot;Số lượng&quot;, &quot;Đơn giá&quot;. Chỉ cần sửa ở đây khi file của bạn đặt tên cột khác. Cột có dấu • là bắt buộc."/>
+        </Border>
+      </StackPanel>
+
+      <!-- ======== DANH SÁCH SHEET ======== -->
+      <Border Background="#FAFCFB"
+              BorderBrush="#E4EEEB"
+              BorderThickness="1"
+              CornerRadius="10">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Margin="12" Spacing="8">
+            <StackPanel x:Name="SheetPanels"/>
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+    </DockPanel>
+  </Border>
+</Window>

@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#087F6E">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Vựa Hoa">
+  <link rel="manifest" href="/manifest.json">
+  <title>Vựa Hoa Nhà Huy - Báo Cáo Chủ Tiệm</title>
+  
+  <style>
+    :root {
+      --primary: #087F6E;
+      --primary-dark: #065F52;
+      --gold: #D9B66F;
+      --gold-dark: #B8964E;
+      --bg: #F3F6F5;
+      --card-bg: #FFFFFF;
+      --text: #1F2937;
+      --text-muted: #6B7280;
+      --danger: #EF4444;
+      --warning: #F59E0B;
+      --success: #10B981;
+      --border: #E5E7EB;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding-bottom: 75px;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    .app-header {
+      background: linear-gradient(135deg, #064E3B 0%, #087F6E 100%);
+      color: white;
+      padding: max(16px, env(safe-area-inset-top)) 16px 14px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-logo-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+    .brand-names {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-sub {
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: #D1FAE5;
+      font-weight: 600;
+    }
+    .brand-main {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: 0.5px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-icon {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    .btn-icon:active {
+      transform: scale(0.92);
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* FILTER BAR */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      background: white;
+      overflow-x: auto;
+      scrollbar-width: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      background: #F3F4F6;
+      border: 1px solid transparent;
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-chip.active {
+      background: #E6F7F3;
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* CONTAINER */
+    .container {
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* STATS GRID */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--primary);
+    }
+    .stat-card.revenue::before { background: var(--primary); }
+    .stat-card.orders::before { background: #3B82F6; }
+    .stat-card.collected::before { background: var(--success); }
+    .stat-card.debt::before { background: var(--warning); }
+    
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .stat-card.revenue .stat-value { color: var(--primary); }
+    .stat-card.debt .stat-value { color: #D97706; }
+
+    /* CARDS */
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 1px solid var(--border);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #F3F4F6;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #111827;
+    }
+    .card-extra {
+      font-size: 12px;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* CHART CONTAINER */
+    .chart-container {
+      display: flex;
+      align-items: flex-end;
+      height: 150px;
+      gap: 8px;
+      padding-top: 15px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .chart-bar-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      min-width: 32px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+    .chart-bar {
+      width: 100%;
+      max-width: 26px;
+      background: linear-gradient(180deg, #10B981 0%, var(--primary) 100%);
+      border-radius: 6px 6px 0 0;
+      transition: height 0.4s ease;
+      position: relative;
+    }
+    .chart-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    /* TOP PRODUCTS LIST */
+    .product-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #F9FAFB;
+    }
+    .product-item:last-child { border-bottom: none; }
+    .product-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+    .product-rank {
+      width: 22px;
+      height: 22px;
+      background: #F3F4F6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .product-rank.top-1 { background: #FEF3C7; color: #B45309; }
+    .product-rank.top-2 { background: #E5E7EB; color: #4B5563; }
+    .product-rank.top-3 { background: #FFEDD5; color: #C2410C; }
+    .product-name {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1F2937;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .product-qty {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .product-revenue {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--primary);
+      text-align: right;
+    }
+
+    /* ORDER ITEM */
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 11px 0;
+      border-bottom: 1px solid #F3F4F6;
+    }
+    .order-item:last-child { border-bottom: none; }
+    .order-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .order-code {
+      font-size: 13px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .order-cust {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .order-amount-col {
+      text-align: right;
+    }
+    .order-amount {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .order-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 2px;
+    }
+    .badge-paid { background: #D1FAE5; color: #065F46; }
+    .badge-debt { background: #FEF3C7; color: #92400E; }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 1px solid var(--border);
+      display: flex;
+      padding-bottom: env(safe-area-inset-bottom);
+      z-index: 100;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    }
+    .nav-btn {
+      flex: 1;
+      padding: 10px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #9CA3AF;
+      transition: all 0.2s;
+    }
+    .nav-btn.active {
+      color: var(--primary);
+    }
+    .nav-icon {
+      font-size: 18px;
+    }
+    .nav-text {
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* LOGIN MODAL */
+    .login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #064E3B;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .login-box {
+      background: white;
+      width: 100%;
+      max-width: 360px;
+      border-radius: 20px;
+      padding: 28px 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      text-align: center;
+    }
+    .login-logo {
+      font-size: 40px;
+      margin-bottom: 8px;
+    }
+    .login-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #064E3B;
+    }
+    .login-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(8, 127, 110, 0.15);
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #087F6E 0%, #064E3B 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+      box-shadow: 0 4px 12px rgba(8, 127, 110, 0.3);
+    }
+    .btn-submit:active { transform: scale(0.98); }
+
+    /* LOADING SPINNER */
+    .spinning {
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1F2937;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 300;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+      display: none;
+    }
+
+    .hide { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- TOAST MESSAGE -->
+  <div id="toast" class="toast"></div>
+
+  <!-- LOGIN OVERLAY -->
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-box">
+      <div class="login-logo">🌸</div>
+      <div class="login-title">VỰA HOA NHÀ HUY</div>
+      <div class="login-sub">Cổng Báo Cáo Quản Trị Từ Xa</div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Tên đăng nhập</label>
+          <input type="text" id="usernameInput" class="form-input" placeholder="Ví dụ: admin_Nhut" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mật khẩu</label>
+          <input type="password" id="passwordInput" class="form-input" placeholder="Nhập mật khẩu" required>
+        </div>
+        <button type="submit" id="loginBtn" class="btn-submit">Đăng Nhập</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="appContainer" class="hide">
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="header-content">
+        <div class="brand-title">
+          <div class="brand-logo-icon">🌸</div>
+          <div class="brand-names">
+            <span class="brand-sub">BÁO CÁO TỔNG QUAN</span>
+            <span class="brand-main">VỰA HOA NHÀ HUY</span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="btn-icon" id="refreshBtn" onclick="refreshCurrentTab()" title="Làm mới số liệu">
+            🔄
+          </button>
+          <button class="btn-icon" onclick="handleLogout()" title="Đăng xuất">
+            🚪
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- TAB 1: TỔNG QUAN (DASHBOARD) -->
+    <main id="tabDashboard">
+      <!-- TIME FILTER BAR -->
+      <div class="filter-bar">
+        <button class="filter-chip active" onclick="setFilter('today', this)">Hôm nay</button>
+        <button class="filter-chip" onclick="setFilter('yesterday', this)">Hôm qua</button>
+        <button class="filter-chip" onclick="setFilter('7days', this)">7 ngày qua</button>
+        <button class="filter-chip" onclick="setFilter('this_month', this)">Tháng này</button>
+      </div>
+
+      <div class="container">
+        <!-- STATS 4 CARDS -->
+        <div class="stats-grid">
+          <div class="stat-card revenue">
+            <div class="stat-label">Doanh Thu</div>
+            <div class="stat-value" id="statRevenue">0 đ</div>
+          </div>
+          <div class="stat-card orders">
+            <div class="stat-label">Số Đơn Hàng</div>
+            <div class="stat-value" id="statOrders">0</div>
+          </div>
+          <div class="stat-card collected">
+            <div class="stat-label">Đã Thu</div>
+            <div class="stat-value" id="statCollected">0 đ</div>
+          </div>
+          <div class="stat-card debt">
+            <div class="stat-label">Còn Nợ</div>
+            <div class="stat-value" id="statDebt">0 đ</div>
+          </div>
+        </div>
+
+        <!-- REVENUE CHART -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📊 Doanh Thu Theo Giờ / Ngày</div>
+            <div class="card-extra" id="chartTotalLabel">0 đ</div>
+          </div>
+          <div class="chart-container" id="chartBars">
+            <!-- Dynamic Bars -->
+          </div>
+        </div>
+
+        <!-- TOP 10 BEST SELLING FLOWERS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🌸 Top Hoa Bán Chạy</div>
+            <div class="card-extra">Theo doanh thu</div>
+          </div>
+          <div id="topProductsList">
+            <!-- Dynamic Items -->
+          </div>
+        </div>
+
+        <!-- 10 RECENT ORDERS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🧾 Đơn Hàng Gần Đây</div>
+            <div class="card-extra">10 đơn mới nhất</div>
+          </div>
+          <div id="recentOrdersList">
+            <!-- Dynamic Items -->
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- TAB 2: BÁO CÁO (REPORTS) -->
+    <main id="tabReports" class="hide">
+      <!-- REPORT SUB-TABS -->
+      <div class="filter-bar">
+        <button class="filter-chip active" onclick="setReportSubTab('end-of-day', this)">🗓 Cuối ngày</button>
+        <button class="filter-chip" onclick="setReportSubTab('debtors', this)">👥 Khách nợ</button>
+        <button class="filter-chip" onclick="setReportSubTab('cash-book', this)">💰 Sổ quỹ</button>
+      </div>
+
+      <div class="container">
+        <!-- BÁO CÁO CUỐI NGÀY -->
+        <div id="reportEndOfDaySection">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🗓 Tổng Kết Bán Hàng Cuối Ngày</div>
+              <input type="date" id="endOfDayDatePicker" onchange="loadEndOfDayReport()" style="border: 1px solid var(--border); padding: 4px 8px; border-radius: 6px; font-size: 12px;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+              <div style="background: #F0FDF4; padding: 12px; border-radius: 10px; border: 1px solid #BBF7D0;">
+                <div style="font-size: 11px; color: #166534; font-weight: 600;">💵 TIỀN MẶT ĐÃ THU</div>
+                <div style="font-size: 16px; font-weight: 800; color: #15803D; margin-top: 4px;" id="eodCashIn">0 đ</div>
+              </div>
+              <div style="background: #EFF6FF; padding: 12px; border-radius: 10px; border: 1px solid #BFDBFE;">
+                <div style="font-size: 11px; color: #1E40AF; font-weight: 600;">💳 CHUYỂN KHOẢN</div>
+                <div style="font-size: 16px; font-weight: 800; color: #1D4ED8; margin-top: 4px;" id="eodTransferIn">0 đ</div>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+              <div style="background: #FEF2F2; padding: 12px; border-radius: 10px; border: 1px solid #FECACA;">
+                <div style="font-size: 11px; color: #991B1B; font-weight: 600;">🔻 TỔNG TIỀN CHI</div>
+                <div style="font-size: 16px; font-weight: 800; color: #B91C1C; margin-top: 4px;" id="eodTotalOut">0 đ</div>
+              </div>
+              <div style="background: #FFFBEB; padding: 12px; border-radius: 10px; border: 1px solid #FDE68A;">
+                <div style="font-size: 11px; color: #92400E; font-weight: 600;">🪙 CHÊNH LỆCH THU-CHI</div>
+                <div style="font-size: 16px; font-weight: 800; color: #B45309; margin-top: 4px;" id="eodNetDiff">0 đ</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📋 Hóa Đơn Trong Ngày</div>
+              <div class="card-extra" id="eodInvoiceCount">0 hóa đơn</div>
+            </div>
+            <div id="eodInvoicesList">
+              <!-- Invoices -->
+            </div>
+          </div>
+        </div>
+
+        <!-- BÁO CÁO KHÁCH HÀNG NỢ -->
+        <div id="reportDebtorsSection" class="hide">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">👥 Tổng Nợ Khách Hàng</div>
+              <div class="card-extra" style="color: #D97706; font-size: 14px;" id="debtorsTotalAmount">0 đ</div>
+            </div>
+            <div id="debtorsList">
+              <!-- Debtors list -->
+            </div>
+          </div>
+        </div>
+
+        <!-- BÁO CÁO SỔ QUỸ -->
+        <div id="reportCashBookSection" class="hide">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">💰 Dòng Tiền Thu Chi 7 Ngày Qua</div>
+              <div class="card-extra" id="cashBookDiff">Chênh lệch: 0 đ</div>
+            </div>
+            <div id="cashBookList">
+              <!-- Cash book transactions -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- TAB 3: THÔNG TIN TIỆM & TÀI KHOẢN -->
+    <main id="tabSettings" class="hide">
+      <div class="container">
+        <div class="card" style="text-align: center; padding: 24px 16px;">
+          <div style="width: 64px; height: 64px; background: #E6F7F3; border: 2px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 12px auto;">
+            🌸
+          </div>
+          <div style="font-size: 18px; font-weight: 800; color: #064E3B;">VỰA HOA NHÀ HUY</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Máy chủ: baokhoagold.ddns.net</div>
+          
+          <div style="margin-top: 20px; padding: 14px; background: #F9FAFB; border-radius: 12px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 12px; color: var(--text-muted);">Tài khoản:</span>
+              <span style="font-size: 13px; font-weight: 700;" id="userProfileName">-</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 12px; color: var(--text-muted);">Họ và tên:</span>
+              <span style="font-size: 13px; font-weight: 700;" id="userProfileFullName">-</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 12px; color: var(--text-muted);">Vai trò:</span>
+              <span style="font-size: 13px; font-weight: 700; color: var(--primary);" id="userProfileRole">-</span>
+            </div>
+          </div>
+
+          <button onclick="handleLogout()" style="width: 100%; margin-top: 20px; padding: 12px; background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer;">
+            Đăng Xuất Khỏi Thiết Bị
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- BOTTOM NAVIGATION BAR -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" id="navDashboard" onclick="switchNav('tabDashboard', this)">
+        <span class="nav-icon">📊</span>
+        <span class="nav-text">Tổng quan</span>
+      </button>
+      <button class="nav-btn" id="navReports" onclick="switchNav('tabReports', this)">
+        <span class="nav-icon">📈</span>
+        <span class="nav-text">Báo cáo</span>
+      </button>
+      <button class="nav-btn" id="navSettings" onclick="switchNav('tabSettings', this)">
+        <span class="nav-icon">👤</span>
+        <span class="nav-text">Tài khoản</span>
+      </button>
+    </nav>
+  </div>
+
+  <script>
+    const API_BASE = '';
+    let currentFilter = 'today';
+    let currentReportSubTab = 'end-of-day';
+    let currentActiveTab = 'tabDashboard';
+
+    // Format tiền tệ Việt Nam
+    function formatMoney(amount) {
+      return (Number(amount) || 0).toLocaleString('vi-VN') + ' đ';
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2500);
+    }
+
+    function getToken() {
+      return localStorage.getItem('shophoa_token');
+    }
+
+    async function apiFetch(endpoint, options = {}) {
+      const token = getToken();
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      try {
+        const res = await fetch(endpoint, { ...options, headers });
+        if (res.status === 401) {
+          handleLogout();
+          throw new Error('Phiên đăng nhập hết hạn');
+        }
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.message || 'Lỗi kết nối máy chủ');
+        }
+        return await res.json();
+      } catch (err) {
+        showToast(err.message);
+        throw err;
+      }
+    }
+
+    // LOGIN
+    async function handleLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('usernameInput').value.trim();
+      const password = document.getElementById('passwordInput').value;
+      const btn = document.getElementById('loginBtn');
+
+      btn.disabled = true;
+      btn.textContent = 'Đang đăng nhập...';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenDangNhap: username, matKhau: password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Đăng nhập không thành công');
+
+        localStorage.setItem('shophoa_token', data.token);
+        localStorage.setItem('shophoa_user', JSON.stringify(data.user));
+
+        document.getElementById('loginOverlay').classList.add('hide');
+        document.getElementById('appContainer').classList.remove('hide');
+        
+        initApp();
+      } catch (err) {
+        showToast(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Đăng Nhập';
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('shophoa_token');
+      localStorage.removeItem('shophoa_user');
+      document.getElementById('appContainer').classList.add('hide');
+      document.getElementById('loginOverlay').classList.remove('hide');
+    }
+
+    // TABS
+    function switchNav(tabId, el) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+
+      document.getElementById('tabDashboard').classList.add('hide');
+      document.getElementById('tabReports').classList.add('hide');
+      document.getElementById('tabSettings').classList.add('hide');
+
+      document.getElementById(tabId).classList.remove('hide');
+      currentActiveTab = tabId;
+
+      if (tabId === 'tabDashboard') loadDashboard();
+      if (tabId === 'tabReports') loadReportData();
+    }
+
+    function refreshCurrentTab() {
+      const btn = document.getElementById('refreshBtn');
+      btn.classList.add('spinning');
+      setTimeout(() => btn.classList.remove('spinning'), 800);
+
+      if (currentActiveTab === 'tabDashboard') loadDashboard();
+      else if (currentActiveTab === 'tabReports') loadReportData();
+    }
+
+    function setFilter(range, el) {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      currentFilter = range;
+      loadDashboard();
+    }
+
+    // DASHBOARD DATA
+    async function loadDashboard() {
+      try {
+        const data = await apiFetch(`/api/dashboard/summary?range=${currentFilter}`);
+        
+        document.getElementById('statRevenue').textContent = formatMoney(data.tongDoanhThu);
+        document.getElementById('statOrders').textContent = data.soHoaDon;
+        document.getElementById('statCollected').textContent = formatMoney(data.daThu);
+        document.getElementById('statDebt').textContent = formatMoney(data.conNo);
+        document.getElementById('chartTotalLabel').textContent = formatMoney(data.tongDoanhThu);
+
+        // Render Chart
+        renderChart(data.bieuDo);
+
+        // Render Top Products
+        renderTopProducts(data.top10SanPham);
+
+        // Render Recent Orders
+        renderRecentOrders(data.donHangMoiNhat);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderChart(items) {
+      const container = document.getElementById('chartBars');
+      if (!items || items.length === 0) {
+        container.innerHTML = '<div style="color: #9CA3AF; font-size: 12px; margin: auto;">Chưa có dữ liệu</div>';
+        return;
+      }
+
+      const maxRev = Math.max(...items.map(i => i.doanhThu || 0), 1);
+      container.innerHTML = items.map(i => {
+        const pct = Math.max(8, Math.round(((i.doanhThu || 0) / maxRev) * 100));
+        return `
+          <div class="chart-bar-group">
+            <div class="chart-bar" style="height: ${pct}%;" title="${i.label}: ${formatMoney(i.doanhThu)}"></div>
+            <div class="chart-label">${i.label}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderTopProducts(items) {
+      const list = document.getElementById('topProductsList');
+      if (!items || items.length === 0) {
+        list.innerHTML = '<div style="color: #9CA3AF; font-size: 12px; padding: 12px; text-align: center;">Chưa có sản phẩm bán ra</div>';
+        return;
+      }
+
+      list.innerHTML = items.map((p, idx) => `
+        <div class="product-item">
+          <div class="product-info">
+            <div class="product-rank top-${idx + 1}">${idx + 1}</div>
+            <div>
+              <div class="product-name">${p.tenSanPham}</div>
+              <div class="product-qty">${p.soLuong} bó/cành</div>
+            </div>
+          </div>
+          <div class="product-revenue">${formatMoney(p.doanhThu)}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderRecentOrders(items) {
+      const list = document.getElementById('recentOrdersList');
+      if (!items || items.length === 0) {
+        list.innerHTML = '<div style="color: #9CA3AF; font-size: 12px; padding: 12px; text-align: center;">Chưa có đơn hàng nào</div>';
+        return;
+      }
+
+      list.innerHTML = items.map(o => {
+        const time = new Date(o.thoiGianBan).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        const isPaid = (o.conNo || 0) <= 0;
+        return `
+          <div class="order-item">
+            <div class="order-meta">
+              <div class="order-code">${o.maHoaDon} <span style="font-size: 11px; font-weight: normal; color: #9CA3AF;">• ${time}</span></div>
+              <div class="order-cust">👤 ${o.tenKhachHang}</div>
+            </div>
+            <div class="order-amount-col">
+              <div class="order-amount">${formatMoney(o.khachCanTra)}</div>
+              <span class="order-badge ${isPaid ? 'badge-paid' : 'badge-debt'}">
+                ${isPaid ? 'Đã thanh toán' : 'Nợ: ' + formatMoney(o.conNo)}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // REPORT TABS
+    function setReportSubTab(sub, el) {
+      document.querySelectorAll('#tabReports .filter-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      currentReportSubTab = sub;
+
+      document.getElementById('reportEndOfDaySection').classList.add('hide');
+      document.getElementById('reportDebtorsSection').classList.add('hide');
+      document.getElementById('reportCashBookSection').classList.add('hide');
+
+      if (sub === 'end-of-day') document.getElementById('reportEndOfDaySection').classList.remove('hide');
+      if (sub === 'debtors') document.getElementById('reportDebtorsSection').classList.remove('hide');
+      if (sub === 'cash-book') document.getElementById('reportCashBookSection').classList.remove('hide');
+
+      loadReportData();
+    }
+
+    function loadReportData() {
+      if (currentReportSubTab === 'end-of-day') loadEndOfDayReport();
+      else if (currentReportSubTab === 'debtors') loadDebtorsReport();
+      else if (currentReportSubTab === 'cash-book') loadCashBookReport();
+    }
+
+    async function loadEndOfDayReport() {
+      const picker = document.getElementById('endOfDayDatePicker');
+      const dateVal = picker.value || new Date().toISOString().split('T')[0];
+      picker.value = dateVal;
+
+      try {
+        const data = await apiFetch(`/api/report/end-of-day?date=${dateVal}`);
+        document.getElementById('eodCashIn').textContent = formatMoney(data.thuTienMat);
+        document.getElementById('eodTransferIn').textContent = formatMoney(data.thuChuyenKhoan);
+        document.getElementById('eodTotalOut').textContent = formatMoney(data.tongChi);
+        document.getElementById('eodNetDiff').textContent = formatMoney(data.chenhLechThuChi);
+        document.getElementById('eodInvoiceCount').textContent = `${data.soHoaDon} hóa đơn`;
+
+        const list = document.getElementById('eodInvoicesList');
+        if (!data.danhSachHoaDon || data.danhSachHoaDon.length === 0) {
+          list.innerHTML = '<div style="color: #9CA3AF; font-size: 12px; padding: 12px; text-align: center;">Không có đơn hàng nào trong ngày này</div>';
+          return;
+        }
+
+        list.innerHTML = data.danhSachHoaDon.map(o => `
+          <div class="order-item">
+            <div class="order-meta">
+              <div class="order-code">${o.maHoaDon}</div>
+              <div class="order-cust">👤 ${o.tenKhachHang}</div>
+            </div>
+            <div class="order-amount-col">
+              <div class="order-amount">${formatMoney(o.khachCanTra)}</div>
+              <span class="order-badge ${(o.conNo || 0) <= 0 ? 'badge-paid' : 'badge-debt'}">
+                ${(o.conNo || 0) <= 0 ? 'Đã xong' : 'Nợ: ' + formatMoney(o.conNo)}
+              </span>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadDebtorsReport() {
+      try {
+        const data = await apiFetch('/api/report/debtors');
+        document.getElementById('debtorsTotalAmount').textContent = formatMoney(data.tongNoToanBo);
+
+        const list = document.getElementById('debtorsList');
+        if (!data.danhSach || data.danhSach.length === 0) {
+          list.innerHTML = '<div style="color: #9CA3AF; font-size: 12px; padding: 12px; text-align: center;">Tuyệt vời! Không có khách hàng nào còn nợ</div>';
+          return;
+        }
+
+        list.innerHTML = data.danhSach.map(d => `
+          <div class="order-item">
+            <div class="order-meta">
+              <div class="order-code">${d.tenKhachHang}</div>
+              <div class="order-cust">
+                ${d.soDienThoai ? `📞 <a href="tel:${d.soDienThoai}" style="color: var(--primary); text-decoration: none; font-weight: 600;">${d.soDienThoai}</a>` : 'Không có SĐT'}
+                • ${d.soDonChuaThanhToan} đơn nợ
+              </div>
+            </div>
+            <div class="order-amount-col">
+              <div class="order-amount" style="color: #D97706;">${formatMoney(d.tongNo)}</div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadCashBookReport() {
+      try {
+        const data = await apiFetch('/api/report/cash-book');
+        document.getElementById('cashBookDiff').textContent = 'Chênh lệch: ' + formatMoney(data.chenhLech);
+
+        const list = document.getElementById('cashBookList');
+        if (!data.giaoDich || data.giaoDich.length === 0) {
+          list.innerHTML = '<div style="color: #9CA3AF; font-size: 12px; padding: 12px; text-align: center;">Chưa có phiếu thu/chi nào gần đây</div>';
+          return;
+        }
+
+        list.innerHTML = data.giaoDich.map(t => {
+          const isThu = t.loai === 'THU';
+          const time = new Date(t.thoiGian).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+          return `
+            <div class="order-item">
+              <div class="order-meta">
+                <div class="order-code">${isThu ? '🟢 Thu' : '🔴 Chi'}: ${t.maPhieu}</div>
+                <div class="order-cust">${time} • ${t.ghiChu || t.nguoiNhanNop || 'Phiếu tự động'}</div>
+              </div>
+              <div class="order-amount-col">
+                <div class="order-amount" style="color: ${isThu ? 'var(--success)' : 'var(--danger)'};">
+                  ${isThu ? '+' : '-'}${formatMoney(t.soTien)}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // INIT
+    function initApp() {
+      const userStr = localStorage.getItem('shophoa_user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          document.getElementById('userProfileName').textContent = user.tenDangNhap;
+          document.getElementById('userProfileFullName').textContent = user.hoTen || user.tenDangNhap;
+          document.getElementById('userProfileRole').textContent = user.vaiTro || 'Chủ tiệm';
+        } catch (e) {}
+      }
+
+      document.getElementById('endOfDayDatePicker').value = new Date().toISOString().split('T')[0];
+      loadDashboard();
+    }
+
+    // Auto check token on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const token = getToken();
+      if (token) {
+        document.getElementById('loginOverlay').classList.add('hide');
+        document.getElementById('appContainer').classList.remove('hide');
+        initApp();
+      } else {
+        document.getElementById('loginOverlay').classList.remove('hide');
+        document.getElementById('appContainer').classList.add('hide');
+      }
+    });
+  </script>
+</body>
+</html>

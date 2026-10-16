@@ -1,0 +1,183 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="using:ShopHoa.Models"
+        x:Class="ShopHoa.Views.SanPhamTrungWindow"
+        Width="980"
+        SizeToContent="Height"
+        MinHeight="520"
+        MaxHeight="760"
+        Title="Phát hiện sản phẩm trùng"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F8F7"
+        CanResize="True">
+  <Window.Styles>
+    <Style Selector="Button">
+      <Setter Property="Padding" Value="18,10"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#087F6E"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderBrush" Value="#087F6E"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style Selector="Button.primary:pointerover">
+      <Setter Property="Background" Value="#056B5D"/>
+    </Style>
+
+    <Style Selector="Button.secondary">
+      <Setter Property="Background" Value="#FFFFFF"/>
+      <Setter Property="Foreground" Value="#263B35"/>
+      <Setter Property="BorderBrush" Value="#C9DCD6"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style Selector="Button.secondary:pointerover">
+      <Setter Property="Background" Value="#E8F5F1"/>
+      <Setter Property="BorderBrush" Value="#8CCFC0"/>
+    </Style>
+
+    <Style Selector="Button.warn">
+      <Setter Property="Background" Value="#B4690E"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderBrush" Value="#B4690E"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style Selector="Button.warn:pointerover">
+      <Setter Property="Background" Value="#9A5A0B"/>
+    </Style>
+
+    <Style Selector="TextBlock.headerCell">
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="#163F38"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style Selector="TextBlock.cell">
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="#263B35"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style Selector="TextBlock.cellCu">
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="#8A8A8A"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+  </Window.Styles>
+
+  <Border Margin="16"
+          Background="#FFFFFF"
+          BorderBrush="#D7E7E2"
+          BorderThickness="1"
+          CornerRadius="14">
+    <DockPanel Margin="24" LastChildFill="True">
+
+      <!-- ======== TIÊU ĐỀ ======== -->
+      <StackPanel DockPanel.Dock="Top" Spacing="6">
+        <TextBlock Text="Phát hiện sản phẩm trùng"
+                   FontSize="20"
+                   FontWeight="Bold"
+                   Foreground="#163F38"/>
+
+        <TextBlock x:Name="SoDongTrungTextBlock"
+                   TextWrapping="Wrap"
+                   FontSize="14"
+                   Foreground="#263B35"/>
+
+        <Border Background="#FFF7E8"
+                BorderBrush="#F0D9AE"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="12,10">
+          <TextBlock TextWrapping="Wrap"
+                     FontSize="13"
+                     Foreground="#7A5210"
+                     LineHeight="20"
+                     Text="Các sản phẩm dưới đây đã có trong hệ thống. Cột “Cũ” là dữ liệu đang lưu, cột “Excel” là dữ liệu trong file bạn vừa chọn. Hãy chọn cách xử lý bên dưới."/>
+        </Border>
+      </StackPanel>
+
+      <!-- ======== NÚT CHỌN CÁCH XỬ LÝ ======== -->
+      <StackPanel DockPanel.Dock="Bottom"
+                  Orientation="Horizontal"
+                  HorizontalAlignment="Right"
+                  Spacing="10"
+                  Margin="0,16,0,0">
+        <Button Classes="secondary"
+                Content="Hủy"
+                Click="HuyButton_OnClick"/>
+        <Button Classes="warn"
+                Content="Giữ sản phẩm cũ"
+                Click="GiuSanPhamCuButton_OnClick"/>
+        <Button Classes="primary"
+                Content="Thay thế bằng dữ liệu Excel"
+                Click="ThayTheButton_OnClick"/>
+      </StackPanel>
+
+      <!-- ======== BẢNG SO SÁNH ======== -->
+      <Grid Margin="0,16,0,0">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Lưới tiêu đề cột -->
+        <Border Grid.Row="0"
+                Background="#EAF4F1"
+                CornerRadius="8"
+                Padding="10,10"
+                Margin="0,0,0,0">
+          <Grid ColumnDefinitions="110,110,90,150,150,150,100,100,150,150">
+            <TextBlock Grid.Column="0" Classes="headerCell" Text="Mã hàng"/>
+            <TextBlock Grid.Column="1" Classes="headerCell" Text="Lý do trùng"/>
+            <TextBlock Grid.Column="2" Classes="headerCell" Text="Dòng Excel"/>
+            <TextBlock Grid.Column="3" Classes="headerCell" Text="Tên hàng (Cũ)"/>
+            <TextBlock Grid.Column="4" Classes="headerCell" Text="Tên hàng (Excel)"/>
+            <TextBlock Grid.Column="5" Classes="headerCell" Text="Giá bán (Cũ → Excel)"/>
+            <TextBlock Grid.Column="6" Classes="headerCell" Text="Giá vốn (Cũ → Excel)"/>
+            <TextBlock Grid.Column="7" Classes="headerCell" Text="Tồn kho (Cũ → Excel)"/>
+            <TextBlock Grid.Column="8" Classes="headerCell" Text="Thời gian tạo (Cũ)"/>
+            <TextBlock Grid.Column="9" Classes="headerCell" Text="Thời gian tạo (Excel)"/>
+          </Grid>
+        </Border>
+
+        <!-- Các dòng trùng -->
+<Border Grid.Row="1"
+                BorderBrush="#D7E7E2"
+                BorderThickness="1"
+                CornerRadius="8"
+                ClipToBounds="True">
+          <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ItemsControl x:Name="DuLieuItems" x:DataType="models:SanPhamTrung">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="models:SanPhamTrung">
+                  <Grid Margin="10,8" ColumnDefinitions="110,110,90,150,150,150,100,100,150,150">
+                    <TextBlock Grid.Column="0" Classes="cell" Text="{Binding MaSanPham}" TextWrapping="Wrap"/>
+                    <TextBlock Grid.Column="1" Classes="cell" Text="{Binding LyDoTrung}"/>
+                    <TextBlock Grid.Column="2" Classes="cell" Text="{Binding SoDongExcel}"/>
+                    <TextBlock Grid.Column="3" Classes="cellCu" Text="{Binding TenCu}" TextWrapping="Wrap"/>
+                    <TextBlock Grid.Column="4" Classes="cell" Text="{Binding TenMoi}" TextWrapping="Wrap"/>
+                    <TextBlock Grid.Column="5" Classes="cell" Text="{Binding GiaBan}"/>
+                    <TextBlock Grid.Column="6" Classes="cell" Text="{Binding GiaVon}"/>
+                    <TextBlock Grid.Column="7" Classes="cell" Text="{Binding TonKho}"/>
+                    <TextBlock Grid.Column="8" Classes="cellCu" Text="{Binding NgayTaoCu}" TextWrapping="Wrap"/>
+                    <TextBlock Grid.Column="9" Classes="cell" Text="{Binding NgayTaoMoi}" TextWrapping="Wrap"/>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Border>
+      </Grid>
+    </DockPanel>
+  </Border>
+</Window>

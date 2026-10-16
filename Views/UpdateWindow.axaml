@@ -1,0 +1,208 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ShopHoa.ViewModels"
+        x:Class="ShopHoa.Views.UpdateWindow"
+        x:DataType="vm:UpdateViewModel"
+        Title="Cập nhật phần mềm ShopHoa"
+        Width="540"
+        Height="460"
+        MinWidth="480"
+        MinHeight="420"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="#F4F7F6">
+
+    <Window.Styles>
+        <!-- TextBox Style -->
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="#F8F9FA" />
+            <Setter Property="Foreground" Value="#1D2939" />
+            <Setter Property="BorderBrush" Value="#D0D5DD" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#078C7A" />
+        </Style>
+        <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#078C7A" />
+        </Style>
+
+        <!-- Button Đóng -->
+        <Style Selector="Button.btn-close">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Foreground" Value="#344054" />
+            <Setter Property="BorderBrush" Value="#D0D5DD" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="18,10" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.btn-close /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#D0D5DD" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="TextBlock.Foreground" Value="#344054" />
+        </Style>
+        <Style Selector="Button.btn-close:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#F2F4F7" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="TextBlock.Foreground" Value="#1D2939" />
+        </Style>
+        <Style Selector="Button.btn-close:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#EAECF0" />
+            <Setter Property="TextBlock.Foreground" Value="#1D2939" />
+        </Style>
+
+        <!-- Button Kiểm tra cập nhật -->
+        <Style Selector="Button.btn-teal">
+            <Setter Property="Background" Value="#078C7A" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="18,10" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.btn-teal /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#078C7A" />
+            <Setter Property="TextBlock.Foreground" Value="White" />
+        </Style>
+        <Style Selector="Button.btn-teal:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#067364" />
+            <Setter Property="TextBlock.Foreground" Value="White" />
+        </Style>
+        <Style Selector="Button.btn-teal:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#055B4F" />
+            <Setter Property="TextBlock.Foreground" Value="White" />
+        </Style>
+
+        <!-- Button Tải và Cập nhật -->
+        <Style Selector="Button.btn-primary">
+            <Setter Property="Background" Value="#0878E8" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="20,10" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.btn-primary /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#0878E8" />
+            <Setter Property="TextBlock.Foreground" Value="White" />
+        </Style>
+        <Style Selector="Button.btn-primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#0662BE" />
+            <Setter Property="TextBlock.Foreground" Value="White" />
+        </Style>
+        <Style Selector="Button.btn-primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#054D96" />
+            <Setter Property="TextBlock.Foreground" Value="White" />
+        </Style>
+
+        <!-- Button Khởi động lại ngay -->
+        <Style Selector="Button.btn-success">
+            <Setter Property="Background" Value="#12B76A" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="20,10" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.btn-success /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#12B76A" />
+            <Setter Property="TextBlock.Foreground" Value="White" />
+        </Style>
+        <Style Selector="Button.btn-success:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#0E9F5D" />
+            <Setter Property="TextBlock.Foreground" Value="White" />
+        </Style>
+        <Style Selector="Button.btn-success:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#0B804B" />
+            <Setter Property="TextBlock.Foreground" Value="White" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="28,24">
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Spacing="6" Margin="0,0,0,20">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <TextBlock Text="🔄" FontSize="26" VerticalAlignment="Center"/>
+                <TextBlock Text="Cập nhật phần mềm" FontSize="22" FontWeight="Bold" Foreground="#173F38" VerticalAlignment="Center"/>
+            </StackPanel>
+            <TextBlock Text="Kiểm tra và nâng cấp phiên bản mới nhất từ máy chủ từ xa."
+                       FontSize="13" Foreground="#667085"/>
+        </StackPanel>
+
+        <!-- Body / Content -->
+        <Border Grid.Row="1" Background="White" CornerRadius="12" Padding="20" BorderBrush="#D8E5E0" BorderThickness="1">
+            <StackPanel Spacing="16" VerticalAlignment="Center">
+                <!-- Version Cards -->
+                <Grid ColumnDefinitions="*,16,*">
+                    <Border Grid.Column="0" Background="#F0F9F6" CornerRadius="8" Padding="14,12" BorderBrush="#B2DDCE" BorderThickness="1">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Phiên bản hiện tại" FontSize="12" Foreground="#4F625D" FontWeight="Medium"/>
+                            <TextBlock Text="{Binding CurrentVersion}" FontSize="18" FontWeight="Bold" Foreground="#078C7A"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" Background="#F8F9FA" CornerRadius="8" Padding="14,12" BorderBrush="#E4E7EC" BorderThickness="1">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Phiên bản mới nhất" FontSize="12" Foreground="#667085" FontWeight="Medium"/>
+                            <TextBlock Text="{Binding NewVersion, FallbackValue='Chưa kiểm tra'}"
+                                       FontSize="18" FontWeight="Bold"
+                                       Foreground="#0878E8"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Update URL Setting -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Địa chỉ máy chủ cập nhật:" FontSize="12" Foreground="#4F625D"/>
+                    <TextBox Text="{Binding UpdateUrl}" FontSize="13" CornerRadius="6" Padding="10,6"
+                             IsEnabled="{Binding !IsDownloading}"/>
+                </StackPanel>
+
+                <!-- Status Message -->
+                <Border Background="#F9FAFB" CornerRadius="8" Padding="12" BorderBrush="#EAECF0" BorderThickness="1">
+                    <TextBlock Text="{Binding StatusMessage}" FontSize="13" TextWrapping="Wrap"
+                               Foreground="#344054" HorizontalAlignment="Center" TextAlignment="Center"/>
+                </Border>
+
+                <!-- Progress Bar -->
+                <StackPanel Spacing="6" IsVisible="{Binding IsDownloading}">
+                    <ProgressBar Minimum="0" Maximum="100" Value="{Binding DownloadProgress}"
+                                 Height="10" CornerRadius="5" Foreground="#078C7A"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Actions Footer -->
+        <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,20,0,0">
+            <Button Grid.Column="0" Content="Đóng" Command="{Binding CloseCommand}"
+                    Classes="btn-close"/>
+
+            <Button Grid.Column="2" Content="Kiểm tra cập nhật" Command="{Binding CheckUpdateCommand}"
+                    Classes="btn-teal"
+                    IsVisible="{Binding !IsUpdateReady}"
+                    IsEnabled="{Binding !IsChecking}"
+                    Margin="0,0,10,0"/>
+
+            <Button Grid.Column="3" Content="Tải và Cập nhật" Command="{Binding DownloadAndInstallCommand}"
+                    Classes="btn-primary"
+                    IsVisible="{Binding HasNewVersion}"
+                    IsEnabled="{Binding !IsDownloading}"/>
+
+            <Button Grid.Column="3" Content="Khởi động lại ngay" Command="{Binding RestartToApplyCommand}"
+                    Classes="btn-success"
+                    IsVisible="{Binding IsUpdateReady}"/>
+        </Grid>
+    </Grid>
+</Window>

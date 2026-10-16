@@ -1,0 +1,105 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="ShopHoa.Views.QuickOptionEditorWindow"
+        Width="440"
+        SizeToContent="Height"
+        Title="Thêm mới"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F8F7"
+        CanResize="False"
+        RequestedThemeVariant="Light">
+  <Window.Styles>
+    <Style Selector="TextBox">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="Foreground" Value="#263B35" />
+      <Setter Property="BorderBrush" Value="#C9DCD6" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Height" Value="40" />
+      <Setter Property="Padding" Value="12,8" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="TextBox:focus">
+      <Setter Property="BorderBrush" Value="#087F6E" />
+      <Setter Property="BorderThickness" Value="1.5" />
+    </Style>
+
+    <Style Selector="Button">
+      <Setter Property="Padding" Value="18,10"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#087F6E"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderBrush" Value="#087F6E"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style Selector="Button.primary:pointerover">
+      <Setter Property="Background" Value="#056B5D"/>
+    </Style>
+
+    <Style Selector="Button.secondary">
+      <Setter Property="Background" Value="#FFFFFF"/>
+      <Setter Property="Foreground" Value="#263B35"/>
+      <Setter Property="BorderBrush" Value="#C9DCD6"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style Selector="Button.secondary:pointerover">
+      <Setter Property="Background" Value="#E8F5F1"/>
+      <Setter Property="BorderBrush" Value="#8CCFC0"/>
+    </Style>
+  </Window.Styles>
+
+  <Border Margin="16"
+          Background="#FFFFFF"
+          BorderBrush="#D7E7E2"
+          BorderThickness="1"
+          CornerRadius="14">
+    <StackPanel Margin="24" Spacing="16">
+      <TextBlock x:Name="TitleTextBlock"
+                 Text="Thêm mới"
+                 FontSize="19"
+                 FontWeight="Bold"
+                 Foreground="#163F38"/>
+
+      <StackPanel Spacing="6">
+        <TextBlock x:Name="LabelTextBlock"
+                   Text="Tên *"
+                   FontSize="13"
+                   FontWeight="SemiBold"
+                   Foreground="#344B45" />
+
+        <TextBox x:Name="InputTextBox"
+                 Watermark="Nhập tên..."
+                 KeyDown="InputTextBox_OnKeyDown" />
+
+        <TextBlock x:Name="ErrorTextBlock"
+                   FontSize="12"
+                   Foreground="#D92D20"
+                   IsVisible="False"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,4,0,0">
+        <Button x:Name="CancelButton"
+                Classes="secondary"
+                Content="Hủy"
+                Click="CancelButton_OnClick"/>
+        <Button x:Name="SaveButton"
+                Classes="primary"
+                Content="Lưu"
+                Click="SaveButton_OnClick"/>
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</Window>

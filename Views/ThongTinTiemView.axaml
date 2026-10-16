@@ -1,0 +1,274 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:vm="using:ShopHoa.ViewModels"
+  x:Class="ShopHoa.Views.ThongTinTiemView"
+  x:DataType="vm:ThongTinTiemViewModel">
+
+  <UserControl.Styles>
+    <Style Selector="Border.ttCard">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="BorderBrush" Value="#E2ECE8" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BoxShadow" Value="0 2 10 0 #14000000" />
+    </Style>
+
+    <Style Selector="TextBlock.ttLabel">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="#164B40" />
+      <Setter Property="Margin" Value="0,0,0,5" />
+    </Style>
+
+    <Style Selector="TextBlock.ttHint">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#8FA39D" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style Selector="TextBox.ttInput">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="Foreground" Value="#263B35" />
+      <Setter Property="BorderBrush" Value="#D8E5E0" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="11,9" />
+    </Style>
+
+    <Style Selector="TextBox.ttInput:focus">
+      <Setter Property="BorderBrush" Value="#087F6E" />
+    </Style>
+
+    <Style Selector="Button.ttSecondary">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="Foreground" Value="#344B45" />
+      <Setter Property="BorderBrush" Value="#D8E5E0" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="14,9" />
+    </Style>
+
+    <Style Selector="Button.ttSecondary:pointerover">
+      <Setter Property="Background" Value="#F2F8F6" />
+      <Setter Property="BorderBrush" Value="#BDE5DA" />
+    </Style>
+
+    <Style Selector="Button.ttPrimary">
+      <Setter Property="Background" Value="#087F6E" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="BorderBrush" Value="#087F6E" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="20,10" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.ttPrimary:pointerover">
+      <Setter Property="Background" Value="#056B5D" />
+    </Style>
+
+    <Style Selector="Button.ttPrimary:disabled">
+      <Setter Property="Background" Value="#A9CFC6" />
+      <Setter Property="BorderBrush" Value="#A9CFC6" />
+    </Style>
+  </UserControl.Styles>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="18" Spacing="14" MaxWidth="1080" HorizontalAlignment="Stretch">
+
+      <!-- ============ TIÊU ĐỀ + HÀNH ĐỘNG ============ -->
+      <Border Classes="ttCard" Padding="16,13">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+          <StackPanel VerticalAlignment="Center">
+            <TextBlock Text="THÔNG TIN TIỆM" FontSize="18" FontWeight="SemiBold"
+              Foreground="#164B40" />
+            <TextBlock Classes="ttHint" Margin="0,3,0,0"
+              Text="Thông tin này được in lên hóa đơn. Sửa và bấm “Lưu thông tin”, hóa đơn tiếp theo sẽ tự lấy thông tin mới — không phải sửa mẫu hóa đơn." />
+          </StackPanel>
+
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+            VerticalAlignment="Center">
+            <Button Classes="ttSecondary" Content="Tải lại"
+              Command="{Binding TaiLaiCommand}" />
+            <Button Classes="ttPrimary" Content="Lưu thông tin"
+              Command="{Binding LuuCommand}"
+              IsEnabled="{Binding CanChinhSua}" />
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- ============ LỖI / ĐANG XỬ LÝ ============ -->
+      <Border IsVisible="{Binding ThongBaoLoi, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+        Background="#FDECEC" BorderBrush="#F5C2C2" BorderThickness="1"
+        CornerRadius="10" Padding="14,11">
+        <TextBlock Text="{Binding ThongBaoLoi}" TextWrapping="Wrap"
+          Foreground="#A32B2B" FontSize="12" />
+      </Border>
+
+      <ProgressBar IsIndeterminate="True" Height="3"
+        IsVisible="{Binding DangTai}" Foreground="#087F6E"
+        Background="#EAF9F5" BorderThickness="0" />
+
+      <Grid ColumnDefinitions="1.35*,0.65*" ColumnSpacing="14">
+
+        <!-- ============ CỘT TRÁI: THÔNG TIN CHUNG ============ -->
+        <StackPanel Spacing="14">
+
+          <Border Classes="ttCard" Padding="16">
+            <StackPanel Spacing="13">
+
+              <TextBlock Text="1. THÔNG TIN CỬA HÀNG" FontSize="13" FontWeight="SemiBold"
+                Foreground="#164B40" />
+
+              <StackPanel Spacing="5">
+                <TextBlock Classes="ttLabel" Text="Tên tiệm *" />
+                <TextBox Classes="ttInput" Text="{Binding TenTiem, Mode=TwoWay}"
+                  IsEnabled="{Binding CanChinhSua}"
+                  Watermark="Ví dụ: Vựa Hoa Nhà Huy" />
+              </StackPanel>
+
+              <StackPanel Spacing="5">
+                <TextBlock Classes="ttLabel" Text="Địa chỉ" />
+                <TextBox Classes="ttInput" Text="{Binding DiaChi, Mode=TwoWay}"
+                  IsEnabled="{Binding CanChinhSua}"
+                  Watermark="Ví dụ: 123 Nguyễn Trãi, Cần Thơ"
+                  AcceptsReturn="True" TextWrapping="Wrap" MinHeight="62" />
+              </StackPanel>
+
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <StackPanel Spacing="5">
+                  <TextBlock Classes="ttLabel" Text="Số điện thoại" />
+                  <TextBox Classes="ttInput" Text="{Binding SoDienThoai, Mode=TwoWay}"
+                    IsEnabled="{Binding CanChinhSua}"
+                    Watermark="0909xxxxxx" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="5">
+                  <TextBlock Classes="ttLabel" Text="Email" />
+                  <TextBox Classes="ttInput" Text="{Binding Email, Mode=TwoWay}"
+                    IsEnabled="{Binding CanChinhSua}"
+                    Watermark="shop@example.com" />
+                </StackPanel>
+              </Grid>
+
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <StackPanel Spacing="5">
+                  <TextBlock Classes="ttLabel" Text="Mã số thuế" />
+                  <TextBox Classes="ttInput" Text="{Binding MaSoThue, Mode=TwoWay}"
+                    IsEnabled="{Binding CanChinhSua}"
+                    Watermark="0123456789" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="5">
+                  <TextBlock Classes="ttLabel" Text="Website" />
+                  <TextBox Classes="ttInput" Text="{Binding Website, Mode=TwoWay}"
+                    IsEnabled="{Binding CanChinhSua}"
+                    Watermark="shophoa.vn" />
+                </StackPanel>
+              </Grid>
+
+              <StackPanel Spacing="5">
+                <TextBlock Classes="ttLabel" Text="Lời cảm ơn / ghi chú cuối hóa đơn" />
+                <TextBox Classes="ttInput" Text="{Binding LoiCamOn, Mode=TwoWay}"
+                  IsEnabled="{Binding CanChinhSua}"
+                  Watermark="Cảm ơn quý khách!"
+                  AcceptsReturn="True" TextWrapping="Wrap" MinHeight="62" />
+                <TextBlock Classes="ttHint"
+                  Text="Để trống thì hóa đơn dùng câu mặc định “Cảm ơn quý khách!”." />
+              </StackPanel>
+
+            </StackPanel>
+          </Border>
+
+          <Border Classes="ttCard" Padding="16">
+            <StackPanel Spacing="9">
+              <TextBlock Text="2. LƯU Ý KHI SỬA" FontSize="13" FontWeight="SemiBold"
+                Foreground="#164B40" />
+              <TextBlock Classes="ttHint"
+                Text="• Thông tin được lưu vào một bản ghi duy nhất trong database. Bấm Lưu nhiều lần vẫn chỉ cập nhật đúng bản ghi đó, không sinh thêm bản ghi." />
+              <TextBlock Classes="ttHint"
+                Text="• Hóa đơn đã xuất trước đây vẫn in theo thông tin lúc bấm Thanh toán; các hóa đơn tạo sau khi lưu sẽ dùng thông tin mới." />
+              <TextBlock Classes="ttHint"
+                Text="• Trường có dấu * là bắt buộc." />
+            </StackPanel>
+          </Border>
+
+        </StackPanel>
+
+        <!-- ============ CỘT PHẢI: LOGO ============ -->
+        <Border Grid.Column="1" Classes="ttCard" Padding="16" VerticalAlignment="Top">
+          <StackPanel Spacing="13">
+
+            <TextBlock Text="3. LOGO TIỆM" FontSize="13" FontWeight="SemiBold"
+              Foreground="#164B40" />
+
+            <Border Height="180" Background="#F7FAF9" CornerRadius="10"
+              BorderBrush="#E2ECE8" BorderThickness="1">
+              <Panel>
+                <!-- Logo đang chọn -->
+                <Image Source="{Binding LogoXemTruoc}" IsVisible="{Binding CoLogoXemTruoc}"
+                  Stretch="Uniform" Margin="10" />
+
+                <!-- Chưa có logo -->
+                <StackPanel IsVisible="{Binding !CoLogoXemTruoc}" VerticalAlignment="Center"
+                  HorizontalAlignment="Center" Spacing="5">
+                  <TextBlock Text="🖼" FontSize="30" HorizontalAlignment="Center"
+                    Foreground="#B6C6C1" />
+                  <TextBlock Text="Chưa có logo" FontSize="12" Foreground="#8FA39D"
+                    HorizontalAlignment="Center" />
+                </StackPanel>
+              </Panel>
+            </Border>
+
+            <TextBlock Classes="ttHint"
+              Text="Logo được hiển thị ở đầu hóa đơn. File được sao chép vào thư mục dữ liệu ứng dụng khi bấm Lưu nên sau này di chuyển file gốc vẫn không mất." />
+
+            <StackPanel Spacing="8">
+              <Button Classes="ttSecondary" Content="📁  Chọn logo từ máy tính"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
+                IsEnabled="{Binding CanChinhSua}"
+                Command="{Binding ChonLogoCommand}" />
+
+              <Button Classes="ttSecondary" Content="Bỏ logo"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
+                IsVisible="{Binding CoLogoXemTruoc}"
+                IsEnabled="{Binding CanChinhSua}"
+                Command="{Binding BoLogoCommand}" />
+            </StackPanel>
+
+            <Border Height="1" Background="#EEF4F2" />
+
+            <StackPanel Spacing="4">
+              <TextBlock Classes="ttLabel" Text="File đang dùng" />
+              <TextBlock Text="{Binding TenLogoHienThi}" FontSize="12"
+                Foreground="#4B5D57" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <Border Background="#F2F8F6" CornerRadius="10" Padding="12,10">
+              <StackPanel Spacing="6">
+                <TextBlock Text="XEM TRƯỚC TRÊN HÓA ĐƠN" FontSize="11"
+                  FontWeight="SemiBold" Foreground="#164B40" />
+                <TextBlock Text="{Binding LoiCamOn}" FontSize="12" FontStyle="Italic"
+                  Foreground="#61736E" HorizontalAlignment="Center"
+                  TextWrapping="Wrap" TextAlignment="Center" />
+                <TextBlock Text="{Binding TenTiem}" FontSize="15" FontWeight="Bold"
+                  Foreground="#163F38" HorizontalAlignment="Center"
+                  TextWrapping="Wrap" TextAlignment="Center" />
+                <TextBlock Text="{Binding DiaChi}" FontSize="11" Foreground="#61736E"
+                  HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+                <TextBlock Text="{Binding SoDienThoai}" FontSize="11" Foreground="#61736E"
+                  HorizontalAlignment="Center" />
+                <TextBlock Text="{Binding Email}" FontSize="11" Foreground="#61736E"
+                  HorizontalAlignment="Center" />
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </Border>
+
+      </Grid>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

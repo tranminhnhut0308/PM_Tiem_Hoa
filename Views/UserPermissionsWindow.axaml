@@ -1,0 +1,88 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:ShopHoa.ViewModels"
+        xmlns:m="clr-namespace:ShopHoa.Models"
+        x:Class="ShopHoa.Views.UserPermissionsWindow"
+        x:DataType="vm:UserPermissionsViewModel"
+        Title="{Binding Title}"
+        Width="900" Height="760"
+        WindowStartupLocation="CenterOwner"
+        RequestedThemeVariant="Light">
+  <Border Background="White">
+    <Grid Margin="16" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="8">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+        <TextBlock Text="QUYỀN TRUY CẬP" FontWeight="SemiBold" FontSize="15" VerticalAlignment="Center" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+          <Button Content="Chọn tất cả" Command="{Binding ChonTatCaCommand}" Padding="10,4" />
+          <Button Content="Bỏ chọn tất cả" Command="{Binding BoChonTatCaCommand}" Padding="10,4" />
+        </StackPanel>
+      </Grid>
+
+      <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+        <TextBlock Text="{Binding Hint}" Foreground="#6B7280" TextWrapping="Wrap" VerticalAlignment="Center" />
+        <TextBlock Grid.Column="1" Text="{Binding SelectedSummary}" Foreground="#0F766E" FontWeight="SemiBold" VerticalAlignment="Center" />
+      </Grid>
+
+      <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+        <ItemsControl ItemsSource="{Binding Groups}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="m:PermissionGroup">
+              <Border Margin="0,4" BorderBrush="#D1D5DB" BorderThickness="1" CornerRadius="6" Background="White">
+                <StackPanel>
+                  <Border Background="#F3F4F6" CornerRadius="5,5,0,0">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Margin="8,6">
+                      <CheckBox Grid.Column="0"
+                                IsThreeState="True"
+                                IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                IsEnabled="{Binding CanEditPermissions}"
+                                VerticalAlignment="Center"
+                                ToolTip.Tip="Chọn / bỏ chọn toàn bộ nhóm" />
+                      <ToggleButton Grid.Column="1"
+                                    Content="{Binding TenNhom}"
+                                    IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Padding="0"
+                                    FontWeight="SemiBold"
+                                    HorizontalAlignment="Left" />
+                      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="{Binding TrangThaiNhom}" Foreground="#6B7280" FontSize="12" VerticalAlignment="Center" />
+                        <Button Content="Chọn" Padding="8,2" FontSize="12"
+                                Command="{Binding ChonTatCaCommand}"
+                                IsEnabled="{Binding CanEditPermissions}" />
+                        <Button Content="Bỏ chọn" Padding="8,2" FontSize="12"
+                                Command="{Binding BoChonTatCaCommand}"
+                                IsEnabled="{Binding CanEditPermissions}" />
+                      </StackPanel>
+                    </Grid>
+                  </Border>
+
+                  <ItemsControl ItemsSource="{Binding Permissions}" IsVisible="{Binding IsExpanded}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="m:PermissionItem">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Margin="24,3,8,3">
+                          <CheckBox Grid.Column="0"
+                                    IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                    IsEnabled="{Binding IsSelectable}" />
+                          <StackPanel Grid.Column="1">
+                            <TextBlock Text="{Binding TenQuyen}" />
+                            <TextBlock Text="{Binding MaQuyen}" FontSize="11" Foreground="#9CA3AF" />
+                          </StackPanel>
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+
+      <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,10,0,0">
+        <Button Content="Hủy" Command="{Binding HuyCommand}" CommandParameter="{Binding $parent[Window]}" />
+        <Button Content="Lưu phân quyền" Command="{Binding LuuCommand}" CommandParameter="{Binding $parent[Window]}" Background="#0F766E" Foreground="White" />
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

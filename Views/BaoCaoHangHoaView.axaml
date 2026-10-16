@@ -1,0 +1,843 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:models="using:ShopHoa.Models"
+  xmlns:vm="using:ShopHoa.ViewModels"
+  x:Class="ShopHoa.Views.BaoCaoHangHoaView"
+  x:Name="RootView"
+  x:DataType="vm:BaoCaoHangHoaViewModel">
+
+  <UserControl.Resources>
+    <x:Double x:Key="DatePickerThemeMinWidth">0</x:Double>
+  </UserControl.Resources>
+
+  <UserControl.Styles>
+    <!-- ===== CARD ===== -->
+    <Style Selector="Border.bcCard">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="BorderBrush" Value="#E4EDEA" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BoxShadow" Value="0 1 4 0 #0D000000" />
+    </Style>
+
+    <!-- ===== THẺ CHỈ SỐ ===== -->
+    <Style Selector="Border.bcMetric">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="BorderBrush" Value="#E4EDEA" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BoxShadow" Value="0 1 3 0 #0A000000" />
+      <Setter Property="Padding" Value="14,11" />
+      <Setter Property="MinWidth" Value="178" />
+    </Style>
+
+    <!-- ===== DÒNG BẢNG ===== -->
+    <Style Selector="Border.bcRow">
+      <Setter Property="Padding" Value="10,6" />
+      <Setter Property="BorderBrush" Value="#EEF4F2" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <!-- ===== NÚT ===== -->
+    <Style Selector="Button.bcBtn">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#D5E3DF" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="12,6" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="#344B45" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.bcBtn:pointerover">
+      <Setter Property="Background" Value="#EFF6F4" />
+      <Setter Property="BorderBrush" Value="#B9D6CF" />
+      <Setter Property="Foreground" Value="#0B5F52" />
+    </Style>
+    <Style Selector="Button.bcBtn:pressed">
+      <Setter Property="Background" Value="#DCEEE9" />
+    </Style>
+    <Style Selector="Button.bcBtn.active">
+      <Setter Property="Background" Value="#087F6E" />
+      <Setter Property="BorderBrush" Value="#087F6E" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.bcBtn.active:pointerover">
+      <Setter Property="Background" Value="#066B5D" />
+      <Setter Property="BorderBrush" Value="#066B5D" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.bcBtn:disabled">
+      <Setter Property="Opacity" Value="0.55" />
+    </Style>
+
+    <!-- ===== NÚT CHÍNH ===== -->
+    <Style Selector="Button.bcPrimary">
+      <Setter Property="Background" Value="#087F6E" />
+      <Setter Property="BorderBrush" Value="#087F6E" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="14,6" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.bcPrimary:pointerover">
+      <Setter Property="Background" Value="#066E61" />
+      <Setter Property="BorderBrush" Value="#066E61" />
+    </Style>
+    <Style Selector="Button.bcPrimary:pressed">
+      <Setter Property="Background" Value="#055A50" />
+      <Setter Property="BorderBrush" Value="#055A50" />
+    </Style>
+    <Style Selector="Button.bcPrimary:disabled">
+      <Setter Property="Opacity" Value="0.55" />
+    </Style>
+
+    <!-- ===== NÚT SẮP XẾP Ở ĐẦU CỘT BẢNG ===== -->
+    <Style Selector="Button.bcSortBtn">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="10,4" />
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.bcSortBtn.pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#F1F8F6" />
+    </Style>
+    <Style Selector="Button.bcSortBtn.right /template/ ContentPresenter">
+      <Setter Property="HorizontalContentAlignment" Value="Right" />
+    </Style>
+
+    <!-- ===== NHÃN ===== -->
+    <Style Selector="TextBlock.bcSectionTitle">
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#164B40" />
+    </Style>
+    <Style Selector="TextBlock.bcSectionSub">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#61736E" />
+    </Style>
+    <Style Selector="TextBlock.bcMuted">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#61736E" />
+    </Style>
+    <Style Selector="TextBlock.bcMetricLabel">
+      <Setter Property="FontSize" Value="9.5" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#7A8C87" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+    <Style Selector="TextBlock.bcMetricValue">
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#1D3B34" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+    <Style Selector="TextBlock.bcMetricSub">
+      <Setter Property="FontSize" Value="9.5" />
+      <Setter Property="Foreground" Value="#93A5A0" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+    <Style Selector="TextBlock.bcTableHead">
+      <Setter Property="FontSize" Value="10.5" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#5B706A" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+    <Style Selector="TextBlock.bcTableCell">
+      <Setter Property="FontSize" Value="11.5" />
+      <Setter Property="Foreground" Value="#2C3A37" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
+    <!-- Lợi nhuận: xanh khi dương, cam khi âm (class bind từ model) -->
+    <Style Selector="TextBlock.bcTableCell.ln">
+      <Setter Property="Foreground" Value="#087F6E" />
+    </Style>
+    <Style Selector="TextBlock.bcTableCell.lo">
+      <Setter Property="Foreground" Value="#D97706" />
+    </Style>
+
+    <Style Selector="Border.bcChip">
+      <Setter Property="Background" Value="#EAF6F3" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="9,4" />
+    </Style>
+
+    <Style Selector="Border.bcEmpty">
+      <Setter Property="Background" Value="#F8FBFA" />
+      <Setter Property="BorderBrush" Value="#E8F0EE" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="16,20" />
+    </Style>
+
+    <!-- ===== BỘ LỌC (CỘT TRÁI) ===== -->
+    <Style Selector="TextBlock.flLabel">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#5B706A" />
+    </Style>
+    <Style Selector="TextBox.flInput">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Padding" Value="9,7" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="BorderBrush" Value="#D5E3DF" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="TextBox.flInput:focus">
+      <Setter Property="BorderBrush" Value="#087F6E" />
+    </Style>
+    <Style Selector="ComboBox.flCombo">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="DatePicker.flDate">
+      <!-- Cho phép co giãn tự do theo chiều ngang và ôm sát khung cha -->
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="MinWidth" Value="0" />
+      <Setter Property="Height" Value="34" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Padding" Value="4,2" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="BorderBrush" Value="#D5E3DF" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <!-- Ép các nút bấm / ô chọn bên trong DatePicker co giãn đúng kích thước -->
+    <Style Selector="DatePicker.flDate /template/ Button#PART_FlyoutButton">
+      <Setter Property="MinWidth" Value="0" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="Padding" Value="4,0" />
+    </Style>
+    <Style Selector="DatePicker.flDate /template/ Button#FlyoutButton">
+      <Setter Property="MinWidth" Value="0" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="Padding" Value="4,0" />
+    </Style>
+
+    <!-- Giảm font chữ của văn bản hiển thị ngày/tháng/năm bên trong -->
+    <Style Selector="DatePicker.flDate TextBlock">
+      <Setter Property="FontSize" Value="11.5" />
+    </Style>
+  </UserControl.Styles>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="16" Spacing="12">
+
+      <!-- ============ 1. HEADER ============ -->
+      <Border Classes="bcCard" Padding="18,13">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+          <StackPanel VerticalAlignment="Center" Spacing="3">
+            <TextBlock Text="Báo cáo hàng hóa" FontSize="20" FontWeight="SemiBold"
+              Foreground="#123F37" />
+            <TextBlock Classes="bcSectionSub" TextWrapping="Wrap"
+              Text="Doanh thu, giá vốn, lợi nhuận, top sản phẩm và bảng chi tiết theo mã hàng." />
+          </StackPanel>
+
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+            VerticalAlignment="Center" HorizontalAlignment="Right">
+            <Border Classes="bcChip">
+              <TextBlock Text="{Binding KhoangHienThi}" FontSize="11.5"
+                FontWeight="SemiBold" Foreground="#0B6A5C" />
+            </Border>
+            <Border Classes="bcChip" Background="#F4F7F6">
+              <TextBlock Text="{Binding KhoangThoiGian}" FontSize="11.5"
+                Foreground="#3E544F" />
+            </Border>
+            <TextBlock Classes="bcMuted" VerticalAlignment="Center"
+              IsVisible="{Binding DangTai}" Text="Đang tải dữ liệu…" />
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- ============ 2. CẢNH BÁO LỖI ============ -->
+      <Border IsVisible="{Binding CoLoi}" Background="#FDECEC"
+        BorderBrush="#F5C2C2" BorderThickness="1" CornerRadius="10" Padding="14,10">
+        <TextBlock Text="{Binding ThongBaoLoi}" TextWrapping="Wrap"
+          Foreground="#A32B2B" FontSize="12" />
+      </Border>
+
+      <!-- ============ 3. THANH TẢI ============ -->
+      <ProgressBar IsIndeterminate="True" Height="3" IsVisible="{Binding DangTai}"
+        Foreground="#087F6E" Background="#EAF9F5" BorderThickness="0" />
+
+      <!-- ============ 4. NỘI DUNG 2 CỘT: BỘ LỌC (TRÁI) + NỘI DUNG (PHẢI) ============ -->
+      <Grid ColumnDefinitions="310,*" ColumnSpacing="12">
+
+        <!-- ===== CỘT TRÁI: BỘ LỌC ===== -->
+        <Border Classes="bcCard" Padding="16,14" VerticalAlignment="Top" ClipToBounds="True">
+          <StackPanel Spacing="11">
+            <TextBlock Classes="bcSectionTitle" Text="Bộ lọc" />
+            <Border Height="1" Background="#EEF4F2" />
+
+            <!-- Kiểu hiển thị -->
+            <StackPanel Spacing="5">
+              <TextBlock Classes="flLabel" Text="Kiểu hiển thị" />
+              <RadioButton GroupName="kieuHienThi" Content="Biểu đồ"
+                IsChecked="{Binding HienThiBieuDo, Mode=TwoWay}" />
+              <RadioButton GroupName="kieuHienThi" Content="Báo cáo"
+                IsChecked="{Binding HienThiBaoCao, Mode=TwoWay}" />
+            </StackPanel>
+
+            <!-- Gộp hàng hóa cùng loại -->
+            <CheckBox IsChecked="{Binding GopHangHoa, Mode=TwoWay}"
+              HorizontalAlignment="Stretch">
+              <TextBlock Text="Gộp hàng hóa cùng loại" TextWrapping="Wrap"
+                FontSize="12" Foreground="#344B45" />
+            </CheckBox>
+
+            <!-- Mối quan tâm -->
+            <StackPanel Spacing="4">
+              <TextBlock Classes="flLabel" Text="Mối quan tâm" />
+              <ComboBox Classes="flCombo"
+                ItemsSource="{Binding MocQuanTamOptions}"
+                SelectedItem="{Binding MocQuanTamChon, Mode=TwoWay}" />
+            </StackPanel>
+
+            <!-- Thời gian -->
+            <StackPanel Spacing="6">
+              <TextBlock Classes="flLabel" Text="Thời gian" />
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button Classes="bcBtn" Content="Tuần này"
+                  Classes.active="{Binding DangChonTuanNay}"
+                  Command="{Binding VeTuanNayCommand}" />
+                <Button Classes="bcBtn" Content="Tùy chọn"
+                  Classes.active="{Binding DangChonTuyChinh}"
+                  Command="{Binding ChonTuyChinhCommand}" />
+              </StackPanel>
+              <StackPanel Spacing="4" IsVisible="{Binding DangChonTuyChinh}">
+                <TextBlock Classes="bcMuted" Text="Từ ngày" />
+                <DatePicker Classes="flDate"
+                  SelectedDate="{Binding TuNgayChon, Mode=TwoWay}" />
+                <TextBlock Classes="bcMuted" Text="Đến ngày" />
+                <DatePicker Classes="flDate"
+                  SelectedDate="{Binding DenNgayChon, Mode=TwoWay}" />
+              </StackPanel>
+            </StackPanel>
+
+            <!-- Hàng hóa -->
+            <StackPanel Spacing="4">
+              <TextBlock Classes="flLabel" Text="Hàng hóa" />
+              <TextBox Classes="flInput" Watermark="Tên hoặc mã hàng…"
+                Text="{Binding TimKiem, Mode=TwoWay}" />
+            </StackPanel>
+
+            <!-- Loại hàng -->
+            <StackPanel Spacing="4">
+              <TextBlock Classes="flLabel" Text="Loại hàng" />
+              <ComboBox Classes="flCombo"
+                ItemsSource="{Binding LoaiHangs}"
+                SelectedItem="{Binding LoaiHangChon, Mode=TwoWay}" />
+            </StackPanel>
+
+            <!-- Nhóm hàng -->
+            <StackPanel Spacing="4">
+              <TextBlock Classes="flLabel" Text="Nhóm hàng" />
+              <ComboBox Classes="flCombo"
+                ItemsSource="{Binding NhomHangOptions}"
+                SelectedIndex="{Binding NhomChonIndex, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="models:BaoCaoHangHoaNhomOption">
+                    <TextBlock Text="{Binding TenHienThi}" TextTrimming="CharacterEllipsis" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+
+            <Border Height="1" Background="#EEF4F2" />
+
+            <!-- Áp dụng / Xóa bộ lọc -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+              <Button Classes="bcPrimary" Content="Áp dụng"
+                Command="{Binding ApDungCommand}" />
+              <Button Grid.Column="1" Classes="bcBtn" Content="Xóa bộ lọc"
+                Command="{Binding XoaBoLocCommand}" />
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <!-- ===== CỘT PHẢI: NỘI DUNG BÁO CÁO ===== -->
+        <StackPanel Grid.Column="1" Spacing="12">
+
+          <!-- Thanh công cụ: chuyển chế độ + Làm mới / Xuất Excel -->
+          <Border Classes="bcCard" Padding="14,10">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+              <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <Button Classes="bcBtn" Content="📈 Biểu đồ"
+                  Classes.active="{Binding HienThiBieuDo}"
+                  Command="{Binding ChonBieuDoCommand}" />
+                <Button Classes="bcBtn" Content="📋 Báo cáo"
+                  Classes.active="{Binding HienThiBaoCao}"
+                  Command="{Binding ChonBaoCaoCommand}" />
+              </StackPanel>
+
+              <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6"
+                VerticalAlignment="Center">
+                <Button Classes="bcBtn" Content="Làm mới"
+                  Command="{Binding TaiLaiCommand}" />
+                <Button Classes="bcPrimary" Content="Xuất Excel"
+                  Command="{Binding XuatExcelCommand}" />
+              </StackPanel>
+            </Grid>
+          </Border>
+
+          <!-- KPI cards -->
+          <WrapPanel>
+
+            <Border Classes="bcMetric" Margin="0,0,10,10">
+              <StackPanel Spacing="2">
+                <TextBlock Classes="bcMetricLabel" Text="DOANH THU" />
+                <TextBlock Classes="bcMetricValue" Foreground="#087F6E"
+                  Text="{Binding TongHop.DoanhThuHienThi}" />
+                <TextBlock Classes="bcMetricSub" Text="Tổng tiền bán đã hoàn thành" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="bcMetric" Margin="0,0,10,10">
+              <StackPanel Spacing="2">
+                <TextBlock Classes="bcMetricLabel" Text="GIÁ VỐN" />
+                <TextBlock Classes="bcMetricValue"
+                  Text="{Binding TongHop.GiaVonHienThi}" />
+                <TextBlock Classes="bcMetricSub" Text="Von theo snapshots khi bán" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="bcMetric" Margin="0,0,10,10">
+              <StackPanel Spacing="2">
+                <TextBlock Classes="bcMetricLabel" Text="LỢI NHUẬN" />
+                <TextBlock Classes="bcMetricValue"
+                  Text="{Binding TongHop.LoiNhuanHienThi}" />
+                <TextBlock Classes="bcMetricSub"
+                  Text="{Binding TongHop.TyLeLoiNhuanHienThi}" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="bcMetric" Margin="0,0,10,10">
+              <StackPanel Spacing="2">
+                <TextBlock Classes="bcMetricLabel" Text="SỐ LƯỢNG BÁN" />
+                <TextBlock Classes="bcMetricValue"
+                  Text="{Binding TongHop.SoLuongBanHienThi}" />
+                <TextBlock Classes="bcMetricSub" Text="Tổng đơn vị đã bán" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="bcMetric" Margin="0,0,10,10">
+              <StackPanel Spacing="2">
+                <TextBlock Classes="bcMetricLabel" Text="SỐ MÃ HÀNG" />
+                <TextBlock Classes="bcMetricValue"
+                  Text="{Binding TongHop.SoMaHangHienThi}" />
+                <TextBlock Classes="bcMetricSub" Text="Mã hàng bán trong kỳ" />
+              </StackPanel>
+            </Border>
+
+          </WrapPanel>
+
+          <!-- ===== CHẾ ĐỘ BIỂU ĐỒ ===== -->
+          <StackPanel Spacing="12" IsVisible="{Binding HienThiBieuDo}">
+
+            <!-- Top 10 theo doanh thu -->
+            <Border Classes="bcCard" Padding="16,13">
+              <StackPanel Spacing="8">
+                <StackPanel Spacing="2">
+                  <TextBlock Classes="bcSectionTitle"
+                    Text="Top 10 sản phẩm theo doanh thu" />
+                  <TextBlock Classes="bcSectionSub" TextWrapping="Wrap"
+                    Text="Sắp xếp giảm dần theo doanh thu trong khoảng thời gian đang chọn." />
+                </StackPanel>
+                <Border Height="1" Background="#EEF4F2" />
+
+                <ItemsControl ItemsSource="{Binding TopDoanhThuItems}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:BaoCaoHangHoaTop">
+                      <Border Classes="bcRow">
+                        <Grid ColumnDefinitions="30,*,270,130" ColumnSpacing="8">
+                          <Border Width="22" Height="22" CornerRadius="7"
+                            Background="#EAF9F5" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Stt}" FontSize="10.5"
+                              Foreground="#087F6E" FontWeight="SemiBold"
+                              HorizontalAlignment="Center" VerticalAlignment="Center" />
+                          </Border>
+
+                          <StackPanel Grid.Column="1" VerticalAlignment="Center"
+                            Spacing="1">
+                            <TextBlock Classes="bcTableCell" FontWeight="SemiBold"
+                              Text="{Binding TenHang}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Classes="bcMetricSub" Text="{Binding MaHang}" />
+                          </StackPanel>
+
+                          <Grid Grid.Column="2" Height="16" VerticalAlignment="Center">
+                            <Border Background="#EFF5F3" CornerRadius="8" Height="14"
+                              VerticalAlignment="Center" />
+                            <Border Background="#0E9382" CornerRadius="8" Height="14"
+                              Width="{Binding RongBar}" HorizontalAlignment="Left"
+                              VerticalAlignment="Center"
+                              ToolTip.Tip="{Binding DoanhThuHienThi}" />
+                          </Grid>
+
+                          <TextBlock Grid.Column="3" Classes="bcTableCell"
+                            FontWeight="SemiBold" Text="{Binding DoanhThuHienThi}"
+                            HorizontalAlignment="Right" VerticalAlignment="Center" />
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Border Classes="bcEmpty" IsVisible="{Binding !CoTopDoanhThu}">
+                  <TextBlock FontSize="12.5" Foreground="#61736E"
+                    HorizontalAlignment="Center" TextWrapping="Wrap"
+                    Text="Chưa có dữ liệu bán hàng trong khoảng thời gian này" />
+                </Border>
+              </StackPanel>
+            </Border>
+
+            <!-- Top 10 theo số lượng bán -->
+            <Border Classes="bcCard" Padding="16,13">
+              <StackPanel Spacing="8">
+                <StackPanel Spacing="2">
+                  <TextBlock Classes="bcSectionTitle"
+                    Text="Top 10 sản phẩm theo số lượng bán" />
+                  <TextBlock Classes="bcSectionSub" TextWrapping="Wrap"
+                    Text="Sắp xếp giảm dần theo số lượng bán trong khoảng thời gian đang chọn." />
+                </StackPanel>
+                <Border Height="1" Background="#EEF4F2" />
+
+                <ItemsControl ItemsSource="{Binding TopSoLuongItems}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:BaoCaoHangHoaTop">
+                      <Border Classes="bcRow">
+                        <Grid ColumnDefinitions="30,*,270,130" ColumnSpacing="8">
+                          <Border Width="22" Height="22" CornerRadius="7"
+                            Background="#EAF9F5" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Stt}" FontSize="10.5"
+                              Foreground="#087F6E" FontWeight="SemiBold"
+                              HorizontalAlignment="Center" VerticalAlignment="Center" />
+                          </Border>
+
+                          <StackPanel Grid.Column="1" VerticalAlignment="Center"
+                            Spacing="1">
+                            <TextBlock Classes="bcTableCell" FontWeight="SemiBold"
+                              Text="{Binding TenHang}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Classes="bcMetricSub" Text="{Binding MaHang}" />
+                          </StackPanel>
+
+                          <Grid Grid.Column="2" Height="16" VerticalAlignment="Center">
+                            <Border Background="#EFF5F3" CornerRadius="8" Height="14"
+                              VerticalAlignment="Center" />
+                            <Border Background="#0E9382" CornerRadius="8" Height="14"
+                              Width="{Binding RongBar}" HorizontalAlignment="Left"
+                              VerticalAlignment="Center"
+                              ToolTip.Tip="{Binding SoLuongBanHienThi}" />
+                          </Grid>
+
+                          <TextBlock Grid.Column="3" Classes="bcTableCell"
+                            FontWeight="SemiBold" Text="{Binding SoLuongBanHienThi}"
+                            HorizontalAlignment="Right" VerticalAlignment="Center" />
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Border Classes="bcEmpty" IsVisible="{Binding !CoTopSoLuong}">
+                  <TextBlock FontSize="12.5" Foreground="#61736E"
+                    HorizontalAlignment="Center" TextWrapping="Wrap"
+                    Text="Chưa có dữ liệu bán hàng trong khoảng thời gian này" />
+                </Border>
+              </StackPanel>
+            </Border>
+
+            <!-- Doanh thu theo nhóm hàng -->
+            <Border Classes="bcCard" Padding="16,13">
+              <StackPanel Spacing="8">
+                <StackPanel Spacing="2">
+                  <TextBlock Classes="bcSectionTitle" Text="Doanh thu theo nhóm hàng" />
+                  <TextBlock Classes="bcSectionSub" TextWrapping="Wrap"
+                    Text="Tổng hợp theo nhóm của sản phẩm; sản phẩm chưa gán nhóm gộp vào “Chưa phân nhóm”." />
+                </StackPanel>
+                <Border Height="1" Background="#EEF4F2" />
+
+                <ItemsControl ItemsSource="{Binding NhomHangItems}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:BaoCaoHangHoaNhom">
+                      <Border Classes="bcRow">
+                        <Grid ColumnDefinitions="30,*,270,130,64" ColumnSpacing="8">
+                          <Border Width="22" Height="22" CornerRadius="7"
+                            Background="#EAF9F5" VerticalAlignment="Center">
+                            <TextBlock Text="🏷" FontSize="10.5"
+                              HorizontalAlignment="Center" VerticalAlignment="Center" />
+                          </Border>
+
+                          <StackPanel Grid.Column="1" VerticalAlignment="Center"
+                            Spacing="1">
+                            <TextBlock Classes="bcTableCell" FontWeight="SemiBold"
+                              Text="{Binding TenNhom}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Classes="bcMetricSub"
+                              Text="{Binding SoMaHangHienThi, StringFormat='{}{0} mã hàng'}" />
+                          </StackPanel>
+
+                          <Grid Grid.Column="2" Height="16" VerticalAlignment="Center">
+                            <Border Background="#EFF5F3" CornerRadius="8" Height="14"
+                              VerticalAlignment="Center" />
+                            <Border Background="#0E9382" CornerRadius="8" Height="14"
+                              Width="{Binding RongBar}" HorizontalAlignment="Left"
+                              VerticalAlignment="Center"
+                              ToolTip.Tip="{Binding DoanhThuHienThi}" />
+                          </Grid>
+
+                          <TextBlock Grid.Column="3" Classes="bcTableCell"
+                            FontWeight="SemiBold" Text="{Binding DoanhThuHienThi}"
+                            HorizontalAlignment="Right" VerticalAlignment="Center" />
+                          <TextBlock Grid.Column="4" Classes="bcTableCell"
+                            Foreground="#087F6E" Text="{Binding TyLePhanTramHienThi}"
+                            HorizontalAlignment="Right" VerticalAlignment="Center" />
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Border Classes="bcEmpty" IsVisible="{Binding !CoNhomHang}">
+                  <TextBlock FontSize="12.5" Foreground="#61736E"
+                    HorizontalAlignment="Center" TextWrapping="Wrap"
+                    Text="Chưa có dữ liệu bán hàng trong khoảng thời gian này" />
+                </Border>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+
+          <!-- ===== CHẾ ĐỘ BÁO CÁO (BẢNG CHI TIẾT) ===== -->
+          <Border Classes="bcCard" Padding="16,13" IsVisible="{Binding HienThiBaoCao}">
+            <StackPanel Spacing="8">
+
+              <!-- Tiêu đề + tìm kiếm trong bảng -->
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <StackPanel VerticalAlignment="Center" Spacing="2">
+                  <TextBlock Classes="bcSectionTitle" Text="Bảng chi tiết hàng hóa" />
+                  <TextBlock Classes="bcSectionSub" TextWrapping="Wrap"
+                    Text="Bấm tiêu đề cột để sắp xếp; STT tính liên tục giữa các trang." />
+                </StackPanel>
+                <TextBox Grid.Column="1" Classes="flInput" Width="230"
+                  Watermark="Tìm trong bảng…"
+                  Text="{Binding TimKiemBang, Mode=TwoWay}"
+                  VerticalAlignment="Center" />
+              </Grid>
+
+              <Border Height="1" Background="#EEF4F2" />
+
+              <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Disabled">
+                <StackPanel MinWidth="940">
+
+                  <!-- Đầu bảng: các cột bấm được để sắp xếp -->
+                  <Border Padding="0,0,0,0" BorderBrush="#EEF4F2"
+                    BorderThickness="0,0,0,1">
+                    <Grid ColumnDefinitions="50,110,*,140,90,130,130,130">
+                      <TextBlock Classes="bcTableHead" Text="STT"
+                        Margin="10,4,0,4" VerticalAlignment="Center" />
+
+                      <Button Grid.Column="1" Classes="bcSortBtn"
+                        Command="{Binding SapXepCommand}"
+                        CommandParameter="MaHang">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                          <TextBlock Classes="bcTableHead" Text="Mã hàng" />
+                          <TextBlock Classes="bcTableHead" Foreground="#087F6E"
+                            Text="{Binding DanhDauMa}" />
+                        </StackPanel>
+                      </Button>
+
+                      <Button Grid.Column="2" Classes="bcSortBtn"
+                        Command="{Binding SapXepCommand}"
+                        CommandParameter="TenHang">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                          <TextBlock Classes="bcTableHead" Text="Tên hàng" />
+                          <TextBlock Classes="bcTableHead" Foreground="#087F6E"
+                            Text="{Binding DanhDauTen}" />
+                        </StackPanel>
+                      </Button>
+
+                      <Button Grid.Column="3" Classes="bcSortBtn"
+                        Command="{Binding SapXepCommand}"
+                        CommandParameter="NhomHang">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                          <TextBlock Classes="bcTableHead" Text="Nhóm hàng" />
+                          <TextBlock Classes="bcTableHead" Foreground="#087F6E"
+                            Text="{Binding DanhDauNhom}" />
+                        </StackPanel>
+                      </Button>
+
+                      <Button Grid.Column="4" Classes="bcSortBtn right"
+                        Command="{Binding SapXepCommand}"
+                        CommandParameter="SoLuongBan">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                          <TextBlock Classes="bcTableHead" Text="SL bán" />
+                          <TextBlock Classes="bcTableHead" Foreground="#087F6E"
+                            Text="{Binding DanhDauSoLuong}" />
+                        </StackPanel>
+                      </Button>
+
+                      <Button Grid.Column="5" Classes="bcSortBtn right"
+                        Command="{Binding SapXepCommand}"
+                        CommandParameter="DoanhThu">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                          <TextBlock Classes="bcTableHead" Text="Doanh thu" />
+                          <TextBlock Classes="bcTableHead" Foreground="#087F6E"
+                            Text="{Binding DanhDauDoanhThu}" />
+                        </StackPanel>
+                      </Button>
+
+                      <Button Grid.Column="6" Classes="bcSortBtn right"
+                        Command="{Binding SapXepCommand}"
+                        CommandParameter="GiaVon">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                          <TextBlock Classes="bcTableHead" Text="Giá vốn" />
+                          <TextBlock Classes="bcTableHead" Foreground="#087F6E"
+                            Text="{Binding DanhDauGiaVon}" />
+                        </StackPanel>
+                      </Button>
+
+                      <Button Grid.Column="7" Classes="bcSortBtn right"
+                        Command="{Binding SapXepCommand}"
+                        CommandParameter="LoiNhuan">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                          <TextBlock Classes="bcTableHead" Text="Lợi nhuận" />
+                          <TextBlock Classes="bcTableHead" Foreground="#087F6E"
+                            Text="{Binding DanhDauLoiNhuan}" />
+                        </StackPanel>
+                      </Button>
+                    </Grid>
+                  </Border>
+
+                  <!-- Dòng dữ liệu -->
+                  <ItemsControl ItemsSource="{Binding ChiTietTrang}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="models:BaoCaoHangHoaChiTiet">
+                        <Border Classes="bcRow">
+                          <Grid ColumnDefinitions="50,110,*,140,90,130,130,130">
+                            <TextBlock Classes="bcTableCell" Text="{Binding Stt}"
+                              VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Classes="bcTableCell"
+                              Text="{Binding MaHang}" TextTrimming="CharacterEllipsis"
+                              VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Classes="bcTableCell"
+                              FontWeight="SemiBold" Text="{Binding TenHang}"
+                              TextTrimming="CharacterEllipsis"
+                              VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="3" Classes="bcTableCell"
+                              Text="{Binding NhomHang}" TextTrimming="CharacterEllipsis"
+                              VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="4" Classes="bcTableCell"
+                              Text="{Binding SoLuongBanHienThi}"
+                              HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="5" Classes="bcTableCell"
+                              FontWeight="SemiBold" Text="{Binding DoanhThuHienThi}"
+                              HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="6" Classes="bcTableCell"
+                              Foreground="#61736E" Text="{Binding GiaVonHienThi}"
+                              HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="7" Classes="bcTableCell"
+                              Classes.ln="{Binding LoiNhuanDuong}"
+                              Classes.lo="{Binding LoiNhuanAm}"
+                              FontWeight="SemiBold" Text="{Binding LoiNhuanHienThi}"
+                              HorizontalAlignment="Right" VerticalAlignment="Center" />
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+
+                  <!-- Tổng cuối bảng (tính trên toàn bộ kết quả, không chỉ trang này) -->
+                  <Border IsVisible="{Binding CoChiTiet}" Margin="0,4,0,0" Padding="10,7"
+                    Background="#F3F8F7" CornerRadius="6">
+                    <Grid ColumnDefinitions="50,110,*,140,90,130,130,130">
+                      <TextBlock Grid.Column="3" FontSize="11.5" FontWeight="SemiBold"
+                        Foreground="#164B40" Text="Tổng cộng" TextTrimming="CharacterEllipsis"
+                        VerticalAlignment="Center" />
+                      <TextBlock Grid.Column="4" FontSize="11.5" FontWeight="SemiBold"
+                        Foreground="#164B40" Text="{Binding TongHop.SoLuongBanHienThi}"
+                        HorizontalAlignment="Right" VerticalAlignment="Center" />
+                      <TextBlock Grid.Column="5" FontSize="11.5" FontWeight="SemiBold"
+                        Foreground="#087F6E" Text="{Binding TongHop.DoanhThuHienThi}"
+                        HorizontalAlignment="Right" VerticalAlignment="Center" />
+                      <TextBlock Grid.Column="6" FontSize="11.5" FontWeight="SemiBold"
+                        Foreground="#164B40" Text="{Binding TongHop.GiaVonHienThi}"
+                        HorizontalAlignment="Right" VerticalAlignment="Center" />
+                      <TextBlock Grid.Column="7" FontSize="11.5" FontWeight="SemiBold"
+                        Foreground="#087F6E" Text="{Binding TongHop.LoiNhuanHienThi}"
+                        HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    </Grid>
+                  </Border>
+                </StackPanel>
+              </ScrollViewer>
+
+              <!-- Trạng thái rỗng -->
+              <Border Classes="bcEmpty" IsVisible="{Binding !CoChiTiet}">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                  Spacing="6">
+                  <TextBlock Text="🔎" FontSize="26" HorizontalAlignment="Center" />
+                  <TextBlock FontSize="12.5" Foreground="#61736E"
+                    HorizontalAlignment="Center" TextWrapping="Wrap"
+                    Text="Không có dữ liệu trong khoảng thời gian / bộ lọc này" />
+                </StackPanel>
+              </Border>
+
+              <!-- Phân trang -->
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10"
+                IsVisible="{Binding CoChiTiet}">
+                <StackPanel Orientation="Horizontal" Spacing="8"
+                  VerticalAlignment="Center">
+                  <TextBlock Classes="bcMuted" VerticalAlignment="Center"
+                    Text="{Binding VanBanPhanTrang}" />
+                  <ComboBox Width="110" FontSize="11"
+                    ItemsSource="{Binding SoDongTrangOptions}"
+                    SelectedItem="{Binding SoDongTrang, Mode=TwoWay}" />
+                  <TextBlock Classes="bcMuted" VerticalAlignment="Center"
+                    Text="dòng/trang" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6"
+                  VerticalAlignment="Center">
+                  <Button Classes="bcBtn" Content="«"
+                    ToolTip.Tip="Trang đầu"
+                    IsEnabled="{Binding CanTrangTruoc}"
+                    Command="{Binding TrangDauCommand}" />
+                  <Button Classes="bcBtn" Content="◀"
+                    ToolTip.Tip="Trang trước"
+                    IsEnabled="{Binding CanTrangTruoc}"
+                    Command="{Binding TrangTruocCommand}" />
+                  <StackPanel Orientation="Horizontal" Spacing="3"
+                    VerticalAlignment="Center">
+                    <TextBlock Classes="bcMuted" Text="Trang" />
+                    <TextBlock Classes="bcMuted" FontWeight="SemiBold"
+                      Text="{Binding Trang}" />
+                    <TextBlock Classes="bcMuted" Text="/" />
+                    <TextBlock Classes="bcMuted" Text="{Binding TongSoTrang}" />
+                  </StackPanel>
+                  <Button Classes="bcBtn" Content="▶"
+                    ToolTip.Tip="Trang sau"
+                    IsEnabled="{Binding CanTrangSau}"
+                    Command="{Binding TrangSauCommand}" />
+                  <Button Classes="bcBtn" Content="»"
+                    ToolTip.Tip="Trang cuối"
+                    IsEnabled="{Binding CanTrangSau}"
+                    Command="{Binding TrangCuoiCommand}" />
+                </StackPanel>
+              </Grid>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Grid>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

@@ -1,0 +1,748 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ShopHoa.ViewModels"
+        x:Class="ShopHoa.Views.LoginWindow"
+        x:DataType="vm:LoginViewModel"
+
+        Title="VỰA HOA NHÀ HUY - Đăng nhập"
+        Icon="/Assets/logo.ico"
+
+        Width="1050"
+        Height="680"
+        WindowState="Maximized"
+
+        MinWidth="950"
+        MinHeight="620"
+
+        CanResize="True"
+        WindowStartupLocation="CenterScreen"
+
+        Background="#F3F7F5">
+
+
+    <!-- ========================================================= -->
+    <!-- STYLES -->
+    <!-- ========================================================= -->
+
+    <Window.Styles>
+
+        <!-- ===================================================== -->
+        <!-- TEXTBOX - LUÔN NỀN TRẮNG -->
+        <!-- ===================================================== -->
+
+        <Style Selector="TextBox.loginInput">
+
+            <Setter Property="Background"
+                    Value="#FFFFFF"/>
+
+            <Setter Property="Foreground"
+                    Value="#263B35"/>
+
+            <Setter Property="BorderBrush"
+                    Value="#D5E1DD"/>
+
+            <Setter Property="BorderThickness"
+                    Value="1"/>
+
+            <Setter Property="FontSize"
+                    Value="14"/>
+
+            <Setter Property="Padding"
+                    Value="14,12"/>
+
+            <Setter Property="MinHeight"
+                    Value="48"/>
+
+            <Setter Property="CornerRadius"
+                    Value="9"/>
+
+        </Style>
+
+
+        <!-- KHI FOCUS - VẪN TRẮNG -->
+
+        <Style Selector="TextBox.loginInput:focus">
+
+            <Setter Property="Background"
+                    Value="#FFFFFF"/>
+
+            <Setter Property="Foreground"
+                    Value="#263B35"/>
+
+            <Setter Property="BorderBrush"
+                    Value="#078774"/>
+
+            <Setter Property="BorderThickness"
+                    Value="1.5"/>
+
+        </Style>
+
+
+        <!-- KHI RÊ CHUỘT - VẪN TRẮNG -->
+
+        <Style Selector="TextBox.loginInput:pointerover">
+
+            <Setter Property="Background"
+                    Value="#FFFFFF"/>
+
+            <Setter Property="Foreground"
+                    Value="#263B35"/>
+
+        </Style>
+
+
+        <!-- KHI VỪA RÊ CHUỘT VỪA FOCUS - VẪN TRẮNG -->
+
+        <Style Selector="TextBox.loginInput:pointerover:focus">
+
+            <Setter Property="Background"
+                    Value="#FFFFFF"/>
+
+            <Setter Property="Foreground"
+                    Value="#263B35"/>
+
+            <Setter Property="BorderBrush"
+                    Value="#078774"/>
+
+        </Style>
+
+
+        <!-- ===================================================== -->
+        <!-- ÉP PHẦN BORDER BÊN TRONG TEMPLATE KHÔNG ĐỔI MÀU -->
+        <!-- Đây là phần quan trọng để trị lỗi nền đen của Avalonia -->
+        <!-- ===================================================== -->
+
+        <Style Selector="TextBox.loginInput /template/ Border#PART_BorderElement">
+
+            <Setter Property="Background"
+                    Value="#FFFFFF"/>
+
+            <Setter Property="BorderBrush"
+                    Value="#D5E1DD"/>
+
+        </Style>
+
+
+        <Style Selector="TextBox.loginInput:focus /template/ Border#PART_BorderElement">
+
+            <Setter Property="Background"
+                    Value="#FFFFFF"/>
+
+            <Setter Property="BorderBrush"
+                    Value="#078774"/>
+
+        </Style>
+
+
+        <Style Selector="TextBox.loginInput:pointerover /template/ Border#PART_BorderElement">
+
+            <Setter Property="Background"
+                    Value="#FFFFFF"/>
+
+        </Style>
+
+
+        <Style Selector="TextBox.loginInput:pointerover:focus /template/ Border#PART_BorderElement">
+
+            <Setter Property="Background"
+                    Value="#FFFFFF"/>
+
+            <Setter Property="BorderBrush"
+                    Value="#078774"/>
+
+        </Style>
+
+
+        <!-- ===================================================== -->
+        <!-- DISABLED - KHÔNG ĐỂ THÀNH ĐEN -->
+        <!-- ===================================================== -->
+
+        <Style Selector="TextBox.loginInput:disabled">
+
+            <Setter Property="Background"
+                    Value="#FFFFFF"/>
+
+            <Setter Property="Foreground"
+                    Value="#667085"/>
+
+            <Setter Property="Opacity"
+                    Value="0.75"/>
+
+        </Style>
+
+
+        <!-- ===================================================== -->
+        <!-- LOGIN BUTTON -->
+        <!-- ===================================================== -->
+
+        <Style Selector="Button.loginButton">
+
+            <Setter Property="Background"
+                    Value="#087F6E"/>
+
+            <Setter Property="Foreground"
+                    Value="#FFFFFF"/>
+
+            <Setter Property="FontSize"
+                    Value="14"/>
+
+            <Setter Property="FontWeight"
+                    Value="Bold"/>
+
+            <Setter Property="MinHeight"
+                    Value="48"/>
+
+            <Setter Property="Padding"
+                    Value="18,10"/>
+
+            <Setter Property="BorderThickness"
+                    Value="0"/>
+
+            <Setter Property="CornerRadius"
+                    Value="24"/>
+
+            <Setter Property="HorizontalContentAlignment"
+                    Value="Center"/>
+
+            <Setter Property="VerticalContentAlignment"
+                    Value="Center"/>
+
+        </Style>
+
+
+        <!-- HOVER -->
+
+        <Style Selector="Button.loginButton:pointerover">
+
+            <Setter Property="Background"
+                    Value="#087F6E"/>
+
+            <Setter Property="Foreground"
+                    Value="#FFFFFF"/>
+
+        </Style>
+
+
+        <!-- FluentTheme đổi nền tại ContentPresenter bên trong template khi rê chuột.
+             Khóa phần này cùng màu với nút để hover không làm đổi màu. -->
+
+        <Style Selector="Button.loginButton /template/ ContentPresenter#PART_ContentPresenter">
+
+            <Setter Property="Background"
+                    Value="#087F6E"/>
+
+        </Style>
+
+
+        <Style Selector="Button.loginButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+
+            <Setter Property="Background"
+                    Value="#087F6E"/>
+
+        </Style>
+
+
+        <!-- PRESSED -->
+
+        <Style Selector="Button.loginButton:pressed">
+
+            <Setter Property="Background"
+                    Value="#05584D"/>
+
+            <Setter Property="Foreground"
+                    Value="#FFFFFF"/>
+
+        </Style>
+
+
+        <!-- DISABLED -->
+
+        <Style Selector="Button.loginButton:disabled">
+
+            <Setter Property="Background"
+                    Value="#087F6E"/>
+
+            <Setter Property="Foreground"
+                    Value="#FFFFFF"/>
+
+            <Setter Property="Opacity"
+                    Value="0.75"/>
+
+        </Style>
+
+
+        <!-- ===================================================== -->
+        <!-- LINK BUTTON -->
+        <!-- ===================================================== -->
+
+        <Style Selector="Button.linkButton">
+
+            <Setter Property="Background"
+                    Value="Transparent"/>
+
+            <Setter Property="Foreground"
+                    Value="#087F6E"/>
+
+            <Setter Property="FontSize"
+                    Value="12"/>
+
+            <Setter Property="FontWeight"
+                    Value="SemiBold"/>
+
+            <Setter Property="BorderThickness"
+                    Value="0"/>
+
+            <Setter Property="Padding"
+                    Value="2,2"/>
+
+        </Style>
+
+
+        <Style Selector="Button.linkButton:pointerover">
+
+            <Setter Property="Background"
+                    Value="Transparent"/>
+
+            <Setter Property="Foreground"
+                    Value="#05594E"/>
+
+        </Style>
+
+
+        <!-- ===================================================== -->
+        <!-- EXIT BUTTON -->
+        <!-- ===================================================== -->
+        <!-- ===================================================== -->
+<!-- EXIT / SETTINGS BUTTON -->
+<!-- ===================================================== -->
+
+<Style Selector="Button.exitButton">
+
+    <Setter Property="Background"
+            Value="Transparent"/>
+
+    <Setter Property="Foreground"
+            Value="#667085"/>
+
+    <Setter Property="FontSize"
+            Value="13"/>
+
+    <Setter Property="FontWeight"
+            Value="SemiBold"/>
+
+    <Setter Property="Padding"
+            Value="8,5"/>
+
+    <Setter Property="BorderThickness"
+            Value="0"/>
+
+    <Setter Property="CornerRadius"
+            Value="6"/>
+
+</Style>
+
+
+<!-- HOVER -->
+
+<Style Selector="Button.exitButton:pointerover">
+
+    <Setter Property="Background"
+            Value="#F1F8F6"/>
+
+    <Setter Property="Foreground"
+            Value="#087F6E"/>
+
+</Style>
+
+
+<!-- PRESSED -->
+
+<Style Selector="Button.exitButton:pressed">
+
+    <Setter Property="Background"
+            Value="#E2F2EE"/>
+
+    <Setter Property="Foreground"
+            Value="#05594E"/>
+
+</Style>
+
+
+<!-- TEMPLATE BÊN TRONG -->
+
+<Style Selector="Button.exitButton /template/ ContentPresenter#PART_ContentPresenter">
+
+    <Setter Property="Background"
+            Value="Transparent"/>
+
+    <Setter Property="Foreground"
+            Value="#667085"/>
+
+</Style>
+
+
+<!-- TEMPLATE KHI HOVER -->
+
+<Style Selector="Button.exitButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+
+    <Setter Property="Background"
+            Value="#F1F8F6"/>
+
+    <Setter Property="Foreground"
+            Value="#087F6E"/>
+
+</Style>
+
+
+<!-- TEMPLATE KHI NHẤN -->
+
+<Style Selector="Button.exitButton:pressed /template/ ContentPresenter#PART_ContentPresenter">
+
+    <Setter Property="Background"
+            Value="#E2F2EE"/>
+
+    <Setter Property="Foreground"
+            Value="#05594E"/>
+
+</Style>
+       
+
+
+        <!-- ===================================================== -->
+        <!-- CHECKBOX -->
+        <!-- ===================================================== -->
+
+        <Style Selector="CheckBox">
+
+            <Setter Property="Foreground"
+                    Value="#667570"/>
+
+            <Setter Property="FontSize"
+                    Value="12"/>
+
+        </Style>
+
+    </Window.Styles>
+
+
+    <!-- ========================================================= -->
+    <!-- KHUNG NGOÀI -->
+    <!-- ========================================================= -->
+
+    <Border Margin="14"
+            CornerRadius="20"
+            Background="#FFFFFF"
+            ClipToBounds="True"
+            BoxShadow="0 10 35 #25000000">
+
+
+        <Grid>
+
+
+            <!-- ================================================= -->
+            <!-- ẢNH NỀN -->
+            <!-- ================================================= -->
+
+            <Image Source="avares://ShopHoa/Assets/Login.png"
+                   Stretch="UniformToFill"/>
+
+
+            <!-- ================================================= -->
+            <!-- FORM BÊN PHẢI -->
+            <!-- ================================================= -->
+
+            <Grid HorizontalAlignment="Right"
+                  Width="575"
+                  Margin="0,0,15,0">
+
+
+                <!-- ================================================= -->
+                <!-- NỀN FORM -->
+                <!-- ================================================= -->
+
+                <Border Background="#FDFEFC"
+                        Opacity="0.94"
+                        CornerRadius="18"
+                        Margin="0,18,0,18">
+
+
+                    <Grid Margin="75,28,75,24">
+
+
+                        <Grid.RowDefinitions>
+
+                            <RowDefinition Height="Auto"/>
+
+                            <RowDefinition Height="*"/>
+
+                            <RowDefinition Height="Auto"/>
+
+                        </Grid.RowDefinitions>
+
+
+                        <!-- ========================================= -->
+                        <!-- LOGO + TIÊU ĐỀ -->
+                        <!-- ========================================= -->
+
+                        <StackPanel Grid.Row="0"
+                                    HorizontalAlignment="Center">
+
+
+                            <!-- LOGO -->
+
+                            <Border Width="105"
+                                    Height="105"
+                                    CornerRadius="53"
+                                    Background="#FFFFFF"
+                                    HorizontalAlignment="Center">
+
+
+                                <Image Source="avares://ShopHoa/Assets/Logo.png"
+                                       Width="96"
+                                       Height="96"
+                                       Stretch="Uniform"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+
+                            </Border>
+
+
+                            <!-- TIÊU ĐỀ -->
+
+                            <TextBlock Text="Đăng nhập"
+                                       FontSize="27"
+                                       FontWeight="Bold"
+                                       Foreground="#17352E"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,9,0,0"/>
+
+
+                            <TextBlock Text="Chào mừng bạn quay trở lại!"
+                                       FontSize="12"
+                                       Foreground="#87958F"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,4,0,0"/>
+
+
+                            <!-- ĐƯỜNG TRANG TRÍ -->
+
+                            <Border Width="38"
+                                    Height="3"
+                                    Background="#087F6E"
+                                    CornerRadius="2"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,12,0,0"/>
+
+                        </StackPanel>
+
+
+                        <!-- ========================================= -->
+                        <!-- FORM -->
+                        <!-- ========================================= -->
+
+                        <StackPanel Grid.Row="1"
+                                    Width="390"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+
+
+                            <!-- ================================= -->
+                            <!-- TÊN ĐĂNG NHẬP -->
+                            <!-- ================================= -->
+
+                            <TextBlock Text="Tên đăng nhập"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="#334640"
+                                       Margin="0,0,0,7"/>
+
+
+                            <TextBox Classes="loginInput"
+                                     Text="{Binding TenDangNhap}"
+                                     Watermark="Nhập tên đăng nhập"/>
+
+
+                            <!-- ================================= -->
+                            <!-- MẬT KHẨU -->
+                            <!-- ================================= -->
+
+                            <TextBlock Text="Mật khẩu"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="#334640"
+                                       Margin="0,20,0,7"/>
+
+
+                            <TextBox Classes="loginInput"
+                                     PasswordChar="●"
+                                     Text="{Binding MatKhau}"
+                                     Watermark="Nhập mật khẩu"/>
+
+
+                            <!-- ================================= -->
+                            <!-- GHI NHỚ / QUÊN MẬT KHẨU -->
+                            <!-- ================================= -->
+
+                            <Grid Margin="0,12,0,0">
+
+
+                                <Grid.ColumnDefinitions>
+
+                                    <ColumnDefinition Width="*"/>
+
+                                    <ColumnDefinition Width="Auto"/>
+
+                                </Grid.ColumnDefinitions>
+
+
+                                <CheckBox Grid.Column="0"
+                                          Content="Ghi nhớ đăng nhập"
+                                          IsChecked="{Binding GhiNhoDangNhap}"
+                                          HorizontalAlignment="Left"/>
+
+
+                                <Button Grid.Column="1"
+                                        Classes="linkButton"
+                                        Content="Quên mật khẩu?"
+                                        Command="{Binding QuenMatKhauCommand}"
+                                        HorizontalAlignment="Right"/>
+
+                            </Grid>
+
+
+                            <!-- ================================= -->
+                            <!-- THÔNG BÁO -->
+                            <!-- ================================= -->
+
+                            <TextBlock Text="{Binding ThongBao}"
+                                       Foreground="#C94A3D"
+                                       FontSize="11"
+                                       TextWrapping="Wrap"
+                                       MaxWidth="390"
+                                       Margin="0,10,0,0"/>
+
+
+                            <!-- ================================= -->
+                            <!-- NÚT ĐĂNG NHẬP -->
+                            <!-- ================================= -->
+
+                            <Button Classes="loginButton"
+                                    Content="ĐĂNG NHẬP    →"
+                                    Command="{Binding DangNhapCommand}"
+                                    CommandParameter="{Binding $parent[Window]}"
+                                    IsDefault="True"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="0,18,0,0"/>
+
+                            <StackPanel IsVisible="{Binding DangXuLy}"
+                                        Orientation="Horizontal"
+                                        HorizontalAlignment="Center"
+                                        Spacing="8"
+                                        Margin="0,10,0,0">
+
+                                <ProgressBar Width="72"
+                                             Height="3"
+                                             IsIndeterminate="True"
+                                             VerticalAlignment="Center"/>
+
+                                <TextBlock Text="Đang đăng nhập..."
+                                           Foreground="#087F6E"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"/>
+
+                            </StackPanel>
+
+
+                            <!-- ================================= -->
+                            <!-- TRẠNG THÁI -->
+                            <!-- ================================= -->
+
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center"
+                                        Margin="0,15,0,0">
+
+
+                                <Ellipse Width="7"
+                                         Height="7"
+                                         Fill="#12B76A"
+                                         VerticalAlignment="Center"/>
+
+
+                                <TextBlock Text="  Hệ thống sẵn sàng"
+                                           Foreground="#667085"
+                                           FontSize="11"
+                                           VerticalAlignment="Center"/>
+
+                            </StackPanel>
+
+                        </StackPanel>
+
+
+                        <!-- ========================================= -->
+                        <!-- FOOTER -->
+                        <!-- ========================================= -->
+
+                        <Grid Grid.Row="2">
+
+    <Grid.ColumnDefinitions>
+
+        <ColumnDefinition Width="*"/>
+
+        <ColumnDefinition Width="Auto"/>
+
+        <ColumnDefinition Width="Auto"/>
+
+        <ColumnDefinition Width="Auto"/>
+
+    </Grid.ColumnDefinitions>
+
+
+    <!-- THÔNG TIN -->
+
+    <TextBlock Text="VỰA HOA NHÀ HUY  •  Quản lý cửa hàng"
+               Foreground="#98A2B3"
+               FontSize="10"
+               VerticalAlignment="Center"/>
+
+
+    <!-- XÓA THÔNG TIN ĐĂNG NHẬP ĐÃ GHI NHỚ (chỉ hiện khi có dữ liệu) -->
+
+    <Button Grid.Column="1"
+            Classes="exitButton"
+            Content="Xóa ghi nhớ"
+            IsVisible="{Binding CoThongTinDaGhiNho}"
+            Command="{Binding XoaThongTinDaGhiNhoCommand}"
+            Margin="0,0,12,0"/>
+
+
+    <!-- CÀI ĐẶT DATABASE -->
+
+    <Button Grid.Column="2"
+            Classes="exitButton"
+            Content="⚙  Cài đặt"
+            Click="OnDatabaseSettingsClick"
+            Margin="0,0,12,0"/>
+
+
+    <!-- THOÁT -->
+
+    <Button Grid.Column="3"
+            Classes="exitButton"
+            Content="Thoát"
+            Command="{Binding ThoatCommand}"
+            CommandParameter="{Binding $parent[Window]}"/>
+
+</Grid>
+
+                    </Grid>
+
+                </Border>
+
+            </Grid>
+
+        </Grid>
+
+    </Border>
+
+</Window>

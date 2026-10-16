@@ -1,0 +1,212 @@
+<Window xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  x:Class="ShopHoa.Views.ProductEditorWindow"
+  Width="620"
+  Height="820"
+  MinWidth="560"
+  Title="Sản phẩm"
+  WindowStartupLocation="CenterOwner"
+  Background="#F7FAF9"
+  RequestedThemeVariant="Light">
+  <Window.Styles>
+    <Style Selector="Window">
+      <Setter Property="Background" Value="#F7FAF9" />
+      <Setter Property="Foreground" Value="#263B35" />
+    </Style>
+
+    <Style Selector="TextBox">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="Foreground" Value="#263B35" />
+      <Setter Property="BorderBrush" Value="#C9DCD6" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="7" />
+      <Setter Property="Margin" Value="0,5,0,14" />
+      <Setter Property="Padding" Value="10,8" />
+    </Style>
+
+    <Style Selector="TextBox:pointerover">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="Foreground" Value="#263B35" />
+      <Setter Property="BorderBrush" Value="#8CCFC0" />
+    </Style>
+
+    <Style Selector="TextBox:focus">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="Foreground" Value="#263B35" />
+      <Setter Property="BorderBrush" Value="#087F6E" />
+    </Style>
+
+    <Style Selector="TextBox /template/ Border#PART_BorderElement">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="BorderBrush" Value="#C9DCD6" />
+    </Style>
+
+    <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="BorderBrush" Value="#087F6E" />
+    </Style>
+
+    <Style Selector="TextBox /template/ ScrollViewer#PART_ContentHost">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="Foreground" Value="#263B35" />
+    </Style>
+
+    <Style Selector="TextBlock.label">
+      <Setter Property="Foreground" Value="#344B45" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style Selector="CheckBox">
+      <Setter Property="Foreground" Value="#263B35" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style Selector="ComboBox">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="Foreground" Value="#263B35" />
+      <Setter Property="BorderBrush" Value="#C9DCD6" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="7" />
+      <Setter Property="Padding" Value="10,8" />
+      <Setter Property="Margin" Value="0,5,0,14" />
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#087F6E" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="BorderBrush" Value="#087F6E" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="16,10" />
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+    <Style Selector="Button.primary:pointerover">
+      <Setter Property="Background" Value="#056B5D" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+
+    <Style Selector="Button.secondary">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="Foreground" Value="#344B45" />
+      <Setter Property="BorderBrush" Value="#C9DCD6" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Padding" Value="16,10" />
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+    <Style Selector="Button.secondary:pointerover">
+      <Setter Property="Background" Value="#E8F5F1" />
+      <Setter Property="Foreground" Value="#075C50" />
+      <Setter Property="BorderBrush" Value="#8CCFC0" />
+    </Style>
+
+    <Style Selector="Button /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="TextElement.Foreground"
+        Value="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}" />
+    </Style>
+  </Window.Styles>
+
+  <ScrollViewer>
+    <StackPanel Margin="28,24">
+      <TextBlock x:Name="TieuDeTextBlock" Text="Thông tin sản phẩm" FontSize="23" FontWeight="Bold" Foreground="#163F38"
+        Margin="0,0,0,4" />
+      <TextBlock x:Name="MoTaTextBlock" Text="Nhập thông tin để tạo sản phẩm mới trong kho hàng."
+        Foreground="#6B7D77" FontSize="13" Margin="0,0,0,20" />
+
+      <TextBlock Classes="label" Text="Mã sản phẩm" />
+      <Border Background="#E8F5F1" BorderBrush="#B8DCD2" BorderThickness="1" CornerRadius="7"
+        Padding="10,9" Margin="0,5,0,14">
+        <TextBlock x:Name="MaSanPhamTextBlock" Foreground="#087F6E" FontWeight="SemiBold" />
+      </Border>
+
+      <TextBlock Classes="label" Text="Tên sản phẩm *" />
+      <TextBox x:Name="TenSanPhamTextBox" Watermark="Tên hoa hoặc phụ kiện" />
+
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+        <StackPanel>
+          <TextBlock Classes="label" Text="Nhóm hàng" />
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6" Margin="0,5,0,14">
+            <ComboBox x:Name="NhomSanPhamComboBox" PlaceholderText="Chọn nhóm hàng"
+              HorizontalAlignment="Stretch" Margin="0" />
+            <Button x:Name="ThemNhomHangButton" Grid.Column="1" Classes="primary" Content="＋"
+              ToolTip.Tip="Thêm nhóm hàng mới"
+              Width="38" Height="38" Padding="0"
+              HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+              FontSize="16" FontWeight="Bold"
+              Click="ThemNhomHangButton_OnClick" />
+          </Grid>
+        </StackPanel>
+        <StackPanel Grid.Column="1">
+          <TextBlock Classes="label" Text="ĐVT" />
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6" Margin="0,5,0,14">
+            <ComboBox x:Name="DonViTinhComboBox" PlaceholderText="Chọn đơn vị"
+              HorizontalAlignment="Stretch" Margin="0" />
+            <Button x:Name="ThemDonViTinhButton" Grid.Column="1" Classes="primary" Content="＋"
+              ToolTip.Tip="Thêm đơn vị tính mới"
+              Width="38" Height="38" Padding="0"
+              HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+              FontSize="16" FontWeight="Bold"
+              Click="ThemDonViTinhButton_OnClick" />
+          </Grid>
+        </StackPanel>
+      </Grid>
+
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+        <StackPanel>
+          <TextBlock Classes="label" Text="Giá bán" />
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <TextBox x:Name="GiaBanTextBox"
+              Text="0"
+              TextAlignment="Right"
+              Margin="0,5,0,0"
+              Watermark="Nhập số tiền, ví dụ 50.000" />
+            <TextBlock Grid.Column="1"
+              Text="đ"
+              Foreground="#6B7D77"
+              FontSize="13"
+              VerticalAlignment="Center"
+              Margin="0,5,0,14" />
+          </Grid>
+          <TextBlock x:Name="LoiGiaBanTextBlock"
+            Foreground="#C0392B"
+            FontSize="12"
+            TextWrapping="Wrap"
+            Margin="2,0,0,6" />
+        </StackPanel>
+        <StackPanel Grid.Column="1">
+          <TextBlock Classes="label" Text="Giá vốn" />
+          <TextBox x:Name="GiaVonTextBox"
+            Text="0"
+            TextAlignment="Right" />
+        </StackPanel>
+      </Grid>
+
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+        <StackPanel>
+          <TextBlock Classes="label" Text="Tồn kho" />
+          <TextBox x:Name="TonKhoTextBox" Text="0" />
+        </StackPanel>
+        <StackPanel Grid.Column="1">
+          <TextBlock Classes="label" Text="KH đặt" />
+          <TextBox x:Name="KhachDatTextBox" Text="0" />
+        </StackPanel>
+      </Grid>
+
+      <TextBlock Classes="label" Text="Vị trí kho" />
+      <TextBox x:Name="ViTriKhoTextBox" Watermark="Ví dụ: Kệ A1" />
+
+      <TextBlock Classes="label" Text="Loại hàng" />
+      <TextBox x:Name="LoaiHangTextBox" Watermark="Ví dụ: Hàng hóa" />
+
+      <TextBlock Classes="label" Text="Dự kiến hết hàng" />
+      <TextBox x:Name="DuKienHetHangTextBox" Watermark="Ví dụ: 15 ngày" />
+
+      <TextBlock x:Name="ErrorTextBlock" Foreground="#C0392B" TextWrapping="Wrap" Margin="0,0,0,12" />
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,4,0,0">
+        <Button x:Name="CancelButton" Classes="secondary" Content="Hủy" Click="CancelButton_OnClick" />
+        <Button x:Name="SaveButton" Classes="primary" Content="Lưu sản phẩm" Click="SaveButton_OnClick" />
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</Window>

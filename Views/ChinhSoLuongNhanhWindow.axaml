@@ -1,0 +1,227 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="ShopHoa.Views.ChinhSoLuongNhanhWindow"
+        Width="460"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Title="Chỉnh sửa số lượng tồn kho"
+        Background="#F4F7F6">
+
+    <Window.Styles>
+        <!-- Ô NHẬP SỐ LƯỢNG -->
+        <Style Selector="TextBox.soLuongInput">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="#163F38"/>
+            <Setter Property="BorderBrush" Value="#D8E5E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="CaretBrush" Value="#087F6E"/>
+        </Style>
+
+        <Style Selector="TextBox.soLuongInput:pointerover">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="#163F38"/>
+            <Setter Property="BorderBrush" Value="#087F6E"/>
+        </Style>
+
+        <Style Selector="TextBox.soLuongInput:focus">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="#163F38"/>
+            <Setter Property="BorderBrush" Value="#087F6E"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+        </Style>
+
+        <Style Selector="TextBox.soLuongInput /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#D8E5E0"/>
+        </Style>
+
+        <Style Selector="TextBox.soLuongInput:focus /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#087F6E"/>
+        </Style>
+
+        <!-- CHIP GỢI Ý NHANH -->
+        <Style Selector="Button.presetChip">
+            <Setter Property="Background" Value="#F0F7F5"/>
+            <Setter Property="Foreground" Value="#087F6E"/>
+            <Setter Property="BorderBrush" Value="#C2DDD6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,5"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style Selector="Button.presetChip:pointerover">
+            <Setter Property="Background" Value="#087F6E"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#087F6E"/>
+        </Style>
+
+        <!-- NÚT HỦY -->
+        <Style Selector="Button.cancelButton">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="#52645E"/>
+            <Setter Property="BorderBrush" Value="#D8E5E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="16,9"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style Selector="Button.cancelButton:pointerover">
+            <Setter Property="Background" Value="#F4F7F6"/>
+            <Setter Property="Foreground" Value="#52645E"/>
+            <Setter Property="BorderBrush" Value="#D8E5E0"/>
+        </Style>
+
+        <!-- NÚT LƯU -->
+        <Style Selector="Button.saveButton">
+            <Setter Property="Background" Value="#087F6E"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#087F6E"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="18,9"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Button.saveButton:pointerover">
+            <Setter Property="Background" Value="#06695B"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+        </Style>
+    </Window.Styles>
+
+    <Border Background="#FFFFFF"
+            CornerRadius="16"
+            BorderBrush="#D8E5E0"
+            BorderThickness="1"
+            Padding="24"
+            Margin="10">
+
+        <StackPanel Spacing="14">
+
+            <!-- HEADER VÀ TRẠNG THÁI HẾT HÀNG -->
+            <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                <TextBlock Text="Cập nhật tồn kho nhanh"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Foreground="#163F38"
+                           VerticalAlignment="Center"/>
+
+                <Border Grid.Column="1"
+                        Background="#FFEEE2"
+                        CornerRadius="4"
+                        Padding="8,4"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="Hết hàng"
+                               Foreground="#E53935"
+                               FontWeight="Bold"
+                               FontSize="12"/>
+                </Border>
+            </Grid>
+
+            <!-- TÊN SẢN PHẨM & MÃ -->
+            <Border Background="#F9FBFA"
+                    CornerRadius="8"
+                    BorderBrush="#E5ECE9"
+                    BorderThickness="1"
+                    Padding="12,10">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalAlignment="Center">
+                    <Border Width="36" Height="36" CornerRadius="6" Background="#DFF5F0" VerticalAlignment="Center">
+                        <TextBlock Text="📦" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                        <TextBlock x:Name="TenSanPhamText"
+                                   Text="Tên sản phẩm"
+                                   FontWeight="Bold"
+                                   FontSize="15"
+                                   Foreground="#163F38"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock x:Name="MaSanPhamText"
+                                   Text="Mã: SP0001"
+                                   FontSize="12"
+                                   Foreground="#61736E"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- NHÃN VÀ Ô NHẬP SỐ LƯỢNG MỚI -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Số lượng tồn kho mới:"
+                           FontWeight="SemiBold"
+                           FontSize="14"
+                           Foreground="#263B35"/>
+
+                <TextBox x:Name="SoLuongTextBox"
+                         Classes="soLuongInput"
+                         Watermark="Nhập số lượng tồn kho mới..."
+                         Height="44"
+                         HorizontalContentAlignment="Left"
+                         VerticalContentAlignment="Center"/>
+
+                <!-- THÔNG BÁO LỖI NẾU CÓ -->
+                <TextBlock x:Name="LoiTextBlock"
+                           Foreground="#E53935"
+                           FontSize="12"
+                           IsVisible="False"
+                           Margin="2,2,0,0"/>
+            </StackPanel>
+
+            <!-- CHIP GỢI Ý SỐ LƯỢNG NHANH -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Chọn nhanh:"
+                           FontSize="12"
+                           Foreground="#61736E"/>
+
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2,0,0">
+                    <Button Content="5" Tag="5" Classes="presetChip" Click="QuickSetClicked"/>
+                    <Button Content="10" Tag="10" Classes="presetChip" Click="QuickSetClicked"/>
+                    <Button Content="20" Tag="20" Classes="presetChip" Click="QuickSetClicked"/>
+                    <Button Content="50" Tag="50" Classes="presetChip" Click="QuickSetClicked"/>
+                    <Button Content="100" Tag="100" Classes="presetChip" Click="QuickSetClicked"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- CHECKBOX THÊM VÀO GIỎ HÀNG NGAY -->
+            <CheckBox x:Name="ThemVaoGioHangCheckBox"
+                      IsChecked="True"
+                      Content="Thêm sản phẩm vào giỏ hàng ngay sau khi cập nhật"
+                      Foreground="#263B35"
+                      FontSize="13"
+                      Margin="0,4,0,4"/>
+
+            <!-- NÚT ĐIỀU KHIỂN HỦY / LƯU -->
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Margin="0,8,0,0">
+                <Button Grid.Column="1"
+                        Content="Hủy"
+                        Classes="cancelButton"
+                        Width="90"
+                        HorizontalContentAlignment="Center"
+                        Click="HuyClicked"/>
+
+                <Button Grid.Column="2"
+                        Content="✓ Lưu &amp; Bán ngay"
+                        Classes="saveButton"
+                        MinWidth="140"
+                        HorizontalContentAlignment="Center"
+                        Click="LuuClicked"/>
+            </Grid>
+
+        </StackPanel>
+
+    </Border>
+
+</Window>

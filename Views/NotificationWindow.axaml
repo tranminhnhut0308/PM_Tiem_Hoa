@@ -1,0 +1,74 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="ShopHoa.Views.NotificationWindow"
+        Title="Thông báo"
+        Width="420"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        RequestedThemeVariant="Light"
+        Background="White">
+
+  <Window.Styles>
+    <Style Selector="Button.primaryBtn">
+      <Setter Property="Background" Value="#0F766E" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="28,10" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.primaryBtn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#0D9488" />
+      <Setter Property="TextBlock.Foreground" Value="White" />
+    </Style>
+  </Window.Styles>
+
+  <Border Padding="28,24" Background="White">
+    <StackPanel Spacing="16" HorizontalAlignment="Center">
+      
+      <!-- Icon Container -->
+      <Border x:Name="IconContainer"
+              Width="56" Height="56"
+              CornerRadius="28"
+              Background="#ECFDF5"
+              HorizontalAlignment="Center">
+        <PathIcon x:Name="IconPath"
+                  Data="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
+                  Width="24" Height="24"
+                  Foreground="#059669"
+                  VerticalAlignment="Center"
+                  HorizontalAlignment="Center" />
+      </Border>
+
+      <!-- Title & Message -->
+      <StackPanel Spacing="6" HorizontalAlignment="Center">
+        <TextBlock x:Name="TitleTextBlock"
+                   Text="Thành công"
+                   FontSize="18"
+                   FontWeight="Bold"
+                   Foreground="#0F172A"
+                   TextAlignment="Center" />
+
+        <TextBlock x:Name="MessageTextBlock"
+                   Text="Tạo tài khoản mới thành công!"
+                   FontSize="14"
+                   Foreground="#475569"
+                   TextWrapping="Wrap"
+                   MaxWidth="360"
+                   LineHeight="22"
+                   TextAlignment="Center" />
+      </StackPanel>
+
+      <!-- Action Button -->
+      <Button x:Name="OkButton"
+              Classes="primaryBtn"
+              Content="Đồng ý"
+              HorizontalAlignment="Center"
+              Margin="0,6,0,0"
+              Click="OkButton_Click" />
+    </StackPanel>
+  </Border>
+</Window>

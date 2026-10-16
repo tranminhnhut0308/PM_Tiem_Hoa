@@ -1,0 +1,190 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="using:ShopHoa.Models"
+        x:Class="ShopHoa.Views.HoaDonImportResultWindow"
+        Width="900"
+        SizeToContent="Height"
+        MinHeight="440"
+        MaxHeight="760"
+        Title="Kết quả nhập hóa đơn"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F8F7"
+        CanResize="True">
+  <Window.Styles>
+    <Style Selector="Button">
+      <Setter Property="Padding" Value="24,10"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#087F6E"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderBrush" Value="#087F6E"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style Selector="Button.primary:pointerover">
+      <Setter Property="Background" Value="#056B5D"/>
+    </Style>
+
+    <Style Selector="Button.secondary">
+      <Setter Property="Background" Value="#FFFFFF"/>
+      <Setter Property="Foreground" Value="#263B35"/>
+      <Setter Property="BorderBrush" Value="#C9DCD6"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style Selector="Button.secondary:pointerover">
+      <Setter Property="Background" Value="#E8F5F1"/>
+      <Setter Property="BorderBrush" Value="#8CCFC0"/>
+    </Style>
+
+    <Style Selector="TextBlock.headerCell">
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="#163F38"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style Selector="TextBlock.cell">
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="#263B35"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+  </Window.Styles>
+
+  <Border Margin="16"
+          Background="#FFFFFF"
+          BorderBrush="#D7E7E2"
+          BorderThickness="1"
+          CornerRadius="14">
+    <DockPanel Margin="24">
+
+      <!-- ======== NÚT ĐÓNG ======== -->
+      <Button DockPanel.Dock="Bottom"
+              Classes="primary"
+              Content="Đóng"
+              HorizontalAlignment="Right"
+              Margin="0,16,0,0"
+              Click="DongButton_OnClick"/>
+
+      <!-- ======== XUẤT FILE LỖI ======== -->
+      <StackPanel DockPanel.Dock="Bottom"
+                  Orientation="Horizontal"
+                  HorizontalAlignment="Left"
+                  Spacing="10"
+                  Margin="0,16,0,0">
+        <Button x:Name="XuatLoiButton"
+                Classes="secondary"
+                Content="📤 Xuất danh sách lỗi ra Excel"
+                Click="XuatLoiButton_OnClick"/>
+
+        <TextBlock x:Name="LoiGhiChuTextBlock"
+                   VerticalAlignment="Center"
+                   FontSize="12"
+                   Foreground="#61736E"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+
+      <!-- ======== TIÊU ĐỀ ======== -->
+      <StackPanel Spacing="10">
+        <TextBlock Text="Kết quả nhập hóa đơn"
+                   FontSize="20"
+                   FontWeight="Bold"
+                   Foreground="#163F38"/>
+
+        <TextBlock x:Name="TenFileTextBlock"
+                   TextWrapping="Wrap"
+                   FontSize="13"
+                   Foreground="#5A7B72"/>
+
+        <Border Background="#F0F8F5"
+                BorderBrush="#CFE3DD"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="16,14">
+          <TextBlock x:Name="TomTatTextBlock"
+                     FontSize="15"
+                     Foreground="#163F38"
+                     LineHeight="24"/>
+        </Border>
+      </StackPanel>
+
+      <!-- ======== CẢNH BÁO ======== -->
+      <Border x:Name="CanhBaoBorder"
+              Margin="0,12,0,0"
+              Background="#FFF7E8"
+              BorderBrush="#F0D9AE"
+              BorderThickness="1"
+              CornerRadius="8"
+              Padding="12,10"
+              IsVisible="False">
+        <StackPanel Spacing="6">
+          <TextBlock Text="Cảnh báo"
+                     FontWeight="Bold"
+                     FontSize="13"
+                     Foreground="#7A5210"/>
+          <ItemsControl x:Name="CanhBaoItems">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding}"
+                           TextWrapping="Wrap"
+                           FontSize="12"
+                           Foreground="#7A5210"
+                           Margin="0,2"/>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <!-- ======== LỖI ======== -->
+      <Border x:Name="LoiBorder"
+              Margin="0,12,0,0"
+              Background="#FEF2F2"
+              BorderBrush="#F3C6C6"
+              BorderThickness="1"
+              CornerRadius="8"
+              Padding="12,10"
+              IsVisible="False">
+        <DockPanel>
+          <TextBlock x:Name="LoiTieudeTextBlock"
+                     DockPanel.Dock="Top"
+                     FontWeight="Bold"
+                     FontSize="13"
+                     Foreground="#A32020"
+                     Margin="0,0,0,8"/>
+
+          <ScrollViewer MaxHeight="220" VerticalScrollBarVisibility="Auto">
+            <ItemsControl x:Name="LoiItems" x:DataType="models:HoaDonImportError">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="models:HoaDonImportError">
+                  <Grid ColumnDefinitions="80,170,*" Margin="0,2">
+                    <TextBlock Grid.Column="0"
+                               FontSize="12"
+                               Foreground="#A32020"
+                               Text="{Binding SoDongExcel}" />
+                    <TextBlock Grid.Column="1"
+                               FontSize="12"
+                               Foreground="#A32020"
+                               Text="{Binding MaHoaDon}"
+                               Margin="6,0" />
+                    <TextBlock Grid.Column="2"
+                               FontSize="12"
+                               Foreground="#263B35"
+                               Text="{Binding LyDo}"
+                               TextWrapping="Wrap" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
+    </DockPanel>
+  </Border>
+</Window>

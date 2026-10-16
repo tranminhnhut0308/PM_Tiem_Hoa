@@ -1,0 +1,9 @@
+{
+  "name": "Vựa Hoa Nhà Huy - Báo Cáo & Tổng Quan",
+  "short_name": "Vựa Hoa",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#064E3B",
+  "theme_color": "#087F6E",
+  "orientation": "portrait-primary"
+}

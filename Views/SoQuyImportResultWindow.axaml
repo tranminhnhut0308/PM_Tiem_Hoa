@@ -1,0 +1,198 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="using:ShopHoa.Models"
+        x:Class="ShopHoa.Views.SoQuyImportResultWindow"
+        x:DataType="models:SoQuyImportResult"
+        Width="900"
+        SizeToContent="Height"
+        MinHeight="460"
+        MaxHeight="780"
+        Title="Kết quả nhập sổ quỹ"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F8F7"
+        CanResize="True">
+
+  <Window.Styles>
+    <Style Selector="Button">
+      <Setter Property="Padding" Value="18,10" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#087F6E" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="BorderBrush" Value="#087F6E" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style Selector="Button.primary:pointerover">
+      <Setter Property="Background" Value="#056B5D" />
+    </Style>
+
+    <Style Selector="Button.secondary">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="Foreground" Value="#263B35" />
+      <Setter Property="BorderBrush" Value="#C9DCD6" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style Selector="Button.secondary:pointerover">
+      <Setter Property="Background" Value="#E8F5F1" />
+      <Setter Property="BorderBrush" Value="#8CCFC0" />
+    </Style>
+
+    <Style Selector="TextBlock.statNhan">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#667A74" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="TextBlock.statGiaTri">
+      <Setter Property="FontSize" Value="22" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="#163F38" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="Margin" Value="0,2,0,0" />
+    </Style>
+  </Window.Styles>
+
+  <Border Margin="16"
+          Background="#FFFFFF"
+          BorderBrush="#D7E7E2"
+          BorderThickness="1"
+          CornerRadius="14">
+
+    <DockPanel Margin="24">
+
+      <!-- ======== NÚT XUỐNG ======== -->
+      <StackPanel DockPanel.Dock="Bottom"
+                  Orientation="Horizontal"
+                  HorizontalAlignment="Right"
+                  Spacing="10"
+                  Margin="0,18,0,0">
+        <Button x:Name="XuatLoiButton"
+                Classes="secondary"
+                Content="Xuất danh sách lỗi"
+                Click="XuatLoiButton_OnClick" />
+        <Button Classes="primary"
+                Content="Đóng"
+                Click="DongButton_OnClick" />
+      </StackPanel>
+
+      <!-- ======== TIÊU ĐỀ ======== -->
+      <StackPanel DockPanel.Dock="Top" Spacing="4">
+        <TextBlock x:Name="TieudeTextBlock"
+                   FontSize="22"
+                   FontWeight="Bold"
+                   Foreground="#163F38" />
+        <TextBlock x:Name="TieudeFileTextBlock"
+                   FontSize="13"
+                   Foreground="#667A74"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+
+      <!-- ======== THẺ TỔNG QUAN ======== -->
+      <Grid DockPanel.Dock="Top"
+            ColumnDefinitions="*,*,*,*,*"
+            ColumnSpacing="10"
+            Margin="0,16,0,0">
+        <Border Grid.Column="0" Background="#F7FAF9" CornerRadius="10" Padding="10">
+          <StackPanel>
+            <TextBlock Classes="statNhan" Text="THÊM MỚI" />
+            <TextBlock x:Name="ThemMoiTextBlock" Classes="statGiaTri" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="1" Background="#F7FAF9" CornerRadius="10" Padding="10">
+          <StackPanel>
+            <TextBlock Classes="statNhan" Text="CẬP NHẬT" />
+            <TextBlock x:Name="CapNhatTextBlock" Classes="statGiaTri" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="2" Background="#F7FAF9" CornerRadius="10" Padding="10">
+          <StackPanel>
+            <TextBlock Classes="statNhan" Text="BỎ QUA" />
+            <TextBlock x:Name="BoQuaTextBlock" Classes="statGiaTri" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="3" Background="#F7FAF9" CornerRadius="10" Padding="10">
+          <StackPanel>
+            <TextBlock Classes="statNhan" Text="LỖI" />
+            <TextBlock x:Name="LoiTextBlock" Classes="statGiaTri" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="4" Background="#F7FAF9" CornerRadius="10" Padding="10">
+          <StackPanel>
+            <TextBlock Classes="statNhan" Text="THỜI GIAN" />
+            <TextBlock x:Name="ThoiGianTextBlock" Classes="statGiaTri" />
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <!-- ======== TÓM TẮT ======== -->
+      <Border DockPanel.Dock="Top"
+              Background="#F2F9F7"
+              BorderBrush="#D7E7E2"
+              BorderThickness="1"
+              CornerRadius="10"
+              Padding="14"
+              Margin="0,16,0,0">
+        <StackPanel Spacing="4">
+          <TextBlock Text="Tóm tắt"
+                     FontSize="13"
+                     FontWeight="SemiBold"
+                     Foreground="#163F38" />
+          <TextBlock x:Name="TomTatTextBlock"
+                     FontSize="13"
+                     Foreground="#263B35"
+                     TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+
+      <!-- ======== CẢNH BÁO ======== -->
+      <Border x:Name="CanhBaoBorder"
+              DockPanel.Dock="Top"
+              Background="#FFF9EC"
+              BorderBrush="#F0D9A0"
+              BorderThickness="1"
+              CornerRadius="10"
+              Padding="14"
+              Margin="0,16,0,0">
+        <StackPanel Spacing="6">
+          <TextBlock Text="Cảnh báo"
+                     FontSize="13"
+                     FontWeight="SemiBold"
+                     Foreground="#8A5A00" />
+          <ItemsControl x:Name="CanhBaoItems" />
+        </StackPanel>
+      </Border>
+
+      <!-- ======== DANH SÁCH LỖI ======== -->
+      <Border x:Name="LoiBorder"
+              DockPanel.Dock="Top"
+              Background="#FEF3F2"
+              BorderBrush="#F5C2BE"
+              BorderThickness="1"
+              CornerRadius="10"
+              Padding="14"
+              Margin="0,16,0,0">
+        <StackPanel Spacing="6">
+          <TextBlock x:Name="LoiTieudeTextBlock"
+                     FontSize="13"
+                     FontWeight="SemiBold"
+                     Foreground="#A32020" />
+          <ScrollViewer MaxHeight="200">
+            <ItemsControl x:Name="LoiItems" />
+          </ScrollViewer>
+          <TextBlock x:Name="LoiGhiChuTextBlock"
+                     FontSize="12"
+                     Foreground="#667A74"
+                     TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+    </DockPanel>
+  </Border>
+</Window>

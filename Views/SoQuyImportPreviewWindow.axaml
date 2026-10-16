@@ -1,0 +1,309 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="using:ShopHoa.Models"
+        x:Class="ShopHoa.Views.SoQuyImportPreviewWindow"
+        x:DataType="models:SoQuyImportPreview"
+        Width="1180"
+        SizeToContent="Height"
+        MinHeight="640"
+        MaxHeight="860"
+        Title="Xem trước trước khi nhập sổ quỹ"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F8F7"
+        CanResize="True">
+
+  <Window.Styles>
+    <Style Selector="Button">
+      <Setter Property="Padding" Value="18,10" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#087F6E" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="BorderBrush" Value="#087F6E" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style Selector="Button.primary:pointerover">
+      <Setter Property="Background" Value="#056B5D" />
+    </Style>
+
+    <Style Selector="Button.secondary">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="Foreground" Value="#263B35" />
+      <Setter Property="BorderBrush" Value="#C9DCD6" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style Selector="Button.secondary:pointerover">
+      <Setter Property="Background" Value="#E8F5F1" />
+      <Setter Property="BorderBrush" Value="#8CCFC0" />
+    </Style>
+
+    <Style Selector="Button.radio">
+      <Setter Property="Padding" Value="12,8" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#C9DCD6" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="FontWeight" Value="Normal" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Foreground" Value="#263B35" />
+    </Style>
+
+    <Style Selector="Button.radio:checked">
+      <Setter Property="Background" Value="#E3F5F0" />
+      <Setter Property="BorderBrush" Value="#087F6E" />
+      <Setter Property="Foreground" Value="#163F38" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="TextBlock.statNhan">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#667A74" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="TextBlock.statGiaTri">
+      <Setter Property="FontSize" Value="19" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="#163F38" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="Margin" Value="0,2,0,0" />
+    </Style>
+
+    <Style Selector="TextBlock.headerCell">
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="#163F38" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="TextBlock.cell">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="#263B35" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="TextBlock.soLoi">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="#A32020" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+  </Window.Styles>
+
+  <Border Margin="16"
+          Background="#FFFFFF"
+          BorderBrush="#D7E7E2"
+          BorderThickness="1"
+          CornerRadius="14">
+
+    <DockPanel Margin="24">
+
+      <!-- ======== NÚT XUỐNG ======== -->
+      <StackPanel DockPanel.Dock="Bottom"
+                  Orientation="Horizontal"
+                  HorizontalAlignment="Right"
+                  Spacing="10"
+                  Margin="0,16,0,0">
+        <Button Classes="secondary"
+                Content="Hủy"
+                Click="HuyButton_OnClick" />
+        <Button x:Name="TienHanhNhapButton"
+                Classes="primary"
+                Content="Tiến hành nhập"
+                Click="TienHanhNhapButton_OnClick" />
+      </StackPanel>
+
+      <!-- ======== XỬ LÝ DÒNG TRÙNG ======== -->
+      <StackPanel x:Name="TrungBlock"
+                  DockPanel.Dock="Bottom"
+                  Spacing="10"
+                  Margin="0,18,0,0">
+        <TextBlock Text="Dòng trùng mã phiếu"
+                   FontSize="14"
+                   FontWeight="SemiBold"
+                   Foreground="#163F38" />
+        <TextBlock Text="Các dòng có mã phiếu đã tồn tại trong database hoặc bị lặp trong chính file này sẽ được xử lý theo lựa chọn của bạn:"
+                   FontSize="12"
+                   Foreground="#667A74"
+                   TextWrapping="Wrap" />
+
+        <StackPanel Spacing="8">
+          <RadioButton x:Name="GiuDuLieuCuRadio"
+                       Classes="radio"
+                       GroupName="XuLyTrung"
+                       IsChecked="True"
+                       Checked="XuLyTrungRadio_OnChecked">
+            <TextBlock Text="Giữ dữ liệu cũ - bỏ qua dòng trùng, không thay đổi phiếu đang có" />
+          </RadioButton>
+
+          <RadioButton x:Name="ThayTheRadio"
+                       Classes="radio"
+                       GroupName="XuLyTrung"
+                       Checked="XuLyTrungRadio_OnChecked">
+            <TextBlock Text="Thay thế - cập nhật phiếu đang có bằng giá trị trong file" />
+          </RadioButton>
+
+          <RadioButton x:Name="BoQuaRadio"
+                       Classes="radio"
+                       GroupName="XuLyTrung"
+                       Checked="XuLyTrungRadio_OnChecked">
+            <TextBlock Text="Bỏ qua - giữ dữ liệu cũ nhưng không tính dòng trùng vào báo cáo nhập" />
+          </RadioButton>
+        </StackPanel>
+      </StackPanel>
+
+      <!-- ======== TIÊU ĐỀ ======== -->
+      <StackPanel DockPanel.Dock="Top" Spacing="4">
+        <TextBlock Text="Xem trước dữ liệu nhập sổ quỹ"
+                   FontSize="22"
+                   FontWeight="Bold"
+                   Foreground="#163F38" />
+        <TextBlock x:Name="TieudeFileTextBlock"
+                   FontSize="13"
+                   Foreground="#667A74"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+
+      <!-- ======== THẺ TỔNG QUAN ======== -->
+      <Grid DockPanel.Dock="Top"
+            ColumnDefinitions="*,*,*,*,*,*"
+            ColumnSpacing="10"
+            Margin="0,16,0,0">
+        <Border Grid.Column="0" Background="#F7FAF9" CornerRadius="10" Padding="10">
+          <StackPanel>
+            <TextBlock Classes="statNhan" Text="TỔNG DÒNG" />
+            <TextBlock x:Name="TongDongTextBlock" Classes="statGiaTri" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="1" Background="#F7FAF9" CornerRadius="10" Padding="10">
+          <StackPanel>
+            <TextBlock Classes="statNhan" Text="HỢP LỆ" />
+            <TextBlock x:Name="HopLeTextBlock" Classes="statGiaTri" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="2" Background="#F7FAF9" CornerRadius="10" Padding="10">
+          <StackPanel>
+            <TextBlock Classes="statNhan" Text="BỊ LỖI" />
+            <TextBlock x:Name="LoiTextBlock" Classes="statGiaTri" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="3" Background="#F7FAF9" CornerRadius="10" Padding="10">
+          <StackPanel>
+            <TextBlock Classes="statNhan" Text="TRÙNG MÃ" />
+            <TextBlock x:Name="TrungMaTextBlock" Classes="statGiaTri" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="4" Background="#F7FAF9" CornerRadius="10" Padding="10">
+          <StackPanel>
+            <TextBlock Classes="statNhan" Text="TỔNG THU" />
+            <TextBlock x:Name="TongThuTextBlock" Classes="statGiaTri" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="5" Background="#F7FAF9" CornerRadius="10" Padding="10">
+          <StackPanel>
+            <TextBlock Classes="statNhan" Text="TỔNG CHI" />
+            <TextBlock x:Name="TongChiTextBlock" Classes="statGiaTri" />
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <!-- ======== CẢNH BÁO ======== -->
+      <Border x:Name="CanhBaoBorder"
+              DockPanel.Dock="Top"
+              Background="#FFF9EC"
+              BorderBrush="#F0D9A0"
+              BorderThickness="1"
+              CornerRadius="10"
+              Padding="14"
+              Margin="0,16,0,0">
+        <StackPanel Spacing="6">
+          <TextBlock Text="Cảnh báo"
+                     FontSize="13"
+                     FontWeight="SemiBold"
+                     Foreground="#8A5A00" />
+          <ItemsControl x:Name="CanhBaoItems" />
+        </StackPanel>
+      </Border>
+
+      <!-- ======== DANH SÁCH LỖI ======== -->
+      <Border x:Name="LoiBorder"
+              DockPanel.Dock="Top"
+              Background="#FEF3F2"
+              BorderBrush="#F5C2BE"
+              BorderThickness="1"
+              CornerRadius="10"
+              Padding="14"
+              Margin="0,16,0,0"
+              MaxHeight="130">
+        <StackPanel Spacing="6">
+          <TextBlock x:Name="LoiTieudeTextBlock"
+                     FontSize="13"
+                     FontWeight="SemiBold"
+                     Foreground="#A32020" />
+          <ScrollViewer MaxHeight="90">
+            <ItemsControl x:Name="LoiItems" />
+          </ScrollViewer>
+        </StackPanel>
+      </Border>
+
+      <!-- ======== BẢNG DÒNG ĐỌC ĐƯỢC ======== -->
+      <Border DockPanel.Dock="Top"
+              Background="#FFFFFF"
+              BorderBrush="#E4EEEB"
+              BorderThickness="1"
+              CornerRadius="10"
+              Margin="0,16,0,0">
+        <Grid RowDefinitions="Auto,*">
+
+          <Border Grid.Row="0"
+                  Background="#F7FAF9"
+                  BorderBrush="#E4EEEB"
+                  BorderThickness="0,0,0,1"
+                  Padding="12,10">
+            <Grid ColumnDefinitions="60,150,80,150,180,130,110,160,200">
+              <TextBlock Classes="headerCell" Text="DÒNG" />
+              <TextBlock Grid.Column="1" Classes="headerCell" Text="MÃ PHIẾU" />
+              <TextBlock Grid.Column="2" Classes="headerCell" Text="LOẠI" />
+              <TextBlock Grid.Column="3" Classes="headerCell" Text="THỜI GIAN" />
+              <TextBlock Grid.Column="4" Classes="headerCell" Text="NGƯỜI NỘP / NHẬN" />
+              <TextBlock Grid.Column="5" Classes="headerCell" Text="SỐ TIỀN" />
+              <TextBlock Grid.Column="6" Classes="headerCell" Text="TRẠNG THÁI" />
+              <TextBlock Grid.Column="7" Classes="headerCell" Text="GHI CHÚ" />
+              <TextBlock Grid.Column="8" Classes="headerCell" Text="LÝ DO" />
+            </Grid>
+          </Border>
+
+          <ScrollViewer Grid.Row="1" MaxHeight="240">
+            <ItemsControl x:Name="DongItems">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="models:SoQuyImportRow">
+                  <Border BorderBrush="#EEF3F1" BorderThickness="0,0,0,1" Padding="12,8">
+                    <Grid ColumnDefinitions="60,150,80,150,180,130,110,160,200">
+                      <TextBlock Classes="cell" Text="{Binding SoDongExcel}" />
+                      <TextBlock Grid.Column="1" Classes="cell" Text="{Binding MaPhieu}" />
+                      <TextBlock Grid.Column="2" Classes="cell" Text="{Binding LoaiHienThi}" />
+                      <TextBlock Grid.Column="3" Classes="cell" Text="{Binding NgayHienThi}" />
+                      <TextBlock Grid.Column="4" Classes="cell" Text="{Binding NguoiNopNhan}" />
+                      <TextBlock Grid.Column="5" Classes="cell" Text="{Binding SoTien, StringFormat={}{0:N0} đ}" />
+                      <TextBlock Grid.Column="6" Classes="cell" Text="{Binding KetQuaHienThi}" />
+                      <TextBlock Grid.Column="7" Classes="cell" Text="{Binding GhiChu}" />
+                      <TextBlock Grid.Column="8" Classes="soLoi" Text="{Binding LyDo}" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Grid>
+      </Border>
+    </DockPanel>
+  </Border>
+</Window>
