@@ -6,7 +6,7 @@ public sealed class DatabaseConfig
 
     public int Port { get; set; } = 3306;
 
-    public string Database { get; set; } = "hoa_shop";
+    public string Database { get; set; } = "shophoa_Huy_tiemhoatest";
 
     public string User { get; set; } = "admin_Nhut";
 

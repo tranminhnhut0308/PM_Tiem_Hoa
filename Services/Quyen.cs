@@ -10,9 +10,13 @@ namespace ShopHoa.Services;
 public static class Quyen
 {
     public const string QuanTri = "QUAN_TRI";
+    public const string Admin = "ADMIN";
     public const string QuanLy = "QUAN_LY";
     public const string Kho = "KHO";
+    public const string ThuKho = "THU_KHO";
     public const string ThuNgan = "THU_NGAN";
+    public const string KeToan = "KE_TOAN";
+    public const string NhanVien = "NHAN_VIEN";
     public const string BaoCao = "BAO_CAO";
 
     public static bool HasAnyRole(NguoiDung? nguoiDung, params string[] maVaiTro)
@@ -26,6 +30,15 @@ public static class Quyen
             {
                 if (string.Equals(ma, canCo, StringComparison.OrdinalIgnoreCase))
                     return true;
+
+                // Ánh xạ tương đương giữa hai quy ước vai trò (hoa_shop vs shophoa_Huy_tiemhoatest)
+                if ((string.Equals(ma, "ADMIN", StringComparison.OrdinalIgnoreCase) || string.Equals(ma, "QUAN_TRI", StringComparison.OrdinalIgnoreCase))
+                    && (string.Equals(canCo, "ADMIN", StringComparison.OrdinalIgnoreCase) || string.Equals(canCo, "QUAN_TRI", StringComparison.OrdinalIgnoreCase)))
+                    return true;
+
+                if ((string.Equals(ma, "THU_KHO", StringComparison.OrdinalIgnoreCase) || string.Equals(ma, "KHO", StringComparison.OrdinalIgnoreCase))
+                    && (string.Equals(canCo, "THU_KHO", StringComparison.OrdinalIgnoreCase) || string.Equals(canCo, "KHO", StringComparison.OrdinalIgnoreCase)))
+                    return true;
             }
         }
         return false;
@@ -33,7 +46,7 @@ public static class Quyen
 
     public static bool IsAdmin(NguoiDung? nguoiDung)
     {
-        return HasAnyRole(nguoiDung, QuanTri);
+        return HasAnyRole(nguoiDung, QuanTri, Admin);
     }
 
     public static bool HasPermission(NguoiDung? nguoiDung, string? permissionKey)

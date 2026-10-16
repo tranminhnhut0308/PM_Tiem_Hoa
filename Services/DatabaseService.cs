@@ -151,9 +151,76 @@ public sealed class DatabaseService
         LIMIT 1;
         """;
 
-        var row = await connection.QuerySingleOrDefaultAsync<dynamic>(
-            sql,
-            new { TenDangNhap = tenDangNhap });
+        dynamic? row = null;
+        try
+        {
+            row = await connection.QuerySingleOrDefaultAsync<dynamic>(
+                sql,
+                new { TenDangNhap = tenDangNhap });
+        }
+        catch
+        {
+            // Fallback khi chạy trên schema shophoa_Huy_tiemhoatest (nguoi_dung có cột vai_tro trực tiếp, không có bảng vai_tro)
+            const string fallbackSql = """
+            SELECT
+                nd.id AS Id,
+                CONCAT('ND', LPAD(nd.id, 4, '0')) AS MaNguoiDung,
+                nd.ten_dang_nhap AS TenDangNhap,
+                nd.mat_khau AS MatKhau,
+                nd.ho_ten AS HoTen,
+                '' AS SoDienThoai,
+                '' AS Email,
+                1 AS ChiNhanhId,
+                COALESCE((SELECT ten_don_vi FROM don_vi LIMIT 1), 'Shop Hoa') AS TenChiNhanh,
+                nd.trang_thai AS TrangThai,
+                nd.vai_tro AS VaiTro,
+                nd.vai_tro AS MaVaiTro
+            FROM nguoi_dung nd
+            WHERE nd.ten_dang_nhap = @TenDangNhap
+            LIMIT 1;
+            """;
+            try
+            {
+                row = await connection.QuerySingleOrDefaultAsync<dynamic>(
+                    fallbackSql,
+                    new { TenDangNhap = tenDangNhap });
+            }
+            catch { }
+        }
+
+        // Tự động khởi tạo tài khoản admin mặc định nếu bảng nguoi_dung hoàn toàn trống
+        if (row is null)
+        {
+            try
+            {
+                var userCount = await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM nguoi_dung;");
+                if (userCount == 0)
+                {
+                    var defaultHash = BCrypt.Net.BCrypt.HashPassword("123456");
+                    bool hasVaiTroCol = await connection.ExecuteScalarAsync<int>(
+                        "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'nguoi_dung' AND COLUMN_NAME = 'vai_tro';") > 0;
+                    if (hasVaiTroCol)
+                    {
+                        await connection.ExecuteAsync(
+                            "INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, ho_ten, vai_tro, trang_thai) VALUES ('admin', @Pwd, 'Quản trị viên', 'ADMIN', 1);",
+                            new { Pwd = defaultHash });
+                    }
+                    else
+                    {
+                        await connection.ExecuteAsync(
+                            "INSERT INTO nguoi_dung (ma_nguoi_dung, ten_dang_nhap, mat_khau, ho_ten, trang_thai) VALUES ('ND0001', 'admin', @Pwd, 'Quản trị viên', 1);",
+                            new { Pwd = defaultHash });
+                    }
+
+                    if (string.Equals(tenDangNhap, "admin", StringComparison.OrdinalIgnoreCase))
+                    {
+                        row = await connection.QuerySingleOrDefaultAsync<dynamic>(
+                            "SELECT id AS Id, 'ND0001' AS MaNguoiDung, ten_dang_nhap AS TenDangNhap, mat_khau AS MatKhau, ho_ten AS HoTen, 'ADMIN' AS VaiTro, 'ADMIN' AS MaVaiTro, 1 AS TrangThai FROM nguoi_dung WHERE ten_dang_nhap = 'admin' LIMIT 1;");
+                    }
+                }
+            }
+            catch { }
+        }
 
         if (row is null)
         {
@@ -163,16 +230,16 @@ public sealed class DatabaseService
         var user = new NguoiDung
         {
             Id = (uint)row.Id,
-            MaNguoiDung = row.MaNguoiDung,
-            TenDangNhap = row.TenDangNhap,
-            MatKhau = row.MatKhau,
-            HoTen = row.HoTen,
+            MaNguoiDung = row.MaNguoiDung ?? "",
+            TenDangNhap = row.TenDangNhap ?? "",
+            MatKhau = row.MatKhau ?? "",
+            HoTen = row.HoTen ?? "",
             SoDienThoai = row.SoDienThoai,
             Email = row.Email,
-            ChiNhanhId = row.ChiNhanhId,
-            TenChiNhanh = row.TenChiNhanh,
-            VaiTro = row.VaiTro,
-            MaVaiTro = row.MaVaiTro
+            ChiNhanhId = row.ChiNhanhId != null ? (uint)row.ChiNhanhId : 1,
+            TenChiNhanh = row.TenChiNhanh ?? "Shop Hoa",
+            VaiTro = row.VaiTro ?? "ADMIN",
+            MaVaiTro = row.MaVaiTro ?? "ADMIN"
         };
 
         bool trangThai = true;
@@ -214,18 +281,38 @@ public sealed class DatabaseService
         {
             await using var connection = await OpenAsync();
 
-            await connection.ExecuteAsync(
-            """
-            UPDATE nguoi_dung
-            SET
-                lan_dang_nhap_cuoi = NOW(),
-                ngay_cap_nhat = NOW()
-            WHERE id = @Id;
-            """,
-            new
+            bool hasLanDangNhap = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'nguoi_dung' AND COLUMN_NAME = 'lan_dang_nhap_cuoi';") > 0;
+
+            if (hasLanDangNhap)
             {
-                Id = userId
-            });
+                await connection.ExecuteAsync(
+                """
+                UPDATE nguoi_dung
+                SET
+                    lan_dang_nhap_cuoi = NOW(),
+                    ngay_cap_nhat = NOW()
+                WHERE id = @Id;
+                """,
+                new
+                {
+                    Id = userId
+                });
+            }
+
+            // Ghi nhật ký vào nhat_ky_he_thong nếu có (schema shophoa_Huy_tiemhoatest)
+            try
+            {
+                bool hasNhatKyHeThong = await connection.ExecuteScalarAsync<int>(
+                    "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'nhat_ky_he_thong';") > 0;
+                if (hasNhatKyHeThong)
+                {
+                    await connection.ExecuteAsync(
+                        "INSERT INTO nhat_ky_he_thong (nguoi_dung_id, hanh_dong, thoi_gian) VALUES (@Id, 'Đăng nhập hệ thống', NOW());",
+                        new { Id = userId });
+                }
+            }
+            catch { }
         }
         catch (Exception ex)
         {

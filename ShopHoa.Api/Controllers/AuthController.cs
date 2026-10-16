@@ -31,31 +31,60 @@ public sealed class AuthController : ControllerBase
 
         await using var conn = await _db.CreateConnectionAsync();
 
-        const string sql = """
-            SELECT
-                nd.id AS Id,
-                nd.ma_nguoi_dung AS MaNguoiDung,
-                nd.ten_dang_nhap AS TenDangNhap,
-                nd.mat_khau AS MatKhau,
-                nd.ho_ten AS HoTen,
-                nd.so_dien_thoai AS SoDienThoai,
-                nd.email AS Email,
-                nd.chi_nhanh_id AS ChiNhanhId,
-                cn.ten_chi_nhanh AS TenChiNhanh,
-                nd.trang_thai AS TrangThai,
-                GROUP_CONCAT(vt.ten_vai_tro ORDER BY vt.id SEPARATOR ', ') AS VaiTro,
-                GROUP_CONCAT(vt.ma_vai_tro ORDER BY vt.id SEPARATOR ',') AS MaVaiTro
-            FROM nguoi_dung nd
-            LEFT JOIN chi_nhanh cn ON cn.id = nd.chi_nhanh_id
-            LEFT JOIN nguoi_dung_vai_tro ndvt ON ndvt.nguoi_dung_id = nd.id
-            LEFT JOIN vai_tro vt ON vt.id = ndvt.vai_tro_id
-            WHERE nd.ten_dang_nhap = @TenDangNhap
-            GROUP BY nd.id, nd.ma_nguoi_dung, nd.ten_dang_nhap, nd.mat_khau, nd.ho_ten,
-                     nd.so_dien_thoai, nd.email, nd.chi_nhanh_id, nd.trang_thai, cn.ten_chi_nhanh
-            LIMIT 1;
-            """;
+        dynamic? row = null;
+        try
+        {
+            const string sql = """
+                SELECT
+                    nd.id AS Id,
+                    nd.ma_nguoi_dung AS MaNguoiDung,
+                    nd.ten_dang_nhap AS TenDangNhap,
+                    nd.mat_khau AS MatKhau,
+                    nd.ho_ten AS HoTen,
+                    nd.so_dien_thoai AS SoDienThoai,
+                    nd.email AS Email,
+                    nd.chi_nhanh_id AS ChiNhanhId,
+                    cn.ten_chi_nhanh AS TenChiNhanh,
+                    nd.trang_thai AS TrangThai,
+                    GROUP_CONCAT(vt.ten_vai_tro ORDER BY vt.id SEPARATOR ', ') AS VaiTro,
+                    GROUP_CONCAT(vt.ma_vai_tro ORDER BY vt.id SEPARATOR ',') AS MaVaiTro
+                FROM nguoi_dung nd
+                LEFT JOIN chi_nhanh cn ON cn.id = nd.chi_nhanh_id
+                LEFT JOIN nguoi_dung_vai_tro ndvt ON ndvt.nguoi_dung_id = nd.id
+                LEFT JOIN vai_tro vt ON vt.id = ndvt.vai_tro_id
+                WHERE nd.ten_dang_nhap = @TenDangNhap
+                GROUP BY nd.id, nd.ma_nguoi_dung, nd.ten_dang_nhap, nd.mat_khau, nd.ho_ten,
+                         nd.so_dien_thoai, nd.email, nd.chi_nhanh_id, nd.trang_thai, cn.ten_chi_nhanh
+                LIMIT 1;
+                """;
 
-        var row = await conn.QuerySingleOrDefaultAsync<dynamic>(sql, new { TenDangNhap = request.TenDangNhap.Trim() });
+            row = await conn.QuerySingleOrDefaultAsync<dynamic>(sql, new { TenDangNhap = request.TenDangNhap.Trim() });
+        }
+        catch
+        {
+            // Fallback cho cấu trúc bảng nguoi_dung mới (shophoa_Huy_tiemhoatest)
+            const string fallbackSql = """
+                SELECT
+                    id AS Id,
+                    CONCAT('ND', LPAD(id, 4, '0')) AS MaNguoiDung,
+                    ten_dang_nhap AS TenDangNhap,
+                    mat_khau AS MatKhau,
+                    ho_ten AS HoTen,
+                    NULL AS SoDienThoai,
+                    NULL AS Email,
+                    1 AS ChiNhanhId,
+                    'Tiệm Hoa Chính' AS TenChiNhanh,
+                    trang_thai AS TrangThai,
+                    vai_tro AS VaiTro,
+                    vai_tro AS MaVaiTro
+                FROM nguoi_dung
+                WHERE ten_dang_nhap = @TenDangNhap
+                LIMIT 1;
+                """;
+
+            row = await conn.QuerySingleOrDefaultAsync<dynamic>(fallbackSql, new { TenDangNhap = request.TenDangNhap.Trim() });
+        }
+
         if (row is null)
         {
             return Unauthorized(new { Message = "Tên đăng nhập hoặc mật khẩu không chính xác." });
@@ -122,7 +151,22 @@ public sealed class AuthController : ControllerBase
         }
         catch
         {
-            // Bảng quyền có thể chưa có hoặc đang dùng vai trò
+            try
+            {
+                // Fallback theo quyen_he_thong & vai_tro_quyen của database mới
+                const string permSql2 = """
+                    SELECT DISTINCT q.ma_quyen
+                    FROM quyen_he_thong q
+                    JOIN vai_tro_quyen vtq ON vtq.quyen_id = q.id
+                    JOIN nguoi_dung nd ON UPPER(nd.vai_tro) = UPPER(vtq.vai_tro)
+                    WHERE nd.id = @UserId AND vtq.duoc_xem = 1;
+                    """;
+                permissions = (await conn.QueryAsync<string>(permSql2, new { UserId = user.Id })).AsList();
+            }
+            catch
+            {
+                // Bảng quyền có thể chưa có hoặc đang dùng vai trò
+            }
         }
 
         // Cập nhật lần đăng nhập cuối
@@ -156,30 +200,56 @@ public sealed class AuthController : ControllerBase
         }
 
         await using var conn = await _db.CreateConnectionAsync();
-        const string sql = """
-            SELECT
-                nd.id AS Id,
-                nd.ma_nguoi_dung AS MaNguoiDung,
-                nd.ten_dang_nhap AS TenDangNhap,
-                nd.ho_ten AS HoTen,
-                nd.so_dien_thoai AS SoDienThoai,
-                nd.email AS Email,
-                nd.chi_nhanh_id AS ChiNhanhId,
-                cn.ten_chi_nhanh AS TenChiNhanh,
-                nd.trang_thai AS TrangThai,
-                GROUP_CONCAT(vt.ten_vai_tro ORDER BY vt.id SEPARATOR ', ') AS VaiTro,
-                GROUP_CONCAT(vt.ma_vai_tro ORDER BY vt.id SEPARATOR ',') AS MaVaiTro
-            FROM nguoi_dung nd
-            LEFT JOIN chi_nhanh cn ON cn.id = nd.chi_nhanh_id
-            LEFT JOIN nguoi_dung_vai_tro ndvt ON ndvt.nguoi_dung_id = nd.id
-            LEFT JOIN vai_tro vt ON vt.id = ndvt.vai_tro_id
-            WHERE nd.id = @Id
-            GROUP BY nd.id, nd.ma_nguoi_dung, nd.ten_dang_nhap, nd.ho_ten,
-                     nd.so_dien_thoai, nd.email, nd.chi_nhanh_id, nd.trang_thai, cn.ten_chi_nhanh
-            LIMIT 1;
-            """;
+        UserDto? user = null;
+        try
+        {
+            const string sql = """
+                SELECT
+                    nd.id AS Id,
+                    nd.ma_nguoi_dung AS MaNguoiDung,
+                    nd.ten_dang_nhap AS TenDangNhap,
+                    nd.ho_ten AS HoTen,
+                    nd.so_dien_thoai AS SoDienThoai,
+                    nd.email AS Email,
+                    nd.chi_nhanh_id AS ChiNhanhId,
+                    cn.ten_chi_nhanh AS TenChiNhanh,
+                    nd.trang_thai AS TrangThai,
+                    GROUP_CONCAT(vt.ten_vai_tro ORDER BY vt.id SEPARATOR ', ') AS VaiTro,
+                    GROUP_CONCAT(vt.ma_vai_tro ORDER BY vt.id SEPARATOR ',') AS MaVaiTro
+                FROM nguoi_dung nd
+                LEFT JOIN chi_nhanh cn ON cn.id = nd.chi_nhanh_id
+                LEFT JOIN nguoi_dung_vai_tro ndvt ON ndvt.nguoi_dung_id = nd.id
+                LEFT JOIN vai_tro vt ON vt.id = ndvt.vai_tro_id
+                WHERE nd.id = @Id
+                GROUP BY nd.id, nd.ma_nguoi_dung, nd.ten_dang_nhap, nd.ho_ten,
+                         nd.so_dien_thoai, nd.email, nd.chi_nhanh_id, nd.trang_thai, cn.ten_chi_nhanh
+                LIMIT 1;
+                """;
 
-        var user = await conn.QuerySingleOrDefaultAsync<UserDto>(sql, new { Id = userId });
+            user = await conn.QuerySingleOrDefaultAsync<UserDto>(sql, new { Id = userId });
+        }
+        catch
+        {
+            const string fallbackSql = """
+                SELECT
+                    id AS Id,
+                    CONCAT('ND', LPAD(id, 4, '0')) AS MaNguoiDung,
+                    ten_dang_nhap AS TenDangNhap,
+                    ho_ten AS HoTen,
+                    NULL AS SoDienThoai,
+                    NULL AS Email,
+                    1 AS ChiNhanhId,
+                    'Tiệm Hoa Chính' AS TenChiNhanh,
+                    trang_thai AS TrangThai,
+                    vai_tro AS VaiTro,
+                    vai_tro AS MaVaiTro
+                FROM nguoi_dung
+                WHERE id = @Id
+                LIMIT 1;
+                """;
+
+            user = await conn.QuerySingleOrDefaultAsync<UserDto>(fallbackSql, new { Id = userId });
+        }
         if (user is null)
         {
             return NotFound(new { Message = "Không tìm thấy người dùng." });

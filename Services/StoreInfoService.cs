@@ -115,6 +115,41 @@ public sealed class StoreInfoService
 
             var info = await connection.QueryFirstOrDefaultAsync<ThongTinTiem>(sql);
 
+            if (info is null || string.IsNullOrWhiteSpace(info.TenTiem) || info.TenTiem == "VỰA HOA NHÀ HUY")
+            {
+                try
+                {
+                    const string donViSql = """
+                    SELECT
+                        ten_don_vi AS TenTiem,
+                        dia_chi    AS DiaChi,
+                        lien_he    AS SoDienThoai,
+                        ma_so_thue AS MaSoThue,
+                        website    AS Website,
+                        logo       AS DuongDanLogo
+                    FROM don_vi
+                    WHERE id = 1
+                    LIMIT 1;
+                    """;
+                    var dv = await connection.QueryFirstOrDefaultAsync<ThongTinTiem>(donViSql);
+                    if (dv != null && !string.IsNullOrWhiteSpace(dv.TenTiem))
+                    {
+                        info = new ThongTinTiem
+                        {
+                            TenTiem = dv.TenTiem,
+                            DiaChi = dv.DiaChi ?? "",
+                            SoDienThoai = dv.SoDienThoai ?? "",
+                            Email = info?.Email ?? "",
+                            MaSoThue = dv.MaSoThue ?? "",
+                            Website = dv.Website ?? "",
+                            DuongDanLogo = dv.DuongDanLogo ?? "",
+                            LoiCamOn = info?.LoiCamOn ?? "Cảm ơn quý khách!"
+                        };
+                    }
+                }
+                catch { }
+            }
+
             return info ?? new ThongTinTiem();
         }
         catch (Exception ex)
@@ -179,6 +214,29 @@ public sealed class StoreInfoService
             DuongDanLogo = (info.DuongDanLogo ?? "").Trim(),
             LoiCamOn = (info.LoiCamOn ?? "").Trim()
         });
+
+        try
+        {
+            await connection.ExecuteAsync("""
+            UPDATE don_vi
+            SET ten_don_vi = @TenTiem,
+                dia_chi = @DiaChi,
+                lien_he = @SoDienThoai,
+                ma_so_thue = @MaSoThue,
+                website = @Website,
+                logo = @DuongDanLogo
+            WHERE id = 1;
+            """, new
+            {
+                TenTiem = (info.TenTiem ?? "").Trim(),
+                DiaChi = (info.DiaChi ?? "").Trim(),
+                SoDienThoai = (info.SoDienThoai ?? "").Trim(),
+                MaSoThue = (info.MaSoThue ?? "").Trim(),
+                Website = (info.Website ?? "").Trim(),
+                DuongDanLogo = (info.DuongDanLogo ?? "").Trim()
+            });
+        }
+        catch { }
     }
 
     // =========================================================

@@ -24,12 +24,12 @@ dotnet --version
 
 ## 2. Database
 
-Import file `database/hoa_shop.sql` vào MariaDB/MySQL.
+Import file `database/shophoa_Huy_tiemhoatest_fixed.sql` vào MariaDB/MySQL.
 
-Database phải có tên:
+Database mặc định:
 
 ```text
-hoa_shop
+shophoa_Huy_tiemhoatest
 ```
 
 ## 3. Cấu hình kết nối
@@ -45,7 +45,7 @@ Sửa:
 ```json
 "Server": "127.0.0.1",
 "Port": 3306,
-"Database": "hoa_shop",
+"Database": "shophoa_Huy_tiemhoatest",
 "User": "root",
 "Password": ""
 ```
