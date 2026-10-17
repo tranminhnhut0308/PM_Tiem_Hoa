@@ -5,6 +5,8 @@ public sealed class UserEditDto
     public uint Id { get; set; }
     public string TenDangNhap { get; set; } = string.Empty;
     public string HoTen { get; set; } = string.Empty;
+    public string? SoDienThoai { get; set; }
+    public string? Email { get; set; }
     public string? MatKhau { get; set; } // null nếu không đổi
     public string? VaiTroText { get; set; }
     public string? MaVaiTro { get; set; }

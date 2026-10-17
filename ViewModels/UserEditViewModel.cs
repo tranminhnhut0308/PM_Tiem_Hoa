@@ -19,6 +19,8 @@ public partial class UserEditViewModel : ObservableObject
     [ObservableProperty] private uint userId;
     [ObservableProperty] private string tenDangNhap = string.Empty;
     [ObservableProperty] private string hoTen = string.Empty;
+    [ObservableProperty] private string soDienThoai = string.Empty;
+    [ObservableProperty] private string email = string.Empty;
     [ObservableProperty] private string matKhau = string.Empty;
     [ObservableProperty] private string nhapLaiMatKhau = string.Empty;
     [ObservableProperty] private bool isActive = true;
@@ -103,6 +105,8 @@ public partial class UserEditViewModel : ObservableObject
                 {
                     TenDangNhap = uwr.TenDangNhap;
                     HoTen = uwr.HoTen;
+                    SoDienThoai = uwr.SoDienThoai ?? string.Empty;
+                    Email = uwr.Email ?? string.Empty;
                     IsActive = uwr.TrangThai;
                     currentRoleIds = uwr.RoleIds.ToArray();
                 }
@@ -478,6 +482,8 @@ public partial class UserEditViewModel : ObservableObject
                     Id = UserId,
                     TenDangNhap = TenDangNhap,
                     HoTen = HoTen,
+                    SoDienThoai = string.IsNullOrWhiteSpace(SoDienThoai) ? null : SoDienThoai.Trim(),
+                    Email = string.IsNullOrWhiteSpace(Email) ? null : Email.Trim(),
                     MatKhau = string.IsNullOrWhiteSpace(MatKhau) ? null : MatKhau,
                     TrangThai = IsActive,
                     RoleIds = roleIds,
@@ -499,6 +505,8 @@ public partial class UserEditViewModel : ObservableObject
                 {
                     TenDangNhap = TenDangNhap,
                     HoTen = HoTen,
+                    SoDienThoai = string.IsNullOrWhiteSpace(SoDienThoai) ? null : SoDienThoai.Trim(),
+                    Email = string.IsNullOrWhiteSpace(Email) ? null : Email.Trim(),
                     MatKhau = MatKhau,
                     TrangThai = IsActive,
                     RoleIds = roleIds,

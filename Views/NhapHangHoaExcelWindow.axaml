@@ -1,0 +1,508 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:ShopHoa.Views"
+        x:Class="ShopHoa.Views.NhapHangHoaExcelWindow"
+        x:DataType="views:NhapHangHoaExcelWindow"
+        Width="1120"
+        Height="760"
+        MinWidth="960"
+        MinHeight="620"
+        WindowStartupLocation="CenterOwner"
+        Title="Nhập hàng hóa từ Excel - WINWON"
+        Background="#F4F7F6"
+        CanResize="True"
+        RequestedThemeVariant="Light">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.breadcrumb">
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="Foreground" Value="#5E7A74"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style Selector="Border.statCard">
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BoxShadow" Value="0 2 6 0 #0D000000"/>
+        </Style>
+
+        <Style Selector="Button.btnAction">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Button.btnPrimary">
+            <Setter Property="Background" Value="#087F6E"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        <Style Selector="Button.btnPrimary:pointerover">
+            <Setter Property="Background" Value="#066658"/>
+        </Style>
+        <Style Selector="Button.btnPrimary:disabled">
+            <Setter Property="Background" Value="#A0D1C8"/>
+            <Setter Property="Foreground" Value="#E2F2EE"/>
+        </Style>
+
+        <Style Selector="Button.btnSecondary">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#2D433E"/>
+            <Setter Property="BorderBrush" Value="#CBDED8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Button.btnSecondary:pointerover">
+            <Setter Property="Background" Value="#E8F4F0"/>
+            <Setter Property="BorderBrush" Value="#087F6E"/>
+        </Style>
+
+        <Style Selector="Button.btnOutline">
+            <Setter Property="Background" Value="#E8F4FD"/>
+            <Setter Property="Foreground" Value="#0E5E9E"/>
+            <Setter Property="BorderBrush" Value="#84BBE6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Button.btnOutline:pointerover">
+            <Setter Property="Background" Value="#D0E9FA"/>
+        </Style>
+
+        <!-- Filter chips -->
+        <Style Selector="Button.filterChip">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Background" Value="#EAF1EE"/>
+            <Setter Property="Foreground" Value="#3F5A53"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.filterChip:pointerover">
+            <Setter Property="Background" Value="#D5E6E0"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="16,14,16,14" RowSpacing="12">
+
+        <!-- ======================================================== -->
+        <!-- 1. BREADCRUMB & HEADER                                  -->
+        <!-- ======================================================== -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <StackPanel Spacing="3">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Classes="breadcrumb" Text="Danh mục"/>
+                    <TextBlock Classes="breadcrumb" Text="/"/>
+                    <TextBlock Classes="breadcrumb" Text="Hàng hóa"/>
+                    <TextBlock Classes="breadcrumb" Text="/"/>
+                    <TextBlock Classes="breadcrumb" Text="Nhập Excel" Foreground="#087F6E" FontWeight="Bold"/>
+                </StackPanel>
+
+                <TextBlock Text="Nhập hàng hóa từ Excel"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Foreground="#163F38"
+                           Margin="0,2,0,0"/>
+
+                <TextBlock Text="Nạp dữ liệu hàng hóa hàng loạt từ tệp Excel (.xlsx, .xls) vào phần mềm. Hệ thống tự động kiểm tra trùng lặp và tính toàn vẹn dữ liệu."
+                           FontSize="12"
+                           Foreground="#5E7A74"/>
+            </StackPanel>
+
+            <!-- Nút Tải file mẫu bên phải header -->
+            <Button Grid.Column="1"
+                    Classes="btnAction btnOutline"
+                    Content="📥  Tải file mẫu Excel chuẩn"
+                    ToolTip.Tip="Tải mẫu Excel chuẩn với các cột dữ liệu mẫu minh họa"
+                    Click="LayMauThamKhao_OnClick"
+                    VerticalAlignment="Center"/>
+        </Grid>
+
+        <!-- ======================================================== -->
+        <!-- 2. KHU VỰC CHỌN FILE EXCEL                               -->
+        <!-- ======================================================== -->
+        <Border Grid.Row="1"
+                Background="White"
+                BorderBrush="#D9EAE4"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="16,12"
+                BoxShadow="0 2 8 0 #0A000000">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12" VerticalAlignment="Center">
+                
+                <!-- Biểu tượng file Excel -->
+                <Border Background="#E8F5E9"
+                        CornerRadius="8"
+                        Width="44"
+                        Height="44"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="📊"
+                               FontSize="22"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+
+                <!-- Thông tin file đã chọn hoặc lời nhắc -->
+                <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{Binding TenFileHienThi}"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Foreground="#163F38"/>
+
+                        <!-- Badge dung lượng file -->
+                        <Border Background="#EAF1EE"
+                                CornerRadius="4"
+                                Padding="6,1"
+                                IsVisible="{Binding DaChonFile}"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding DungLuongFileHienThi}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="#087F6E"/>
+                        </Border>
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding DuongDanFileHienThi}"
+                               FontSize="11.5"
+                               Foreground="#6E8E87"
+                               TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+
+                <!-- Chọn Sheet khi file có nhiều sheet -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"
+                            IsVisible="{Binding DaChonFile}">
+                    <TextBlock Text="Bảng tính:"
+                               FontSize="12.5"
+                               FontWeight="SemiBold"
+                               Foreground="#2D433E"
+                               VerticalAlignment="Center"/>
+
+                    <ComboBox Name="ChonSheetComboBox"
+                              ItemsSource="{Binding DanhSachSheets}"
+                              SelectedItem="{Binding SheetDangChon, Mode=TwoWay}"
+                              Width="150"
+                              Height="34"
+                              SelectionChanged="ChonSheetComboBox_OnSelectionChanged"/>
+                </StackPanel>
+
+                <!-- Cụm nút: Chọn file & Bỏ file -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <Button Classes="btnAction btnPrimary"
+                            Content="📁  Chọn file Excel..."
+                            Click="ChonFile_OnClick"
+                            IsEnabled="{Binding !DangXuLy}"/>
+
+                    <Button Classes="btnAction btnSecondary"
+                            Content="✕  Bỏ chọn"
+                            Click="BoChonFile_OnClick"
+                            IsVisible="{Binding DaChonFile}"
+                            IsEnabled="{Binding !DangXuLy}"/>
+                </StackPanel>
+
+            </Grid>
+        </Border>
+
+        <!-- ======================================================== -->
+        <!-- 3. THỐNG KÊ VÀ LỰA CHỌN XỬ LÝ TRÙNG LẶP                  -->
+        <!-- ======================================================== -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="14" IsVisible="{Binding DaChonFile}">
+            
+            <!-- 4 Thẻ chỉ số thống kê thực tế -->
+            <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="10">
+                
+                <!-- Tổng số dòng -->
+                <Border Grid.Column="0" Classes="statCard" Background="#F0F6FA" BorderBrush="#C7DFEE">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="TỔNG DÒNG ĐÃ ĐỌC" FontSize="11" FontWeight="Bold" Foreground="#0F4C81"/>
+                        <TextBlock Text="{Binding TongSoDongText}" FontSize="22" FontWeight="Bold" Foreground="#0F4C81"/>
+                        <TextBlock Text="Từ sheet hiện tại" FontSize="11" Foreground="#477EAC"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Số dòng hợp lệ -->
+                <Border Grid.Column="1" Classes="statCard" Background="#F1F9F4" BorderBrush="#BEE3CA">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="HỢP LỆ (MỚI)" FontSize="11" FontWeight="Bold" Foreground="#2E7D32"/>
+                        <TextBlock Text="{Binding SoDongHopLeText}" FontSize="22" FontWeight="Bold" Foreground="#2E7D32"/>
+                        <TextBlock Text="Sẵn sàng nhập mới" FontSize="11" Foreground="#4E9C52"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Số dòng trùng lặp -->
+                <Border Grid.Column="2" Classes="statCard" Background="#FFFBF0" BorderBrush="#FCE3A6">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="TRÙNG LẶP" FontSize="11" FontWeight="Bold" Foreground="#D97706"/>
+                        <TextBlock Text="{Binding SoDongTrungText}" FontSize="22" FontWeight="Bold" Foreground="#D97706"/>
+                        <TextBlock Text="Trùng mã / barcode" FontSize="11" Foreground="#B45309"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Số dòng lỗi -->
+                <Border Grid.Column="3" Classes="statCard" Background="#FEF2F2" BorderBrush="#FECACA">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="CÓ LỖI" FontSize="11" FontWeight="Bold" Foreground="#DC2626"/>
+                        <TextBlock Text="{Binding SoDongLoiText}" FontSize="22" FontWeight="Bold" Foreground="#DC2626"/>
+                        <TextBlock Text="Sẽ bị loại bỏ" FontSize="11" Foreground="#EF4444"/>
+                    </StackPanel>
+                </Border>
+
+            </Grid>
+
+            <!-- Hộp lựa chọn xử lý trùng lặp -->
+            <Border Grid.Column="1"
+                    Background="White"
+                    BorderBrush="#D9EAE4"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="14,8"
+                    MinWidth="320">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Phương án xử lý hàng trùng mã / barcode:"
+                               FontSize="11.5"
+                               FontWeight="Bold"
+                               Foreground="#163F38"/>
+
+                    <StackPanel Orientation="Horizontal" Spacing="14">
+                        <RadioButton GroupName="XuLyTrung"
+                                     Content="Bỏ qua"
+                                     FontSize="12.5"
+                                     IsChecked="{Binding IsXuLyBoQua, Mode=TwoWay}"
+                                     ToolTip.Tip="Chỉ thêm mặt hàng mới, không can thiệp mặt hàng đã có"/>
+
+                        <RadioButton GroupName="XuLyTrung"
+                                     Content="Cập nhật hàng cũ"
+                                     FontSize="12.5"
+                                     IsChecked="{Binding IsXuLyCapNhat, Mode=TwoWay}"
+                                     ToolTip.Tip="Cập nhật thông tin giá, nhóm, ĐVT của hàng cũ; bảo vệ tồn kho và lịch sử"/>
+
+                        <RadioButton GroupName="XuLyTrung"
+                                     Content="Hủy nếu trùng"
+                                     FontSize="12.5"
+                                     IsChecked="{Binding IsXuLyHuy, Mode=TwoWay}"
+                                     ToolTip.Tip="Hủy lượt nhập nếu phát hiện trùng lặp"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+        </Grid>
+
+        <!-- ======================================================== -->
+        <!-- 4. BẢNG XEM TRƯỚC DỮ LIỆU EXCEL (DATAGRID)              -->
+        <!-- ======================================================== -->
+        <Border Grid.Row="3"
+                Background="White"
+                BorderBrush="#D9EAE4"
+                BorderThickness="1"
+                CornerRadius="8"
+                ClipToBounds="True">
+            <Grid RowDefinitions="Auto,*">
+
+                <!-- Thanh lọc nhanh danh sách xem trước -->
+                <Border Grid.Row="0"
+                        Background="#F8FAF9"
+                        BorderBrush="#E2ECE8"
+                        BorderThickness="0,0,0,1"
+                        Padding="12,8">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <TextBlock Text="Bộ lọc hiển thị:"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="#5E7A74"
+                                       VerticalAlignment="Center"/>
+
+                            <Button Classes="filterChip"
+                                    Content="{Binding FilterTatCaText}"
+                                    Click="LocTatCa_OnClick"/>
+
+                            <Button Classes="filterChip"
+                                    Content="{Binding FilterHopLeText}"
+                                    Click="LocHopLe_OnClick"/>
+
+                            <Button Classes="filterChip"
+                                    Content="{Binding FilterTrungText}"
+                                    Click="LocTrung_OnClick"/>
+
+                            <Button Classes="filterChip"
+                                    Content="{Binding FilterLoiText}"
+                                    Click="LocLoi_OnClick"/>
+                        </StackPanel>
+
+                        <TextBlock Grid.Column="2"
+                                   Text="{Binding SoLuongHienThiText}"
+                                   FontSize="12"
+                                   Foreground="#5E7A74"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <!-- DataGrid danh sách dòng xem trước -->
+                <DataGrid Grid.Row="1"
+                          Name="PreviewDataGrid"
+                          ItemsSource="{Binding DanhSachHienThi}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="All"
+                          HeadersVisibility="Column"
+                          CanUserResizeColumns="True"
+                          CanUserSortColumns="True"
+                          RowBackground="White">
+                    
+                    <DataGrid.Columns>
+                        <!-- Cột 1: STT dòng Excel -->
+                        <DataGridTextColumn Header="STT"
+                                            Binding="{Binding SoDongExcel}"
+                                            Width="55"/>
+
+                        <!-- Cột 2: Trạng thái kiểm tra (Badge màu) -->
+                        <DataGridTemplateColumn Header="Trạng thái" Width="105">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Background="{Binding BadgeBackground}"
+                                            CornerRadius="4"
+                                            Padding="8,3"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding TrangThaiText}"
+                                                   Foreground="{Binding BadgeForeground}"
+                                                   FontSize="11.5"
+                                                   FontWeight="SemiBold"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Cột 3: Mã hàng -->
+                        <DataGridTextColumn Header="Mã hàng"
+                                            Binding="{Binding MaSanPham}"
+                                            Width="105"/>
+
+                        <!-- Cột 4: Tên hàng hóa -->
+                        <DataGridTextColumn Header="Tên hàng hóa"
+                                            Binding="{Binding TenSanPham}"
+                                            Width="*"/>
+
+                        <!-- Cột 5: Barcode / Mã vạch -->
+                        <DataGridTextColumn Header="Mã vạch (Barcode)"
+                                            Binding="{Binding MaVach}"
+                                            Width="125"/>
+
+                        <!-- Cột 6: Nhóm hàng -->
+                        <DataGridTextColumn Header="Nhóm hàng"
+                                            Binding="{Binding NhomSanPham}"
+                                            Width="130"/>
+
+                        <!-- Cột 7: ĐVT -->
+                        <DataGridTextColumn Header="ĐVT"
+                                            Binding="{Binding DonViTinh}"
+                                            Width="75"/>
+
+                        <!-- Cột 8: Giá vốn -->
+                        <DataGridTextColumn Header="Giá vốn"
+                                            Binding="{Binding GiaVon, StringFormat={}{0:N0} đ}"
+                                            Width="105"/>
+
+                        <!-- Cột 9: Giá bán -->
+                        <DataGridTextColumn Header="Giá bán"
+                                            Binding="{Binding GiaBan, StringFormat={}{0:N0} đ}"
+                                            Width="105"/>
+
+                        <!-- Cột 10: Tồn kho -->
+                        <DataGridTextColumn Header="Tồn kho"
+                                            Binding="{Binding TonKho, StringFormat={}{0:N0}}"
+                                            Width="85"/>
+
+                        <!-- Cột 11: Nguyên nhân kiểm tra / Chi tiết lỗi -->
+                        <DataGridTextColumn Header="Chi tiết kiểm tra / Ghi chú"
+                                            Binding="{Binding ChiTietTrangThai}"
+                                            Width="220"/>
+                    </DataGrid.Columns>
+
+                </DataGrid>
+
+                <!-- Thông báo trống khi chưa chọn file -->
+                <Border Grid.Row="1"
+                        Background="White"
+                        IsVisible="{Binding !DaChonFile}"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+                        <TextBlock Text="📄" FontSize="36" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Chưa chọn tệp dữ liệu Excel"
+                                   FontSize="15"
+                                   FontWeight="Bold"
+                                   Foreground="#4F625D"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Vui lòng nhấn nút 'Chọn file Excel...' ở phía trên để nạp danh sách hàng hóa cần nhập."
+                                   FontSize="12.5"
+                                   Foreground="#7B938D"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+            </Grid>
+        </Border>
+
+        <!-- ======================================================== -->
+        <!-- 5. KHU VỰC THAO TÁC VÀ TIẾN TRÌNH DƯỚI CÙNG              -->
+        <!-- ======================================================== -->
+        <Border Grid.Row="4"
+                Background="White"
+                BorderBrush="#D9EAE4"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16,10">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10" VerticalAlignment="Center">
+                
+                <!-- Thông báo trạng thái hoặc Tiến trình xử lý -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
+                    <TextBlock Text="{Binding ThongBaoTrangThai}"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Foreground="{Binding MauThongBaoTrangThai}"/>
+
+                    <ProgressBar Height="4"
+                                 IsIndeterminate="True"
+                                 IsVisible="{Binding DangXuLy}"
+                                 HorizontalAlignment="Stretch"
+                                 Margin="0,2,20,0"/>
+                </StackPanel>
+
+                <!-- Nút Kiểm tra lại dữ liệu -->
+                <Button Grid.Column="1"
+                        Classes="btnAction btnSecondary"
+                        Content="🔄  Kiểm tra lại"
+                        ToolTip.Tip="Kiểm tra lại tính hợp lệ và đối chiếu dữ liệu với database"
+                        Click="KiemTraLai_OnClick"
+                        IsVisible="{Binding DaChonFile}"
+                        IsEnabled="{Binding !DangXuLy}"/>
+
+                <!-- Nút Nhập hàng hóa (Nút chính) -->
+                <Button Grid.Column="2"
+                        Classes="btnAction btnPrimary"
+                        Content="{Binding NutNhapDuLieuText}"
+                        ToolTip.Tip="Tiến hành lưu dữ liệu hợp lệ vào hệ thống cơ sở dữ liệu"
+                        Click="ThucHienNhap_OnClick"
+                        IsEnabled="{Binding CoTheNhapDuLieu}"/>
+
+                <!-- Nút Hủy / Đóng -->
+                <Button Grid.Column="3"
+                        Classes="btnAction btnSecondary"
+                        Content="✕  Đóng"
+                        Click="Dong_OnClick"
+                        IsEnabled="{Binding !DangXuLy}"/>
+
+            </Grid>
+        </Border>
+
+    </Grid>
+</Window>

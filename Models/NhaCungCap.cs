@@ -21,6 +21,14 @@ public sealed class NhaCungCap
     public string? TinhThanh { get; set; }
 
     public string? MaSoThue { get; set; }
+    public string? SoTaiKhoan { get; set; }
+    public string? NganHang { get; set; }
+    public decimal CongNoGoiDau { get; set; }
+    public string? NhanHieu { get; set; }
+    public decimal ChietKhau { get; set; }
+    public string? LienHe { get => NguoiLienHe ?? SoDienThoai; set { NguoiLienHe = value; if (string.IsNullOrWhiteSpace(SoDienThoai)) SoDienThoai = value; } }
+    public bool ConHopTac { get => TrangThai; set => TrangThai = value; }
+    public uint? NhomNhaCungCapId { get; set; }
 
     public string? NguoiLienHe { get; set; }
 

@@ -15,7 +15,7 @@
         <TextBlock Text="Tạo tài khoản và gán quyền theo từng chức năng chi tiết" Foreground="#6B7280" />
       </StackPanel>
 
-      <Grid Grid.Row="1" Margin="0,16,0,0" RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" RowSpacing="10">
+      <Grid Grid.Row="1" Margin="0,16,0,0" RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto" RowSpacing="10">
         <StackPanel Grid.Row="0" Spacing="4">
           <TextBlock Text="Tên đăng nhập *" />
           <TextBox Text="{Binding TenDangNhap}" IsEnabled="{Binding CanChangeUsername}" />
@@ -28,6 +28,17 @@
 
         <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12">
           <StackPanel Spacing="4">
+            <TextBlock Text="Số điện thoại" />
+            <TextBox Text="{Binding SoDienThoai}" Watermark="Ví dụ: 0912345678" />
+          </StackPanel>
+          <StackPanel Grid.Column="1" Spacing="4">
+            <TextBlock Text="Email" />
+            <TextBox Text="{Binding Email}" Watermark="Ví dụ: nhanvien@tiemhoa.vn" />
+          </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="3" ColumnDefinitions="*,*" ColumnSpacing="12">
+          <StackPanel Spacing="4">
             <TextBlock Text="Mật khẩu *" />
             <TextBox Text="{Binding MatKhau}" PasswordChar="*" Watermark="{Binding PasswordWatermark}" />
           </StackPanel>
@@ -37,7 +48,7 @@
           </StackPanel>
         </Grid>
 
-        <StackPanel Grid.Row="3" Spacing="4">
+        <StackPanel Grid.Row="4" Spacing="4">
           <TextBlock Text="Vai trò" />
           <ComboBox ItemsSource="{Binding Roles}"
                     SelectedItem="{Binding SelectedRole}"
@@ -51,7 +62,7 @@
           <CheckBox Content="Đang hoạt động" IsChecked="{Binding IsActive}" Margin="0,6,0,0" />
         </StackPanel>
 
-        <Border Grid.Row="4"
+        <Border Grid.Row="5"
                 BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8" Padding="12" Background="#FAFAFA">
           <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="8">
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
@@ -131,7 +142,7 @@
           </Grid>
         </Border>
 
-        <Grid Grid.Row="5" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Margin="0,16,0,0">
+        <Grid Grid.Row="6" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Margin="0,16,0,0">
           <Button Grid.Column="1" Content="Hủy" Command="{Binding CancelCommand}" CommandParameter="{Binding $parent[Window]}" />
           <Button Grid.Column="2" Content="{Binding SaveButtonText}" Command="{Binding SaveCommand}" CommandParameter="{Binding $parent[Window]}" Background="#0F766E" Foreground="White" />
         </Grid>

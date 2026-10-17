@@ -1,0 +1,405 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="using:ShopHoa.Models"
+        x:Class="ShopHoa.Views.ThemKhachHangNoiBoWindow"
+        Width="750"
+        Height="650"
+        MinWidth="700"
+        MinHeight="580"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Title="Thêm khách hàng nội bộ - WINWON"
+        Background="#F0F5FA"
+        RequestedThemeVariant="Light">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.fieldLabel">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#1C3A5E"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+
+        <Style Selector="TextBlock.requiredStar">
+            <Setter Property="Foreground" Value="#D92D20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <Style Selector="TextBox.classicInput">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#8EB2D5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <Style Selector="TextBox.classicInput:focus">
+            <Setter Property="BorderBrush" Value="#1976D2"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+        </Style>
+
+        <Style Selector="ComboBox.classicCombo">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#8EB2D5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="ComboBox.classicCombo:focus">
+            <Setter Property="BorderBrush" Value="#1976D2"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+        </Style>
+
+        <Style Selector="Border.formCard">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#D2E2F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="14,12"/>
+            <Setter Property="BoxShadow" Value="0 2 6 0 #0D1976D2"/>
+        </Style>
+
+        <Style Selector="TextBlock.cardHeader">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#0B4B82"/>
+            <Setter Property="LetterSpacing" Value="0.5"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <Style Selector="Button.actionBtn">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Button.saveBtn">
+            <Setter Property="Background" Value="#1976D2"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        <Style Selector="Button.saveBtn:pointerover">
+            <Setter Property="Background" Value="#1565C0"/>
+        </Style>
+        <Style Selector="Button.saveBtn:disabled">
+            <Setter Property="Opacity" Value="0.6"/>
+            <Setter Property="Cursor" Value="Wait"/>
+        </Style>
+
+        <Style Selector="Button.saveAndNewBtn">
+            <Setter Property="Background" Value="#E3F2FD"/>
+            <Setter Property="Foreground" Value="#0D47A1"/>
+            <Setter Property="BorderBrush" Value="#90CAF9"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Button.saveAndNewBtn:pointerover">
+            <Setter Property="Background" Value="#BBDEFB"/>
+        </Style>
+
+        <Style Selector="Button.cancelBtn">
+            <Setter Property="Background" Value="#FCE4D6"/>
+            <Setter Property="Foreground" Value="#C00000"/>
+            <Setter Property="BorderBrush" Value="#F4B084"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Button.cancelBtn:pointerover">
+            <Setter Property="Background" Value="#F8CBAD"/>
+        </Style>
+
+        <Style Selector="Button.codeGenBtn">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Background" Value="#E3F2FD"/>
+            <Setter Property="Foreground" Value="#0B4B82"/>
+            <Setter Property="BorderBrush" Value="#8EB2D5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.codeGenBtn:pointerover">
+            <Setter Property="Background" Value="#BBDEFB"/>
+        </Style>
+
+        <Style Selector="Button.closeWindowBtn">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#0B4B82"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <Style Selector="Button.closeWindowBtn:pointerover">
+            <Setter Property="Background" Value="#FDE8E8"/>
+            <Setter Property="Foreground" Value="#C00000"/>
+        </Style>
+    </Window.Styles>
+
+    <!-- KHUNG BAO NGOÀI FORM MODAL CHUYÊN NGHIỆP -->
+    <Border BorderBrush="#6DA2D9" BorderThickness="2" Margin="6" Background="#F0F5FA" CornerRadius="6"
+            BoxShadow="0 8 24 0 #25000000">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+            <!-- ======================================================== -->
+            <!-- A. THANH TIÊU ĐỀ BANNER                                   -->
+            <!-- ======================================================== -->
+            <Border Grid.Row="0"
+                    Background="#CBE8FA"
+                    BorderBrush="#90C4E8"
+                    BorderThickness="0,0,0,1"
+                    Padding="14,9"
+                    CornerRadius="4,4,0,0">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <!-- Icon + Tiêu đề + Breadcrumb -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="9" VerticalAlignment="Center">
+                        <Border Background="#0B4B82" CornerRadius="6" Width="28" Height="28" VerticalAlignment="Center">
+                            <TextBlock Text="🏢" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center" Spacing="1">
+                            <TextBlock Text="THÊM KHÁCH HÀNG NỘI BỘ"
+                                       FontSize="15"
+                                       FontWeight="Bold"
+                                       Foreground="#0B4B82"/>
+                            <TextBlock Text="Danh mục → Đối tác → Nội bộ → Thêm khách hàng nội bộ"
+                                       FontSize="11.5"
+                                       Foreground="#4A7599"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Nút đóng cửa sổ -->
+                    <Button Grid.Column="2"
+                            Classes="closeWindowBtn"
+                            Content="✕"
+                            ToolTip.Tip="Đóng cửa sổ"
+                            Click="OnCancelClicked"/>
+                </Grid>
+            </Border>
+
+            <!-- ======================================================== -->
+            <!-- B. NỘI DUNG FORM NHẬP LIỆU                                -->
+            <!-- ======================================================== -->
+            <ScrollViewer Grid.Row="1" Padding="16,12" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="10">
+
+                    <!-- CARD 1: THÔNG TIN CƠ BẢN & BỘ PHẬN -->
+                    <Border Classes="formCard">
+                        <StackPanel Spacing="8">
+                            <TextBlock Classes="cardHeader" Text="1. THÔNG TIN ĐỐI TÁC NỘI BỘ &amp; BỘ PHẬN"/>
+
+                            <!-- Hàng 1: Mã KH nội bộ & Bộ phận/Đơn vị -->
+                            <Grid ColumnDefinitions="*,14,*">
+                                <!-- Cột 1: Mã khách hàng nội bộ -->
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <TextBlock Classes="fieldLabel" Text="Mã đối tác nội bộ"/>
+                                        <TextBlock Classes="requiredStar" Text="*"/>
+                                    </StackPanel>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                                        <TextBox Name="MaKhachHangBox"
+                                                 Classes="classicInput"
+                                                 Watermark="Ví dụ: NB000001"/>
+                                        <Button Grid.Column="1"
+                                                Classes="codeGenBtn"
+                                                Content="↻ Sinh mã"
+                                                ToolTip.Tip="Tự động sinh mã đối tác nội bộ mới"
+                                                Click="OnSinhMaMoiClicked"/>
+                                    </Grid>
+                                </StackPanel>
+
+                                <!-- Cột 2: Bộ phận hoặc đơn vị trực thuộc -->
+                                <StackPanel Grid.Column="2" Spacing="2">
+                                    <TextBlock Classes="fieldLabel" Text="Bộ phận / Đơn vị trực thuộc"/>
+                                    <ComboBox Name="BoPhanComboBox"
+                                              Classes="classicCombo"
+                                              HorizontalAlignment="Stretch"
+                                              PlaceholderText="-- Chọn hoặc nhập bộ phận --"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Hàng 2: Tên khách hàng nội bộ -->
+                            <StackPanel Spacing="2">
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <TextBlock Classes="fieldLabel" Text="Tên khách hàng / Đối tác nội bộ"/>
+                                    <TextBlock Classes="requiredStar" Text="*"/>
+                                </StackPanel>
+                                <TextBox Name="TenKhachHangBox"
+                                         Classes="classicInput"
+                                         Watermark="Nhập họ tên nhân sự, quản lý hoặc tên đơn vị nội bộ..."/>
+                            </StackPanel>
+
+                            <!-- Hàng 3: Nhóm khách hàng & Trạng thái -->
+                            <Grid ColumnDefinitions="*,14,*">
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                    <TextBlock Classes="fieldLabel" Text="Nhóm đối tác"/>
+                                    <ComboBox Name="NhomKhachHangComboBox"
+                                              Classes="classicCombo"
+                                              HorizontalAlignment="Stretch">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="models:NhomKhachHang">
+                                                <TextBlock Text="{Binding TenNhom}"/>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,18,0,0">
+                                    <CheckBox Name="TrangThaiCheckBox"
+                                              IsChecked="True"
+                                              Content="Đang hoạt động (cho phép giao dịch nội bộ)"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- CARD 2: THÔNG TIN LIÊN HỆ & ĐỊA CHỈ -->
+                    <Border Classes="formCard">
+                        <StackPanel Spacing="8">
+                            <TextBlock Classes="cardHeader" Text="2. THÔNG TIN LIÊN LẠC &amp; ĐỊA CHỈ LÀM VIỆC"/>
+
+                            <!-- Hàng 4: Số điện thoại & Email -->
+                            <Grid ColumnDefinitions="*,14,*">
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                    <TextBlock Classes="fieldLabel" Text="Số điện thoại liên hệ"/>
+                                    <TextBox Name="SoDienThoaiBox"
+                                             Classes="classicInput"
+                                             Watermark="Số điện thoại di động / nội bộ"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" Spacing="2">
+                                    <TextBlock Classes="fieldLabel" Text="Địa chỉ Email"/>
+                                    <TextBox Name="EmailBox"
+                                             Classes="classicInput"
+                                             Watermark="email@shophoa.com"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Hàng 5: Địa chỉ làm việc / cơ sở -->
+                            <StackPanel Spacing="2">
+                                <TextBlock Classes="fieldLabel" Text="Địa chỉ làm việc / Chi nhánh"/>
+                                <TextBox Name="DiaChiBox"
+                                         Classes="classicInput"
+                                         Watermark="Địa chỉ phòng ban, chi nhánh, quầy làm việc..."/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- CARD 3: GHI CHÚ -->
+                    <Border Classes="formCard">
+                        <StackPanel Spacing="8">
+                            <TextBlock Classes="cardHeader" Text="3. GHI CHÚ NỘI BỘ &amp; PHÂN CÔNG"/>
+
+                            <TextBox Name="GhiChuBox"
+                                     Classes="classicInput"
+                                     Height="65"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     VerticalContentAlignment="Top"
+                                     Watermark="Ghi chú về nhiệm vụ, quyền hạn hoặc hạn mức công nợ nội bộ..."/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- KHUNG THÔNG BÁO LỖI -->
+                    <Border Name="LoiBorder"
+                            IsVisible="False"
+                            Background="#FDE8E8"
+                            BorderBrush="#F87171"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="12,8">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <TextBlock Text="⚠️" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Grid.Column="1"
+                                       Name="LoiMessageTextBlock"
+                                       Foreground="#B91C1C"
+                                       FontWeight="SemiBold"
+                                       FontSize="12.5"
+                                       TextWrapping="Wrap"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- KHUNG BÁO THÀNH CÔNG (KHI LƯU VÀ THÊM MỚI) -->
+                    <Border Name="ThanhCongBorder"
+                            IsVisible="False"
+                            Background="#E6F4EA"
+                            BorderBrush="#85C7B7"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="12,8">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <TextBlock Text="✓" FontSize="14" Foreground="#137333" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Grid.Column="1"
+                                       Name="ThanhCongMessageTextBlock"
+                                       Foreground="#137333"
+                                       FontWeight="SemiBold"
+                                       FontSize="12.5"
+                                       TextWrapping="Wrap"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- THANH TIẾN TRÌNH KHI ĐANG LƯU -->
+                    <ProgressBar Name="LoadingProgressBar"
+                                 IsIndeterminate="True"
+                                 Height="3"
+                                 Foreground="#1976D2"
+                                 IsVisible="False"/>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ======================================================== -->
+            <!-- C. THANH NÚT BẤM DƯỚI ĐÁY                                 -->
+            <!-- ======================================================== -->
+            <Border Grid.Row="2"
+                    Background="#E6EFF7"
+                    BorderBrush="#BAD4EB"
+                    BorderThickness="0,1,0,0"
+                    Padding="14,10"
+                    CornerRadius="0,0,4,4">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="14">
+                    <Button Name="NutLuuButton"
+                            Classes="actionBtn saveBtn"
+                            Content="💾  Lưu"
+                            ToolTip.Tip="Lưu khách hàng nội bộ và đóng cửa sổ"
+                            Click="OnSaveClicked"/>
+
+                    <Button Name="NutLuuVaThemMoiButton"
+                            Classes="actionBtn saveAndNewBtn"
+                            Content="➕  Lưu và thêm mới"
+                            ToolTip.Tip="Lưu bản ghi này và tiếp tục nhập khách hàng nội bộ tiếp theo"
+                            Click="OnSaveAndNewClicked"/>
+
+                    <Button Name="NutHuyButton"
+                            Classes="actionBtn cancelBtn"
+                            Content="🚫  Hủy bỏ"
+                            ToolTip.Tip="Hủy bỏ và đóng cửa sổ"
+                            Click="OnCancelClicked"/>
+                </StackPanel>
+            </Border>
+
+        </Grid>
+    </Border>
+</Window>

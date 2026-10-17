@@ -1,0 +1,502 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ShopHoa.ViewModels"
+        xmlns:models="using:ShopHoa.Models"
+        x:Class="ShopHoa.Views.DanhSachNhanVienWindow"
+        x:DataType="vm:DanhSachNhanVienViewModel"
+        Width="1240"
+        Height="780"
+        MinWidth="1050"
+        MinHeight="620"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Title="Danh mục → Đối tác → Nhân viên - WINWON"
+        Background="#F4F7F6"
+        RequestedThemeVariant="Light">
+
+    <Window.Styles>
+        <!-- TextBox Style -->
+        <Style Selector="TextBox.searchInput">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="TextBox.searchInput:focus">
+            <Setter Property="BorderBrush" Value="#0B4B82"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+        </Style>
+
+        <!-- ComboBox Filter -->
+        <Style Selector="ComboBox.filterCombo">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Button Primary (Thêm nhân viên) -->
+        <Style Selector="Button.btnPrimary">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Background" Value="#0B4B82"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="18,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.btnPrimary:pointerover">
+            <Setter Property="Background" Value="#083863"/>
+        </Style>
+
+        <!-- Button Default / Action -->
+        <Style Selector="Button.btnAction">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.btnAction:pointerover">
+            <Setter Property="Background" Value="#F1F5F9"/>
+        </Style>
+
+        <!-- DataGrid Row Action Button -->
+        <Style Selector="Button.rowBtn">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Paging Navigation Button -->
+        <Style Selector="Button.pageBtn">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="MinWidth" Value="32"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.pageBtn:pointerover">
+            <Setter Property="Background" Value="#EFF6FF"/>
+            <Setter Property="BorderBrush" Value="#93C5FD"/>
+            <Setter Property="Foreground" Value="#1D4ED8"/>
+        </Style>
+        <Style Selector="Button.pageBtn:disabled">
+            <Setter Property="Opacity" Value="0.4"/>
+            <Setter Property="Cursor" Value="Arrow"/>
+        </Style>
+
+        <!-- DataGrid Styles -->
+        <Style Selector="DataGrid">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#F1F5F9"/>
+            <Setter Property="RowHeight" Value="48"/>
+        </Style>
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="Padding" Value="12,12"/>
+            <Setter Property="SeparatorBrush" Value="#E2E8F0"/>
+        </Style>
+        <Style Selector="DataGridRow:pointerover">
+            <Setter Property="Background" Value="#F8FAFC"/>
+        </Style>
+        <Style Selector="DataGridRow:selected">
+            <Setter Property="Background" Value="#EFF6FF"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="20,16,20,16" RowSpacing="12">
+
+        <!-- 1. HEADER & BREADCRUMB -->
+        <Border Grid.Row="0" Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Padding="20,14">
+            <Grid ColumnDefinitions="*,Auto">
+                <!-- Tiêu đề & Breadcrumb -->
+                <StackPanel Spacing="4" VerticalAlignment="Center">
+                    <!-- Breadcrumb -->
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="Danh mục" Foreground="#64748B" FontSize="12" />
+                        <TextBlock Text="›" Foreground="#94A3B8" FontSize="12" />
+                        <TextBlock Text="Đối tác" Foreground="#64748B" FontSize="12" />
+                        <TextBlock Text="›" Foreground="#94A3B8" FontSize="12" />
+                        <TextBlock Text="Nhân viên" Foreground="#0B4B82" FontWeight="SemiBold" FontSize="12" />
+                    </StackPanel>
+
+                    <!-- Title -->
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2,0,0">
+                        <Border Width="38" Height="38" CornerRadius="10" Background="#EFF6FF" VerticalAlignment="Center">
+                            <TextBlock Text="👥" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center" Spacing="2">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="Danh sách nhân viên" FontSize="20" FontWeight="Bold" Foreground="#0F172A"/>
+                                <Border Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="12" Padding="8,2" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding TotalRecords, StringFormat='{}{0} nhân viên'}" FontSize="11.5" FontWeight="Bold" Foreground="#1D4ED8"/>
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="Quản lý hồ sơ nhân sự, chức vụ, bộ phận và trạng thái làm việc" FontSize="12.5" Foreground="#64748B"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Actions: Thêm nhân viên + Làm mới -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Button Classes="btnAction" Command="{Binding LoadDataCommand}" ToolTip.Tip="Tải lại danh sách">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="🔄" FontSize="13" VerticalAlignment="Center"/>
+                            <TextBlock Text="Làm mới" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Classes="btnPrimary"
+                            Command="{Binding ThemNhanVienCommand}"
+                            IsVisible="{Binding CanCreate}"
+                            ToolTip.Tip="Thêm nhân viên mới">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="➕" FontSize="12" VerticalAlignment="Center"/>
+                            <TextBlock Text="Thêm nhân viên" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 2. SEARCH & FILTER TOOLBAR -->
+        <Border Grid.Row="1" Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Padding="14,12">
+            <Grid ColumnDefinitions="320,180,220,Auto,*,Auto" ColumnSpacing="10">
+                <!-- Ô tìm kiếm theo mã, họ tên, số điện thoại -->
+                <TextBox Grid.Column="0" Classes="searchInput"
+                         Text="{Binding SearchKeyword, Mode=TwoWay}"
+                         Watermark="🔍 Tìm theo mã NV, họ tên, số điện thoại..."/>
+
+                <!-- Lọc theo trạng thái làm việc -->
+                <ComboBox Grid.Column="1" Classes="filterCombo"
+                          HorizontalAlignment="Stretch"
+                          ItemsSource="{Binding TrangThaiOptions}"
+                          SelectedItem="{Binding SelectedTrangThai, Mode=TwoWay}"/>
+
+                <!-- Lọc theo chức vụ / bộ phận -->
+                <ComboBox Grid.Column="2" Classes="filterCombo"
+                          HorizontalAlignment="Stretch"
+                          ItemsSource="{Binding RoleOptions}"
+                          SelectedItem="{Binding SelectedRole, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:Role">
+                            <TextBlock Text="{Binding TenVaiTro}" FontSize="13" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <!-- Nút Xóa bộ lọc -->
+                <Button Grid.Column="3" Classes="btnAction" Command="{Binding XoaBoLocCommand}" ToolTip.Tip="Đặt lại bộ lọc mặc định">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="✕" FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>
+                        <TextBlock Text="Xóa lọc" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Nút Tìm kiếm thủ công -->
+                <Button Grid.Column="5" Classes="btnAction" Command="{Binding LoadDataCommand}" ToolTip.Tip="Tìm kiếm">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="🔎" FontSize="13" VerticalAlignment="Center"/>
+                        <TextBlock Text="Tìm kiếm" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- 3. DATA TABLE -->
+        <Border Grid.Row="2" Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" ClipToBounds="True">
+            <Grid>
+                <!-- DataGrid danh sách nhân viên -->
+                <DataGrid ItemsSource="{Binding NhanVienList}"
+                          SelectedItem="{Binding SelectedNhanVien}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserResizeColumns="True"
+                          BorderThickness="0"
+                          DoubleTapped="OnRowDoubleTapped">
+                    <DataGrid.Columns>
+                        <!-- STT -->
+                        <DataGridTemplateColumn Header="STT" Width="60">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:NhanVienItem">
+                                    <TextBlock Text="{Binding Stt}" 
+                                               Foreground="#64748B" 
+                                               FontSize="12.5" 
+                                               HorizontalAlignment="Center" 
+                                               VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Mã nhân viên -->
+                        <DataGridTemplateColumn Header="Mã NV" Width="115">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:NhanVienItem">
+                                    <TextBlock Text="{Binding MaNhanVien}" 
+                                               FontWeight="Bold" 
+                                               Foreground="#0B4B82" 
+                                               VerticalAlignment="Center" 
+                                               Margin="12,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Họ và tên -->
+                        <DataGridTemplateColumn Header="Họ và tên" Width="2*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:NhanVienItem">
+                                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="12,0">
+                                        <TextBlock Text="{Binding HoTen}" 
+                                                   FontWeight="SemiBold" 
+                                                   Foreground="#0F172A" 
+                                                   FontSize="13" 
+                                                   VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <!-- Badge quản trị -->
+                                        <Border Background="#FEF3C7" BorderBrush="#FDE68A" BorderThickness="1" CornerRadius="4" Padding="6,1" VerticalAlignment="Center" IsVisible="{Binding IsAdmin}">
+                                            <TextBlock Text="Admin" Foreground="#B45309" FontSize="10.5" FontWeight="Bold"/>
+                                        </Border>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Số điện thoại -->
+                        <DataGridTemplateColumn Header="Số điện thoại" Width="130">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:NhanVienItem">
+                                    <TextBlock Text="{Binding SoDienThoai}" 
+                                               Foreground="#334155" 
+                                               FontSize="12.5" 
+                                               VerticalAlignment="Center" 
+                                               Margin="12,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Email -->
+                        <DataGridTemplateColumn Header="Email" Width="180">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:NhanVienItem">
+                                    <TextBlock Text="{Binding Email}" 
+                                               Foreground="#64748B" 
+                                               FontSize="12" 
+                                               VerticalAlignment="Center" 
+                                               Margin="12,0"
+                                               TextTrimming="CharacterEllipsis"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Chức vụ / Bộ phận -->
+                        <DataGridTemplateColumn Header="Chức vụ / Bộ phận" Width="160">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:NhanVienItem">
+                                    <Border Background="#F1F5F9" CornerRadius="6" Padding="8,4" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="12,0">
+                                        <TextBlock Text="{Binding ChucVu, FallbackValue='Nhân viên'}" 
+                                                   Foreground="#334155" 
+                                                   FontSize="12" 
+                                                   FontWeight="Medium"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Trạng thái -->
+                        <DataGridTemplateColumn Header="Trạng thái" Width="140">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:NhanVienItem">
+                                    <Panel VerticalAlignment="Center" Margin="12,0">
+                                        <!-- Đang làm việc -->
+                                        <Border Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="12" Padding="8,3" HorizontalAlignment="Left" IsVisible="{Binding TrangThai}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <Ellipse Width="6" Height="6" Fill="#10B981" />
+                                                <TextBlock Text="Đang làm việc" Foreground="#047857" FontSize="11.5" FontWeight="Medium" />
+                                            </StackPanel>
+                                        </Border>
+                                        <!-- Đã khóa / Ngừng làm việc -->
+                                        <Border Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="12" Padding="8,3" HorizontalAlignment="Left" IsVisible="{Binding !TrangThai}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <Ellipse Width="6" Height="6" Fill="#EF4444" />
+                                                <TextBlock Text="Đã khóa" Foreground="#B91C1C" FontSize="11.5" FontWeight="Medium" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Panel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Thao tác -->
+                        <DataGridTemplateColumn Header="Thao tác" Width="260">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:NhanVienItem">
+                                    <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center" Margin="8,0">
+                                        <!-- Xem -->
+                                        <Button Classes="rowBtn" Content="👁️ Xem"
+                                                Command="{Binding $parent[Window].DataContext.XemChiTietCommand}"
+                                                CommandParameter="{Binding}"
+                                                Background="#F8FAFC" Foreground="#334155" BorderBrush="#E2E8F0" BorderThickness="1"
+                                                ToolTip.Tip="Xem chi tiết nhân viên"/>
+
+                                        <!-- Sửa -->
+                                        <Button Classes="rowBtn" Content="✏️ Sửa"
+                                                IsVisible="{Binding $parent[Window].DataContext.CanEdit}"
+                                                Command="{Binding $parent[Window].DataContext.SuaNhanVienCommand}"
+                                                CommandParameter="{Binding}"
+                                                Background="#EFF6FF" Foreground="#1D4ED8" BorderBrush="#BFDBFE" BorderThickness="1"
+                                                ToolTip.Tip="Sửa thông tin nhân viên"/>
+
+                                        <!-- Phân quyền -->
+                                        <Button Classes="rowBtn" Content="🔑 Quyền"
+                                                IsVisible="{Binding $parent[Window].DataContext.CanAssignPermission}"
+                                                Command="{Binding $parent[Window].DataContext.PhanQuyenCommand}"
+                                                CommandParameter="{Binding}"
+                                                Background="#F5F3FF" Foreground="#6D28D9" BorderBrush="#DDD6FE" BorderThickness="1"
+                                                ToolTip.Tip="Phân quyền truy cập"/>
+
+                                        <!-- Khóa (khi đang hoạt động) -->
+                                        <Button Classes="rowBtn" Content="🔒 Khóa"
+                                                IsVisible="{Binding TrangThai}"
+                                                IsEnabled="{Binding $parent[Window].DataContext.CanLock}"
+                                                Command="{Binding $parent[Window].DataContext.KhoaNhanVienCommand}"
+                                                CommandParameter="{Binding}"
+                                                Background="#FFFBEB" Foreground="#B45309" BorderBrush="#FDE68A" BorderThickness="1"
+                                                ToolTip.Tip="Khóa nhân viên này"/>
+
+                                        <!-- Mở khóa (khi bị khóa) -->
+                                        <Button Classes="rowBtn" Content="🔓 Mở"
+                                                IsVisible="{Binding !TrangThai}"
+                                                IsEnabled="{Binding $parent[Window].DataContext.CanUnlock}"
+                                                Command="{Binding $parent[Window].DataContext.MoKhoaNhanVienCommand}"
+                                                CommandParameter="{Binding}"
+                                                Background="#ECFDF5" Foreground="#047857" BorderBrush="#A7F3D0" BorderThickness="1"
+                                                ToolTip.Tip="Mở khóa cho nhân viên"/>
+
+                                        <!-- Xóa -->
+                                        <Button Classes="rowBtn" Content="🗑️"
+                                                IsVisible="{Binding $parent[Window].DataContext.CanDelete}"
+                                                Command="{Binding $parent[Window].DataContext.XoaNhanVienCommand}"
+                                                CommandParameter="{Binding}"
+                                                Background="#FEF2F2" Foreground="#DC2626" BorderBrush="#FECACA" BorderThickness="1"
+                                                ToolTip.Tip="Xóa nhân viên khỏi hệ thống"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Trạng thái danh sách rỗng (Empty state) -->
+                <Border Background="White" IsVisible="{Binding IsEmpty}" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="40">
+                    <StackPanel Spacing="10" HorizontalAlignment="Center">
+                        <TextBlock Text="👥" FontSize="44" HorizontalAlignment="Center" Foreground="#94A3B8"/>
+                        <TextBlock Text="Không tìm thấy nhân viên nào" FontSize="16" FontWeight="SemiBold" Foreground="#334155" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Thử tìm kiếm với từ khóa khác hoặc bấm nút Xóa lọc bên trên." FontSize="13" Foreground="#64748B" HorizontalAlignment="Center"/>
+                        <Button Classes="btnAction" Content="Xóa bộ lọc" Command="{Binding XoaBoLocCommand}" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Trạng thái đang tải (Loading state) -->
+                <Border Background="#40FFFFFF" IsVisible="{Binding IsLoading}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
+                        <ProgressBar IsIndeterminate="True" Width="200" Height="4" Foreground="#0B4B82"/>
+                        <TextBlock Text="Đang tải dữ liệu nhân viên..." FontSize="13" Foreground="#64748B" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- 4. PAGING FOOTER -->
+        <Border Grid.Row="3" Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Padding="16,10">
+            <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+                <!-- Dải hiển thị -->
+                <TextBlock Grid.Column="0" Text="{Binding PagingSummary}" Foreground="#64748B" FontSize="13" VerticalAlignment="Center"/>
+
+                <!-- Chọn số bản ghi mỗi trang -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="20,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="Hiển thị:" Foreground="#64748B" FontSize="12.5" VerticalAlignment="Center"/>
+                    <ComboBox ItemsSource="{Binding PageSizeOptions}"
+                              SelectedItem="{Binding PageSize, Mode=TwoWay}"
+                              Height="30" Padding="8,0"
+                              FontSize="12"
+                              VerticalAlignment="Center"/>
+                    <TextBlock Text="dòng/trang" Foreground="#64748B" FontSize="12.5" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Điều hướng phân trang -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <Button Classes="pageBtn" Command="{Binding TrangDauCommand}" IsEnabled="{Binding CanGoPrevious}" ToolTip.Tip="Trang đầu">
+                        <TextBlock Text="⏮" FontSize="11" VerticalAlignment="Center"/>
+                    </Button>
+                    <Button Classes="pageBtn" Command="{Binding TrangTruocCommand}" IsEnabled="{Binding CanGoPrevious}" ToolTip.Tip="Trang trước">
+                        <TextBlock Text="◀" FontSize="10" VerticalAlignment="Center"/>
+                    </Button>
+
+                    <Border Background="#F1F5F9" CornerRadius="6" Padding="12,4" VerticalAlignment="Center">
+                        <TextBlock FontSize="12.5" FontWeight="SemiBold" Foreground="#1E293B">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="Trang {0} / {1}">
+                                    <Binding Path="CurrentPage"/>
+                                    <Binding Path="TotalPages"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </Border>
+
+                    <Button Classes="pageBtn" Command="{Binding TrangSauCommand}" IsEnabled="{Binding CanGoNext}" ToolTip.Tip="Trang sau">
+                        <TextBlock Text="▶" FontSize="10" VerticalAlignment="Center"/>
+                    </Button>
+                    <Button Classes="pageBtn" Command="{Binding TrangCuoiCommand}" IsEnabled="{Binding CanGoNext}" ToolTip.Tip="Trang cuối">
+                        <TextBlock Text="⏭" FontSize="11" VerticalAlignment="Center"/>
+                    </Button>
+                </StackPanel>
+
+                <!-- Nút Đóng -->
+                <Button Grid.Column="4" Classes="btnAction" Click="Close_Click" Margin="16,0,0,0">
+                    <TextBlock Text="Đóng" VerticalAlignment="Center"/>
+                </Button>
+            </Grid>
+        </Border>
+
+    </Grid>
+</Window>

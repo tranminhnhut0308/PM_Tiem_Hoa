@@ -573,7 +573,7 @@ public partial class MainWindowViewModel : ObservableObject
         => OnPropertyChanged(nameof(ExpandedCustomer));
 
     [RelayCommand]
-    private void ChonKhachHangBan(KhachHang? customer)
+    private async Task ChonKhachHangBan(KhachHang? customer)
     {
         if (customer is null)
             return;
@@ -583,6 +583,38 @@ public partial class MainWindowViewModel : ObservableObject
         SaleCustomerPhone = customer.SoDienThoai ?? "";
         SaleCustomerAddress = customer.DiaChi ?? "";
         SaleCustomerSuggestions.Clear();
+
+        // Tự động kiểm tra và áp dụng giá bán riêng của khách hàng cho các sản phẩm trong giỏ
+        try
+        {
+            var giaRiengDict = await _db.LayTatCaGiaRiengKhachHangAsync(customer.Id);
+            var soHangCoGiaRieng = 0;
+
+            foreach (var item in SaleCart)
+            {
+                if (giaRiengDict.TryGetValue(item.SanPham.Id, out var giaRieng))
+                {
+                    item.DonGiaRieng = giaRieng;
+                    soHangCoGiaRieng++;
+                }
+                else
+                {
+                    item.DonGiaRieng = null;
+                }
+                item.CapNhatThanhTien();
+            }
+
+            RecalculateSaleTotal();
+
+            if (soHangCoGiaRieng > 0)
+            {
+                StatusMessage = $"Đã áp dụng bảng giá riêng của {customer.TenKhachHang} ({soHangCoGiaRieng} mặt hàng).";
+            }
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Lỗi áp dụng giá riêng khi chọn khách hàng", ex);
+        }
     }
 
     [RelayCommand]
@@ -593,6 +625,15 @@ public partial class MainWindowViewModel : ObservableObject
         SaleCustomerPhone = "";
         SaleCustomerAddress = "";
         SaleCustomerSuggestions.Clear();
+
+        // Khách lẻ quay về áp dụng giá bán niêm yết chuẩn
+        foreach (var item in SaleCart)
+        {
+            item.DonGiaRieng = null;
+            item.CapNhatThanhTien();
+        }
+
+        RecalculateSaleTotal();
     }
 
     [RelayCommand]
@@ -901,6 +942,43 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Mở cửa sổ "Danh mục → Đối tác → Nội bộ → Thêm khách hàng nội bộ" (Giao diện 17).
+    /// </summary>
+    [RelayCommand]
+    private async Task ThemKhachHangNoiBoAsync()
+    {
+        if (!await KiemTraQuyenAsync(PermissionKeys.CustomersCreate, "Bạn không có quyền thêm khách hàng nội bộ."))
+        {
+            return;
+        }
+
+        if (OwnerWindow is null)
+            return;
+
+        try
+        {
+            var window = new ThemKhachHangNoiBoWindow();
+            var result = await window.ShowDialog<bool>(OwnerWindow);
+
+            if (result && window.KetQuaLuu is not null)
+            {
+                CustomerPage = 1;
+                await LoadCustomersAsync();
+
+                StatusMessage = $"Đã thêm khách hàng nội bộ: {window.KetQuaLuu.TenKhachHang} ({window.KetQuaLuu.MaKhachHang})";
+                await NotificationWindow.ShowSuccessAsync(
+                    $"Đã thêm khách hàng nội bộ \"{window.KetQuaLuu.TenKhachHang}\" thành công.",
+                    owner: OwnerWindow);
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi khi thêm khách hàng nội bộ: " + ex.Message;
+            SafeLog.WriteError("Lỗi ThemKhachHangNoiBoAsync", ex);
+        }
+    }
+
     [RelayCommand]
     private async Task ThemKhachHangTuFileAsync()
     {
@@ -1088,6 +1166,37 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    private async Task InDanhSachKhachHangAsync()
+    {
+        if (OwnerWindow is null) return;
+        try
+        {
+            var (customers, _) = await _db.GetKhachHangPagedAsync(
+                CustomerSearch, 
+                1, 
+                10000, 
+                false, 
+                SelectedCustomerNhom?.Id ?? 0, 
+                CustomerCongNoFilter);
+            var boLoc = string.IsNullOrWhiteSpace(CustomerSearch) ? "Tất cả khách hàng" : $"Tìm kiếm: \"{CustomerSearch.Trim()}\"";
+            if (SelectedCustomerNhom != null && SelectedCustomerNhom.Id > 0)
+            {
+                boLoc += $" • Nhóm: {SelectedCustomerNhom.TenNhom}";
+            }
+            if (!string.IsNullOrWhiteSpace(CustomerCongNoFilter) && CustomerCongNoFilter != "tatca")
+            {
+                boLoc += CustomerCongNoFilter == "conno" ? " • Tình trạng: Còn nợ" : " • Tình trạng: Không còn nợ";
+            }
+            var win = new BaoCaoInDanhSachWindow("DANH SÁCH KHÁCH HÀNG", customers, "KHACH_HANG", boLoc);
+            await win.ShowDialog(OwnerWindow);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi in danh sách khách hàng: " + ex.Message;
+        }
+    }
+
     private async Task<IReadOnlyList<NhomKhachHang>> LoadNhomKhachHangOptionsAsync()
     {
         try
@@ -1165,6 +1274,54 @@ public partial class MainWindowViewModel : ObservableObject
             StatusMessage = "Không thể xóa khách hàng: " + ex.Message;
         }
     }
+
+    /// <summary>
+    /// Mở cửa sổ "Danh mục → Đối tác → Khách hàng → Thiết lập giá"
+    /// cho khách hàng trên dòng đang chọn hoặc đang mở chi tiết.
+    /// </summary>
+    [RelayCommand]
+    public async Task ThietLapGiaKhachHangAsync(KhachHangRowViewModel? row)
+    {
+        if (OwnerWindow is null)
+            return;
+
+        if (!await KiemTraQuyenAsync(PermissionKeys.CustomersEdit, "Bạn không có quyền thiết lập giá khách hàng."))
+        {
+            return;
+        }
+
+        var customer = row?.Customer ?? SelectedCustomer?.Customer;
+        if (customer is null)
+        {
+            var firstRow = CustomerRows.FirstOrDefault(r => r.IsSelected) ?? CustomerRows.FirstOrDefault();
+            customer = firstRow?.Customer;
+
+            if (customer is null)
+            {
+                await ShowMessageAsync("Thông báo", "Vui lòng chọn một khách hàng để thiết lập bảng giá riêng.");
+                return;
+            }
+        }
+
+        try
+        {
+            var window = new ThietLapGiaKhachHangWindow(customer);
+            await window.ShowDialog(OwnerWindow);
+            StatusMessage = $"Đã đóng thiết lập giá cho khách hàng {customer.TenKhachHang}.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Không thể mở thiết lập giá: " + ex.Message;
+            SafeLog.WriteError("Lỗi ThietLapGiaKhachHangAsync", ex);
+        }
+    }
+
+    /// <summary>
+    /// Mở thiết lập giá cho khách hàng đang chọn trên thanh công cụ danh sách.
+    /// </summary>
+    [RelayCommand]
+    public Task ThietLapGiaKhachHangDangChonAsync()
+        => ThietLapGiaKhachHangAsync(SelectedCustomer);
 
     private bool _isInitialized;
 
@@ -2220,6 +2377,217 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Mở cửa sổ "Dữ liệu đầu kỳ → Hàng hóa đầu kỳ → Thêm hàng tồn đầu kỳ".
+    /// Cho phép nhập số lượng tồn, giá vốn, tự động tính thành tiền và lưu vào hệ thống.
+    /// </summary>
+    [RelayCommand]
+    private async Task ThemHangTonDauKyAsync(SanPham? sanPham = null)
+    {
+        if (OwnerWindow is null)
+            return;
+
+        try
+        {
+            var window = new ThemHangTonDauKyWindow(sanPham);
+            var result = await window.ShowDialog<bool>(OwnerWindow);
+            if (result)
+            {
+                await RefreshProductsAsync();
+                StatusMessage = "Đã lưu hàng tồn đầu kỳ thành công!";
+                await NotificationWindow.ShowSuccessAsync("Đã lưu hàng tồn đầu kỳ thành công!", owner: OwnerWindow);
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi khi thêm tồn đầu kỳ: " + ex.Message;
+            SafeLog.WriteError("Lỗi ThemHangTonDauKyAsync", ex);
+        }
+    }
+
+    /// <summary>
+    /// Mở cửa sổ "Dữ liệu đầu kỳ → Công nợ đầu kỳ → Thêm công nợ đầu kỳ".
+    /// Cho phép khai báo số dư công nợ của khách hàng hoặc nhà cung cấp tại thời điểm đầu kỳ.
+    /// </summary>
+    [RelayCommand]
+    private async Task ThemCongNoDauKyAsync(string? loaiDoiTacMacDinh = null)
+    {
+        if (OwnerWindow is null)
+            return;
+
+        try
+        {
+            // Nếu người dùng đang đứng ở tab Nhà cung cấp, gợi ý mở sẵn loại Nhà cung cấp
+            if (string.IsNullOrWhiteSpace(loaiDoiTacMacDinh))
+            {
+                if (IsNhaCungCapSelected)
+                    loaiDoiTacMacDinh = "NHA_CUNG_CAP";
+                else if (IsKhachHangSelected)
+                    loaiDoiTacMacDinh = "KHACH_HANG";
+            }
+
+            var window = new ThemCongNoDauKyWindow(loaiDoiTacMacDinh);
+            var result = await window.ShowDialog<bool>(OwnerWindow);
+            if (result)
+            {
+                // Làm mới danh sách tương ứng để thấy số dư nợ mới
+                if (IsKhachHangSelected)
+                {
+                    await LoadCustomersAsync();
+                }
+                else if (IsNhaCungCapSelected)
+                {
+                    await LoadSuppliersAsync();
+                }
+
+                StatusMessage = "Đã lưu công nợ đầu kỳ thành công!";
+                await NotificationWindow.ShowSuccessAsync("Đã lưu công nợ đầu kỳ thành công!", owner: OwnerWindow);
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi khi thêm công nợ đầu kỳ: " + ex.Message;
+            SafeLog.WriteError("Lỗi ThemCongNoDauKyAsync", ex);
+        }
+    }
+
+    /// <summary>
+    /// Mở cửa sổ "Sổ quỹ → Số dư quỹ đầu kỳ".
+    /// Cho phép khai báo số tiền hiện có trong từng quỹ tại thời điểm bắt đầu dùng phần mềm.
+    /// </summary>
+    [RelayCommand]
+    private async Task QuanLySoQuyDauKyAsync()
+    {
+        if (!await KiemTraQuyenAsync(PermissionKeys.CashBookOpeningBalance, "Bạn không có quyền nhập số dư quỹ đầu kỳ."))
+        {
+            return;
+        }
+
+        if (OwnerWindow is null)
+            return;
+
+        try
+        {
+            var window = new SoQuyDauKyWindow();
+            await window.ShowDialog<bool>(OwnerWindow);
+
+            // Làm mới sổ quỹ để tồn quỹ cập nhật theo số dư đầu kỳ vừa khai báo.
+            await TaiLaiSoQuyAsync();
+            StatusMessage = "Đã cập nhật số dư quỹ đầu kỳ.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi khi mở số dư quỹ đầu kỳ: " + ex.Message;
+            SafeLog.WriteError("Lỗi QuanLySoQuyDauKyAsync", ex);
+        }
+    }
+
+    /// <summary>
+    /// Mở cửa sổ "Danh mục → Khuyến mãi → Thêm chương trình khuyến mãi".
+    /// Cho phép thiết lập chương trình ưu đãi, chọn danh sách hàng hóa và mức chiết khấu.
+    /// </summary>
+    [RelayCommand]
+    private async Task ThemChuongTrinhKhuyenMaiAsync()
+    {
+        if (OwnerWindow is null)
+            return;
+
+        try
+        {
+            var window = new ThemChuongTrinhKhuyenMaiWindow();
+            var result = await window.ShowDialog<bool>(OwnerWindow);
+            if (result && window.KetQuaLuu != null)
+            {
+                StatusMessage = $"Đã lưu chương trình khuyến mãi: {window.KetQuaLuu.TenChuongTrinh}";
+                await NotificationWindow.ShowSuccessAsync($"Đã thêm chương trình khuyến mãi: {window.KetQuaLuu.TenChuongTrinh}", owner: OwnerWindow);
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi khi thêm chương trình khuyến mãi: " + ex.Message;
+            SafeLog.WriteError("Lỗi ThemChuongTrinhKhuyenMaiAsync", ex);
+        }
+    }
+
+    /// <summary>
+    /// Mở cửa sổ "Danh mục → Khuyến mãi" hiển thị danh sách chương trình
+    /// khuyến mãi đã lưu, cho phép tìm kiếm, lọc, thêm, sửa và xóa.
+    /// </summary>
+    [RelayCommand]
+    private async Task QuanLyKhuyenMaiAsync()
+    {
+        if (OwnerWindow is null)
+            return;
+
+        try
+        {
+            var window = new DanhSachKhuyenMaiWindow();
+            await window.ShowDialog<bool>(OwnerWindow);
+            StatusMessage = "Đã cập nhật danh mục chương trình khuyến mãi.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi khi mở danh mục khuyến mãi: " + ex.Message;
+            SafeLog.WriteError("Lỗi QuanLyKhuyenMaiAsync", ex);
+        }
+    }
+
+    /// <summary>
+    /// Mở giao diện "Danh mục → Đối tác → Nhân viên".
+    /// Hiển thị danh sách nhân viên, tìm kiếm, lọc theo trạng thái, chức vụ và phân trang.
+    /// </summary>
+    [RelayCommand]
+    private async Task MoDanhSachNhanVienAsync()
+    {
+        if (!await KiemTraQuyenAsync(PermissionKeys.UsersView, "Bạn không có quyền xem danh sách nhân viên."))
+        {
+            return;
+        }
+
+        if (OwnerWindow is null)
+            return;
+
+        try
+        {
+            var window = new DanhSachNhanVienWindow();
+            await window.ShowDialog<bool>(OwnerWindow);
+            StatusMessage = "Đã xem danh sách nhân viên.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi khi mở danh sách nhân viên: " + ex.Message;
+            SafeLog.WriteError("Lỗi MoDanhSachNhanVienAsync", ex);
+        }
+    }
+
+    /// <summary>
+    /// Mở nhanh form "Thêm nhân viên" từ menu Danh mục → Đối tác → Nhân viên.
+    /// </summary>
+    [RelayCommand]
+    private async Task ThemNhanVienAsync()
+    {
+        if (!await KiemTraQuyenAsync(PermissionKeys.UsersCreate, "Bạn không có quyền thêm mới nhân viên."))
+        {
+            return;
+        }
+
+        if (OwnerWindow is null)
+            return;
+
+        try
+        {
+            var vm = new UserEditViewModel(_db, isEdit: false, userId: 0);
+            var win = new UserEditWindow(vm);
+            await win.ShowDialog(OwnerWindow);
+            StatusMessage = "Đã hoàn thành thêm nhân viên.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi khi thêm nhân viên: " + ex.Message;
+            SafeLog.WriteError("Lỗi ThemNhanVienAsync", ex);
+        }
+    }
+
     [RelayCommand]
     private async Task ThemSanPhamAsync()
     {
@@ -2254,6 +2622,87 @@ public partial class MainWindowViewModel : ObservableObject
             StatusMessage = "Không thể thêm sản phẩm: " + ex.Message;
         }
     }
+
+    [RelayCommand]
+    private async Task InDanhSachHangHoaAsync()
+    {
+        if (OwnerWindow is null) return;
+        try
+        {
+            var (products, _) = await _db.GetSanPhamPagedAsync(ProductSearch, 1, 10000);
+
+            // Áp dụng lọc theo nhóm sản phẩm nếu đang chọn nhóm
+            if (SelectedNhomSanPham != null && SelectedNhomSanPham.Id > 0)
+            {
+                if (SelectedNhomSanPham.Id == 999999)
+                {
+                    products = products.Where(p => p.NhomSanPhamId == null || p.NhomSanPhamId == 0).ToList();
+                }
+                else
+                {
+                    products = products.Where(p => p.NhomSanPhamId == SelectedNhomSanPham.Id).ToList();
+                }
+            }
+
+            // Áp dụng lọc phụ nếu có
+            if (!string.IsNullOrWhiteSpace(ProductFilter))
+            {
+                products = products.Where(p => MatchesFilter(p, ProductFilter)).ToList();
+            }
+
+            // Chuẩn bị thông tin bộ lọc hiển thị trên tiêu đề báo cáo
+            var boLoc = string.IsNullOrWhiteSpace(ProductSearch) ? "Tất cả hàng hóa" : $"Tìm kiếm: \"{ProductSearch.Trim()}\"";
+            if (SelectedNhomSanPham != null && SelectedNhomSanPham.Id > 0)
+            {
+                boLoc += SelectedNhomSanPham.Id == 999999 
+                    ? " • Nhóm: Chưa phân nhóm" 
+                    : $" • Nhóm: {SelectedNhomSanPham.Name}";
+            }
+            if (!string.IsNullOrWhiteSpace(ProductFilter))
+            {
+                boLoc += $" • Lọc: {ProductFilter.Trim()}";
+            }
+
+            // Kiểm tra quyền xem giá vốn của người dùng hiện tại
+            var coQuyenGiaVon = CanViewCost || CanUpdateProductCost;
+
+            var win = new BaoCaoInDanhSachWindow("DANH SÁCH HÀNG HÓA", products, "HANG_HOA", boLoc, coQuyenGiaVon);
+            await win.ShowDialog(OwnerWindow);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi in danh sách hàng hóa: " + ex.Message;
+        }
+    }
+
+    [RelayCommand]
+    private async Task NhapHangHoaTuExcelSalesProAsync()
+    {
+        if (!await KiemTraQuyenAsync(PermissionKeys.ProductsImport, "Bạn không có quyền import hàng hóa."))
+        {
+            return;
+        }
+        if (OwnerWindow is null) return;
+        try
+        {
+            var win = new NhapHangHoaExcelWindow();
+            var result = await win.ShowDialog<bool>(OwnerWindow);
+            if (result && win.DaLuuThanhCong)
+            {
+                await RefreshProductsAsync();
+                StatusMessage = !string.IsNullOrWhiteSpace(win.ThongBaoKetQua)
+                    ? win.ThongBaoKetQua
+                    : "Đã hoàn thành nhập dữ liệu hàng hóa từ file Excel.";
+
+                await NotificationWindow.ShowSuccessAsync(StatusMessage, owner: OwnerWindow);
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi khi nhập hàng hóa từ Excel: " + ex.Message;
+        }
+    }
+
     [RelayCommand]
     private async Task ThemSanPhamTuFileAsync()
     {
@@ -2959,7 +3408,8 @@ public partial class MainWindowViewModel : ObservableObject
         {
             MaNhaCungCap = generatedCode,
             TenNhaCungCap = string.Empty,
-            TrangThai = true
+            TrangThai = true,
+            ConHopTac = true
         };
 
         // Mở giao diện nhập thông tin nhà cung cấp
@@ -2970,16 +3420,36 @@ public partial class MainWindowViewModel : ObservableObject
         if (!saved)
             return null;
 
-        // Lưu database
-        editor.Supplier.Id =
-            await _db.ThemNhaCungCapAsync(editor.Supplier);
+        try
+        {
+            // Lưu database
+            editor.Supplier.Id =
+                await _db.ThemNhaCungCapAsync(editor.Supplier);
 
-        // Danh sách đang phân trang theo database nên tải lại trang hiện tại
-        // thay vì thêm thủ công một dòng có thể không thuộc trang đang xem.
-        await LoadSupplierPageAsync();
+            StatusMessage =
+                $"Đã thêm nhà cung cấp \"{editor.Supplier.TenNhaCungCap}\" thành công.";
 
-        return editor.Supplier;
+            await NotificationWindow.ShowSuccessAsync(
+                $"Nhà cung cấp \"{editor.Supplier.TenNhaCungCap}\" (Mã: {editor.Supplier.MaNhaCungCap}) đã được lưu thành công.",
+                "Thêm nhà cung cấp thành công",
+                owner: OwnerWindow);
+
+            // Danh sách đang phân trang theo database nên tải lại trang hiện tại
+            await LoadSupplierPageAsync();
+
+            return editor.Supplier;
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Không thể thêm nhà cung cấp: " + ex.Message;
+            await NotificationWindow.ShowErrorAsync(
+                "Không thể lưu nhà cung cấp vào cơ sở dữ liệu: " + ex.Message,
+                "Lỗi lưu dữ liệu",
+                owner: OwnerWindow);
+            return null;
+        }
     }
+
     [RelayCommand]
     private async Task SuaNhaCungCapAsync(NhaCungCap? supplier)
     {
@@ -3003,7 +3473,12 @@ public partial class MainWindowViewModel : ObservableObject
             await _db.CapNhatNhaCungCapAsync(editor.Supplier);
 
             StatusMessage =
-                $"Đã cập nhật nhà cung cấp {editor.Supplier.TenNhaCungCap}";
+                $"Đã cập nhật nhà cung cấp \"{editor.Supplier.TenNhaCungCap}\" thành công.";
+
+            await NotificationWindow.ShowSuccessAsync(
+                $"Cập nhật thông tin nhà cung cấp \"{editor.Supplier.TenNhaCungCap}\" thành công.",
+                "Cập nhật thành công",
+                owner: OwnerWindow);
 
             // Thứ tự hiển thị có thể đổi theo tên nên tải lại đúng trang đang xem.
             await LoadSupplierPageAsync();
@@ -3012,6 +3487,48 @@ public partial class MainWindowViewModel : ObservableObject
         {
             StatusMessage =
                 "Không thể cập nhật nhà cung cấp: " + ex.Message;
+            await NotificationWindow.ShowErrorAsync(
+                "Không thể cập nhật nhà cung cấp: " + ex.Message,
+                "Lỗi cập nhật",
+                owner: OwnerWindow);
+        }
+    }
+
+    [RelayCommand]
+    private async Task InDanhSachNhaCungCapAsync()
+    {
+        if (!await KiemTraQuyenAsync(PermissionKeys.SuppliersView, "Bạn không có quyền xem danh sách nhà cung cấp."))
+        {
+            return;
+        }
+        if (OwnerWindow is null) return;
+        try
+        {
+            var loc = TaoBoLocNhaCungCap();
+            var suppliers = await _db.GetAllNhaCungCapForExportAsync(loc);
+
+            var boLocMoTa = new List<string>();
+            if (!string.IsNullOrWhiteSpace(SupplierSearch))
+            {
+                boLocMoTa.Add($"Tìm kiếm: \"{SupplierSearch.Trim()}\"");
+            }
+            if (SupplierCongNoFilter == CongNoConNo)
+            {
+                boLocMoTa.Add("Công nợ: Còn nợ");
+            }
+            else if (SupplierCongNoFilter == CongNoKhongConNo)
+            {
+                boLocMoTa.Add("Công nợ: Không còn nợ");
+            }
+
+            var boLoc = boLocMoTa.Count > 0 ? string.Join(" • ", boLocMoTa) : "Tất cả nhà cung cấp";
+            var win = new BaoCaoInDanhSachWindow("DANH SÁCH NHÀ CUNG CẤP", suppliers, "NHA_CUNG_CAP", boLoc);
+            await win.ShowDialog(OwnerWindow);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi xem / in danh sách nhà cung cấp: " + ex.Message;
+            SafeLog.WriteError("Lỗi InDanhSachNhaCungCapAsync", ex);
         }
     }
 
@@ -3495,9 +4012,25 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             }
         }
 
+        // Kiểm tra xem khách hàng có giá riêng cho sản phẩm này không
+        decimal? giaRieng = null;
+        if (SelectedSaleCustomer != null && SelectedSaleCustomer.Id > 0)
+        {
+            try
+            {
+                giaRieng = await _db.LayGiaRiengKhachHangAsync(SelectedSaleCustomer.Id, product.Id);
+            }
+            catch { }
+        }
+
         // 4. Có giá rồi thì thêm vào giỏ
         if (existing is not null)
         {
+            if (giaRieng.HasValue)
+            {
+                existing.DonGiaRieng = giaRieng.Value;
+                existing.CapNhatThanhTien();
+            }
             existing.SoLuong += 1;
         }
         else
@@ -3505,7 +4038,8 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             var item = new SaleCartItem
             {
                 SanPham = product,
-                SoLuong = 1
+                SoLuong = 1,
+                DonGiaRieng = giaRieng
             };
 
             item.QuantityChanged += RecalculateSaleTotal;
@@ -3515,7 +4049,9 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         RecalculateSaleTotal();
 
         // Thông báo thành công khi thêm vào giỏ thành công
-        StatusMessage = $"Đã thêm '{product.TenSanPham}' vào giỏ hàng.";
+        StatusMessage = giaRieng.HasValue
+            ? $"Đã thêm '{product.TenSanPham}' vào giỏ (áp dụng giá riêng: {MoneyInput.Format(giaRieng.Value)} đ)."
+            : $"Đã thêm '{product.TenSanPham}' vào giỏ hàng.";
     }
     [RelayCommand]
     private void CapNhatTongTienBanHang()

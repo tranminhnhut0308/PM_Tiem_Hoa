@@ -4,6 +4,8 @@ public sealed class UserCreateDto
 {
     public string TenDangNhap { get; set; } = string.Empty;
     public string HoTen { get; set; } = string.Empty;
+    public string? SoDienThoai { get; set; }
+    public string? Email { get; set; }
     public string MatKhau { get; set; } = string.Empty;
     public string? VaiTroText { get; set; }
     public string? MaVaiTro { get; set; }

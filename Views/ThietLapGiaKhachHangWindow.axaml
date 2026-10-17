@@ -1,0 +1,325 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ShopHoa.ViewModels"
+        xmlns:models="using:ShopHoa.Models"
+        x:Class="ShopHoa.Views.ThietLapGiaKhachHangWindow"
+        x:DataType="vm:ThietLapGiaKhachHangViewModel"
+        Width="1050"
+        Height="720"
+        MinWidth="950"
+        MinHeight="600"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Title="Thiết lập giá khách hàng"
+        Background="#F4F7F6"
+        RequestedThemeVariant="Light">
+
+    <Window.Styles>
+        <Style Selector="TextBox.searchInput">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#D8E5E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="TextBox.searchInput:focus">
+            <Setter Property="BorderBrush" Value="#087F6E"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+        </Style>
+
+        <Style Selector="ComboBox.filterCombo">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#D8E5E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Button.btnPrimary">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Background" Value="#087F6E"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.btnPrimary:pointerover">
+            <Setter Property="Background" Value="#066356"/>
+        </Style>
+
+        <Style Selector="Button.btnAction">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#263B35"/>
+            <Setter Property="BorderBrush" Value="#D8E5E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.btnAction:pointerover">
+            <Setter Property="Background" Value="#EDF3F1"/>
+        </Style>
+
+        <Style Selector="Button.btnRowAction">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <!-- DATA GRID STYLES -->
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background" Value="#EBF3F0"/>
+            <Setter Property="Foreground" Value="#164B40"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="SeparatorBrush" Value="#D8E5E0"/>
+        </Style>
+        <Style Selector="DataGridRow:pointerover">
+            <Setter Property="Background" Value="#F2F8F5"/>
+        </Style>
+        <Style Selector="DataGridRow:selected">
+            <Setter Property="Background" Value="#E3F2ED"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+        <!-- A. THÔNG TIN KHÁCH HÀNG (CARD PHÍA TRÊN) -->
+        <Border Grid.Row="0" Background="White" BorderBrush="#D8E5E0" BorderThickness="0,0,0,1" Padding="24,18">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <!-- Avatar & Tên khách hàng -->
+                <StackPanel Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+                    <Border Width="48" Height="48" CornerRadius="24" Background="#087F6E" VerticalAlignment="Center">
+                        <TextBlock Text="👤" Foreground="White" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center" Spacing="3">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding TenKhachHang}" FontSize="20" FontWeight="Bold" Foreground="#163F38"/>
+                            <Border Background="#E3F2ED" BorderBrush="#087F6E" BorderThickness="1" CornerRadius="12" Padding="8,2" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding NhomKhachHang}" FontSize="11" FontWeight="Bold" Foreground="#087F6E"/>
+                            </Border>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <TextBlock Text="{Binding MaKhachHang, StringFormat='Mã: {0}'}" FontSize="12.5" Foreground="#667A74" FontWeight="SemiBold"/>
+                            <TextBlock Text="•" FontSize="12" Foreground="#B4C4BF"/>
+                            <TextBlock Text="{Binding SoDienThoai, StringFormat='SĐT: {0}'}" FontSize="12.5" Foreground="#344B45"/>
+                            <TextBlock Text="•" FontSize="12" Foreground="#B4C4BF"/>
+                            <TextBlock Text="{Binding DiaChi, StringFormat='Địa chỉ: {0}'}" FontSize="12" Foreground="#667A74" MaxWidth="350" TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Quick Stats -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Border Background="#F4F8F6" BorderBrush="#D8E5E0" BorderThickness="1" CornerRadius="8" Padding="12,8">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="Số mặt hàng có giá" FontSize="11" Foreground="#667A74" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding TongSoMatHang}" FontSize="16" FontWeight="Bold" Foreground="#163F38" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#E8F5E9" BorderBrush="#A5D6A7" BorderThickness="1" CornerRadius="8" Padding="12,8">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="Hàng giá ưu đãi" FontSize="11" Foreground="#2E7D32" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding SoHangGiamGia}" FontSize="16" FontWeight="Bold" Foreground="#2E7D32" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- B. THANH TÌM KIẾM HÀNG HÓA & CÔNG CỤ -->
+        <Border Grid.Row="1" Background="#F8FAFA" BorderBrush="#E2ECE8" BorderThickness="0,0,0,1" Padding="24,12">
+            <Grid ColumnDefinitions="280,220,*,Auto,Auto" ColumnSpacing="12">
+                <!-- Ô tìm kiếm theo mã hoặc tên hàng -->
+                <TextBox Grid.Column="0" Classes="searchInput"
+                         Text="{Binding SearchKeyword, Mode=TwoWay}"
+                         Watermark="🔍 Tìm kiếm theo mã hoặc tên hàng..."/>
+
+                <!-- Bộ lọc nhóm hàng -->
+                <ComboBox Grid.Column="1" Classes="filterCombo"
+                          HorizontalAlignment="Stretch"
+                          ItemsSource="{Binding NhomHangOptions}"
+                          SelectedItem="{Binding SelectedNhomHang, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:ProductOption">
+                            <TextBlock Text="{Binding Name}" FontSize="13" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <!-- Nút Làm mới -->
+                <Button Grid.Column="3" Classes="btnAction" Content="↻ Làm mới"
+                        Command="{Binding LamMoiCommand}" ToolTip.Tip="Tải lại danh sách thiết lập giá"/>
+
+                <!-- Nút Thêm hàng hóa -->
+                <Button Grid.Column="4" Classes="btnPrimary" Content="＋ Thêm hàng hóa"
+                        Command="{Binding ThemGiaHangHoaCommand}" ToolTip.Tip="Thiết lập giá bán riêng cho sản phẩm mới"/>
+            </Grid>
+        </Border>
+
+        <!-- C. BẢNG THIẾT LẬP GIÁ -->
+        <Grid Grid.Row="2" Margin="24,14,24,10">
+            <!-- Loading indicator -->
+            <ProgressBar IsIndeterminate="True" Height="3" Foreground="#087F6E" Background="Transparent"
+                         VerticalAlignment="Top" IsVisible="{Binding IsLoading}" ZIndex="10"/>
+
+            <!-- Empty State -->
+            <Border Background="White" CornerRadius="10" BorderBrush="#D8E5E0" BorderThickness="1"
+                    IsVisible="{Binding IsEmpty}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="20">
+                    <Border Width="64" Height="64" CornerRadius="32" Background="#E3F2ED" HorizontalAlignment="Center">
+                        <TextBlock Text="🏷️" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="Khách hàng chưa có thiết lập giá bán riêng nào" FontSize="16" FontWeight="Bold" Foreground="#163F38" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Mọi mặt hàng hiện tại đang được tính theo giá bán chung niêm yết.&#x0a;Nhấn nút “＋ Thêm hàng hóa” phía trên để thiết lập giá bán riêng."
+                               FontSize="13" Foreground="#667A74" TextAlignment="Center" HorizontalAlignment="Center"/>
+                    <Button Classes="btnPrimary" Content="＋ Thêm hàng hóa ngay" Command="{Binding ThemGiaHangHoaCommand}" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- DataGrid Danh Sách Giá -->
+            <Border Background="White" CornerRadius="10" BorderBrush="#D8E5E0" BorderThickness="1"
+                    IsVisible="{Binding !IsEmpty}" ClipToBounds="True">
+                <DataGrid ItemsSource="{Binding DanhSachGia}"
+                          SelectedItem="{Binding SelectedGiaItem}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto"
+                          RowHeight="44">
+                    <DataGrid.Columns>
+
+                        <!-- STT -->
+                        <DataGridTextColumn Header="STT" Binding="{Binding Stt}" Width="50"/>
+
+                        <!-- MÃ HÀNG -->
+                        <DataGridTemplateColumn Header="MÃ HÀNG" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:GiaBanKhachHangItem">
+                                    <TextBlock Text="{Binding MaSanPham}" FontWeight="Bold" Foreground="#087F6E"
+                                               FontSize="12.5" VerticalAlignment="Center" Margin="10,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- TÊN HÀNG & NHÓM -->
+                        <DataGridTemplateColumn Header="TÊN HÀNG HÓA" Width="2*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:GiaBanKhachHangItem">
+                                    <StackPanel VerticalAlignment="Center" Margin="10,0">
+                                        <TextBlock Text="{Binding TenSanPham}" FontWeight="SemiBold" Foreground="#163F38"
+                                                   FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding NhomSanPham}" FontSize="11" Foreground="#667A74"
+                                                   Margin="0,1,0,0" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- ĐVT -->
+                        <DataGridTextColumn Header="ĐVT" Binding="{Binding DonViTinh}" Width="80"/>
+
+                        <!-- GIÁ BÁN CHUNG (GỐC) -->
+                        <DataGridTemplateColumn Header="GIÁ CHUNG" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:GiaBanKhachHangItem">
+                                    <TextBlock Text="{Binding GiaGocText}" Foreground="#667A74" FontSize="12.5"
+                                               HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- GIÁ BÁN RIÊNG (NỔI BẬT) -->
+                        <DataGridTemplateColumn Header="GIÁ BÁN RIÊNG" Width="140">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:GiaBanKhachHangItem">
+                                    <Border Background="#E8F5E9" CornerRadius="6" Padding="8,4" HorizontalAlignment="Right" Margin="0,0,10,0">
+                                        <TextBlock Text="{Binding GiaRiengText}" FontWeight="Bold" Foreground="#087F6E"
+                                                   FontSize="13.5" VerticalAlignment="Center"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- CHÊNH LỆCH -->
+                        <DataGridTemplateColumn Header="CHÊNH LỆCH" Width="145">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:GiaBanKhachHangItem">
+                                    <TextBlock Text="{Binding ChenhLechText}" Foreground="{Binding ChenhLechColor}"
+                                               FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Right"
+                                               VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- NGÀY ÁP DỤNG & GHI CHÚ -->
+                        <DataGridTemplateColumn Header="NGÀY ÁP DỤNG / GHI CHÚ" Width="160">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:GiaBanKhachHangItem">
+                                    <StackPanel VerticalAlignment="Center" Margin="10,0">
+                                        <TextBlock Text="{Binding NgayApDungText}" FontSize="12" Foreground="#344B45"/>
+                                        <TextBlock Text="{Binding GhiChu}" FontSize="11" Foreground="#667A74"
+                                                   IsVisible="{Binding GhiChu, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- THAO TÁC -->
+                        <DataGridTemplateColumn Header="THAO TÁC" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:GiaBanKhachHangItem">
+                                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Button Classes="btnRowAction" Background="#E3F2ED" Foreground="#087F6E"
+                                                Content="✏ Sửa" ToolTip.Tip="Chỉnh sửa giá bán riêng"
+                                                Command="{Binding $parent[Window].((vm:ThietLapGiaKhachHangViewModel)DataContext).SuaGiaHangHoaCommand}"
+                                                CommandParameter="{Binding}"/>
+                                        <Button Classes="btnRowAction" Background="#FEE2E2" Foreground="#B91C1C"
+                                                Content="🗑" ToolTip.Tip="Xóa giá riêng (áp dụng lại giá chung)"
+                                                Command="{Binding $parent[Window].((vm:ThietLapGiaKhachHangViewModel)DataContext).XoaGiaHangHoaCommand}"
+                                                CommandParameter="{Binding}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </Grid>
+
+        <!-- D. FOOTER -->
+        <Border Grid.Row="3" Background="White" BorderBrush="#D8E5E0" BorderThickness="0,1,0,0" Padding="24,12">
+            <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding StatusMessage}" Foreground="#667A74" FontSize="12.5"/>
+                </StackPanel>
+
+                <Button Grid.Column="1" Classes="btnAction" Content="Đóng" Click="OnCloseClick" Width="90" HorizontalContentAlignment="Center"/>
+            </Grid>
+        </Border>
+
+    </Grid>
+</Window>

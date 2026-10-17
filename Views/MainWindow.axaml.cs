@@ -1079,7 +1079,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        var usersWindow = new UsersWindow();
+        var usersWindow = new DanhSachNhanVienWindow();
         await usersWindow.ShowDialog(this);
     }
     private async void OpenUpdateWindow_OnClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

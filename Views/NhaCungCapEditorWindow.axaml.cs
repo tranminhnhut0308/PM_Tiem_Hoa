@@ -1,692 +1,406 @@
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using ShopHoa.Models;
+using ShopHoa.Services;
 
 namespace ShopHoa.Views;
 
+/// <summary>
+/// Cửa sổ thêm mới và chỉnh sửa nhà cung cấp theo chuẩn giao diện hiện đại WINWON.
+/// </summary>
 public partial class NhaCungCapEditorWindow : Window, INotifyPropertyChanged
 {
-    public new event PropertyChangedEventHandler? PropertyChanged;
-
-    private static readonly Regex EmailPrefixRegex = new(
-        @"^[a-zA-Z0-9]+([._-][a-zA-Z0-9]+)*$",
-        RegexOptions.Compiled);
-
-    private static readonly Regex EmailDomainRegex = new(
-        @"^@[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*(\.[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*)*\.[a-zA-Z]{2,}$",
-        RegexOptions.Compiled);
-
-    private int _soLuongSoDienThoai = 1;
+    private readonly DatabaseService _db = new();
 
     public NhaCungCap Supplier { get; }
 
     public bool IsEditMode { get; }
 
-    public string TieuDe =>
-        IsEditMode
-            ? "Sửa nhà cung cấp"
-            : "Thêm nhà cung cấp";
+    public string TieuDe => IsEditMode ? "Cập nhật thông tin nhà cung cấp - WINWON" : "Thêm nhà cung cấp mới - WINWON";
+
+    public string HeaderText => IsEditMode ? "CẬP NHẬT NHÀ CUNG CẤP" : "THÊM NHÀ CUNG CẤP MỚI";
+
+    public string BreadcrumbCurrentText => IsEditMode ? "Cập nhật nhà cung cấp" : "Thêm nhà cung cấp";
+
+    public bool CoTheThietLapGia => IsEditMode && Supplier.Id > 0;
+
+    private string _diaChiDayDuPreview = "(Chưa nhập địa chỉ)";
+    public string DiaChiDayDuPreview
+    {
+        get => _diaChiDayDuPreview;
+        set => SetField(ref _diaChiDayDuPreview, value);
+    }
+
+    private bool _coLoi;
+    public bool CoLoi
+    {
+        get => _coLoi;
+        set => SetField(ref _coLoi, value);
+    }
 
     private string _loiMessage = "";
-
     public string LoiMessage
     {
         get => _loiMessage;
-        private set
+        set
         {
-            if (_loiMessage == value)
-                return;
-
-            _loiMessage = value;
-            OnPropertyChanged();
+            if (SetField(ref _loiMessage, value))
+            {
+                CoLoi = !string.IsNullOrWhiteSpace(value);
+            }
         }
+    }
+
+    public string StatusBadgeText => IsEditMode ? $"NCC ID: #{Supplier.Id}" : "Bản ghi mới";
+
+    public IBrush StatusBadgeBackground => IsEditMode
+        ? new SolidColorBrush(Color.Parse("#E8F4FD"))
+        : new SolidColorBrush(Color.Parse("#E6F4EA"));
+
+    public IBrush StatusBadgeForeground => IsEditMode
+        ? new SolidColorBrush(Color.Parse("#0E5E9E"))
+        : new SolidColorBrush(Color.Parse("#137333"));
+
+    public ObservableCollection<string> DanhSachNhomNCC { get; } = new();
+
+    public new event PropertyChangedEventHandler? PropertyChanged;
+
+    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        return true;
     }
 
     public NhaCungCapEditorWindow(NhaCungCap? supplier)
     {
         IsEditMode = supplier is not null && supplier.Id > 0;
+        Supplier = SaoChep(supplier);
 
+        InitializeComponent();
+        DataContext = this;
+
+        // Cập nhật preview địa chỉ ban đầu
+        CapNhatDiaChiDayDuPreview();
+
+        // Tải danh sách nhóm gợi ý và sinh mã nếu cần
+        _ = KhoiTaoDuLieuAsync();
+    }
+
+    private async Task KhoiTaoDuLieuAsync()
+    {
+        try
+        {
+            // 1. Gợi ý các nhóm nhà cung cấp mặc định
+            var nhomMacDinh = new[]
+            {
+                "Vườn hoa Đà Lạt",
+                "Hoa nhập khẩu cao cấp",
+                "Phụ liệu cắm hoa & Xốp lẵng",
+                "Chợ đầu mối hoa tươi",
+                "Vườn lan & Cây kiểng",
+                "Bao bì, ruy băng & Giấy gói"
+            };
+
+            foreach (var item in nhomMacDinh)
+            {
+                if (!DanhSachNhomNCC.Contains(item))
+                    DanhSachNhomNCC.Add(item);
+            }
+
+            // 2. Lấy thêm các nhóm thực tế từ database
+            var nhomTuDb = await _db.LayDanhSachNhomNhaCungCapAsync();
+            foreach (var nhom in nhomTuDb)
+            {
+                if (!string.IsNullOrWhiteSpace(nhom) && !DanhSachNhomNCC.Contains(nhom))
+                    DanhSachNhomNCC.Add(nhom);
+            }
+
+            // 3. Nếu là thêm mới và mã đang trống, tự động sinh mã
+            if (!IsEditMode && string.IsNullOrWhiteSpace(Supplier.MaNhaCungCap))
+            {
+                var maMoi = await _db.TaoMaNhaCungCapMoiAsync();
+                Supplier.MaNhaCungCap = maMoi;
+                var maBox = this.FindControl<TextBox>("MaNhaCungCapBox");
+                if (maBox != null)
+                    maBox.Text = maMoi;
+            }
+        }
+        catch
+        {
+            // Không làm gián đoạn hiển thị form nếu kết nối gợi ý lỗi
+        }
+    }
+
+    private static NhaCungCap SaoChep(NhaCungCap? supplier)
+    {
         if (supplier is null)
         {
-            Supplier = new NhaCungCap
+            return new NhaCungCap
             {
+                Id = 0,
                 MaNhaCungCap = "",
                 TenNhaCungCap = "",
                 TrangThai = true,
+                ConHopTac = true,
                 NgayTao = DateTime.Now
             };
         }
-        else
+
+        return new NhaCungCap
         {
-            // Tạo bản sao để khi bấm Hủy dữ liệu trong danh sách không bị thay đổi.
-            Supplier = new NhaCungCap
-            {
-                Id = supplier.Id,
-                MaNhaCungCap = supplier.MaNhaCungCap,
-                TenNhaCungCap = supplier.TenNhaCungCap,
-                SoDienThoai = supplier.SoDienThoai,
-                Email = supplier.Email,
-                DiaChi = supplier.DiaChi,
-                PhuongXa = supplier.PhuongXa,
-                QuanHuyen = supplier.QuanHuyen,
-                TinhThanh = supplier.TinhThanh,
-                MaSoThue = supplier.MaSoThue,
-                NguoiLienHe = supplier.NguoiLienHe,
-                GhiChu = supplier.GhiChu,
-                TrangThai = supplier.TrangThai,
-                ConNo = supplier.ConNo,
-                NgayTao = supplier.NgayTao
-            };
-        }
-
-        InitializeComponent();
-
-        // ===== HIỂN THỊ EMAIL CŨ LÊN 2 Ô (TIỀN TỐ + HẬU TỐ) =====
-        var emailUserBox = this.FindControl<TextBox>("EmailUserBox");
-        var emailDomainBox = this.FindControl<TextBox>("EmailDomainBox");
-
-        if (!string.IsNullOrWhiteSpace(Supplier.Email))
-        {
-            var parts = Supplier.Email.Trim().Split('@', 2);
-            if (parts.Length == 2)
-            {
-                if (emailUserBox is not null) emailUserBox.Text = parts[0];
-                if (emailDomainBox is not null) emailDomainBox.Text = "@" + parts[1];
-            }
-            else
-            {
-                if (emailUserBox is not null) emailUserBox.Text = Supplier.Email.Trim();
-            }
-        }
-
-        // ===== TÁCH SỐ ĐIỆN THOẠI KHI SỬA (HỖ TRỢ TỐI ĐA 3 SỐ LIÊN HỆ) =====
-        if (!string.IsNullOrWhiteSpace(Supplier.SoDienThoai))
-        {
-            var cacSo = Supplier.SoDienThoai
-                .Split(new[] { " - ", "-", ",", ";", "/" }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => s.Trim())
-                .Where(s => !string.IsNullOrWhiteSpace(s))
-                .Take(3)
-                .ToArray();
-
-            var box1 = this.FindControl<TextBox>("SoDienThoai1Box");
-            var box2 = this.FindControl<TextBox>("SoDienThoai2Box");
-            var box3 = this.FindControl<TextBox>("SoDienThoai3Box");
-            var btnThemSo = this.FindControl<Button>("BtnThemSo");
-
-            if (cacSo.Length > 0 && box1 is not null)
-                box1.Text = cacSo[0];
-
-            if (cacSo.Length > 1 && box2 is not null)
-            {
-                box2.Text = cacSo[1];
-                box2.IsVisible = true;
-                _soLuongSoDienThoai = 2;
-            }
-
-            if (cacSo.Length > 2 && box3 is not null)
-            {
-                box3.Text = cacSo[2];
-                box3.IsVisible = true;
-                _soLuongSoDienThoai = 3;
-                if (btnThemSo is not null)
-                    btnThemSo.IsEnabled = false;
-            }
-        }
-
-        // ===== CHỌN LOẠI ĐỊA CHỈ HÀNH CHÍNH (MỚI 2 CẤP / CŨ 3 CẤP CÓ QUẬN HUYỆN) =====
-        var radioMoi = this.FindControl<RadioButton>("RadioDiaChiMoi");
-        var radioCu = this.FindControl<RadioButton>("RadioDiaChiCu");
-        var panelQuanHuyen = this.FindControl<StackPanel>("PanelQuanHuyen");
-
-        if (!string.IsNullOrWhiteSpace(Supplier.QuanHuyen))
-        {
-            if (radioCu is not null) radioCu.IsChecked = true;
-            if (panelQuanHuyen is not null) panelQuanHuyen.IsVisible = true;
-        }
-        else
-        {
-            if (radioMoi is not null) radioMoi.IsChecked = true;
-            if (panelQuanHuyen is not null) panelQuanHuyen.IsVisible = false;
-        }
-
-        DataContext = this;
-    }
-
-    private void OnPropertyChanged(
-        [CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(
-            this,
-            new PropertyChangedEventArgs(propertyName));
-    }
-
-    // =========================================================
-    // XỬ LÝ SỐ ĐIỆN THOẠI (NHIỀU SỐ LIÊN HỆ + RÀNG BUỘC 10-11 SỐ)
-    // =========================================================
-
-    private void OnThemSoDienThoai(object? sender, RoutedEventArgs e)
-    {
-        if (_soLuongSoDienThoai >= 3)
-            return;
-
-        _soLuongSoDienThoai++;
-
-        if (_soLuongSoDienThoai == 2)
-        {
-            var box2 = this.FindControl<TextBox>("SoDienThoai2Box");
-            if (box2 is not null)
-            {
-                box2.IsVisible = true;
-                box2.Focus();
-            }
-        }
-        else if (_soLuongSoDienThoai == 3)
-        {
-            var box3 = this.FindControl<TextBox>("SoDienThoai3Box");
-            if (box3 is not null)
-            {
-                box3.IsVisible = true;
-                box3.Focus();
-            }
-
-            var btn = this.FindControl<Button>("BtnThemSo");
-            if (btn is not null)
-                btn.IsEnabled = false;
-        }
-    }
-
-    private TextBlock? TimHintBoxSoDienThoai(TextBox box)
-    {
-        return box.Name switch
-        {
-            "SoDienThoai1Box" => this.FindControl<TextBlock>("Sdt1HintBox"),
-            "SoDienThoai2Box" => this.FindControl<TextBlock>("Sdt2HintBox"),
-            "SoDienThoai3Box" => this.FindControl<TextBlock>("Sdt3HintBox"),
-            _ => null
+            Id = supplier.Id,
+            MaNhaCungCap = supplier.MaNhaCungCap ?? "",
+            TenNhaCungCap = supplier.TenNhaCungCap ?? "",
+            TenCongTy = supplier.TenCongTy,
+            NhomNhaCungCapTen = supplier.NhomNhaCungCapTen,
+            NhomNhaCungCapId = supplier.NhomNhaCungCapId,
+            NguoiLienHe = supplier.NguoiLienHe,
+            MaSoThue = supplier.MaSoThue,
+            SoDienThoai = supplier.SoDienThoai,
+            Email = supplier.Email,
+            DiaChi = supplier.DiaChi,
+            PhuongXa = supplier.PhuongXa,
+            QuanHuyen = supplier.QuanHuyen,
+            TinhThanh = supplier.TinhThanh,
+            SoTaiKhoan = supplier.SoTaiKhoan,
+            NganHang = supplier.NganHang,
+            CongNoGoiDau = supplier.CongNoGoiDau,
+            NhanHieu = supplier.NhanHieu,
+            ChietKhau = supplier.ChietKhau,
+            GhiChu = supplier.GhiChu,
+            TrangThai = supplier.TrangThai,
+            ConHopTac = supplier.ConHopTac,
+            ConNo = supplier.ConNo,
+            TongMua = supplier.TongMua,
+            TongMuaTruTraHang = supplier.TongMuaTruTraHang,
+            NgayTao = supplier.NgayTao
         };
     }
 
-    private void OnSoDienThoaiTextChanged(object? sender, TextChangedEventArgs e)
+    private void CapNhatDiaChiDayDuPreview()
     {
-        if (sender is not TextBox box)
-            return;
+        var diaChiChiTiet = this.FindControl<TextBox>("DiaChiChiTietBox")?.Text?.Trim() ?? Supplier.DiaChi?.Trim();
+        var phuongXa = this.FindControl<TextBox>("PhuongXaBox")?.Text?.Trim() ?? Supplier.PhuongXa?.Trim();
+        var quanHuyen = this.FindControl<TextBox>("QuanHuyenBox")?.Text?.Trim() ?? Supplier.QuanHuyen?.Trim();
+        var tinhThanh = this.FindControl<TextBox>("TinhThanhBox")?.Text?.Trim() ?? Supplier.TinhThanh?.Trim();
 
-        // Chỉ giữ lại các ký tự chữ số 0-9
-        var digits = new string(box.Text?.Where(char.IsDigit).ToArray() ?? Array.Empty<char>());
+        var parts = new[] { diaChiChiTiet, phuongXa, quanHuyen, tinhThanh }
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(s => s!.Trim())
+            .ToList();
 
-        if (digits != box.Text)
-        {
-            box.Text = digits;
-            box.CaretIndex = digits.Length;
-        }
+        DiaChiDayDuPreview = parts.Count > 0
+            ? string.Join(", ", parts)
+            : "(Chưa nhập địa chỉ)";
+    }
 
-        var hintBox = TimHintBoxSoDienThoai(box);
-        if (hintBox is null)
-            return;
+    private void OnDiaChiComponentChanged(object? sender, KeyEventArgs e)
+    {
+        CapNhatDiaChiDayDuPreview();
+    }
 
-        if (digits.Length == 0)
-        {
-            hintBox.Text = "";
-            return;
-        }
+    private void OnDiaChiComponentLostFocus(object? sender, RoutedEventArgs e)
+    {
+        CapNhatDiaChiDayDuPreview();
+    }
 
-        if (!digits.StartsWith('0'))
+    private async void OnSinhMaClicked(object? sender, RoutedEventArgs e)
+    {
+        try
         {
-            hintBox.Foreground = Avalonia.Media.Brush.Parse("#D64545");
-            hintBox.Text = $"❌ Số điện thoại phải bắt đầu bằng số 0 ({digits.Length}/10)";
-            return;
+            var maMoi = await _db.TaoMaNhaCungCapMoiAsync();
+            Supplier.MaNhaCungCap = maMoi;
+            var maBox = this.FindControl<TextBox>("MaNhaCungCapBox");
+            if (maBox != null)
+                maBox.Text = maMoi;
         }
-
-        if (digits.Length < 10)
+        catch (Exception ex)
         {
-            hintBox.Foreground = Avalonia.Media.Brush.Parse("#D97706");
-            hintBox.Text = $"⚠️ Đang nhập ({digits.Length}/10 số) — yêu cầu đủ 10 số";
-        }
-        else if (digits.Length == 10)
-        {
-            hintBox.Foreground = Avalonia.Media.Brush.Parse("#087F6E");
-            hintBox.Text = "✓ Đạt chuẩn 10 số (10/10)";
-        }
-        else if (digits.Length == 11)
-        {
-            hintBox.Foreground = Avalonia.Media.Brush.Parse("#087F6E");
-            hintBox.Text = "✓ Hợp lệ 11 số (số máy bàn / tổng đài)";
-        }
-        else
-        {
-            hintBox.Foreground = Avalonia.Media.Brush.Parse("#D64545");
-            hintBox.Text = $"❌ Không hợp lệ: {digits.Length} số (vượt quá quy định 10–11 số)";
+            HienLoi("Lỗi sinh mã tự động: " + ex.Message);
         }
     }
 
-    private void OnSoDienThoaiLostFocus(object? sender, RoutedEventArgs e)
+    private void HienLoi(string message)
     {
-        if (sender is not TextBox box)
-            return;
-
-        var digits = new string(box.Text?.Where(char.IsDigit).ToArray() ?? Array.Empty<char>());
-        var hintBox = TimHintBoxSoDienThoai(box);
-
-        if (hintBox is null || digits.Length == 0)
-            return;
-
-        if (!digits.StartsWith('0'))
-        {
-            hintBox.Foreground = Avalonia.Media.Brush.Parse("#D64545");
-            hintBox.Text = "❌ Số điện thoại bắt buộc phải bắt đầu bằng số 0.";
-        }
-        else if (digits.Length < 10)
-        {
-            hintBox.Foreground = Avalonia.Media.Brush.Parse("#D64545");
-            hintBox.Text = $"❌ Chưa đủ 10 chữ số ({digits.Length}/10). Vui lòng kiểm tra lại.";
-        }
-        else if (digits.Length > 11)
-        {
-            hintBox.Foreground = Avalonia.Media.Brush.Parse("#D64545");
-            hintBox.Text = $"❌ Số điện thoại thừa ({digits.Length} số). Chỉ cho phép tối đa 10–11 chữ số.";
-        }
+        LoiMessage = message;
     }
 
-    private static bool KiemTraMotSoDienThoai(string? so, string tenO, out string thongBaoLoi)
+    private async void OnSaveClicked(object? sender, RoutedEventArgs e)
     {
-        thongBaoLoi = "";
-        if (string.IsNullOrWhiteSpace(so))
-            return true;
+        HienLoi("");
 
-        var digits = so.Trim();
-        if (!digits.All(char.IsDigit))
-        {
-            thongBaoLoi = $"{tenO} chỉ được chứa chữ số (0–9).";
-            return false;
-        }
-
-        if (!digits.StartsWith('0'))
-        {
-            thongBaoLoi = $"{tenO} ({digits}) không hợp lệ: phải bắt đầu bằng chữ số 0.";
-            return false;
-        }
-
-        if (digits.Length < 10)
-        {
-            thongBaoLoi = $"{tenO} ({digits}) chưa đủ 10 chữ số (hiện có {digits.Length} số).";
-            return false;
-        }
-
-        if (digits.Length > 11)
-        {
-            thongBaoLoi = $"{tenO} ({digits}) vượt quá quy định (hiện có {digits.Length} số, chỉ cho phép 10–11 số).";
-            return false;
-        }
-
-        return true;
-    }
-
-    // =========================================================
-    // XỬ LÝ EMAIL (TÁCH TIỀN TỐ + HẬU TỐ @gmail.com & KIỂM TRA ĐỊNH DẠNG)
-    // =========================================================
-
-    private void OnEmailUserTextChanged(object? sender, TextChangedEventArgs e)
-    {
-        if (sender is not TextBox userBox)
-            return;
-
-        var text = userBox.Text ?? "";
-        if (text.Contains('@'))
-        {
-            var parts = text.Split('@', 2);
-            userBox.Text = parts[0];
-            userBox.CaretIndex = userBox.Text.Length;
-
-            var domainBox = this.FindControl<TextBox>("EmailDomainBox");
-            if (domainBox is not null && !string.IsNullOrWhiteSpace(parts[1]))
-            {
-                domainBox.Text = "@" + parts[1];
-            }
-        }
-
-        CapNhatHintEmail();
-    }
-
-    private void OnEmailDomainTextChanged(object? sender, TextChangedEventArgs e)
-    {
-        CapNhatHintEmail();
-    }
-
-    private void OnEmailLostFocus(object? sender, RoutedEventArgs e)
-    {
-        CapNhatHintEmail();
-    }
-
-    private void OnEmailDomainLostFocus(object? sender, RoutedEventArgs e)
-    {
-        if (sender is TextBox domainBox)
-        {
-            var text = domainBox.Text?.Trim() ?? "";
-            if (!string.IsNullOrWhiteSpace(text) && !text.StartsWith('@'))
-            {
-                domainBox.Text = "@" + text;
-            }
-        }
-
-        CapNhatHintEmail();
-    }
-
-    private void CapNhatHintEmail()
-    {
-        var hintBox = this.FindControl<TextBlock>("EmailHintBox");
-        if (hintBox is null)
-            return;
-
-        var userText = this.FindControl<TextBox>("EmailUserBox")?.Text?.Trim() ?? "";
-        var domainText = this.FindControl<TextBox>("EmailDomainBox")?.Text?.Trim() ?? "";
-
-        if (string.IsNullOrWhiteSpace(userText))
-        {
-            hintBox.Foreground = Avalonia.Media.Brush.Parse("#7A8C86");
-            hintBox.Text = "Nhập tiền tố tài khoản (chữ không dấu, số, dấu chấm) và hậu tố tên miền (mặc định @gmail.com)";
-            return;
-        }
-
-        if (!KiemTraHopLeEmail(userText, domainText, out var emailGhep, out var loiEmail))
-        {
-            hintBox.Foreground = Avalonia.Media.Brush.Parse("#D64545");
-            hintBox.Text = $"❌ {loiEmail}";
-        }
-        else
-        {
-            hintBox.Foreground = Avalonia.Media.Brush.Parse("#087F6E");
-            hintBox.Text = $"✓ Email hợp lệ: {emailGhep}";
-        }
-    }
-
-    private static bool KiemTraHopLeEmail(
-        string userPart,
-        string domainPart,
-        out string emailHoanChinh,
-        out string thongBaoLoi)
-    {
-        emailHoanChinh = "";
-        thongBaoLoi = "";
-
-        var user = (userPart ?? "").Trim();
-        var domain = (domainPart ?? "").Trim();
-
-        if (string.IsNullOrWhiteSpace(user))
-            return true;
-
-        if (user.Length < 3 || user.Length > 64)
-        {
-            thongBaoLoi = "Tiền tố email (trước @) phải có từ 3 đến 64 ký tự.";
-            return false;
-        }
-
-        if (!EmailPrefixRegex.IsMatch(user))
-        {
-            thongBaoLoi = "Tiền tố email không hợp lệ (chỉ gồm chữ cái không dấu a–z, số 0–9, dấu chấm '.', gạch dưới '_', gạch ngang '-', không bắt đầu/kết thúc bằng dấu chấm).";
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(domain) || domain == "@")
-        {
-            thongBaoLoi = "Thiếu hậu tố tên miền email (ví dụ: @gmail.com).";
-            return false;
-        }
-
-        if (!domain.StartsWith('@'))
-        {
-            thongBaoLoi = "Hậu tố email phải bắt đầu bằng ký tự '@' (ví dụ: @gmail.com).";
-            return false;
-        }
-
-        if (!EmailDomainRegex.IsMatch(domain))
-        {
-            thongBaoLoi = $"Hậu tố tên miền '{domain}' không đúng định dạng chuẩn (ví dụ hợp lệ: @gmail.com, @yahoo.com, @congty.vn).";
-            return false;
-        }
-
-        emailHoanChinh = user + domain.ToLowerInvariant();
-        return true;
-    }
-
-    // =========================================================
-    // XỬ LÝ PHÂN CẤP ĐỊA CHỈ HÀNH CHÍNH (MỚI 2 CẤP / CŨ 3 CẤP)
-    // =========================================================
-
-    private void OnLoaiDiaChiChanged(object? sender, RoutedEventArgs e)
-    {
-        var panel = this.FindControl<StackPanel>("PanelQuanHuyen");
-        if (panel is null)
-            return;
-
-        var isDiaChiCu = this.FindControl<RadioButton>("RadioDiaChiCu")?.IsChecked == true;
-        panel.IsVisible = isDiaChiCu;
-
-        // Khi chọn phân cấp hành chính mới (chỉ có Xã/Phường và Tỉnh/Thành phố) thì xóa Quận/Huyện
-        if (!isDiaChiCu)
-            Supplier.QuanHuyen = null;
-    }
-
-    // =========================================================
-    // LƯU / HỦY / XÓA
-    // =========================================================
-
-    private void OnSaveClicked(
-        object? sender,
-        RoutedEventArgs e)
-    {
-        LoiMessage = "";
-
-        // 1. Chuẩn hóa các trường cơ bản
-        Supplier.MaNhaCungCap = Supplier.MaNhaCungCap?.Trim() ?? "";
-        Supplier.TenNhaCungCap = Supplier.TenNhaCungCap?.Trim() ?? "";
-        Supplier.DiaChi = Supplier.DiaChi?.Trim();
-        Supplier.PhuongXa = Supplier.PhuongXa?.Trim();
-        Supplier.TinhThanh = Supplier.TinhThanh?.Trim();
-        Supplier.MaSoThue = Supplier.MaSoThue?.Trim();
-        Supplier.NguoiLienHe = Supplier.NguoiLienHe?.Trim();
-        Supplier.GhiChu = Supplier.GhiChu?.Trim();
-
-        var isDiaChiCu = this.FindControl<RadioButton>("RadioDiaChiCu")?.IsChecked == true;
-        Supplier.QuanHuyen = isDiaChiCu ? Supplier.QuanHuyen?.Trim() : null;
-
-        // 2. Kiểm tra Mã & Tên nhà cung cấp
-        if (string.IsNullOrWhiteSpace(Supplier.MaNhaCungCap))
-        {
-            LoiMessage = "Vui lòng nhập mã nhà cung cấp.";
-            return;
-        }
+        // 1. Kiểm tra Tên nhà cung cấp (bắt buộc)
+        var tenBox = this.FindControl<TextBox>("TenNhaCungCapBox");
+        Supplier.TenNhaCungCap = tenBox?.Text?.Trim() ?? "";
 
         if (string.IsNullOrWhiteSpace(Supplier.TenNhaCungCap))
         {
-            LoiMessage = "Vui lòng nhập tên nhà cung cấp.";
-            this.FindControl<TextBox>("TenNhaCungCapBox")?.Focus();
+            HienLoi("Vui lòng nhập tên nhà cung cấp (trường bắt buộc).");
+            tenBox?.Focus();
             return;
         }
 
-        // 3. Kiểm tra các số điện thoại liên hệ (Chính + Cấp 2 + Cấp 3)
-        var box1 = this.FindControl<TextBox>("SoDienThoai1Box");
-        var box2 = this.FindControl<TextBox>("SoDienThoai2Box");
-        var box3 = this.FindControl<TextBox>("SoDienThoai3Box");
+        // 2. Kiểm tra Mã nhà cung cấp
+        var maBox = this.FindControl<TextBox>("MaNhaCungCapBox");
+        var maNhap = maBox?.Text?.Trim() ?? "";
 
-        var so1 = box1?.Text?.Trim().Replace(" ", "") ?? "";
-        var so2 = box2?.Text?.Trim().Replace(" ", "") ?? "";
-        var so3 = box3?.Text?.Trim().Replace(" ", "") ?? "";
-
-        if (!KiemTraMotSoDienThoai(so1, "Số điện thoại chính", out var loiSdt1))
+        if (string.IsNullOrWhiteSpace(maNhap))
         {
-            LoiMessage = loiSdt1;
-            box1?.Focus();
-            return;
-        }
-
-        if (!KiemTraMotSoDienThoai(so2, "Số điện thoại liên hệ cấp 2", out var loiSdt2))
-        {
-            LoiMessage = loiSdt2;
-            box2?.Focus();
-            return;
-        }
-
-        if (!KiemTraMotSoDienThoai(so3, "Số điện thoại liên hệ cấp 3", out var loiSdt3))
-        {
-            LoiMessage = loiSdt3;
-            box3?.Focus();
-            return;
-        }
-
-        var danhSachSdt = new List<string>();
-        if (!string.IsNullOrWhiteSpace(so1)) danhSachSdt.Add(so1);
-        if (!string.IsNullOrWhiteSpace(so2)) danhSachSdt.Add(so2);
-        if (!string.IsNullOrWhiteSpace(so3)) danhSachSdt.Add(so3);
-
-        if (danhSachSdt.Count != danhSachSdt.Distinct(StringComparer.Ordinal).Count())
-        {
-            LoiMessage = "Các số điện thoại liên hệ không được trùng nhau.";
-            return;
-        }
-
-        Supplier.SoDienThoai = danhSachSdt.Count > 0
-            ? string.Join(" - ", danhSachSdt)
-            : null;
-
-        // 4. Kiểm tra Email (Tiền tố + Hậu tố @gmail.com / tên miền hợp lệ)
-        var emailUserBox = this.FindControl<TextBox>("EmailUserBox");
-        var emailDomainBox = this.FindControl<TextBox>("EmailDomainBox");
-        var userText = emailUserBox?.Text?.Trim() ?? "";
-        var domainText = emailDomainBox?.Text?.Trim() ?? "";
-
-        if (!string.IsNullOrWhiteSpace(userText))
-        {
-            if (!KiemTraHopLeEmail(userText, domainText, out var emailHopLe, out var loiEmail))
+            try
             {
-                LoiMessage = loiEmail;
-                emailUserBox?.Focus();
+                maNhap = await _db.TaoMaNhaCungCapMoiAsync();
+                Supplier.MaNhaCungCap = maNhap;
+                if (maBox != null) maBox.Text = maNhap;
+            }
+            catch (Exception ex)
+            {
+                HienLoi("Không thể tạo mã nhà cung cấp tự động: " + ex.Message);
                 return;
             }
-
-            Supplier.Email = emailHopLe;
         }
         else
         {
-            Supplier.Email = null;
+            Supplier.MaNhaCungCap = maNhap;
+            try
+            {
+                var daTonTai = await _db.KiemTraTrungMaNhaCungCapAsync(Supplier.MaNhaCungCap, Supplier.Id);
+                if (daTonTai)
+                {
+                    HienLoi($"Mã nhà cung cấp '{Supplier.MaNhaCungCap}' đã được sử dụng bởi nhà cung cấp khác. Vui lòng chọn mã khác.");
+                    maBox?.Focus();
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                HienLoi("Lỗi kiểm tra trùng mã nhà cung cấp: " + ex.Message);
+                return;
+            }
         }
 
-        // 5. Ngày tạo & Lưu
-        if (!IsEditMode)
+        // 3. Kiểm tra Số điện thoại nếu có nhập
+        var sdtBox = this.FindControl<TextBox>("SoDienThoaiBox");
+        var sdt = sdtBox?.Text?.Trim() ?? "";
+        Supplier.SoDienThoai = string.IsNullOrWhiteSpace(sdt) ? null : sdt;
+
+        if (!string.IsNullOrWhiteSpace(Supplier.SoDienThoai))
         {
-            Supplier.NgayTao = DateTime.Now;
+            var digitsOnly = new string(Supplier.SoDienThoai.Where(char.IsDigit).ToArray());
+            if (digitsOnly.Length < 8 || digitsOnly.Length > 15)
+            {
+                HienLoi("Số điện thoại liên hệ không hợp lệ (cần từ 8 đến 15 chữ số).");
+                sdtBox?.Focus();
+                return;
+            }
         }
 
+        // 4. Kiểm tra Email nếu có nhập
+        var emailBox = this.FindControl<TextBox>("EmailBox");
+        var email = emailBox?.Text?.Trim() ?? "";
+        Supplier.Email = string.IsNullOrWhiteSpace(email) ? null : email;
+
+        if (!string.IsNullOrWhiteSpace(Supplier.Email))
+        {
+            if (!Supplier.Email.Contains('@') || !Supplier.Email.Contains('.') || Supplier.Email.IndexOf('@') > Supplier.Email.LastIndexOf('.'))
+            {
+                HienLoi("Địa chỉ email không đúng định dạng (ví dụ: contact@nhavuon.vn).");
+                emailBox?.Focus();
+                return;
+            }
+        }
+
+        // 5. Chuẩn hóa các trường thông tin địa chỉ
+        var diaChiChiTietBox = this.FindControl<TextBox>("DiaChiChiTietBox");
+        var phuongXaBox = this.FindControl<TextBox>("PhuongXaBox");
+        var quanHuyenBox = this.FindControl<TextBox>("QuanHuyenBox");
+        var tinhThanhBox = this.FindControl<TextBox>("TinhThanhBox");
+
+        Supplier.DiaChi = string.IsNullOrWhiteSpace(diaChiChiTietBox?.Text) ? null : diaChiChiTietBox.Text.Trim();
+        Supplier.PhuongXa = string.IsNullOrWhiteSpace(phuongXaBox?.Text) ? null : phuongXaBox.Text.Trim();
+        Supplier.QuanHuyen = string.IsNullOrWhiteSpace(quanHuyenBox?.Text) ? null : quanHuyenBox.Text.Trim();
+        Supplier.TinhThanh = string.IsNullOrWhiteSpace(tinhThanhBox?.Text) ? null : tinhThanhBox.Text.Trim();
+
+        // 6. Chuẩn hóa các trường chuỗi còn lại
+        Supplier.TenCongTy = string.IsNullOrWhiteSpace(Supplier.TenCongTy) ? null : Supplier.TenCongTy.Trim();
+        var nhomBox = this.FindControl<AutoCompleteBox>("NhomNhaCungCapBox");
+        Supplier.NhomNhaCungCapTen = string.IsNullOrWhiteSpace(nhomBox?.Text) ? null : nhomBox.Text.Trim();
+        Supplier.NguoiLienHe = string.IsNullOrWhiteSpace(Supplier.NguoiLienHe) ? null : Supplier.NguoiLienHe.Trim();
+        Supplier.MaSoThue = string.IsNullOrWhiteSpace(Supplier.MaSoThue) ? null : Supplier.MaSoThue.Trim();
+        Supplier.SoTaiKhoan = string.IsNullOrWhiteSpace(Supplier.SoTaiKhoan) ? null : Supplier.SoTaiKhoan.Trim();
+        Supplier.NganHang = string.IsNullOrWhiteSpace(Supplier.NganHang) ? null : Supplier.NganHang.Trim();
+        Supplier.NhanHieu = string.IsNullOrWhiteSpace(Supplier.NhanHieu) ? null : Supplier.NhanHieu.Trim();
+        Supplier.GhiChu = string.IsNullOrWhiteSpace(Supplier.GhiChu) ? null : Supplier.GhiChu.Trim();
+
+        // 7. Parse số tiền Hạn mức nợ / C.Nợ gối đầu
+        var congNoBox = this.FindControl<TextBox>("CongNoGoiDauBox");
+        if (congNoBox is not null && !string.IsNullOrWhiteSpace(congNoBox.Text))
+        {
+            var raw = congNoBox.Text.Replace(",", "").Replace(".", "").Trim();
+            if (decimal.TryParse(raw, NumberStyles.Any, CultureInfo.InvariantCulture, out var congNo))
+                Supplier.CongNoGoiDau = congNo;
+            else
+                Supplier.CongNoGoiDau = 0;
+        }
+        else
+        {
+            Supplier.CongNoGoiDau = 0;
+        }
+
+        // 8. Parse Chiết khấu (%)
+        var chietKhauBox = this.FindControl<TextBox>("ChietKhauBox");
+        if (chietKhauBox is not null && !string.IsNullOrWhiteSpace(chietKhauBox.Text))
+        {
+            var raw = chietKhauBox.Text.Replace(",", ".").Trim();
+            if (decimal.TryParse(raw, NumberStyles.Any, CultureInfo.InvariantCulture, out var ck))
+                Supplier.ChietKhau = Math.Max(0, Math.Min(100, ck));
+            else
+                Supplier.ChietKhau = 0;
+        }
+        else
+        {
+            Supplier.ChietKhau = 0;
+        }
+
+        // 9. Trạng thái hợp tác
+        var conHopTacCheck = this.FindControl<CheckBox>("ConHopTacCheckBox");
+        Supplier.ConHopTac = conHopTacCheck?.IsChecked ?? true;
+        Supplier.TrangThai = Supplier.ConHopTac;
+
+        if (!IsEditMode)
+            Supplier.NgayTao = DateTime.Now;
+
+        // Thành công: đóng form trả về true
         Close(true);
     }
 
-    private void OnCancelClicked(
-        object? sender,
-        RoutedEventArgs e)
+    private async void OnThietLapGiaClicked(object? sender, RoutedEventArgs e)
     {
-        Close(false);
-    }
-
-    private async void OnDeleteClicked(
-        object? sender,
-        RoutedEventArgs e)
-    {
-        var result =
-            await ShowDeleteConfirmationAsync();
-
-        if (!result)
+        if (Supplier.Id == 0)
+        {
+            HienLoi("Vui lòng lưu thông tin nhà cung cấp trước khi thiết lập bảng giá chi tiết.");
             return;
+        }
 
-        Close(false);
+        var window = new ThietLapGiaDoiTacWindow(
+            Supplier.Id,
+            Supplier.MaNhaCungCap,
+            string.IsNullOrWhiteSpace(Supplier.TenNhaCungCap) ? "Nhà cung cấp" : Supplier.TenNhaCungCap,
+            "NCC");
+
+        await window.ShowDialog(this);
     }
 
-    private async Task<bool> ShowDeleteConfirmationAsync()
+    private void OnCancelClicked(object? sender, RoutedEventArgs e)
     {
-        var confirmWindow = new Window
-        {
-            Title = "Xác nhận xóa",
-            Width = 420,
-            Height = 220,
-            WindowStartupLocation =
-                WindowStartupLocation.CenterOwner
-        };
-
-        var yesButton = new Button
-        {
-            Content = "Xóa",
-            Width = 100,
-            Background =
-                Avalonia.Media.Brushes.IndianRed,
-            Foreground =
-                Avalonia.Media.Brushes.White
-        };
-
-        var noButton = new Button
-        {
-            Content = "Hủy",
-            Width = 100
-        };
-
-        var result = false;
-
-        yesButton.Click += (_, _) =>
-        {
-            result = true;
-            confirmWindow.Close();
-        };
-
-        noButton.Click += (_, _) =>
-        {
-            result = false;
-            confirmWindow.Close();
-        };
-
-        confirmWindow.Content =
-            new StackPanel
-            {
-                Margin =
-                    new Avalonia.Thickness(25),
-
-                Spacing = 18,
-
-                Children =
-                {
-                    new TextBlock
-                    {
-                        Text =
-                            $"Bạn có chắc muốn xóa nhà cung cấp " +
-                            $"\"{Supplier.TenNhaCungCap}\" không?",
-
-                        TextWrapping =
-                            Avalonia.Media.TextWrapping.Wrap,
-
-                        FontSize = 15
-                    },
-
-                    new StackPanel
-                    {
-                        Orientation =
-                            Avalonia.Layout.Orientation.Horizontal,
-
-                        HorizontalAlignment =
-                            Avalonia.Layout.HorizontalAlignment.Right,
-
-                        Spacing = 10,
-
-                        Children =
-                        {
-                            noButton,
-                            yesButton
-                        }
-                    }
-                }
-            };
-
-        await confirmWindow.ShowDialog(this);
-
-        return result;
+        Close(false);
     }
 }

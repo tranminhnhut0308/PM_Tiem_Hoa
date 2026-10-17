@@ -21,7 +21,6 @@ public partial class ProductEditorWindow : Window
     private readonly bool _duocSuaGiaBan;
     private readonly bool _duocSuaGiaVon;
     private readonly bool _duocDieuChinhTonKho;
-    private bool _dangDinhDangTien;
 
     public SanPham Product => _product;
 
@@ -29,13 +28,6 @@ public partial class ProductEditorWindow : Window
     {
     }
 
-    /// <param name="duocSuaGiaBan">Có quyền <c>hanghoa.sua_gia_ban</c>.</param>
-    /// <param name="duocSuaGiaVon">Có quyền <c>hanghoa.sua_gia_von</c>.</param>
-    /// <param name="duocDieuChinhTonKho">Có quyền <c>hanghoa.dieu_chinh_ton_kho</c>.</param>
-    /// <param name="cheDoXem">
-    /// true = chỉ xem chi tiết (mở bằng quyền <c>hanghoa.xem_chi_tiet</c> mà không có
-    /// <c>hanghoa.sua</c>): mọi trường chỉ đọc và ẩn nút Lưu.
-    /// </param>
     public ProductEditorWindow(
         SanPham? product = null,
         IReadOnlyList<ProductOption>? groups = null,
@@ -48,7 +40,6 @@ public partial class ProductEditorWindow : Window
         InitializeComponent();
 
         _cheDoXem = cheDoXem;
-        // Chế độ chỉ xem thì mọi trường đều khóa, bất kể các quyền chi tiết.
         _duocSuaGiaBan = duocSuaGiaBan && !cheDoXem;
         _duocSuaGiaVon = duocSuaGiaVon && !cheDoXem;
         _duocDieuChinhTonKho = duocDieuChinhTonKho && !cheDoXem;
@@ -56,7 +47,9 @@ public partial class ProductEditorWindow : Window
         _product = product ?? new SanPham
         {
             MaSanPham = GenerateProductCode(),
-            DuocBanTrucTiep = true
+            DuocBanTrucTiep = true,
+            DangKinhDoanh = true,
+            InAn = true
         };
 
         _groupsList = (groups ?? []).ToList();
@@ -64,335 +57,254 @@ public partial class ProductEditorWindow : Window
 
         NhomSanPhamComboBox.ItemsSource = _groupsList;
         DonViTinhComboBox.ItemsSource = _unitsList;
+        DonViTinhCap2ComboBox.ItemsSource = _unitsList;
+        DonViTinhCap3ComboBox.ItemsSource = _unitsList;
 
         ApCheQuyenTungTruong();
 
-        GiaBanTextBox.GotFocus += GiaBanTextBox_OnGotFocus;
-        GiaBanTextBox.LostFocus += GiaBanTextBox_OnLostFocus;
-        GiaBanTextBox.TextChanged += GiaBanTextBox_OnTextChanged;
+        // Gắn sự kiện format số tiền cho các ô giá
+        GanSuKienTien(GiaVonTextBox);
+        GanSuKienTien(GiaBanTextBox);
+        GanSuKienTien(GiaSiTextBox);
+        GanSuKienTien(GiaNhapCap2TextBox);
+        GanSuKienTien(GiaLeCap2TextBox);
+        GanSuKienTien(GiaSiCap2TextBox);
+        GanSuKienTien(GiaNhapCap3TextBox);
+        GanSuKienTien(GiaLeCap3TextBox);
+        GanSuKienTien(GiaSiCap3TextBox);
 
-        Title = _isNew ? "Thêm sản phẩm" : (_cheDoXem ? "Chi tiết sản phẩm" : "Sửa sản phẩm");
+        Title = _isNew ? "Thêm hàng hóa mới" : (_cheDoXem ? "Chi tiết hàng hóa" : "Sửa hàng hóa");
         LoadProduct();
     }
 
-    /// <summary>
-    /// Áp quyền chi tiết lên từng trường: giá bán, giá vốn, tồn kho theo đúng
-    /// quyền tương ứng; chế độ chỉ xem thì khóa toàn bộ và ẩn thao tác lưu.
-    /// </summary>
     private void ApCheQuyenTungTruong()
     {
         if (_cheDoXem)
         {
-            // Chỉ xem: mọi ô nhập chỉ đọc, ẩn các thao tác thay đổi dữ liệu.
             foreach (var textBox in new[]
                      {
-                         TenSanPhamTextBox, GiaBanTextBox, GiaVonTextBox, TonKhoTextBox,
-                         KhachDatTextBox, ViTriKhoTextBox, LoaiHangTextBox, DuKienHetHangTextBox
+                         MaSanPhamTextBox, BarcodeTextBox, TenSanPhamTextBox,
+                         GiaVonTextBox, GiaBanTextBox, GiaSiTextBox,
+                         QuyDoiCap2TextBox, GiaNhapCap2TextBox, GiaLeCap2TextBox, GiaSiCap2TextBox,
+                         QuyDoiCap3TextBox, GiaNhapCap3TextBox, GiaLeCap3TextBox, GiaSiCap3TextBox,
+                         QuyCachTextBox, TrongLuongTextBox, DuTruMinTextBox, DuTruMaxTextBox, GhiChuTextBox
                      })
             {
-                textBox.IsEnabled = true;
                 textBox.IsReadOnly = true;
             }
 
             NhomSanPhamComboBox.IsEnabled = false;
             DonViTinhComboBox.IsEnabled = false;
-            ThemNhomHangButton.IsVisible = false;
-            ThemDonViTinhButton.IsVisible = false;
+            DonViTinhCap2ComboBox.IsEnabled = false;
+            DonViTinhCap3ComboBox.IsEnabled = false;
+            InAnCheckBox.IsEnabled = false;
+            ConSuDungCheckBox.IsEnabled = false;
             SaveButton.IsVisible = false;
             CancelButton.Content = "Đóng";
             return;
         }
 
-        // Chế độ sửa: ô nào thiếu quyền chi tiết thì khóa lại, vẫn hiện giá trị.
-        // Giá bán chỉ cho gõ khi có quyền sửa giá bán.
         GiaBanTextBox.IsEnabled = _duocSuaGiaBan;
         GiaBanTextBox.IsReadOnly = !_duocSuaGiaBan;
-        ToolTip.SetTip(
-            GiaBanTextBox,
-            _duocSuaGiaBan
-                ? "Nhập số tiền, ví dụ 50.000 hoặc 1500000"
-                : "Bạn không có quyền chỉnh giá bán");
 
-        // Giá vốn chỉ cho gõ khi có quyền sửa giá vốn.
         GiaVonTextBox.IsEnabled = _duocSuaGiaVon;
         GiaVonTextBox.IsReadOnly = !_duocSuaGiaVon;
-        ToolTip.SetTip(
-            GiaVonTextBox,
-            _duocSuaGiaVon ? "Nhập giá vốn" : "Bạn không có quyền chỉnh giá vốn");
-
-        // Tồn kho chỉ cho gõ khi có quyền điều chỉnh tồn kho.
-        TonKhoTextBox.IsEnabled = _duocDieuChinhTonKho;
-        TonKhoTextBox.IsReadOnly = !_duocDieuChinhTonKho;
-        ToolTip.SetTip(
-            TonKhoTextBox,
-            _duocDieuChinhTonKho ? "Nhập số lượng tồn" : "Bạn không có quyền điều chỉnh tồn kho");
     }
 
     private void LoadProduct()
     {
-        TieuDeTextBlock.Text = _isNew
-            ? "Thông tin sản phẩm"
-            : (_cheDoXem ? $"Chi tiết sản phẩm {_product.MaSanPham}" : $"Sửa sản phẩm {_product.MaSanPham}");
-
-        MoTaTextBlock.Text = _isNew
-            ? "Nhập thông tin để tạo sản phẩm mới trong kho hàng."
-            : (_cheDoXem
-                ? "Thông tin chi tiết của sản phẩm đang chọn (chỉ xem)."
-                : "Chỉnh sửa thông tin của sản phẩm đang chọn.");
-
-        MaSanPhamTextBlock.Text = _product.MaSanPham;
+        MaSanPhamTextBox.Text = _product.MaSanPham;
+        BarcodeTextBox.Text = _product.Barcode ?? _product.MaVach ?? "";
         TenSanPhamTextBox.Text = _product.TenSanPham;
-        NhomSanPhamComboBox.SelectedItem = FindOption(NhomSanPhamComboBox.ItemsSource, _product.NhomSanPhamId);
-        DonViTinhComboBox.SelectedItem = FindOption(DonViTinhComboBox.ItemsSource, _product.DonViTinhId);
 
-        // Giá bán / giá vốn hiển thị kiểu tiền Việt Nam (50.000).
-        // Tồn kho / KH đặt là số lượng nên dùng định dạng số lượng: bỏ các số 0
-        // thập phân vô nghĩa (100.000 -> 100) nhưng giữ phần thập phân thật.
+        NhomSanPhamComboBox.SelectedItem = FindOption(_groupsList, _product.NhomSanPhamId);
+
+        // Cấp 1
+        DonViTinhComboBox.SelectedItem = FindOption(_unitsList, _product.DonViTinhId);
+        GiaVonTextBox.Text = MoneyInput.Format(_product.GiaVon);
         GiaBanTextBox.Text = MoneyInput.Format(_product.GiaBan);
-        GiaVonTextBox.Text =  MoneyInput.Format(_product.GiaVon);
-        TonKhoTextBox.Text = SoLuongFormat.Raw(_product.TonKhoExcel);
-        KhachDatTextBox.Text = SoLuongFormat.Raw(_product.KhachDat);
-        ViTriKhoTextBox.Text = _product.ViTriKho ?? "";
-        LoaiHangTextBox.Text = !string.IsNullOrWhiteSpace(_product.LoaiHang) ? _product.LoaiHang : (_isNew ? "Hàng hóa" : "");
-        DuKienHetHangTextBox.Text = _product.DuKienHetHang ?? "";
+        GiaSiTextBox.Text = MoneyInput.Format(_product.GiaSi);
+
+        // Cấp 2
+        DonViTinhCap2ComboBox.SelectedItem = FindOption(_unitsList, _product.DonViTinhCap2Id);
+        QuyDoiCap2TextBox.Text = _product.QuyDoiCap2.ToString("G29", CultureInfo.InvariantCulture);
+        GiaNhapCap2TextBox.Text = MoneyInput.Format(_product.GiaNhapCap2);
+        GiaLeCap2TextBox.Text = MoneyInput.Format(_product.GiaLeCap2);
+        GiaSiCap2TextBox.Text = MoneyInput.Format(_product.GiaSiCap2);
+
+        // Cấp 3
+        DonViTinhCap3ComboBox.SelectedItem = FindOption(_unitsList, _product.DonViTinhCap3Id);
+        QuyDoiCap3TextBox.Text = _product.QuyDoiCap3.ToString("G29", CultureInfo.InvariantCulture);
+        GiaNhapCap3TextBox.Text = MoneyInput.Format(_product.GiaNhapCap3);
+        GiaLeCap3TextBox.Text = MoneyInput.Format(_product.GiaLeCap3);
+        GiaSiCap3TextBox.Text = MoneyInput.Format(_product.GiaSiCap3);
+
+        // Quy cách, trọng lượng, min/max
+        QuyCachTextBox.Text = _product.QuyCach ?? "";
+        TrongLuongTextBox.Text = (_product.TrongLuong ?? 0m).ToString("G29", CultureInfo.InvariantCulture);
+        DuTruMinTextBox.Text = _product.DuTruMin.ToString("G29", CultureInfo.InvariantCulture);
+        DuTruMaxTextBox.Text = _product.DuTruMax.ToString("G29", CultureInfo.InvariantCulture);
+
+        GhiChuTextBox.Text = _product.GhiChu ?? "";
+        InAnCheckBox.IsChecked = _product.InAn;
+        ConSuDungCheckBox.IsChecked = _product.ConSuDung;
     }
 
-    /// <summary>Bắt đầu gõ thì bỏ dấu phân cách để sửa số bình thường.</summary>
-    private void GiaBanTextBox_OnGotFocus(object? sender, RoutedEventArgs e)
+    private void SaveButton_OnClick(object? sender, RoutedEventArgs e)
     {
-        if (!MoneyInput.TryParse(GiaBanTextBox.Text, false, out var value, out _))
-            return;
-
-        var raw = MoneyInput.ToRawText(value);
-
-        if (GiaBanTextBox.Text != raw)
-            GiaBanTextBox.Text = raw;
-
-        GiaBanTextBox.SelectAll();
-    }
-
-    /// <summary>Rời ô thì format lại kiểu Việt Nam, kể cả khi người dùng gõ sai.</summary>
-    private void GiaBanTextBox_OnLostFocus(object? sender, RoutedEventArgs e)
-    {
-        if (!MoneyInput.TryParse(GiaBanTextBox.Text, false, out var value, out _))
-            value = 0m;
-
-        _dangDinhDangTien = true;
-        GiaBanTextBox.Text = MoneyInput.Format(value);
-        _dangDinhDangTien = false;
-    }
-
-    /// <summary>
-    /// Gõ tới đâu thì thêm dấu phân cách hàng nghìn tới đó (gõ 1500000 ra 1.500.000).
-    /// Chỉ lấy chữ số để khỏi hiện ký hiệu tiền lẫn trong ô nhập.
-    /// </summary>
-    private void GiaBanTextBox_OnTextChanged(object? sender, TextChangedEventArgs e)
-    {
-        if (_dangDinhDangTien)
-            return;
-
-        var digits = new string(
-            (GiaBanTextBox.Text ?? "")
-                .Where(char.IsDigit)
-                .ToArray());
-
-        // Để trống thì chờ người dùng gõ tiếp, không tự nhảy về "0"
-        if (digits.Length == 0)
-            return;
-
-        if (!decimal.TryParse(
-                digits,
-                NumberStyles.None,
-                CultureInfo.InvariantCulture,
-                out var value))
-        {
-            return;
-        }
-
-        var formatted = MoneyInput.Format(value);
-
-        if (formatted == GiaBanTextBox.Text)
-            return;
-
-        _dangDinhDangTien = true;
-
-        GiaBanTextBox.Text = formatted;
-        GiaBanTextBox.CaretIndex = formatted.Length;
-
-        _dangDinhDangTien = false;
-    }
-
-    private void SaveButton_OnClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        // Chế độ chỉ xem không có nút Lưu; chặn thêm ở đây để không lưu nhầm.
         if (_cheDoXem)
             return;
 
         ErrorTextBlock.Text = "";
-        LoiGiaBanTextBlock.Text = "";
 
-        if (string.IsNullOrWhiteSpace(TenSanPhamTextBox.Text))
+        var ma = (MaSanPhamTextBox.Text ?? "").Trim();
+        var ten = (TenSanPhamTextBox.Text ?? "").Trim();
+
+        if (string.IsNullOrWhiteSpace(ten))
         {
-            ErrorTextBlock.Text = "Mã và tên sản phẩm là bắt buộc.";
+            ErrorTextBlock.Text = "Vui lòng nhập tên hàng hóa.";
+            TenSanPhamTextBox.Focus();
             return;
         }
 
-        // Validate giá bán trước: không cho lưu nếu nhập chữ, số âm,
-        // để trống hoặc vượt quá giới hạn DECIMAL(15,2).
-        var giaBan = _product.GiaBan;
-
-        if (_duocSuaGiaBan &&
-            !MoneyInput.TryParse(GiaBanTextBox.Text, true, out giaBan, out var loiGiaBan))
+        if (string.IsNullOrWhiteSpace(ma))
         {
-            LoiGiaBanTextBlock.Text = loiGiaBan;
-            ErrorTextBlock.Text = "Giá bán chưa hợp lệ, vui lòng kiểm tra lại.";
-            GiaBanTextBox.Focus();
-            return;
+            ma = GenerateProductCode();
         }
 
-        if (!TryReadDecimal(GiaVonTextBox.Text, out var giaVon))
+        _product.MaSanPham = ma;
+        _product.Barcode = BarcodeTextBox.Text?.Trim();
+        _product.MaVach = _product.Barcode;
+        _product.TenSanPham = ten;
+
+        if (NhomSanPhamComboBox.SelectedItem is ProductOption selectedGroup)
         {
-            ErrorTextBlock.Text = "Giá vốn phải là số hợp lệ.";
-            return;
-        }
-
-        if (!TryReadDecimal(TonKhoTextBox.Text, out var tonKho) ||
-            !TryReadDecimal(KhachDatTextBox.Text, out var khachDat))
-        {
-            ErrorTextBlock.Text = "Tồn kho và KH đặt phải là số hợp lệ.";
-            return;
-        }
-
-        // Mọi thông tin đã hợp lệ mới ghi vào đối tượng sản phẩm.
-        var selectedGroup = NhomSanPhamComboBox.SelectedItem as ProductOption;
-        var selectedUnit = DonViTinhComboBox.SelectedItem as ProductOption;
-
-        _product.TenSanPham = TenSanPhamTextBox.Text.Trim();
-
-        if (selectedGroup != null)
-        {
-            if (_product.NhomSanPhamId != selectedGroup.Id || string.IsNullOrWhiteSpace(_product.NhomHangBaCap))
-            {
-                _product.NhomHangBaCap = selectedGroup.Name;
-            }
             _product.NhomSanPhamId = selectedGroup.Id;
             _product.NhomSanPham = selectedGroup.Name;
         }
-        else
-        {
-            _product.NhomSanPhamId = null;
-            _product.NhomSanPham = null;
-            _product.NhomHangBaCap = null;
-        }
 
-        if (selectedUnit != null)
+        // Cấp 1
+        if (DonViTinhComboBox.SelectedItem is ProductOption selectedUnit)
         {
             _product.DonViTinhId = selectedUnit.Id;
             _product.DonViTinh = selectedUnit.Name;
             _product.TenDonViTinh = selectedUnit.Name;
         }
-        else
-        {
-            _product.DonViTinhId = null;
-            _product.DonViTinh = null;
-            _product.TenDonViTinh = null;
-        }
 
-        _product.GiaBan = giaBan;
-        _product.GiaVon = giaVon;
-        _product.TonKhoExcel = tonKho;
-        _product.KhachDat = khachDat;
-        _product.ViTriKho = NullIfEmpty(ViTriKhoTextBox.Text);
-        _product.LoaiHang = NullIfEmpty(LoaiHangTextBox.Text) ?? "Hàng hóa";
-        _product.DuKienHetHang = NullIfEmpty(DuKienHetHangTextBox.Text);
+        _product.GiaVon = DocTien(GiaVonTextBox.Text);
+        _product.GiaBan = DocTien(GiaBanTextBox.Text);
+        _product.GiaSi = DocTien(GiaSiTextBox.Text);
+
+        // Cấp 2
+        if (DonViTinhCap2ComboBox.SelectedItem is ProductOption selectedUnit2)
+        {
+            _product.DonViTinhCap2Id = selectedUnit2.Id;
+            _product.DonViTinhCap2 = selectedUnit2.Name;
+        }
+        _product.QuyDoiCap2 = DocSoThapPhan(QuyDoiCap2TextBox.Text);
+        _product.GiaNhapCap2 = DocTien(GiaNhapCap2TextBox.Text);
+        _product.GiaLeCap2 = DocTien(GiaLeCap2TextBox.Text);
+        _product.GiaSiCap2 = DocTien(GiaSiCap2TextBox.Text);
+
+        // Cấp 3
+        if (DonViTinhCap3ComboBox.SelectedItem is ProductOption selectedUnit3)
+        {
+            _product.DonViTinhCap3Id = selectedUnit3.Id;
+            _product.DonViTinhCap3 = selectedUnit3.Name;
+        }
+        _product.QuyDoiCap3 = DocSoThapPhan(QuyDoiCap3TextBox.Text);
+        _product.GiaNhapCap3 = DocTien(GiaNhapCap3TextBox.Text);
+        _product.GiaLeCap3 = DocTien(GiaLeCap3TextBox.Text);
+        _product.GiaSiCap3 = DocTien(GiaSiCap3TextBox.Text);
+
+        // Quy cách, trọng lượng, min/max
+        _product.QuyCach = QuyCachTextBox.Text?.Trim();
+        _product.TrongLuong = DocSoThapPhan(TrongLuongTextBox.Text);
+        _product.DuTruMin = DocSoThapPhan(DuTruMinTextBox.Text);
+        _product.DuTruMax = DocSoThapPhan(DuTruMaxTextBox.Text);
+
+        _product.GhiChu = GhiChuTextBox.Text?.Trim();
+        _product.InAn = InAnCheckBox.IsChecked ?? true;
+        _product.ConSuDung = ConSuDungCheckBox.IsChecked ?? true;
+        _product.DangKinhDoanh = _product.ConSuDung;
 
         Close(true);
     }
 
-    private static ProductOption? FindOption(object? source, uint? id)
-    {
-        if (id is null || source is not IEnumerable<ProductOption> options)
-            return null;
-
-        return options.FirstOrDefault(option => option.Id == id.Value);
-    }
-
-    private static bool TryReadDecimal(string? value, out decimal result)
-    {
-        return decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out result) ||
-               decimal.TryParse(value, NumberStyles.Number, CultureInfo.CurrentCulture, out result);
-    }
-
-    private static string? NullIfEmpty(string? value) =>
-        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-
-    private static string GenerateProductCode() =>
-        $"SP-{DateTime.Now:yyyyMMdd-HHmmssfff}";
-
-    private void CancelButton_OnClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void CancelButton_OnClick(object? sender, RoutedEventArgs e)
     {
         Close(false);
     }
 
-    private async void ThemNhomHangButton_OnClick(object? sender, RoutedEventArgs e)
+    private static ProductOption? FindOption(IEnumerable<ProductOption>? items, uint? id)
     {
-        try
-        {
-            var tenNhom = await QuickOptionEditorWindow.ShowAsync(
-                this,
-                "Thêm nhóm hàng mới",
-                "Tên nhóm hàng *",
-                "Ví dụ: Hoa cúc, Hoa hồng, Phụ kiện...");
+        if (items is null || id is null)
+            return null;
 
-            if (string.IsNullOrWhiteSpace(tenNhom))
-                return;
-
-            var newOption = await _db.ThemNhomSanPhamAsync(tenNhom);
-            var existing = _groupsList.FirstOrDefault(x => x.Id == newOption.Id);
-            if (existing == null)
-            {
-                _groupsList.Add(newOption);
-                _groupsList.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.CurrentCultureIgnoreCase));
-            }
-
-            NhomSanPhamComboBox.ItemsSource = null;
-            NhomSanPhamComboBox.ItemsSource = _groupsList;
-            NhomSanPhamComboBox.SelectedItem = _groupsList.FirstOrDefault(x => x.Id == newOption.Id);
-        }
-        catch (Exception ex)
-        {
-            await NotificationWindow.ShowErrorAsync("Không thể thêm nhóm hàng: " + ex.Message, owner: this);
-        }
+        return items.FirstOrDefault(item => item.Id == id.Value);
     }
 
-    private async void ThemDonViTinhButton_OnClick(object? sender, RoutedEventArgs e)
+    private static string GenerateProductCode()
     {
-        try
+        return $"HH{DateTime.Now:yyMMddHHmmss}";
+    }
+
+    private static decimal DocTien(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return 0m;
+
+        var cleaned = text.Replace(".", "").Replace(",", "").Trim();
+        return decimal.TryParse(cleaned, NumberStyles.Number, CultureInfo.InvariantCulture, out var val) ? val : 0m;
+    }
+
+    private static decimal DocSoThapPhan(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return 0m;
+
+        var normalized = text.Replace(" ", "").Replace(",", ".").Trim();
+        return decimal.TryParse(normalized, NumberStyles.Float, CultureInfo.InvariantCulture, out var val) ? val : 0m;
+    }
+
+    private static void GanSuKienTien(TextBox textBox)
+    {
+        var dangFormat = false;
+
+        textBox.GotFocus += (_, _) =>
         {
-            var tenDvt = await QuickOptionEditorWindow.ShowAsync(
-                this,
-                "Thêm đơn vị tính mới",
-                "Tên đơn vị tính *",
-                "Ví dụ: Bó, Cành, Chậu, Giỏ, Lẵng, Bình...");
+            var raw = textBox.Text?.Replace(".", "").Replace(",", "").Trim() ?? "";
+            if (raw == "0") raw = "";
+            textBox.Text = raw;
+            textBox.SelectAll();
+        };
 
-            if (string.IsNullOrWhiteSpace(tenDvt))
-                return;
+        textBox.LostFocus += (_, _) =>
+        {
+            var val = DocTien(textBox.Text);
+            dangFormat = true;
+            textBox.Text = MoneyInput.Format(val);
+            dangFormat = false;
+        };
 
-            var newOption = await _db.ThemDonViTinhAsync(tenDvt);
-            var existing = _unitsList.FirstOrDefault(x => x.Id == newOption.Id);
-            if (existing == null)
+        textBox.TextChanged += (_, _) =>
+        {
+            if (dangFormat) return;
+
+            var digits = new string((textBox.Text ?? "").Where(char.IsDigit).ToArray());
+            if (digits.Length == 0) return;
+
+            if (decimal.TryParse(digits, NumberStyles.None, CultureInfo.InvariantCulture, out var val))
             {
-                _unitsList.Add(newOption);
-                _unitsList.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.CurrentCultureIgnoreCase));
+                var formatted = MoneyInput.Format(val);
+                if (formatted != textBox.Text)
+                {
+                    dangFormat = true;
+                    textBox.Text = formatted;
+                    textBox.CaretIndex = formatted.Length;
+                    dangFormat = false;
+                }
             }
-
-            DonViTinhComboBox.ItemsSource = null;
-            DonViTinhComboBox.ItemsSource = _unitsList;
-            DonViTinhComboBox.SelectedItem = _unitsList.FirstOrDefault(x => x.Id == newOption.Id);
-        }
-        catch (Exception ex)
-        {
-            await NotificationWindow.ShowErrorAsync("Không thể thêm đơn vị tính: " + ex.Message, owner: this);
-        }
+        };
     }
 }

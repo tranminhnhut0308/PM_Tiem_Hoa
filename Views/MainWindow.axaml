@@ -1353,6 +1353,73 @@
               </Grid>
             </Button>
 
+            <!-- DỮ LIỆU ĐẦU KỲ -->
+            <Button Classes="menu">
+              <Button.Flyout>
+                <MenuFlyout Placement="RightEdgeAlignedTop">
+                  <MenuItem Header="📦 Hàng hóa đầu kỳ">
+                    <MenuItem Header="➕ Thêm hàng tồn đầu kỳ..."
+                              Command="{Binding ThemHangTonDauKyCommand}" />
+                  </MenuItem>
+                  <MenuItem Header="💳 Công nợ đầu kỳ">
+                    <MenuItem Header="➕ Thêm công nợ đầu kỳ..."
+                              Command="{Binding ThemCongNoDauKyCommand}" />
+                  </MenuItem>
+                  <MenuItem Header="💰 Sổ quỹ đầu kỳ">
+                    <MenuItem Header="➕ Khai báo số dư quỹ đầu kỳ..."
+                              Command="{Binding QuanLySoQuyDauKyCommand}" />
+                  </MenuItem>
+                </MenuFlyout>
+              </Button.Flyout>
+              <Grid ColumnDefinitions="24,*,Auto">
+                <TextBlock Text="📁" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Dữ liệu đầu kỳ" VerticalAlignment="Center" Margin="6,0,0,0" />
+                <TextBlock Grid.Column="2" Text="▸" FontSize="11" Foreground="#85C7B7" VerticalAlignment="Center" Margin="0,0,4,0" />
+              </Grid>
+            </Button>
+
+            <!-- KHUYẾN MÃI -->
+            <Button Classes="menu">
+              <Button.Flyout>
+                <MenuFlyout Placement="RightEdgeAlignedTop">
+                  <MenuItem Header="🎁 Danh mục khuyến mãi">
+                    <MenuItem Header="📋 Quản lý danh mục khuyến mãi..."
+                              Command="{Binding QuanLyKhuyenMaiCommand}" />
+                    <MenuItem Header="➕ Thêm chương trình khuyến mãi..."
+                              Command="{Binding ThemChuongTrinhKhuyenMaiCommand}" />
+                  </MenuItem>
+                </MenuFlyout>
+              </Button.Flyout>
+              <Grid ColumnDefinitions="24,*,Auto">
+                <TextBlock Text="🎁" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Khuyến mãi" VerticalAlignment="Center" Margin="6,0,0,0" />
+                <TextBlock Grid.Column="2" Text="▸" FontSize="11" Foreground="#85C7B7" VerticalAlignment="Center" Margin="0,0,4,0" />
+              </Grid>
+            </Button>
+
+            <!-- ĐỐI TÁC NỘI BỘ (DANH MỤC → ĐỐI TÁC → NỘI BỘ) -->
+            <Button Classes="menu">
+              <Button.Flyout>
+                <MenuFlyout Placement="RightEdgeAlignedTop">
+                  <MenuItem Header="👥 Nhân viên">
+                    <MenuItem Header="📋 Danh sách nhân viên..."
+                              Command="{Binding MoDanhSachNhanVienCommand}" />
+                    <MenuItem Header="➕ Thêm nhân viên..."
+                              Command="{Binding ThemNhanVienCommand}" />
+                  </MenuItem>
+                  <MenuItem Header="🏢 Khách hàng nội bộ">
+                    <MenuItem Header="➕ Thêm khách hàng nội bộ..."
+                              Command="{Binding ThemKhachHangNoiBoCommand}" />
+                  </MenuItem>
+                </MenuFlyout>
+              </Button.Flyout>
+              <Grid ColumnDefinitions="24,*,Auto">
+                <TextBlock Text="🏢" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Đối tác nội bộ" VerticalAlignment="Center" Margin="6,0,0,0" />
+                <TextBlock Grid.Column="2" Text="▸" FontSize="11" Foreground="#85C7B7" VerticalAlignment="Center" Margin="0,0,4,0" />
+              </Grid>
+            </Button>
+
             <!-- BÁO CÁO (ACCORDION CÓ GẬP MỞ) -->
             <Button Classes="menu" Classes.active="{Binding IsBaoCaoSectionSelected}"
               Command="{Binding ChonMenuCommand}" CommandParameter="Báo cáo"
@@ -1487,6 +1554,51 @@
                         <TextBlock Text="⚙" FontSize="14" Foreground="#087F6E"
                           VerticalAlignment="Center" />
                         <TextBlock Text="Cài đặt danh mục" FontSize="13" Foreground="#263B35"
+                          VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+
+                    <!-- Mục Dữ liệu đầu kỳ: Thêm hàng tồn đầu kỳ -->
+                    <Button Background="Transparent"
+                      BorderThickness="0"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Left"
+                      Padding="10,8"
+                      Command="{Binding ThemHangTonDauKyCommand}">
+                      <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="📦" FontSize="14" Foreground="#087F6E"
+                          VerticalAlignment="Center" />
+                        <TextBlock Text="Thêm tồn đầu kỳ" FontSize="13" Foreground="#263B35"
+                          VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+
+                    <!-- Mục Danh mục: Thêm chương trình khuyến mãi -->
+                    <Button Background="Transparent"
+                      BorderThickness="0"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Left"
+                      Padding="10,8"
+                      Command="{Binding ThemChuongTrinhKhuyenMaiCommand}">
+                      <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="🎁" FontSize="14" Foreground="#087F6E"
+                          VerticalAlignment="Center" />
+                        <TextBlock Text="Thêm khuyến mãi" FontSize="13" Foreground="#263B35"
+                          VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+
+                    <!-- Mục Danh mục: Thêm khách hàng nội bộ -->
+                    <Button Background="Transparent"
+                      BorderThickness="0"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Left"
+                      Padding="10,8"
+                      Command="{Binding ThemKhachHangNoiBoCommand}">
+                      <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="🏢" FontSize="14" Foreground="#1976D2"
+                          VerticalAlignment="Center" />
+                        <TextBlock Text="Thêm khách nội bộ" FontSize="13" Foreground="#263B35"
                           VerticalAlignment="Center" />
                       </StackPanel>
                     </Button>
@@ -1665,7 +1777,12 @@
                     <Border BorderBrush="#EAEFE2" BorderThickness="0,0,0,1" Padding="0,6">
                       <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                         <StackPanel VerticalAlignment="Center">
-                          <TextBlock Text="{Binding SanPham.TenSanPham}" FontWeight="SemiBold" Foreground="#163F38" FontSize="13" TextTrimming="CharacterEllipsis" />
+                          <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{Binding SanPham.TenSanPham}" FontWeight="SemiBold" Foreground="#163F38" FontSize="13" TextTrimming="CharacterEllipsis" />
+                            <Border Background="#E6F4EA" CornerRadius="4" Padding="4,1" VerticalAlignment="Center" IsVisible="{Binding CoGiaRieng}">
+                              <TextBlock Text="🏷 Giá riêng" FontSize="10" FontWeight="SemiBold" Foreground="#137333" />
+                            </Border>
+                          </StackPanel>
                           <TextBlock Text="{Binding ThanhTien, StringFormat={}{0:N0} đ}" Foreground="#087F6E" FontWeight="Bold" FontSize="12" />
                         </StackPanel>
 
@@ -1934,7 +2051,7 @@
           <Grid Margin="0,0,0,0" RowDefinitions="Auto,Auto,*">
 
             <!-- THANH CÔNG CỤ -->
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto"
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
              ColumnSpacing="8"
              Margin="0,0,0,10">
 
@@ -1985,7 +2102,6 @@
                 </Button.Flyout>
               </Button>
 
-              <!-- CÁC NÚT CŨ GIỮ NGUYÊN (Đổi lại số thứ tự Grid.Column cho khớp) -->
               <Button Grid.Column="3"
                 Classes="toolbar-primary"
                 Content="＋  Hàng hóa"
@@ -1996,13 +2112,46 @@
 
               <Button Grid.Column="4"
                 Classes="toolbar-primary"
+                Content="📦  Tồn đầu kỳ"
+                Command="{Binding ThemHangTonDauKyCommand}"
+                ToolTip.Tip="Dữ liệu đầu kỳ → Hàng hóa đầu kỳ → Thêm hàng tồn đầu kỳ"
+                Margin="0"
+                Height="38" />
+
+              <Button Grid.Column="5"
+                Classes="toolbar-action"
+                Content="🎁  Khuyến mãi"
+                Command="{Binding ThemChuongTrinhKhuyenMaiCommand}"
+                ToolTip.Tip="Danh mục → Khuyến mãi → Thêm chương trình khuyến mãi"
+                Margin="0"
+                Height="38" />
+
+              <Button Grid.Column="6"
+                Classes="toolbar-primary"
                 Content="＋  Nhập hàng"
                 Command="{Binding MoGiaoDienNhapHangCommand}"
                 Margin="0"
                 Height="38"
                 IsVisible="{Binding CanCreatePurchase}" />
 
-              <Button Grid.Column="5"
+              <Button Grid.Column="7"
+                Classes="toolbar-action"
+                Content="📊 Nhập Excel"
+                Command="{Binding NhapHangHoaTuExcelSalesProCommand}"
+                ToolTip.Tip="Danh mục → Hàng hóa → Nhập hàng hóa từ Excel (.xlsx, .xls)"
+                Margin="0"
+                Height="38"
+                IsVisible="{Binding CanImportProduct}" />
+
+              <Button Grid.Column="8"
+                Classes="toolbar-action"
+                Content="🖨️ Xem / In"
+                Command="{Binding InDanhSachHangHoaCommand}"
+                ToolTip.Tip="Xem trước và in danh sách hàng hóa chuẩn A4 (Hỗ trợ PDF &amp; Excel)"
+                Margin="0"
+                Height="38" />
+
+              <Button Grid.Column="9"
                 Classes="toolbar-action"
                 Content="⇩  Import file"
                 Command="{Binding ThemSanPhamTuFileCommand}"
@@ -2010,7 +2159,7 @@
                 Height="38"
                 IsVisible="{Binding CanImportProduct}" />
 
-              <Button Grid.Column="6"
+              <Button Grid.Column="10"
                 Classes="toolbar-action"
                 Content="⇧  Xuất file"
                 Margin="0"
@@ -2154,6 +2303,17 @@
                           BorderThickness="0,0,0,1"
                           Padding="8,0"
                           PointerPressed="OnProductRowPointerPressed">
+
+                          <Border.ContextMenu>
+                            <ContextMenu>
+                              <MenuItem Header="📦 Thêm hàng tồn đầu kỳ..."
+                                        Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ThemHangTonDauKyCommand}"
+                                        CommandParameter="{Binding}" />
+                              <MenuItem Header="✏ Chỉnh sửa thông tin hàng..."
+                                        Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).SuaSanPhamCommand}"
+                                        CommandParameter="{Binding}" />
+                            </ContextMenu>
+                          </Border.ContextMenu>
 
                           <Grid ColumnDefinitions="42,150,260,120,120,120,120,120,170,130"
                             Height="56">
@@ -2402,7 +2562,7 @@
           <Grid RowDefinitions="Auto,Auto,*" Margin="0,14,16,0" RowSpacing="12">
 
             <!-- 1. THANH CÔNG CỤ -->
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
               <TextBox Classes="searchInput" Height="38" VerticalAlignment="Top"
                 Watermark="🔍 Tìm theo mã, tên, số điện thoại..."
                 Text="{Binding CustomerSearch, Mode=TwoWay}"
@@ -2471,11 +2631,30 @@
               <Button Grid.Column="2" Classes="toolbar-action" Content="Tìm kiếm"
                 Command="{Binding TimKiemKhachHangCommand}"
                 Margin="0,0,10,0" />
-              <Button Grid.Column="3" Classes="toolbar-action" Content="📁 Nhập file"
+              <Button Grid.Column="3" Classes="toolbar-action" Content="🖨️ In danh sách"
+                Margin="0,0,10,0"
+                Command="{Binding InDanhSachKhachHangCommand}"
+                ToolTip.Tip="Xem trước và in danh sách khách hàng A4" />
+              <Button Grid.Column="4" Classes="toolbar-action" Content="📁 Nhập file"
                 Margin="0,0,10,0"
                 Command="{Binding ThemKhachHangTuFileCommand}"
                 IsVisible="{Binding CanImportCustomer}" />
-              <Button Grid.Column="4" Classes="toolbar-primary" Content="＋ Thêm mới"
+              <Button Grid.Column="5" Classes="toolbar-action" Content="💳 Nợ đầu kỳ"
+                Margin="0,0,10,0"
+                Command="{Binding ThemCongNoDauKyCommand}"
+                CommandParameter="KHACH_HANG"
+                ToolTip.Tip="Khai báo số dư công nợ đầu kỳ của khách hàng" />
+              <Button Grid.Column="6" Classes="toolbar-action" Content="🏷 Thiết lập giá"
+                Margin="0,0,10,0"
+                Command="{Binding ThietLapGiaKhachHangDangChonCommand}"
+                ToolTip.Tip="Thiết lập bảng giá bán riêng cho khách hàng đang chọn"
+                IsVisible="{Binding CanEditCustomer}" />
+              <Button Grid.Column="7" Classes="toolbar-action" Content="🏢 Khách nội bộ"
+                Margin="0,0,10,0"
+                Command="{Binding ThemKhachHangNoiBoCommand}"
+                ToolTip.Tip="Thêm đối tác / khách hàng nội bộ (Danh mục → Đối tác → Nội bộ)"
+                IsVisible="{Binding CanCreateCustomer}" />
+              <Button Grid.Column="8" Classes="toolbar-primary" Content="＋ Thêm mới"
                 Margin="0"
                 Command="{Binding ThemMoiKhachHangCommand}"
                 IsVisible="{Binding CanCreateCustomer}" />
@@ -2645,7 +2824,7 @@
                             <StackPanel Spacing="14">
 
                               <!-- TÊN + NÚT SỬA / XÓA -->
-                              <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="14">
+                              <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="14">
                                 <Border Width="42" Height="42" CornerRadius="21" Background="#087F6E">
                                   <TextBlock Text="{Binding Detail.ChuCaiDau}" Foreground="White"
                                     FontSize="16" FontWeight="Bold"
@@ -2667,10 +2846,14 @@
                                   </StackPanel>
                                 </StackPanel>
 
-                                <Button Grid.Column="2" Classes="toolbar-action" Content="✏ Sửa"
+                                <Button Grid.Column="2" Classes="toolbar-action" Content="🏷 Thiết lập giá"
+                                  Margin="0,0,8,0" Command="{Binding ThietLapGiaCommand}"
+                                  ToolTip.Tip="Thiết lập bảng giá bán riêng cho khách hàng này"
+                                  IsVisible="{Binding $parent[Window].DataContext.CanEditCustomer}" />
+                                <Button Grid.Column="3" Classes="toolbar-action" Content="✏ Sửa"
                                   Margin="0,0,8,0" Command="{Binding SuaCommand}"
                                   IsVisible="{Binding $parent[Window].DataContext.CanEditCustomer}" />
-                                <Button Grid.Column="3" Classes="toolbar-action" Content="🗑 Xóa"
+                                <Button Grid.Column="4" Classes="toolbar-action" Content="🗑 Xóa"
                                   Margin="0" Command="{Binding XoaCommand}"
                                   IsVisible="{Binding $parent[Window].DataContext.CanDeleteCustomer}" />
                               </Grid>
@@ -3375,6 +3558,9 @@
               <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
                 <Button Classes="toolbar-action" Content="↻ Làm mới" Margin="0"
                   Command="{Binding RefreshSuppliersCommand}" />
+                <Button Classes="toolbar-action" Content="🖨️ Xem / In" Margin="0"
+                  Command="{Binding InDanhSachNhaCungCapCommand}"
+                  ToolTip.Tip="Xem trước và in danh sách nhà cung cấp A4" />
                 <Button Classes="toolbar-action" Content="📁 Nhập file" Margin="0"
                   Command="{Binding ThemNhaCungCapTuFileCommand}"
                   IsVisible="{Binding CanImportSupplier}" />
@@ -3382,6 +3568,10 @@
                   Command="{Binding XuatFileNhaCungCapCommand}"
                   ToolTip.Tip="Xuất toàn bộ danh sách nhà cung cấp đang xem ra file Excel"
                   IsVisible="{Binding CanExportSupplier}" />
+                <Button Classes="toolbar-action" Content="💳 Nợ đầu kỳ" Margin="0"
+                  Command="{Binding ThemCongNoDauKyCommand}"
+                  CommandParameter="NHA_CUNG_CAP"
+                  ToolTip.Tip="Khai báo số dư công nợ đầu kỳ của nhà cung cấp" />
                 <Button Classes="toolbar-primary" Content="＋ Thêm nhà cung cấp" Margin="0"
                   Command="{Binding ThemNhaCungCapCommand}"
                   IsVisible="{Binding CanCreateSupplier}" />
@@ -5339,13 +5529,22 @@
                     Height="38"
                     Padding="16,0"
                     FontSize="13"
-                    IsVisible="{Binding CanCreatePayment}" />
+                     IsVisible="{Binding CanCreatePayment}" />
 
-                  <Border Width="1"
-                    Height="26"
-                    Background="#E2ECE8"
-                    Margin="4,0"
-                    VerticalAlignment="Center" />
+                   <Button Classes="toolbar-action"
+                     Content="💰  Số dư đầu kỳ"
+                     ToolTip.Tip="Khai báo số tiền hiện có trong từng quỹ tại thời điểm bắt đầu dùng phần mềm"
+                     Command="{Binding QuanLySoQuyDauKyCommand}"
+                     Height="38"
+                     Padding="14,0"
+                     FontSize="13"
+                     IsVisible="{Binding CanSetOpeningBalance}" />
+
+                   <Border Width="1"
+                     Height="26"
+                     Background="#E2ECE8"
+                     Margin="4,0"
+                     VerticalAlignment="Center" />
 
                   <Button Classes="toolbar-action"
                     Content="⇩  Xuất file"

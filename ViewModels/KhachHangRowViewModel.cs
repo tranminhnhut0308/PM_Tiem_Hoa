@@ -56,6 +56,11 @@ public sealed partial class KhachHangRowViewModel : ObservableObject
     private void Xoa()
         => _chuSo?.XoaKhachHangCommand.Execute(this);
 
+    /// <summary>Mở cửa sổ thiết lập bảng giá bán riêng cho khách hàng này.</summary>
+    [RelayCommand]
+    private void ThietLapGia()
+        => _chuSo?.ThietLapGiaKhachHangCommand.Execute(this);
+
     public uint CustomerId => Customer.Id;
 
     public string MaKhachHang => HienThi(Customer.MaKhachHang);

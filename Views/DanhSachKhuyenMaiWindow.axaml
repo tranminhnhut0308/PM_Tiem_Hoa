@@ -1,0 +1,163 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="using:ShopHoa.Models"
+        x:Class="ShopHoa.Views.DanhSachKhuyenMaiWindow"
+        x:DataType="models:ChuongTrinhKhuyenMai"
+        Width="1080"
+        Height="660"
+        MinWidth="940"
+        MinHeight="560"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Title="Danh mục chương trình khuyến mãi"
+        Background="#F0F5FA"
+        RequestedThemeVariant="Light">
+
+    <Window.Styles>
+        <Style Selector="TextBox.classicInput">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#8EB2D5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <Style Selector="ComboBox.classicCombo">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#8EB2D5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Button.actionBtn">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Button.rowBtn">
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background" Value="#E8F1F8"/>
+            <Setter Property="Foreground" Value="#1C3A5E"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="10,9"/>
+        </Style>
+    </Window.Styles>
+
+    <Border BorderBrush="#6DA2D9" BorderThickness="2" Margin="6" Background="#F0F5FA" CornerRadius="6">
+        <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+            <!-- HEADER -->
+            <Border Grid.Row="0"
+                    Background="#CBE8FA"
+                    BorderBrush="#90C4E8"
+                    BorderThickness="0,0,0,1"
+                    Padding="14,10"
+                    CornerRadius="4,4,0,0">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Border Background="#0B4B82" CornerRadius="6" Width="26" Height="26" VerticalAlignment="Center">
+                            <TextBlock Text="🎁" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center" Spacing="1">
+                            <TextBlock Text="DANH MỤC CHƯƠNG TRÌNH KHUYẾN MÃI" FontSize="14.5" FontWeight="Bold" Foreground="#0B4B82"/>
+                            <TextBlock Text="Danh mục → Khuyến mãi"
+                                       FontSize="11" Foreground="#4A7599"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <TextBlock Text="Tổng chương trình:" FontSize="12.5" Foreground="#1C3A5E" VerticalAlignment="Center"/>
+                        <TextBlock Name="TongSoText" Text="0" FontSize="14" FontWeight="Bold" Foreground="#0B4B82" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- TOOLBAR -->
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" Margin="14,12,14,0" ColumnSpacing="10">
+                <TextBox Grid.Column="0" Name="SearchTextBox" Classes="classicInput"
+                         Watermark="🔍 Tìm theo mã hoặc tên chương trình..." TextChanged="SearchTextBox_OnTextChanged"/>
+                <ComboBox Grid.Column="1" Name="TrangThaiComboBox" Classes="classicCombo" Width="180"
+                          SelectionChanged="TrangThaiComboBox_OnSelectionChanged">
+                    <ComboBoxItem Tag="TAT_CA" IsSelected="True">-- Tất cả trạng thái --</ComboBoxItem>
+                    <ComboBoxItem Tag="DANG_HOAT_DONG">Đang diễn ra</ComboBoxItem>
+                    <ComboBoxItem Tag="CHUA_BAT_DAU">Chưa bắt đầu</ComboBoxItem>
+                    <ComboBoxItem Tag="TAM_NGUNG">Tạm ngưng</ComboBoxItem>
+                </ComboBox>
+                <Button Grid.Column="2" Classes="actionBtn" Background="#E6F4EA" Foreground="#137333"
+                        BorderBrush="#A8DAB5" BorderThickness="1" Content="➕  Thêm chương trình"
+                        Click="ThemButton_OnClick"/>
+            </Grid>
+
+            <!-- LIST -->
+            <Border Grid.Row="2" Background="White" BorderBrush="#BED4E8" BorderThickness="1"
+                    CornerRadius="6" Margin="14,12,14,12">
+                <DataGrid Name="DanhSachGrid"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto"
+                          RowHeight="44">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="MÃ" Binding="{Binding MaChuongTrinh}" Width="150"/>
+                        <DataGridTextColumn Header="TÊN CHƯƠNG TRÌNH" Binding="{Binding TenChuongTrinh}" Width="2*"/>
+                        <DataGridTextColumn Header="THỜI GIAN" Binding="{Binding ThoiGianHienThi}" Width="180"/>
+                        <DataGridTextColumn Header="ĐỐI TƯỢNG" Binding="{Binding DoiTuongHienThi}" Width="180"/>
+                        <DataGridTextColumn Header="TRẠNG THÁI" Binding="{Binding TrangThaiHienThi}" Width="120"/>
+                        <DataGridTextColumn Header="SỐ HÀNG" Binding="{Binding SoLuongSanPham}" Width="80"/>
+                        <DataGridTemplateColumn Header="THAO TÁC" Width="160">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:ChuongTrinhKhuyenMai">
+                                    <StackPanel Orientation="Horizontal" Spacing="6"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Button Classes="rowBtn" Background="#E3F2ED" Foreground="#0B6B3A"
+                                                Content="✏ Sửa" Click="SuaRow_OnClick" Tag="{Binding}"/>
+                                        <Button Classes="rowBtn" Background="#FEE2E2" Foreground="#B91C1C"
+                                                Content="🗑 Xóa" Click="XoaRow_OnClick" Tag="{Binding}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- FOOTER -->
+            <Border Grid.Row="3" Background="#E6EFF7" BorderBrush="#BAD4EB" BorderThickness="0,1,0,0"
+                    Padding="16,10" CornerRadius="0,0,4,4">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Name="StatusText" Text=""
+                               FontSize="12" FontStyle="Italic" Foreground="#536E8A" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Classes="actionBtn" Background="#E6EFF7" Foreground="#0B4B82"
+                            BorderBrush="#90C4E8" BorderThickness="1" Content="Đóng" Click="CloseButton_OnClick"/>
+                </Grid>
+            </Border>
+
+        </Grid>
+    </Border>
+</Window>

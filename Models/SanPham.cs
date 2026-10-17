@@ -49,6 +49,34 @@ public sealed partial class SanPham : ObservableObject
     public string? GhiChu { get; set; }
 
     // =========================================================
+    // 3 CẤP ĐƠN VỊ TÍNH & ĐƠN GIÁ (KHỚP GIAO DIỆN & CSDL HÀNG HÓA)
+    // =========================================================
+    public string? Barcode { get => MaVach; set => MaVach = value; }
+    public decimal GiaNhap { get => GiaVon; set => GiaVon = value; }
+    public decimal GiaLe { get => GiaBan; set => GiaBan = value; }
+    public decimal GiaSi { get; set; }
+
+    public uint? DonViTinhCap2Id { get; set; }
+    public string? DonViTinhCap2 { get; set; }
+    public decimal QuyDoiCap2 { get; set; }
+    public decimal GiaNhapCap2 { get; set; }
+    public decimal GiaLeCap2 { get; set; }
+    public decimal GiaSiCap2 { get; set; }
+
+    public uint? DonViTinhCap3Id { get; set; }
+    public string? DonViTinhCap3 { get; set; }
+    public decimal QuyDoiCap3 { get; set; }
+    public decimal GiaNhapCap3 { get; set; }
+    public decimal GiaLeCap3 { get; set; }
+    public decimal GiaSiCap3 { get; set; }
+
+    public string? QuyCach { get; set; }
+    public decimal DuTruMin { get => TonToiThieu; set => TonToiThieu = value; }
+    public decimal DuTruMax { get => TonToiDa; set => TonToiDa = value; }
+    public bool InAn { get; set; } = true;
+    public bool ConSuDung { get => DangKinhDoanh; set => DangKinhDoanh = value; }
+
+    // =========================================================
     // CỘT LẤY TỪ FILE EXCEL DANH SÁCH HÀNG HÓA
     // Các cột này có trong bảng san_pham nhưng trước đây đọc vào rồi bị bỏ,
     // nên dữ liệu nhập từ file không đầy đủ. Không cột nào trong nhóm này

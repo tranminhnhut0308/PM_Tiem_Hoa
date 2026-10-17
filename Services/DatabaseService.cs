@@ -22,6 +22,8 @@ public sealed class DatabaseService
     private bool? _cotNgayTaoSanPhamChoPhepNull;
     private bool? _coCotDuLieuKiotVietNhaCungCap;
     private bool? _hasHoaDonContactColumns;
+    private bool? _coCotSoDienThoaiNguoiDung;
+    private bool? _coCotEmailNguoiDung;
     private bool _daBackfillNhomSoQuy;
 
     public DatabaseService()
@@ -2508,6 +2510,62 @@ public sealed class DatabaseService
         return $"KH{nextNumber:D7}";
     }
 
+    /// <summary>
+    /// Sinh mã khách hàng nội bộ tuần tự theo dạng NB000001 (hoặc KHNB0001).
+    /// </summary>
+    public async Task<string> TaoMaKhachHangNoiBoMoiAsync(string prefix = "NB")
+    {
+        await using var connection = await OpenAsync();
+
+        var sql = $"""
+        SELECT COALESCE(
+            MAX(CAST(SUBSTRING(ma_khach_hang, {prefix.Length + 1}) AS UNSIGNED)),
+            0
+        ) + 1
+        FROM khach_hang
+        WHERE ma_khach_hang REGEXP '^{prefix}[0-9]+$';
+        """;
+
+        var nextNumber = await connection.ExecuteScalarAsync<long>(sql);
+        if (nextNumber <= 0) nextNumber = 1;
+
+        return $"{prefix}{nextNumber:D6}";
+    }
+
+    /// <summary>
+    /// Đảm bảo nhóm "Nội bộ" tồn tại trong bảng nhom_khach_hang để gán hoặc lọc đối tác nội bộ.
+    /// </summary>
+    public async Task<NhomKhachHang> EnsureNhomKhachHangNoiBoAsync()
+    {
+        await using var connection = await OpenAsync();
+
+        const string checkSql = """
+        SELECT id AS Id, ten_nhom AS TenNhom, phan_tram_giam_gia AS PhanTramGiamGia, trang_thai AS TrangThai
+        FROM nhom_khach_hang
+        WHERE ten_nhom = 'Nội bộ'
+        LIMIT 1;
+        """;
+
+        var existing = await connection.QueryFirstOrDefaultAsync<NhomKhachHang>(checkSql);
+        if (existing is not null)
+            return existing;
+
+        const string insertSql = """
+        INSERT INTO nhom_khach_hang (ten_nhom, phan_tram_giam_gia, ghi_chu, trang_thai)
+        VALUES ('Nội bộ', 0, 'Nhóm khách hàng / đối tác nội bộ', 1);
+        SELECT LAST_INSERT_ID();
+        """;
+
+        var id = await connection.ExecuteScalarAsync<uint>(insertSql);
+        return new NhomKhachHang
+        {
+            Id = id,
+            TenNhom = "Nội bộ",
+            PhanTramGiamGia = 0,
+            TrangThai = true
+        };
+    }
+
     public async Task<IReadOnlyList<KhachHang>> GetKhachHangAsync(
         string? search = null)
     {
@@ -3402,6 +3460,23 @@ public sealed class DatabaseService
 
         return id;
     }
+
+    /// <summary>
+    /// Thêm đối tác / khách hàng nội bộ (gắn LoaiKhachHang = "NOI_BO").
+    /// </summary>
+    public async Task<uint> ThemKhachHangNoiBoAsync(KhachHang customer)
+    {
+        customer.LoaiKhachHang = "NOI_BO";
+        var id = await ThemKhachHangAsync(customer);
+        _ = LogSubAccountActivityAsync(
+            "Thêm khách nội bộ",
+            "KHACH_HANG",
+            id,
+            customer.MaKhachHang,
+            $"Thêm khách hàng nội bộ: {customer.TenKhachHang} ({customer.TenCongTy ?? "Nội bộ"})");
+        return id;
+    }
+
     public async Task CapNhatKhachHangAsync(KhachHang customer)
     {
         Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CustomersEdit, "Bạn không có quyền sửa khách hàng.");
@@ -4872,7 +4947,7 @@ LIMIT 500;
                         TenSanPham = item.SanPham.TenSanPham,
                         DonViTinh = item.SanPham.DonViTinh,
                         item.SoLuong,
-                        DonGia = item.SanPham.GiaBan,
+                        DonGia = item.DonGia,
                         item.ThanhTien,
                         GiaVon = item.SanPham.GiaVon
                     },
@@ -6933,10 +7008,66 @@ LIMIT 500;
         }
     }
 
+    /// <summary>
+    /// Kiểm tra xem mã nhà cung cấp đã tồn tại trong database chưa (bỏ qua id hiện tại nếu có).
+    /// </summary>
+    public async Task<bool> KiemTraTrungMaNhaCungCapAsync(string maNhaCungCap, uint idHienTai = 0)
+    {
+        if (string.IsNullOrWhiteSpace(maNhaCungCap))
+            return false;
+
+        await using var connection = await OpenAsync();
+        const string sql = """
+        SELECT COUNT(*)
+        FROM nha_cung_cap
+        WHERE ma_nha_cung_cap = @Ma
+          AND (@Id = 0 OR id != @Id)
+          AND trang_thai = 1;
+        """;
+
+        var count = await connection.ExecuteScalarAsync<int>(
+            sql,
+            new { Ma = maNhaCungCap.Trim(), Id = idHienTai });
+
+        return count > 0;
+    }
+
+    /// <summary>
+    /// Lấy danh sách các nhóm nhà cung cấp đã có trong database để gợi ý khi nhập liệu.
+    /// </summary>
+    public async Task<IReadOnlyList<string>> LayDanhSachNhomNhaCungCapAsync()
+    {
+        try
+        {
+            await using var connection = await OpenAsync();
+            var coCotKiotViet = await DamBaoCotDuLieuKiotVietNhaCungCapAsync();
+            if (!coCotKiotViet)
+                return [];
+
+            const string sql = """
+            SELECT DISTINCT nhom_nha_cung_cap_ten
+            FROM nha_cung_cap
+            WHERE nhom_nha_cung_cap_ten IS NOT NULL
+              AND TRIM(nhom_nha_cung_cap_ten) != ''
+            ORDER BY nhom_nha_cung_cap_ten;
+            """;
+
+            var rows = await connection.QueryAsync<string>(sql);
+            return rows.Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => r.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
     public async Task<uint> ThemNhaCungCapAsync(NhaCungCap supplier)
     {
         Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SuppliersCreate, "Bạn không có quyền thêm nhà cung cấp.");
         var coCotKiotViet = await DamBaoCotDuLieuKiotVietNhaCungCapAsync();
+
+        if (string.IsNullOrWhiteSpace(supplier.MaNhaCungCap))
+            supplier.MaNhaCungCap = await TaoMaNhaCungCapMoiAsync();
 
         await using var connection = await OpenAsync();
         await DamBaoDoDaiSoDienThoaiNhaCungCapAsync(connection);
@@ -7019,22 +7150,45 @@ LIMIT 500;
         Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SuppliersEdit, "Bạn không có quyền sửa nhà cung cấp.");
         await using var connection = await OpenAsync();
         await DamBaoDoDaiSoDienThoaiNhaCungCapAsync(connection);
+        var coCotKiotViet = await DamBaoCotDuLieuKiotVietNhaCungCapAsync();
 
-        const string sql = """
-        UPDATE nha_cung_cap
-        SET ten_nha_cung_cap = @TenNhaCungCap,
-            so_dien_thoai = @SoDienThoai,
-            email = @Email,
-            dia_chi = @DiaChi,
-            phuong_xa = @PhuongXa,
-            quan_huyen = @QuanHuyen,
-            tinh_thanh = @TinhThanh,
-            ma_so_thue = @MaSoThue,
-            nguoi_lien_he = @NguoiLienHe,
-            ghi_chu = @GhiChu,
-            ngay_cap_nhat = NOW()
-        WHERE id = @Id AND trang_thai = 1;
-        """;
+        var sql = coCotKiotViet
+            ? """
+            UPDATE nha_cung_cap
+            SET ma_nha_cung_cap = @MaNhaCungCap,
+                ten_nha_cung_cap = @TenNhaCungCap,
+                so_dien_thoai = @SoDienThoai,
+                email = @Email,
+                dia_chi = @DiaChi,
+                phuong_xa = @PhuongXa,
+                quan_huyen = @QuanHuyen,
+                tinh_thanh = @TinhThanh,
+                ma_so_thue = @MaSoThue,
+                nguoi_lien_he = @NguoiLienHe,
+                ghi_chu = @GhiChu,
+                nhom_nha_cung_cap_ten = @NhomNhaCungCapTen,
+                ten_cong_ty = @TenCongTy,
+                trang_thai = @TrangThai,
+                ngay_cap_nhat = NOW()
+            WHERE id = @Id;
+            """
+            : """
+            UPDATE nha_cung_cap
+            SET ma_nha_cung_cap = @MaNhaCungCap,
+                ten_nha_cung_cap = @TenNhaCungCap,
+                so_dien_thoai = @SoDienThoai,
+                email = @Email,
+                dia_chi = @DiaChi,
+                phuong_xa = @PhuongXa,
+                quan_huyen = @QuanHuyen,
+                tinh_thanh = @TinhThanh,
+                ma_so_thue = @MaSoThue,
+                nguoi_lien_he = @NguoiLienHe,
+                ghi_chu = @GhiChu,
+                trang_thai = @TrangThai,
+                ngay_cap_nhat = NOW()
+            WHERE id = @Id;
+            """;
 
         var affectedRows = await connection.ExecuteAsync(sql, supplier);
         if (affectedRows == 0)
@@ -9504,7 +9658,11 @@ LIMIT 500;
             var dieuKienDem = TaoDieuKienSoQuy(apDungKhoangThoiGian: true, apDungKhoangTien: true, coCotMoi);
             var thamSoDem = TaoThamSoSoQuy(loc, apDungKhoangTien: true);
 
-            var quyDauKy = row?.QuyDauKy ?? 0m;
+            // Cộng số dư quỹ đầu kỳ do người dùng khai báo (bảng so_quy_dau_ky)
+            // vào quỹ đầu kỳ để tồn quỹ luôn phản ánh đúng tiền thực có.
+            var soDuQuyDauKy = await GetTongSoDuQuyDauKyAsync(loc.PhuongThuc);
+
+            var quyDauKy = (row?.QuyDauKy ?? 0m) + soDuQuyDauKy;
             var tongThu = row?.TongThu ?? 0m;
             var tongChi = row?.TongChi ?? 0m;
             var tonQuy = quyDauKy + tongThu - tongChi;
@@ -10300,11 +10458,239 @@ LIMIT 500;
         return items.ToList();
     }
 
+    private async Task EnsureNguoiDungContactColumnsAsync(MySqlConnection connection)
+    {
+        if (_coCotSoDienThoaiNguoiDung.HasValue && _coCotEmailNguoiDung.HasValue)
+            return;
+
+        try
+        {
+            var cols = (await connection.QueryAsync<string>(
+                "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'nguoi_dung';"))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            _coCotSoDienThoaiNguoiDung = cols.Contains("so_dien_thoai");
+            _coCotEmailNguoiDung = cols.Contains("email");
+        }
+        catch
+        {
+            _coCotSoDienThoaiNguoiDung ??= true;
+            _coCotEmailNguoiDung ??= true;
+        }
+    }
+
+    /// <summary>
+    /// Lấy danh sách nhân viên có phân trang, tìm kiếm và bộ lọc theo trạng thái, chức vụ / vai trò.
+    /// Dùng cho màn hình "Danh mục → Đối tác → Nhân viên".
+    /// </summary>
+    public async Task<(IReadOnlyList<NhanVienItem> Items, int TongSoBanGhi)> GetNhanVienPagedAsync(
+        string? search,
+        int page,
+        int pageSize,
+        string? trangThaiLoc = null,
+        uint? vaiTroId = null)
+    {
+        await using var connection = await OpenAsync();
+        await EnsureNguoiDungContactColumnsAsync(connection);
+
+        var keyword = (search ?? string.Empty).Trim();
+        var safePage = page < 1 ? 1 : page;
+        var safePageSize = pageSize < 1 ? 20 : pageSize;
+        var offset = (safePage - 1) * safePageSize;
+
+        var parameters = new DynamicParameters();
+        parameters.Add("PageSize", safePageSize);
+        parameters.Add("Offset", offset);
+
+        var whereConditions = new List<string>();
+
+        bool coSdt = _coCotSoDienThoaiNguoiDung == true;
+        bool coEmail = _coCotEmailNguoiDung == true;
+
+        if (!string.IsNullOrWhiteSpace(keyword))
+        {
+            parameters.Add("Search", $"%{keyword}%");
+            var searchConds = new List<string>
+            {
+                "nd.ten_dang_nhap LIKE @Search",
+                "nd.ho_ten LIKE @Search",
+                "nd.ma_nguoi_dung LIKE @Search"
+            };
+
+            if (coSdt)
+                searchConds.Add("nd.so_dien_thoai LIKE @Search");
+            if (coEmail)
+                searchConds.Add("nd.email LIKE @Search");
+
+            whereConditions.Add($"({string.Join(" OR ", searchConds)})");
+        }
+
+        if (!string.IsNullOrWhiteSpace(trangThaiLoc) && !string.Equals(trangThaiLoc, "TAT_CA", StringComparison.OrdinalIgnoreCase))
+        {
+            if (string.Equals(trangThaiLoc, "DANG_LAM_VIEC", StringComparison.OrdinalIgnoreCase) || string.Equals(trangThaiLoc, "1"))
+            {
+                whereConditions.Add("nd.trang_thai = 1");
+            }
+            else if (string.Equals(trangThaiLoc, "KHOA", StringComparison.OrdinalIgnoreCase) || string.Equals(trangThaiLoc, "0"))
+            {
+                whereConditions.Add("nd.trang_thai = 0");
+            }
+        }
+
+        if (vaiTroId.HasValue && vaiTroId.Value > 0)
+        {
+            parameters.Add("VaiTroId", vaiTroId.Value);
+            whereConditions.Add("EXISTS (SELECT 1 FROM nguoi_dung_vai_tro r_vt WHERE r_vt.nguoi_dung_id = nd.id AND r_vt.vai_tro_id = @VaiTroId)");
+        }
+
+        var whereClause = whereConditions.Count > 0
+            ? "WHERE " + string.Join(" AND ", whereConditions)
+            : "";
+
+        var countSql = $"""
+        SELECT COUNT(DISTINCT nd.id)
+        FROM nguoi_dung nd
+        {whereClause}
+        """;
+
+        var totalRecords = await connection.ExecuteScalarAsync<int>(countSql, parameters);
+
+        var sdtCol = coSdt ? "nd.so_dien_thoai" : "''";
+        var emailCol = coEmail ? "nd.email" : "''";
+
+        var dataSql = $"""
+        SELECT 
+            nd.id AS Id,
+            nd.ma_nguoi_dung AS MaNguoiDung,
+            nd.ten_dang_nhap AS TenDangNhap,
+            nd.ho_ten AS HoTen,
+            {sdtCol} AS SoDienThoai,
+            {emailCol} AS Email,
+            nd.chi_nhanh_id AS ChiNhanhId,
+            cn.ten_chi_nhanh AS TenChiNhanh,
+            nd.trang_thai AS TrangThai,
+            nd.lan_dang_nhap_cuoi AS LanDangNhapCuoi,
+            nd.ngay_tao AS NgayTao,
+            GROUP_CONCAT(DISTINCT vt.ten_vai_tro ORDER BY vt.id SEPARATOR ', ') AS ChucVu,
+            GROUP_CONCAT(DISTINCT vt.ma_vai_tro ORDER BY vt.id SEPARATOR ',') AS MaVaiTro
+        FROM nguoi_dung nd
+        LEFT JOIN chi_nhanh cn ON cn.id = nd.chi_nhanh_id
+        LEFT JOIN nguoi_dung_vai_tro ndvt ON ndvt.nguoi_dung_id = nd.id
+        LEFT JOIN vai_tro vt ON vt.id = ndvt.vai_tro_id
+        {whereClause}
+        GROUP BY nd.id, nd.ma_nguoi_dung, nd.ten_dang_nhap, nd.ho_ten, nd.chi_nhanh_id, cn.ten_chi_nhanh, nd.trang_thai, nd.lan_dang_nhap_cuoi, nd.ngay_tao
+        ORDER BY nd.id ASC
+        LIMIT @PageSize OFFSET @Offset
+        """;
+
+        var items = (await connection.QueryAsync<NhanVienItem>(dataSql, parameters)).AsList();
+        for (int i = 0; i < items.Count; i++)
+        {
+            items[i].Stt = offset + i + 1;
+        }
+
+        return (items, totalRecords);
+    }
+
+    /// <summary>
+    /// Kiểm tra ràng buộc trước khi xóa nhân viên:
+    /// - Không cho xóa tài khoản ID = 1 hoặc Quản trị viên.
+    /// - Không cho tự xóa tài khoản của chính người đang thao tác.
+    /// - Kiểm tra xem nhân viên đã từng lập hóa đơn, phiếu nhập hay phiếu thu/chi chưa.
+    /// </summary>
+    public async Task<(bool CanDelete, string? Reason)> KiemTraXoaNhanVienAsync(uint nhanVienId)
+    {
+        if (nhanVienId == 1)
+            return (false, "Không thể xóa tài khoản Quản trị viên mặc định của hệ thống.");
+
+        if (Session.CurrentUser != null && nhanVienId == Session.CurrentUser.Id)
+            return (false, "Bạn không thể tự xóa tài khoản của chính mình đang đăng nhập.");
+
+        if (await IsQuanTriAsync(nhanVienId))
+            return (false, "Không thể xóa tài khoản có chức vụ / vai trò Quản trị viên.");
+
+        await using var connection = await OpenAsync();
+
+        // 1. Kiểm tra hóa đơn bán hàng
+        try
+        {
+            var hasHoaDonCol = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'hoa_don' AND COLUMN_NAME IN ('nguoi_tao_id', 'thu_ngan_id');");
+            if (hasHoaDonCol > 0)
+            {
+                var soHoaDon = await connection.ExecuteScalarAsync<int>(
+                    "SELECT COUNT(*) FROM hoa_don WHERE (nguoi_tao_id = @Id OR thu_ngan_id = @Id);",
+                    new { Id = nhanVienId });
+                if (soHoaDon > 0)
+                {
+                    return (false, $"Nhân viên này đã lập {soHoaDon} hóa đơn trong hệ thống. Để bảo toàn lịch sử bán hàng và kế toán, không thể xóa tài khoản. Bạn có thể sử dụng chức năng Khóa nhân viên.");
+                }
+            }
+        }
+        catch { }
+
+        // 2. Kiểm tra phiếu nhập hàng
+        try
+        {
+            var hasPhieuNhapCol = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'phieu_nhap' AND COLUMN_NAME IN ('nguoi_tao_id', 'nguoi_nhap_id');");
+            if (hasPhieuNhapCol > 0)
+            {
+                var soPhieuNhap = await connection.ExecuteScalarAsync<int>(
+                    "SELECT COUNT(*) FROM phieu_nhap WHERE (nguoi_tao_id = @Id OR nguoi_nhap_id = @Id);",
+                    new { Id = nhanVienId });
+                if (soPhieuNhap > 0)
+                {
+                    return (false, $"Nhân viên này đã lập {soPhieuNhap} phiếu nhập hàng trong hệ thống. Để bảo toàn lịch sử kho hàng, không thể xóa tài khoản. Bạn có thể sử dụng chức năng Khóa nhân viên.");
+                }
+            }
+        }
+        catch { }
+
+        // 3. Kiểm tra sổ quỹ
+        try
+        {
+            var hasSoQuyCol = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'so_quy' AND COLUMN_NAME = 'nguoi_tao_id';");
+            if (hasSoQuyCol > 0)
+            {
+                var soPhieuQuy = await connection.ExecuteScalarAsync<int>(
+                    "SELECT COUNT(*) FROM so_quy WHERE nguoi_tao_id = @Id;",
+                    new { Id = nhanVienId });
+                if (soPhieuQuy > 0)
+                {
+                    return (false, $"Nhân viên này đã lập {soPhieuQuy} phiếu thu / chi trong sổ quỹ. Để bảo toàn chứng từ thu chi, không thể xóa tài khoản. Bạn có thể sử dụng chức năng Khóa nhân viên.");
+                }
+            }
+        }
+        catch { }
+
+        return (true, null);
+    }
+
+    /// <summary>
+    /// Xóa an toàn nhân viên có kiểm tra đầy đủ quyền và ràng buộc nghiệp vụ.
+    /// </summary>
+    public async Task XoaNhanVienAnToanAsync(uint nhanVienId)
+    {
+        var (canDelete, reason) = await KiemTraXoaNhanVienAsync(nhanVienId);
+        if (!canDelete)
+        {
+            throw new InvalidOperationException(reason ?? "Không thể xóa nhân viên này.");
+        }
+
+        await DeleteUserAsync(nhanVienId, Session.CurrentUser?.Id);
+    }
+
     public async Task<UserWithRoles?> GetUserWithRolesAsync(uint userId)
     {
         await using var connection = await OpenAsync();
-        var sqlUser = """
-        SELECT nd.id AS Id, nd.ma_nguoi_dung AS MaNguoiDung, nd.ten_dang_nhap AS TenDangNhap, nd.ho_ten AS HoTen, nd.trang_thai AS TrangThai,
+        await EnsureNguoiDungContactColumnsAsync(connection);
+        var sdtCol = _coCotSoDienThoaiNguoiDung == true ? "nd.so_dien_thoai" : "''";
+        var emailCol = _coCotEmailNguoiDung == true ? "nd.email" : "''";
+        var sqlUser = $"""
+        SELECT nd.id AS Id, nd.ma_nguoi_dung AS MaNguoiDung, nd.ten_dang_nhap AS TenDangNhap, nd.ho_ten AS HoTen,
+               {sdtCol} AS SoDienThoai, {emailCol} AS Email, nd.trang_thai AS TrangThai,
                GROUP_CONCAT(DISTINCT vt.ten_vai_tro ORDER BY vt.id SEPARATOR ', ') AS VaiTro,
                GROUP_CONCAT(DISTINCT vt.ma_vai_tro ORDER BY vt.id SEPARATOR ',') AS MaVaiTro
         FROM nguoi_dung nd
@@ -10737,16 +11123,26 @@ LIMIT 500;
             var maNguoiDung = await GenerateMaNguoiDungAsync(connection, tx);
             var hashed = BCrypt.Net.BCrypt.HashPassword(dto.MatKhau);
             var chiNhanhId = Session.CurrentUser?.ChiNhanhId ?? 1u;
-            var sql = """
-            INSERT INTO nguoi_dung (ma_nguoi_dung, ten_dang_nhap, mat_khau, ho_ten, chi_nhanh_id, trang_thai, ngay_tao, ngay_cap_nhat)
-            VALUES (@MaNguoiDung, @TenDangNhap, @MatKhau, @HoTen, @ChiNhanhId, @TrangThai, NOW(), NOW())
-            """;
+            await EnsureNguoiDungContactColumnsAsync(connection);
+            bool coSdt = _coCotSoDienThoaiNguoiDung == true;
+            bool coEmail = _coCotEmailNguoiDung == true;
+            var sql = (coSdt && coEmail)
+                ? """
+                INSERT INTO nguoi_dung (ma_nguoi_dung, ten_dang_nhap, mat_khau, ho_ten, so_dien_thoai, email, chi_nhanh_id, trang_thai, ngay_tao, ngay_cap_nhat)
+                VALUES (@MaNguoiDung, @TenDangNhap, @MatKhau, @HoTen, @SoDienThoai, @Email, @ChiNhanhId, @TrangThai, NOW(), NOW())
+                """
+                : """
+                INSERT INTO nguoi_dung (ma_nguoi_dung, ten_dang_nhap, mat_khau, ho_ten, chi_nhanh_id, trang_thai, ngay_tao, ngay_cap_nhat)
+                VALUES (@MaNguoiDung, @TenDangNhap, @MatKhau, @HoTen, @ChiNhanhId, @TrangThai, NOW(), NOW())
+                """;
             await connection.ExecuteAsync(sql, new
             {
                 MaNguoiDung = maNguoiDung,
                 TenDangNhap = dto.TenDangNhap,
                 MatKhau = hashed,
                 HoTen = dto.HoTen,
+                SoDienThoai = dto.SoDienThoai,
+                Email = dto.Email,
                 ChiNhanhId = chiNhanhId,
                 TrangThai = dto.TrangThai ? 1 : 0
             }, tx);
@@ -10803,14 +11199,19 @@ LIMIT 500;
         await using var tx = await connection.BeginTransactionAsync();
         try
         {
+            await EnsureNguoiDungContactColumnsAsync(connection);
+            bool coSdt = _coCotSoDienThoaiNguoiDung == true;
+            bool coEmail = _coCotEmailNguoiDung == true;
+            var contactCols = (coSdt && coEmail) ? ", so_dien_thoai = @SoDienThoai, email = @Email" : "";
+
             if (!string.IsNullOrWhiteSpace(dto.MatKhau))
             {
                 var hashed = BCrypt.Net.BCrypt.HashPassword(dto.MatKhau);
-                await connection.ExecuteAsync("UPDATE nguoi_dung SET ho_ten = @HoTen, mat_khau = @MatKhau, trang_thai = @TrangThai, ngay_cap_nhat = NOW() WHERE id = @Id", new { Id = dto.Id, HoTen = dto.HoTen, MatKhau = hashed, TrangThai = dto.TrangThai ? 1 : 0 }, tx);
+                await connection.ExecuteAsync($"UPDATE nguoi_dung SET ho_ten = @HoTen {contactCols}, mat_khau = @MatKhau, trang_thai = @TrangThai, ngay_cap_nhat = NOW() WHERE id = @Id", new { Id = dto.Id, HoTen = dto.HoTen, SoDienThoai = dto.SoDienThoai, Email = dto.Email, MatKhau = hashed, TrangThai = dto.TrangThai ? 1 : 0 }, tx);
             }
             else
             {
-                await connection.ExecuteAsync("UPDATE nguoi_dung SET ho_ten = @HoTen, trang_thai = @TrangThai, ngay_cap_nhat = NOW() WHERE id = @Id", new { Id = dto.Id, HoTen = dto.HoTen, TrangThai = dto.TrangThai ? 1 : 0 }, tx);
+                await connection.ExecuteAsync($"UPDATE nguoi_dung SET ho_ten = @HoTen {contactCols}, trang_thai = @TrangThai, ngay_cap_nhat = NOW() WHERE id = @Id", new { Id = dto.Id, HoTen = dto.HoTen, SoDienThoai = dto.SoDienThoai, Email = dto.Email, TrangThai = dto.TrangThai ? 1 : 0 }, tx);
             }
             await connection.ExecuteAsync("DELETE FROM nguoi_dung_vai_tro WHERE nguoi_dung_id = @UserId", new { UserId = dto.Id }, tx);
             foreach (var rid in dto.RoleIds.Distinct())
@@ -11042,5 +11443,1831 @@ LIMIT 500;
     }
     #endregion
 
+    #region Chi Tiết Giá Đối Tác
+    public async Task<IReadOnlyList<ChiTietGiaDoiTac>> GetChiTietGiaDoiTacAsync(uint doiTacId)
+    {
+        await using var connection = await OpenAsync();
+        try
+        {
+            const string sql = """
+            SELECT 
+                ct.id AS Id,
+                ct.doi_tac_id AS DoiTacId,
+                ct.hang_hoa_id AS HangHoaId,
+                hh.ma_hang_hoa AS MaHangHoa,
+                hh.ten_hang_hoa AS TenHangHoa,
+                ct.don_vi_tinh_id AS DonViTinhId,
+                COALESCE(dvt.ten_don_vi_tinh, '') AS DonViTinh,
+                ct.chiet_khau AS ChietKhau,
+                ct.don_gia AS DonGia
+            FROM chi_tiet_gia_doi_tac ct
+            LEFT JOIN hang_hoa hh ON hh.id = ct.hang_hoa_id
+            LEFT JOIN don_vi_tinh_hang_hoa dvt ON dvt.id = ct.don_vi_tinh_id
+            WHERE ct.doi_tac_id = @DoiTacId;
+            """;
+            return (await connection.QueryAsync<ChiTietGiaDoiTac>(sql, new { DoiTacId = doiTacId })).AsList();
+        }
+        catch
+        {
+            return Array.Empty<ChiTietGiaDoiTac>();
+        }
+    }
+
+    public async Task LuuChiTietGiaDoiTacAsync(uint doiTacId, IEnumerable<ChiTietGiaDoiTac> items)
+    {
+        await using var connection = await OpenAsync();
+        await using var transaction = await connection.BeginTransactionAsync();
+        try
+        {
+            await connection.ExecuteAsync("DELETE FROM chi_tiet_gia_doi_tac WHERE doi_tac_id = @DoiTacId;", new { DoiTacId = doiTacId }, transaction);
+            const string insertSql = """
+            INSERT INTO chi_tiet_gia_doi_tac (doi_tac_id, hang_hoa_id, don_vi_tinh_id, chiet_khau, don_gia)
+            VALUES (@DoiTacId, @HangHoaId, @DonViTinhId, @ChietKhau, @DonGia);
+            """;
+            foreach (var item in items)
+            {
+                await connection.ExecuteAsync(insertSql, new
+                {
+                    DoiTacId = doiTacId,
+                    item.HangHoaId,
+                    item.DonViTinhId,
+                    item.ChietKhau,
+                    item.DonGia
+                }, transaction);
+            }
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            SafeLog.WriteError("Loi luu chi tiet gia doi tac", ex);
+            throw;
+        }
+    }
+    #endregion
+
+    #region Hàng Tồn Đầu Kỳ
+    /// <summary>
+    /// Lấy danh sách kho hàng / chi nhánh hiện có từ cơ sở dữ liệu.
+    /// Tương thích cả bảng kho_hang (SakePro) và chi_nhanh (ShopHoa).
+    /// </summary>
+    public async Task<IReadOnlyList<ProductOption>> GetDanhSachKhoAsync()
+    {
+        await using var connection = await OpenAsync();
+        try
+        {
+            // 1. Thử lấy từ bảng kho_hang (SakePro schema)
+            bool hasKhoHang = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'kho_hang';") > 0;
+            if (hasKhoHang)
+            {
+                var list = (await connection.QueryAsync<ProductOption>(
+                    "SELECT id AS Id, ten_kho_hang AS Name FROM kho_hang ORDER BY id;")).AsList();
+                if (list.Count > 0)
+                    return list;
+            }
+        }
+        catch { }
+
+        try
+        {
+            // 2. Thử lấy từ bảng chi_nhanh
+            bool hasChiNhanh = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'chi_nhanh';") > 0;
+            if (hasChiNhanh)
+            {
+                var list = (await connection.QueryAsync<ProductOption>(
+                    "SELECT id AS Id, ten_chi_nhanh AS Name FROM chi_nhanh WHERE trang_thai = 1 ORDER BY id;")).AsList();
+                if (list.Count > 0)
+                    return list;
+            }
+        }
+        catch { }
+
+        // Mặc định fallback
+        return new List<ProductOption>
+        {
+            new() { Id = 1, Name = "Kho Tổng (Mặc định)" }
+        };
+    }
+
+    /// <summary>
+    /// Lấy thông tin tồn đầu kỳ đã lưu trước đó của sản phẩm theo kho và ngày (nếu có).
+    /// </summary>
+    public async Task<ChiTietHangHoaDauKy?> LayHangTonDauKyCuaSanPhamAsync(uint khoHangId, uint sanPhamId, DateTime ngayDauKy)
+    {
+        await using var connection = await OpenAsync();
+        try
+        {
+            bool hasChiTietDauKy = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'chi_tiet_hang_hoa_dau_ky';") > 0;
+
+            if (hasChiTietDauKy)
+            {
+                const string sql = """
+                SELECT 
+                    ct.id AS Id,
+                    ct.kho_hang_id AS KhoHangId,
+                    ct.hang_hoa_id AS HangHoaId,
+                    ct.ky_ke_toan_id AS KyKeToanId,
+                    ct.so_luong AS SoLuong,
+                    ct.gia_von AS GiaVon,
+                    ct.thanh_tien AS ThanhTien,
+                    ct.noi_dung AS NoiDung
+                FROM chi_tiet_hang_hoa_dau_ky ct
+                WHERE ct.kho_hang_id = @KhoHangId AND ct.hang_hoa_id = @HangHoaId
+                ORDER BY ct.id DESC
+                LIMIT 1;
+                """;
+
+                return await connection.QueryFirstOrDefaultAsync<ChiTietHangHoaDauKy>(
+                    sql, new { KhoHangId = khoHangId, HangHoaId = sanPhamId });
+            }
+            else
+            {
+                // Fallback từ bảng ton_kho
+                bool hasTonKho = await connection.ExecuteScalarAsync<int>(
+                    "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'ton_kho';") > 0;
+
+                if (hasTonKho)
+                {
+                    const string sqlTk = """
+                    SELECT 
+                        san_pham_id AS HangHoaId,
+                        chi_nhanh_id AS KhoHangId,
+                        so_luong_ton AS SoLuong,
+                        gia_von_binh_quan AS GiaVon,
+                        (so_luong_ton * gia_von_binh_quan) AS ThanhTien,
+                        'Tồn đầu kỳ' AS NoiDung
+                    FROM ton_kho
+                    WHERE chi_nhanh_id = @KhoHangId AND san_pham_id = @SanPhamId
+                    LIMIT 1;
+                    """;
+
+                    return await connection.QueryFirstOrDefaultAsync<ChiTietHangHoaDauKy>(
+                        sqlTk, new { KhoHangId = khoHangId, SanPhamId = sanPhamId });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Lỗi LayHangTonDauKyCuaSanPhamAsync", ex);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Lưu thông tin tồn đầu kỳ của sản phẩm vào hệ thống.
+    /// Tự động cập nhật bảng chi_tiet_hang_hoa_dau_ky, ton_kho, san_pham
+    /// và ghi nhật ký lịch sử kho mà không gây cộng dồn 2 lần khi thao tác lại.
+    /// </summary>
+    public async Task<bool> LuuHangTonDauKyAsync(
+        uint khoHangId,
+        uint sanPhamId,
+        decimal soLuong,
+        decimal giaVon,
+        DateTime ngayDauKy,
+        string? noiDung)
+    {
+        if (khoHangId == 0)
+            throw new ArgumentException("Kho hàng không hợp lệ.", nameof(khoHangId));
+
+        if (sanPhamId == 0)
+            throw new ArgumentException("Hàng hóa chưa được chọn.", nameof(sanPhamId));
+
+        if (soLuong < 0)
+            throw new ArgumentException("Số lượng không được âm.", nameof(soLuong));
+
+        if (giaVon < 0)
+            throw new ArgumentException("Giá vốn không được âm.", nameof(giaVon));
+
+        noiDung = string.IsNullOrWhiteSpace(noiDung) ? "Tồn đầu kỳ" : noiDung.Trim();
+        decimal thanhTien = Math.Round(soLuong * giaVon, 2, MidpointRounding.AwayFromZero);
+
+        await using var connection = await OpenAsync();
+        await using var transaction = await connection.BeginTransactionAsync();
+
+        try
+        {
+            // 1. Quản lý kỳ kế toán (nếu database có bảng ky_ke_toan)
+            uint kyKeToanId = 1;
+            bool hasKyKeToan = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'ky_ke_toan';",
+                transaction: transaction) > 0;
+
+            if (hasKyKeToan)
+            {
+                var maKy = $"KY_{ngayDauKy:MM_yyyy}";
+                var existingKyId = await connection.ExecuteScalarAsync<uint?>(
+                    "SELECT id FROM ky_ke_toan WHERE ma_ky = @MaKy LIMIT 1;",
+                    new { MaKy = maKy },
+                    transaction: transaction);
+
+                if (existingKyId.HasValue && existingKyId.Value > 0)
+                {
+                    kyKeToanId = existingKyId.Value;
+                }
+                else
+                {
+                    var dauThang = new DateTime(ngayDauKy.Year, ngayDauKy.Month, 1);
+                    var cuoiThang = dauThang.AddMonths(1).AddDays(-1);
+                    var tenKy = $"Tháng {ngayDauKy.Month} Năm {ngayDauKy.Year}";
+                    const string insertKySql = """
+                        INSERT INTO ky_ke_toan (ma_ky, ten_ky, ngay_bat_dau_ky, ngay_ket_thuc_ky, trang_thai_khoa_so)
+                        VALUES (@MaKy, @TenKy, @BatDau, @KetThuc, 0);
+                        SELECT LAST_INSERT_ID();
+                        """;
+                    kyKeToanId = await connection.ExecuteScalarAsync<uint>(insertKySql, new
+                    {
+                        MaKy = maKy,
+                        TenKy = tenKy,
+                        BatDau = dauThang,
+                        KetThuc = cuoiThang
+                    }, transaction: transaction);
+                }
+            }
+
+            // 2. Lưu vào bảng chi_tiet_hang_hoa_dau_ky (schema SakePro) nếu có
+            bool hasChiTietDauKy = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'chi_tiet_hang_hoa_dau_ky';",
+                transaction: transaction) > 0;
+
+            if (hasChiTietDauKy)
+            {
+                // Kiểm tra trùng theo quy tắc: cùng kho, hàng, kỳ kế toán
+                var existingId = await connection.ExecuteScalarAsync<uint?>(
+                    """
+                    SELECT id FROM chi_tiet_hang_hoa_dau_ky
+                    WHERE kho_hang_id = @KhoHangId AND hang_hoa_id = @HangHoaId AND ky_ke_toan_id = @KyKeToanId
+                    LIMIT 1;
+                    """,
+                    new { KhoHangId = khoHangId, HangHoaId = sanPhamId, KyKeToanId = kyKeToanId },
+                    transaction: transaction);
+
+                if (existingId.HasValue && existingId.Value > 0)
+                {
+                    // Cập nhật lại bản ghi cũ, không cộng dồn hai lần
+                    await connection.ExecuteAsync(
+                        """
+                        UPDATE chi_tiet_hang_hoa_dau_ky
+                        SET so_luong = @SoLuong,
+                            gia_von = @GiaVon,
+                            thanh_tien = @ThanhTien,
+                            noi_dung = @NoiDung
+                        WHERE id = @Id;
+                        """,
+                        new
+                        {
+                            Id = existingId.Value,
+                            SoLuong = soLuong,
+                            GiaVon = giaVon,
+                            ThanhTien = thanhTien,
+                            NoiDung = noiDung
+                        },
+                        transaction: transaction);
+                }
+                else
+                {
+                    // Thêm bản ghi mới
+                    await connection.ExecuteAsync(
+                        """
+                        INSERT INTO chi_tiet_hang_hoa_dau_ky
+                        (kho_hang_id, hang_hoa_id, ky_ke_toan_id, so_luong, gia_von, thanh_tien, noi_dung)
+                        VALUES
+                        (@KhoHangId, @HangHoaId, @KyKeToanId, @SoLuong, @GiaVon, @ThanhTien, @NoiDung);
+                        """,
+                        new
+                        {
+                            KhoHangId = khoHangId,
+                            HangHoaId = sanPhamId,
+                            KyKeToanId = kyKeToanId,
+                            SoLuong = soLuong,
+                            GiaVon = giaVon,
+                            ThanhTien = thanhTien,
+                            NoiDung = noiDung
+                        },
+                        transaction: transaction);
+                }
+            }
+
+            // 3. Cập nhật tồn kho vào bảng ton_kho
+            bool hasTonKho = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'ton_kho';",
+                transaction: transaction) > 0;
+
+            decimal tonTruoc = 0;
+            if (hasTonKho)
+            {
+                var tonRow = await connection.QueryFirstOrDefaultAsync<dynamic>(
+                    "SELECT so_luong_ton FROM ton_kho WHERE chi_nhanh_id = @ChiNhanhId AND san_pham_id = @SanPhamId FOR UPDATE;",
+                    new { ChiNhanhId = khoHangId, SanPhamId = sanPhamId },
+                    transaction: transaction);
+
+                if (tonRow != null)
+                {
+                    tonTruoc = ToDecimal(tonRow.so_luong_ton);
+                }
+
+                // Ghi đè số lượng tồn đầu kỳ (tránh cộng dồn 2 lần)
+                await connection.ExecuteAsync(
+                    """
+                    INSERT INTO ton_kho (chi_nhanh_id, san_pham_id, so_luong_ton, gia_von_binh_quan, ngay_cap_nhat)
+                    VALUES (@ChiNhanhId, @SanPhamId, @SoLuong, @GiaVon, NOW())
+                    ON DUPLICATE KEY UPDATE
+                        so_luong_ton = @SoLuong,
+                        gia_von_binh_quan = @GiaVon,
+                        ngay_cap_nhat = NOW();
+                    """,
+                    new
+                    {
+                        ChiNhanhId = khoHangId,
+                        SanPhamId = sanPhamId,
+                        SoLuong = soLuong,
+                        GiaVon = giaVon
+                    },
+                    transaction: transaction);
+            }
+
+            // 4. Đồng bộ vào bảng san_pham
+            bool hasSanPham = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'san_pham';",
+                transaction: transaction) > 0;
+
+            if (hasSanPham)
+            {
+                await connection.ExecuteAsync(
+                    """
+                    UPDATE san_pham
+                    SET ton_kho_excel = @SoLuong,
+                        gia_von = @GiaVon,
+                        ngay_cap_nhat = NOW()
+                    WHERE id = @SanPhamId;
+                    """,
+                    new
+                    {
+                        SanPhamId = sanPhamId,
+                        SoLuong = soLuong,
+                        GiaVon = giaVon
+                    },
+                    transaction: transaction);
+            }
+
+            // 5. Ghi nhật ký lịch sử nhập xuất kho
+            bool hasLichSu = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'lich_su_nhap_xuat_kho';",
+                transaction: transaction) > 0;
+
+            if (hasLichSu)
+            {
+                var maChungTu = $"TDK_{ngayDauKy:yyyyMMdd}_{sanPhamId}";
+                await connection.ExecuteAsync(
+                    """
+                    INSERT INTO lich_su_nhap_xuat_kho
+                    (
+                        chi_nhanh_id,
+                        san_pham_id,
+                        loai_giao_dich,
+                        loai_chung_tu,
+                        ma_chung_tu,
+                        so_luong,
+                        ton_truoc,
+                        ton_sau,
+                        gia_von,
+                        nguoi_thuc_hien_id,
+                        thoi_gian,
+                        ghi_chu
+                    )
+                    VALUES
+                    (
+                        @ChiNhanhId,
+                        @SanPhamId,
+                        'TON_DAU_KY',
+                        'DAU_KY',
+                        @MaChungTu,
+                        @SoLuong,
+                        @TonTruoc,
+                        @TonSau,
+                        @GiaVon,
+                        @NguoiThucHienId,
+                        NOW(),
+                        @GhiChu
+                    );
+                    """,
+                    new
+                    {
+                        ChiNhanhId = khoHangId,
+                        SanPhamId = sanPhamId,
+                        MaChungTu = maChungTu,
+                        SoLuong = soLuong,
+                        TonTruoc = tonTruoc,
+                        TonSau = soLuong,
+                        GiaVon = giaVon,
+                        NguoiThucHienId = Session.CurrentUser?.Id,
+                        GhiChu = noiDung
+                    },
+                    transaction: transaction);
+            }
+
+            await transaction.CommitAsync();
+
+            _ = LogSubAccountActivityAsync(
+                "Thêm hàng tồn đầu kỳ",
+                "SAN_PHAM",
+                sanPhamId,
+                $"TDK_{ngayDauKy:yyyyMMdd}",
+                $"Cập nhật tồn đầu kỳ: SL = {soLuong:N0}, Giá vốn = {giaVon:N0}, KhoId = {khoHangId}. {noiDung}",
+                thanhTien);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            SafeLog.WriteError("Lỗi LuuHangTonDauKyAsync", ex);
+            throw;
+        }
+    }
+    #endregion
+
+    #region Công Nợ Đầu Kỳ
+    /// <summary>
+    /// Đảm bảo bảng chi_tiet_cong_no_dau_ky tồn tại để lưu vết cấu trúc dữ liệu đầu kỳ đồng bộ.
+    /// </summary>
+    private async Task EnsureBangCongNoDauKyAsync(MySqlConnection connection, MySqlTransaction transaction)
+    {
+        try
+        {
+            const string createSql = """
+            CREATE TABLE IF NOT EXISTS chi_tiet_cong_no_dau_ky (
+                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                loai_doi_tac VARCHAR(20) NOT NULL COMMENT 'KHACH_HANG hoặc NHA_CUNG_CAP',
+                doi_tac_id INT UNSIGNED NOT NULL,
+                ma_doi_tac VARCHAR(50) NULL,
+                ten_doi_tac VARCHAR(255) NULL,
+                so_dien_thoai VARCHAR(50) NULL,
+                so_tien DECIMAL(15,2) NOT NULL DEFAULT 0,
+                ngay_dau_ky DATE NOT NULL,
+                ngay_hen_tra DATE NULL,
+                noi_dung TEXT NULL,
+                chi_nhanh_id INT UNSIGNED NOT NULL DEFAULT 1,
+                ky_ke_toan_id INT UNSIGNED NULL,
+                nguoi_tao_id INT UNSIGNED NULL,
+                ngay_tao DATETIME DEFAULT CURRENT_TIMESTAMP,
+                ngay_cap_nhat DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY uk_doitac_dauky (loai_doi_tac, doi_tac_id, ngay_dau_ky)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            """;
+            await connection.ExecuteAsync(createSql, transaction: transaction);
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Không tạo được bảng chi_tiet_cong_no_dau_ky", ex);
+        }
+    }
+
+    /// <summary>
+    /// Lấy danh sách đối tác (Khách hàng hoặc Nhà cung cấp) dùng cho ô tìm kiếm AutoCompleteBox.
+    /// </summary>
+    public async Task<IReadOnlyList<DoiTacOption>> GetDanhSachDoiTacCongNoAsync(string loaiDoiTac, string? search = null)
+    {
+        var result = new List<DoiTacOption>();
+        loaiDoiTac = (loaiDoiTac ?? "KHACH_HANG").Trim().ToUpperInvariant();
+
+        if (loaiDoiTac == "KHACH_HANG")
+        {
+            var khachHangs = await GetKhachHangAsync(search);
+            foreach (var kh in khachHangs)
+            {
+                result.Add(new DoiTacOption
+                {
+                    Id = kh.Id,
+                    MaDoiTac = kh.MaKhachHang,
+                    TenDoiTac = kh.TenKhachHang,
+                    SoDienThoai = kh.SoDienThoai,
+                    LoaiDoiTac = "KHACH_HANG",
+                    CongNoHienTai = kh.NoHienTai
+                });
+            }
+        }
+        else
+        {
+            var nhaCungCaps = await GetNhaCungCapAsync(search);
+            foreach (var ncc in nhaCungCaps)
+            {
+                result.Add(new DoiTacOption
+                {
+                    Id = ncc.Id,
+                    MaDoiTac = ncc.MaNhaCungCap,
+                    TenDoiTac = ncc.TenNhaCungCap,
+                    SoDienThoai = ncc.SoDienThoai,
+                    LoaiDoiTac = "NHA_CUNG_CAP",
+                    CongNoHienTai = ncc.ConNo
+                });
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Tra cứu công nợ đầu kỳ đã khai báo trước đó của đối tác (nếu có).
+    /// </summary>
+    public async Task<ChiTietCongNoDauKy?> LayCongNoDauKyCuaDoiTacAsync(string loaiDoiTac, uint doiTacId, DateTime ngayDauKy)
+    {
+        await using var connection = await OpenAsync();
+        loaiDoiTac = (loaiDoiTac ?? "KHACH_HANG").Trim().ToUpperInvariant();
+
+        try
+        {
+            // 1. Thử lấy từ chi_tiet_cong_no_dau_ky
+            bool hasBangDauKy = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'chi_tiet_cong_no_dau_ky';") > 0;
+
+            if (hasBangDauKy)
+            {
+                const string sql = """
+                SELECT 
+                    id AS Id,
+                    loai_doi_tac AS LoaiDoiTac,
+                    doi_tac_id AS DoiTacId,
+                    ma_doi_tac AS MaDoiTac,
+                    ten_doi_tac AS TenDoiTac,
+                    so_dien_thoai AS SoDienThoai,
+                    so_tien AS SoTien,
+                    ngay_dau_ky AS NgayDauKy,
+                    ngay_hen_tra AS NgayHenTra,
+                    noi_dung AS NoiDung,
+                    chi_nhanh_id AS ChiNhanhId,
+                    ky_ke_toan_id AS KyKeToanId,
+                    ngay_tao AS NgayTao
+                FROM chi_tiet_cong_no_dau_ky
+                WHERE loai_doi_tac = @LoaiDoiTac AND doi_tac_id = @DoiTacId
+                ORDER BY id DESC
+                LIMIT 1;
+                """;
+
+                var record = await connection.QueryFirstOrDefaultAsync<ChiTietCongNoDauKy>(
+                    sql, new { LoaiDoiTac = loaiDoiTac, DoiTacId = doiTacId });
+
+                if (record != null)
+                    return record;
+            }
+
+            // 2. Fallback từ lịch sử công nợ
+            if (loaiDoiTac == "KHACH_HANG")
+            {
+                const string sqlKh = """
+                SELECT 
+                    id AS Id,
+                    'KHACH_HANG' AS LoaiDoiTac,
+                    khach_hang_id AS DoiTacId,
+                    ghi_no AS SoTien,
+                    thoi_gian AS NgayDauKy,
+                    ghi_chu AS NoiDung,
+                    chi_nhanh_id AS ChiNhanhId
+                FROM lich_su_cong_no_khach_hang
+                WHERE khach_hang_id = @Id 
+                  AND (loai_giao_dich = 'NO_DAU_KY' OR loai_chung_tu = 'DAU_KY')
+                ORDER BY id DESC
+                LIMIT 1;
+                """;
+
+                var row = await connection.QueryFirstOrDefaultAsync<ChiTietCongNoDauKy>(sqlKh, new { Id = doiTacId });
+                if (row != null)
+                {
+                    var kh = await connection.QueryFirstOrDefaultAsync<KhachHang>(
+                        "SELECT ma_khach_hang AS MaKhachHang, ten_khach_hang AS TenKhachHang, so_dien_thoai AS SoDienThoai FROM khach_hang WHERE id = @Id;",
+                        new { Id = doiTacId });
+                    if (kh != null)
+                    {
+                        row.MaDoiTac = kh.MaKhachHang;
+                        row.TenDoiTac = kh.TenKhachHang;
+                        row.SoDienThoai = kh.SoDienThoai;
+                    }
+                    return row;
+                }
+            }
+            else
+            {
+                const string sqlNcc = """
+                SELECT 
+                    id AS Id,
+                    'NHA_CUNG_CAP' AS LoaiDoiTac,
+                    nha_cung_cap_id AS DoiTacId,
+                    ghi_no AS SoTien,
+                    thoi_gian AS NgayDauKy,
+                    ghi_chu AS NoiDung,
+                    chi_nhanh_id AS ChiNhanhId
+                FROM lich_su_cong_no_nha_cung_cap
+                WHERE nha_cung_cap_id = @Id 
+                  AND (loai_giao_dich = 'NO_DAU_KY' OR loai_chung_tu = 'DAU_KY')
+                ORDER BY id DESC
+                LIMIT 1;
+                """;
+
+                var row = await connection.QueryFirstOrDefaultAsync<ChiTietCongNoDauKy>(sqlNcc, new { Id = doiTacId });
+                if (row != null)
+                {
+                    var ncc = await connection.QueryFirstOrDefaultAsync<NhaCungCap>(
+                        "SELECT ma_nha_cung_cap AS MaNhaCungCap, ten_nha_cung_cap AS TenNhaCungCap, so_dien_thoai AS SoDienThoai FROM nha_cung_cap WHERE id = @Id;",
+                        new { Id = doiTacId });
+                    if (ncc != null)
+                    {
+                        row.MaDoiTac = ncc.MaNhaCungCap;
+                        row.TenDoiTac = ncc.TenNhaCungCap;
+                        row.SoDienThoai = ncc.SoDienThoai;
+                    }
+                    return row;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Lỗi LayCongNoDauKyCuaDoiTacAsync", ex);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Lưu thông tin công nợ đầu kỳ của đối tác (Khách hàng / Nhà cung cấp).
+    /// Đảm bảo tính nhất quán qua Transaction, tự cập nhật sổ cái công nợ tương ứng,
+    /// chống cộng dồn hai lần khi người dùng thao tác lại, không tạo phiếu thu chi hay hóa đơn giả.
+    /// </summary>
+    public async Task<bool> LuuCongNoDauKyAsync(ChiTietCongNoDauKy item)
+    {
+        if (item is null)
+            throw new ArgumentNullException(nameof(item));
+
+        if (item.DoiTacId == 0)
+            throw new ArgumentException("Chưa chọn đối tác công nợ.", nameof(item.DoiTacId));
+
+        if (item.SoTien < 0)
+            throw new ArgumentException("Số tiền công nợ không được âm.", nameof(item.SoTien));
+
+        var loaiDoiTac = (item.LoaiDoiTac ?? "KHACH_HANG").Trim().ToUpperInvariant();
+        var branchId = item.ChiNhanhId > 0 ? item.ChiNhanhId : (Session.CurrentUser?.ChiNhanhId ?? 1);
+        var userId = Session.CurrentUser?.Id;
+        var ngayDauKy = item.NgayDauKy.Date;
+
+        var ghiChuDayDu = string.IsNullOrWhiteSpace(item.NoiDung) ? "Nợ đầu kỳ" : item.NoiDung.Trim();
+        if (item.NgayHenTra.HasValue)
+        {
+            ghiChuDayDu += $" (Hạn trả: {item.NgayHenTra.Value:dd/MM/yyyy})";
+        }
+
+        await using var connection = await OpenAsync();
+        await using var transaction = await connection.BeginTransactionAsync();
+
+        try
+        {
+            await EnsureBangCongNoDauKyAsync(connection, transaction);
+
+            if (loaiDoiTac == "KHACH_HANG")
+            {
+                // ==============================================================
+                // 1. CÔNG NỢ KHÁCH HÀNG (PHẢI THU KHÁCH HÀNG)
+                // ==============================================================
+                var maChungTu = $"CNDK_{item.MaDoiTac}";
+
+                // Kiểm tra xem khách hàng này đã có dòng công nợ đầu kỳ chưa (FOR UPDATE để an toàn)
+                const string checkExistingKhSql = """
+                SELECT id, ghi_no, so_du 
+                FROM lich_su_cong_no_khach_hang 
+                WHERE khach_hang_id = @KhachHangId 
+                  AND (loai_giao_dich = 'NO_DAU_KY' OR loai_chung_tu = 'DAU_KY' OR ma_chung_tu = @MaChungTu)
+                LIMIT 1
+                FOR UPDATE;
+                """;
+
+                var existingRow = await connection.QueryFirstOrDefaultAsync<dynamic>(
+                    checkExistingKhSql,
+                    new { KhachHangId = item.DoiTacId, MaChungTu = maChungTu },
+                    transaction: transaction);
+
+                if (existingRow != null)
+                {
+                    uint existingId = (uint)existingRow.id;
+                    decimal oldGhiNo = ToDecimal(existingRow.ghi_no);
+                    decimal delta = item.SoTien - oldGhiNo;
+
+                    // Cập nhật lại bản ghi đầu kỳ đã có (chống cộng dồn 2 lần)
+                    await connection.ExecuteAsync(
+                        """
+                        UPDATE lich_su_cong_no_khach_hang
+                        SET ghi_no = @SoTien,
+                            so_du = so_du + @Delta,
+                            thoi_gian = @ThoiGian,
+                            nguoi_thuc_hien_id = @NguoiThucHienId,
+                            ghi_chu = @GhiChu
+                        WHERE id = @Id;
+                        """,
+                        new
+                        {
+                            Id = existingId,
+                            SoTien = item.SoTien,
+                            Delta = delta,
+                            ThoiGian = ngayDauKy,
+                            NguoiThucHienId = userId,
+                            GhiChu = ghiChuDayDu
+                        },
+                        transaction: transaction);
+
+                    // Nếu có chênh lệch delta và có các dòng phát sinh sau đó, điều chỉnh số dư an toàn
+                    if (delta != 0)
+                    {
+                        await connection.ExecuteAsync(
+                            """
+                            UPDATE lich_su_cong_no_khach_hang
+                            SET so_du = so_du + @Delta
+                            WHERE khach_hang_id = @KhachHangId AND id > @ExistingId;
+                            """,
+                            new
+                            {
+                                Delta = delta,
+                                KhachHangId = item.DoiTacId,
+                                ExistingId = existingId
+                            },
+                            transaction: transaction);
+                    }
+                }
+                else
+                {
+                    // Lấy số dư công nợ hiện có trước khi thêm
+                    var currentDebt = await connection.ExecuteScalarAsync<decimal>(
+                        """
+                        SELECT COALESCE(SUM(ghi_no - ghi_co), 0)
+                        FROM lich_su_cong_no_khach_hang
+                        WHERE khach_hang_id = @KhachHangId
+                        FOR UPDATE;
+                        """,
+                        new { KhachHangId = item.DoiTacId },
+                        transaction: transaction);
+
+                    var newDebtBalance = currentDebt + item.SoTien;
+
+                    await connection.ExecuteAsync(
+                        """
+                        INSERT INTO lich_su_cong_no_khach_hang
+                        (
+                            khach_hang_id, chi_nhanh_id, loai_giao_dich, loai_chung_tu,
+                            ma_chung_tu, ghi_no, ghi_co, so_du,
+                            thoi_gian, nguoi_thuc_hien_id, ghi_chu
+                        )
+                        VALUES
+                        (
+                            @KhachHangId, @ChiNhanhId, 'NO_DAU_KY', 'DAU_KY',
+                            @MaChungTu, @GhiNo, 0, @SoDu,
+                            @ThoiGian, @NguoiThucHienId, @GhiChu
+                        );
+                        """,
+                        new
+                        {
+                            KhachHangId = item.DoiTacId,
+                            ChiNhanhId = branchId,
+                            MaChungTu = maChungTu,
+                            GhiNo = item.SoTien,
+                            SoDu = newDebtBalance,
+                            ThoiGian = ngayDauKy,
+                            NguoiThucHienId = userId,
+                            GhiChu = ghiChuDayDu
+                        },
+                        transaction: transaction);
+                }
+
+                // Lưu ý: KHÔNG đồng bộ cột no_can_thu_hien_tai ở đây vì công nợ đầu kỳ
+                // đã được ghi nhận vào sổ cái lich_su_cong_no_khach_hang. Nếu vừa ghi sổ cái
+                // vừa gán cột nền tảng sẽ khiến số dư bị cộng hai lần ở màn hình công nợ.
+            }
+            else
+            {
+                // ==============================================================
+                // 2. CÔNG NỢ NHÀ CUNG CẤP (PHẢI TRẢ NHÀ CUNG CẤP)
+                // ==============================================================
+                var maChungTu = $"CNDK_{item.MaDoiTac}";
+
+                const string checkExistingNccSql = """
+                SELECT id, ghi_no, so_du 
+                FROM lich_su_cong_no_nha_cung_cap 
+                WHERE nha_cung_cap_id = @NhaCungCapId 
+                  AND (loai_giao_dich = 'NO_DAU_KY' OR loai_chung_tu = 'DAU_KY' OR ma_chung_tu = @MaChungTu)
+                LIMIT 1
+                FOR UPDATE;
+                """;
+
+                var existingRow = await connection.QueryFirstOrDefaultAsync<dynamic>(
+                    checkExistingNccSql,
+                    new { NhaCungCapId = item.DoiTacId, MaChungTu = maChungTu },
+                    transaction: transaction);
+
+                if (existingRow != null)
+                {
+                    uint existingId = (uint)existingRow.id;
+                    decimal oldGhiNo = ToDecimal(existingRow.ghi_no);
+                    decimal delta = item.SoTien - oldGhiNo;
+
+                    await connection.ExecuteAsync(
+                        """
+                        UPDATE lich_su_cong_no_nha_cung_cap
+                        SET ghi_no = @SoTien,
+                            so_du = so_du + @Delta,
+                            thoi_gian = @ThoiGian,
+                            nguoi_thuc_hien_id = @NguoiThucHienId,
+                            ghi_chu = @GhiChu
+                        WHERE id = @Id;
+                        """,
+                        new
+                        {
+                            Id = existingId,
+                            SoTien = item.SoTien,
+                            Delta = delta,
+                            ThoiGian = ngayDauKy,
+                            NguoiThucHienId = userId,
+                            GhiChu = ghiChuDayDu
+                        },
+                        transaction: transaction);
+
+                    if (delta != 0)
+                    {
+                        await connection.ExecuteAsync(
+                            """
+                            UPDATE lich_su_cong_no_nha_cung_cap
+                            SET so_du = so_du + @Delta
+                            WHERE nha_cung_cap_id = @NhaCungCapId AND id > @ExistingId;
+                            """,
+                            new
+                            {
+                                Delta = delta,
+                                NhaCungCapId = item.DoiTacId,
+                                ExistingId = existingId
+                            },
+                            transaction: transaction);
+                    }
+                }
+                else
+                {
+                    var baselineDebt = await connection.ExecuteScalarAsync<decimal>(
+                        """
+                        SELECT COALESCE(no_can_tra_hien_tai, 0)
+                        FROM nha_cung_cap
+                        WHERE id = @NhaCungCapId;
+                        """,
+                        new { NhaCungCapId = item.DoiTacId },
+                        transaction: transaction);
+
+                    var currentDebt = await connection.ExecuteScalarAsync<decimal>(
+                        """
+                        SELECT COALESCE(SUM(ghi_no - ghi_co), 0)
+                        FROM lich_su_cong_no_nha_cung_cap
+                        WHERE nha_cung_cap_id = @NhaCungCapId
+                        FOR UPDATE;
+                        """,
+                        new { NhaCungCapId = item.DoiTacId },
+                        transaction: transaction);
+
+                    var newDebtBalance = baselineDebt + currentDebt + item.SoTien;
+
+                    await connection.ExecuteAsync(
+                        """
+                        INSERT INTO lich_su_cong_no_nha_cung_cap
+                        (
+                            nha_cung_cap_id, chi_nhanh_id, loai_giao_dich, loai_chung_tu,
+                            ma_chung_tu, ghi_no, ghi_co, so_du,
+                            thoi_gian, nguoi_thuc_hien_id, ghi_chu
+                        )
+                        VALUES
+                        (
+                            @NhaCungCapId, @ChiNhanhId, 'NO_DAU_KY', 'DAU_KY',
+                            @MaChungTu, @GhiNo, 0, @SoDu,
+                            @ThoiGian, @NguoiThucHienId, @GhiChu
+                        );
+                        """,
+                        new
+                        {
+                            NhaCungCapId = item.DoiTacId,
+                            ChiNhanhId = branchId,
+                            MaChungTu = maChungTu,
+                            GhiNo = item.SoTien,
+                            SoDu = newDebtBalance,
+                            ThoiGian = ngayDauKy,
+                            NguoiThucHienId = userId,
+                            GhiChu = ghiChuDayDu
+                        },
+                        transaction: transaction);
+                }
+
+                // Lưu ý: KHÔNG đồng bộ cột no_can_tra_hien_tai ở đây vì công nợ đầu kỳ
+                // đã được ghi nhận vào sổ cái lich_su_cong_no_nha_cung_cap. Vừa ghi sổ cái
+                // vừa gán cột nền tảng sẽ khiến số dư nhà cung cấp bị cộng hai lần.
+            }
+
+            // ==============================================================
+            // 3. GHI LƯU VÀO BẢNG chi_tiet_cong_no_dau_ky ĐỒNG BỘ
+            // ==============================================================
+            const string upsertDauKySql = """
+            INSERT INTO chi_tiet_cong_no_dau_ky
+            (
+                loai_doi_tac, doi_tac_id, ma_doi_tac, ten_doi_tac, so_dien_thoai,
+                so_tien, ngay_dau_ky, ngay_hen_tra, noi_dung, chi_nhanh_id, nguoi_tao_id
+            )
+            VALUES
+            (
+                @LoaiDoiTac, @DoiTacId, @MaDoiTac, @TenDoiTac, @SoDienThoai,
+                @SoTien, @NgayDauKy, @NgayHenTra, @NoiDung, @ChiNhanhId, @NguoiTaoId
+            )
+            ON DUPLICATE KEY UPDATE
+                so_tien = @SoTien,
+                ngay_hen_tra = @NgayHenTra,
+                noi_dung = @NoiDung,
+                nguoi_tao_id = @NguoiTaoId,
+                ngay_cap_nhat = NOW();
+            """;
+
+            await connection.ExecuteAsync(
+                upsertDauKySql,
+                new
+                {
+                    LoaiDoiTac = loaiDoiTac,
+                    DoiTacId = item.DoiTacId,
+                    MaDoiTac = item.MaDoiTac,
+                    TenDoiTac = item.TenDoiTac,
+                    SoDienThoai = item.SoDienThoai,
+                    SoTien = item.SoTien,
+                    NgayDauKy = ngayDauKy,
+                    NgayHenTra = item.NgayHenTra?.Date,
+                    NoiDung = item.NoiDung,
+                    ChiNhanhId = branchId,
+                    NguoiTaoId = userId
+                },
+                transaction: transaction);
+
+            await transaction.CommitAsync();
+
+            _ = LogSubAccountActivityAsync(
+                "Thêm công nợ đầu kỳ",
+                loaiDoiTac == "KHACH_HANG" ? "KHACH_HANG" : "NHA_CUNG_CAP",
+                item.DoiTacId,
+                item.MaDoiTac,
+                $"Khai báo công nợ đầu kỳ: {item.SoTien:N0} đ cho đối tác {item.TenDoiTac} ({loaiDoiTac}). {item.NoiDung}",
+                item.SoTien);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            SafeLog.WriteError("Lỗi LuuCongNoDauKyAsync", ex);
+            throw;
+        }
+    }
+    #endregion
+
+    #region Khuyến Mãi
+    /// <summary>
+    /// Đảm bảo các bảng khuyến mãi tồn tại trong cơ sở dữ liệu.
+    /// </summary>
+    public async Task EnsureBangKhuyenMaiAsync(MySqlConnection connection, MySqlTransaction? transaction = null)
+    {
+        try
+        {
+            const string createTableSql = """
+            CREATE TABLE IF NOT EXISTS chuong_trinh_khuyen_mai (
+                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                ma_chuong_trinh VARCHAR(50) NOT NULL UNIQUE,
+                ten_chuong_trinh VARCHAR(255) NOT NULL,
+                ngay_bat_dau DATETIME NOT NULL,
+                ngay_ket_thuc DATETIME NOT NULL,
+                nhom_khach_hang_id INT UNSIGNED NULL,
+                trang_thai VARCHAR(50) NOT NULL DEFAULT 'DANG_HOAT_DONG',
+                loai_khuyen_mai VARCHAR(50) NOT NULL DEFAULT 'THEO_HANG_HOA',
+                ghi_chu TEXT NULL,
+                chi_nhanh_id INT UNSIGNED NOT NULL DEFAULT 1,
+                nguoi_tao_id INT UNSIGNED NULL,
+                ngay_tao DATETIME DEFAULT CURRENT_TIMESTAMP,
+                ngay_cap_nhat DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_ctkm_ngay (ngay_bat_dau, ngay_ket_thuc),
+                INDEX idx_ctkm_trangthai (trang_thai)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+            CREATE TABLE IF NOT EXISTS chi_tiet_khuyen_mai (
+                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                chuong_trinh_id INT UNSIGNED NOT NULL,
+                san_pham_id INT UNSIGNED NOT NULL,
+                ma_san_pham VARCHAR(50) NULL,
+                ten_san_pham VARCHAR(255) NULL,
+                don_vi_tinh VARCHAR(50) NULL,
+                so_luong_mua DECIMAL(15,2) NOT NULL DEFAULT 1,
+                loai_giam_gia VARCHAR(20) NOT NULL DEFAULT 'PHAN_TRAM',
+                gia_tri_giam DECIMAL(15,2) NOT NULL DEFAULT 0,
+                so_luong_tang DECIMAL(15,2) NOT NULL DEFAULT 0,
+                san_pham_tang_id INT UNSIGNED NULL,
+                ten_san_pham_tang VARCHAR(255) NULL,
+                ghi_chu VARCHAR(255) NULL,
+                INDEX idx_ctkm_ct (chuong_trinh_id),
+                INDEX idx_ctkm_sp (san_pham_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            """;
+
+            await connection.ExecuteAsync(createTableSql, transaction: transaction);
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Không tạo được bảng khuyến mãi", ex);
+        }
+    }
+
+    /// <summary>
+    /// Sinh mã chương trình khuyến mãi tự động theo ngày: KM{yyyyMMdd}{001}.
+    /// </summary>
+    public async Task<string> SinhMaKhuyenMaiMoiAsync()
+    {
+        var prefix = $"KM{DateTime.Now:yyyyMMdd}";
+        await using var connection = await OpenAsync();
+        await EnsureBangKhuyenMaiAsync(connection);
+
+        const string sql = """
+        SELECT ma_chuong_trinh
+        FROM chuong_trinh_khuyen_mai
+        WHERE ma_chuong_trinh LIKE CONCAT(@Prefix, '%')
+        ORDER BY ma_chuong_trinh DESC
+        LIMIT 1;
+        """;
+
+        var lastMa = await connection.QueryFirstOrDefaultAsync<string>(sql, new { Prefix = prefix });
+        if (string.IsNullOrWhiteSpace(lastMa) || lastMa.Length < prefix.Length + 3)
+        {
+            return $"{prefix}001";
+        }
+
+        var suffix = lastMa.Substring(prefix.Length);
+        if (int.TryParse(suffix, out var num))
+        {
+            return $"{prefix}{(num + 1):D3}";
+        }
+
+        return $"{prefix}001";
+    }
+
+    /// <summary>
+    /// Kiểm tra xem mã chương trình khuyến mãi đã tồn tại chưa.
+    /// </summary>
+    public async Task<bool> KiemTraMaKhuyenMaiTonTaiAsync(string ma, uint? excludeId = null)
+    {
+        if (string.IsNullOrWhiteSpace(ma))
+            return false;
+
+        await using var connection = await OpenAsync();
+        await EnsureBangKhuyenMaiAsync(connection);
+
+        const string sql = """
+        SELECT COUNT(*)
+        FROM chuong_trinh_khuyen_mai
+        WHERE ma_chuong_trinh = @Ma AND (@ExcludeId IS NULL OR id != @ExcludeId);
+        """;
+
+        var count = await connection.ExecuteScalarAsync<int>(sql, new { Ma = ma.Trim(), ExcludeId = excludeId });
+        return count > 0;
+    }
+
+    /// <summary>
+    /// Lưu chương trình khuyến mãi và các dòng chi tiết hàng hóa (hỗ trợ tạo mới hoặc cập nhật) bằng Transaction.
+    /// </summary>
+    public async Task<uint> LuuChuongTrinhKhuyenMaiAsync(ChuongTrinhKhuyenMai ct, IReadOnlyList<ChiTietKhuyenMai> chiTiets)
+    {
+        if (ct is null)
+            throw new ArgumentNullException(nameof(ct));
+
+        if (string.IsNullOrWhiteSpace(ct.TenChuongTrinh))
+            throw new ArgumentException("Tên chương trình khuyến mãi không được để trống.", nameof(ct.TenChuongTrinh));
+
+        if (ct.NgayKetThuc < ct.NgayBatDau)
+            throw new ArgumentException("Ngày kết thúc không được trước ngày bắt đầu.", nameof(ct.NgayKetThuc));
+
+        var branchId = ct.ChiNhanhId > 0 ? ct.ChiNhanhId : (Session.CurrentUser?.ChiNhanhId ?? 1);
+        var userId = Session.CurrentUser?.Id;
+
+        await using var connection = await OpenAsync();
+        await EnsureBangKhuyenMaiAsync(connection);
+        await using var transaction = await connection.BeginTransactionAsync();
+
+        try
+        {
+            uint chuongTrinhId = ct.Id;
+
+            if (chuongTrinhId == 0)
+            {
+                // Kiểm tra trùng mã
+                var exists = await connection.ExecuteScalarAsync<int>(
+                    "SELECT COUNT(*) FROM chuong_trinh_khuyen_mai WHERE ma_chuong_trinh = @Ma;",
+                    new { Ma = ct.MaChuongTrinh.Trim() },
+                    transaction: transaction) > 0;
+
+                if (exists)
+                {
+                    // Nếu trùng thì tự sinh mã mới
+                    ct.MaChuongTrinh = await SinhMaKhuyenMaiMoiAsync();
+                }
+
+                const string insertSql = """
+                INSERT INTO chuong_trinh_khuyen_mai
+                (
+                    ma_chuong_trinh, ten_chuong_trinh, ngay_bat_dau, ngay_ket_thuc,
+                    nhom_khach_hang_id, trang_thai, loai_khuyen_mai, ghi_chu,
+                    chi_nhanh_id, nguoi_tao_id
+                )
+                VALUES
+                (
+                    @MaChuongTrinh, @TenChuongTrinh, @NgayBatDau, @NgayKetThuc,
+                    @NhomKhachHangId, @TrangThai, @LoaiKhuyenMai, @GhiChu,
+                    @ChiNhanhId, @NguoiTaoId
+                );
+                SELECT LAST_INSERT_ID();
+                """;
+
+                chuongTrinhId = await connection.ExecuteScalarAsync<uint>(
+                    insertSql,
+                    new
+                    {
+                        ct.MaChuongTrinh,
+                        ct.TenChuongTrinh,
+                        ct.NgayBatDau,
+                        ct.NgayKetThuc,
+                        ct.NhomKhachHangId,
+                        ct.TrangThai,
+                        ct.LoaiKhuyenMai,
+                        ct.GhiChu,
+                        ChiNhanhId = branchId,
+                        NguoiTaoId = userId
+                    },
+                    transaction: transaction);
+                ct.Id = chuongTrinhId;
+            }
+            else
+            {
+                const string updateSql = """
+                UPDATE chuong_trinh_khuyen_mai
+                SET ma_chuong_trinh = @MaChuongTrinh,
+                    ten_chuong_trinh = @TenChuongTrinh,
+                    ngay_bat_dau = @NgayBatDau,
+                    ngay_ket_thuc = @NgayKetThuc,
+                    nhom_khach_hang_id = @NhomKhachHangId,
+                    trang_thai = @TrangThai,
+                    loai_khuyen_mai = @LoaiKhuyenMai,
+                    ghi_chu = @GhiChu,
+                    chi_nhanh_id = @ChiNhanhId
+                WHERE id = @Id;
+                """;
+
+                await connection.ExecuteAsync(
+                    updateSql,
+                    new
+                    {
+                        ct.MaChuongTrinh,
+                        ct.TenChuongTrinh,
+                        ct.NgayBatDau,
+                        ct.NgayKetThuc,
+                        ct.NhomKhachHangId,
+                        ct.TrangThai,
+                        ct.LoaiKhuyenMai,
+                        ct.GhiChu,
+                        ChiNhanhId = branchId,
+                        ct.Id
+                    },
+                    transaction: transaction);
+
+                // Xóa chi tiết cũ trước khi ghi lại
+                await connection.ExecuteAsync(
+                    "DELETE FROM chi_tiet_khuyen_mai WHERE chuong_trinh_id = @ChuongTrinhId;",
+                    new { ChuongTrinhId = chuongTrinhId },
+                    transaction: transaction);
+            }
+
+            // Ghi các dòng chi tiết hàng hóa áp dụng
+            if (chiTiets != null && chiTiets.Count > 0)
+            {
+                const string insertDetailSql = """
+                INSERT INTO chi_tiet_khuyen_mai
+                (
+                    chuong_trinh_id, san_pham_id, ma_san_pham, ten_san_pham, don_vi_tinh,
+                    so_luong_mua, loai_giam_gia, gia_tri_giam, so_luong_tang,
+                    san_pham_tang_id, ten_san_pham_tang, ghi_chu
+                )
+                VALUES
+                (
+                    @ChuongTrinhId, @SanPhamId, @MaSanPham, @TenSanPham, @DonViTinh,
+                    @SoLuongMua, @LoaiGiamGia, @GiaTriGiam, @SoLuongTang,
+                    @SanPhamTangId, @TenSanPhamTang, @GhiChu
+                );
+                """;
+
+                foreach (var d in chiTiets.Where(c => c.SanPhamId > 0))
+                {
+                    await connection.ExecuteAsync(
+                        insertDetailSql,
+                        new
+                        {
+                            ChuongTrinhId = chuongTrinhId,
+                            d.SanPhamId,
+                            d.MaSanPham,
+                            d.TenSanPham,
+                            d.DonViTinh,
+                            d.SoLuongMua,
+                            d.LoaiGiamGia,
+                            d.GiaTriGiam,
+                            d.SoLuongTang,
+                            d.SanPhamTangId,
+                            d.TenSanPhamTang,
+                            d.GhiChu
+                        },
+                        transaction: transaction);
+                }
+            }
+
+            await transaction.CommitAsync();
+
+            _ = LogSubAccountActivityAsync(
+                "Khuyến mãi",
+                "CHUONG_TRINH_KHUYEN_MAI",
+                chuongTrinhId,
+                ct.MaChuongTrinh,
+                $"Lưu chương trình khuyến mãi: {ct.TenChuongTrinh} ({chiTiets?.Count ?? 0} sản phẩm)",
+                0);
+
+            return chuongTrinhId;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            SafeLog.WriteError("Lỗi LuuChuongTrinhKhuyenMaiAsync", ex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Lấy danh sách các chương trình khuyến mãi trong hệ thống.
+    /// </summary>
+    public async Task<IReadOnlyList<ChuongTrinhKhuyenMai>> GetDanhSachKhuyenMaiAsync(string? search = null, string? trangThai = null)
+    {
+        await using var connection = await OpenAsync();
+        await EnsureBangKhuyenMaiAsync(connection);
+
+        var sql = """
+        SELECT 
+            km.id AS Id,
+            km.ma_chuong_trinh AS MaChuongTrinh,
+            km.ten_chuong_trinh AS TenChuongTrinh,
+            km.ngay_bat_dau AS NgayBatDau,
+            km.ngay_ket_thuc AS NgayKetThuc,
+            km.nhom_khach_hang_id AS NhomKhachHangId,
+            nkh.ten_nhom AS TenNhomKhachHang,
+            km.trang_thai AS TrangThai,
+            km.loai_khuyen_mai AS LoaiKhuyenMai,
+            km.ghi_chu AS GhiChu,
+            km.chi_nhanh_id AS ChiNhanhId,
+            km.ngay_tao AS NgayTao
+        FROM chuong_trinh_khuyen_mai km
+        LEFT JOIN nhom_khach_hang nkh ON nkh.id = km.nhom_khach_hang_id
+        WHERE 1 = 1
+        """;
+
+        var param = new DynamicParameters();
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            sql += " AND (km.ma_chuong_trinh LIKE @Search OR km.ten_chuong_trinh LIKE @Search)";
+            param.Add("Search", $"%{search.Trim()}%");
+        }
+
+        if (!string.IsNullOrWhiteSpace(trangThai) && trangThai != "TAT_CA")
+        {
+            sql += " AND km.trang_thai = @TrangThai";
+            param.Add("TrangThai", trangThai);
+        }
+
+        sql += " ORDER BY km.id DESC;";
+
+        var list = (await connection.QueryAsync<ChuongTrinhKhuyenMai>(sql, param)).AsList();
+
+        // Nạp số lượng sản phẩm áp dụng cho mỗi chương trình
+        if (list.Count > 0)
+        {
+            const string countSql = "SELECT chuong_trinh_id AS CtId, COUNT(*) AS SoLuong FROM chi_tiet_khuyen_mai GROUP BY chuong_trinh_id;";
+            var counts = (await connection.QueryAsync<(uint CtId, int SoLuong)>(countSql)).ToDictionary(x => x.CtId, x => x.SoLuong);
+
+            foreach (var item in list)
+            {
+                if (counts.TryGetValue(item.Id, out var count))
+                {
+                    for (int i = 0; i < count; i++)
+                        item.DanhSachChiTiet.Add(new ChiTietKhuyenMai());
+                }
+            }
+        }
+
+        return list;
+    }
+
+    /// <summary>
+    /// Lấy chi tiết các sản phẩm áp dụng trong một chương trình khuyến mãi.
+    /// </summary>
+    public async Task<IReadOnlyList<ChiTietKhuyenMai>> GetChiTietKhuyenMaiAsync(uint chuongTrinhId)
+    {
+        await using var connection = await OpenAsync();
+        await EnsureBangKhuyenMaiAsync(connection);
+
+        const string sql = """
+        SELECT 
+            ct.id AS Id,
+            ct.chuong_trinh_id AS ChuongTrinhId,
+            ct.san_pham_id AS SanPhamId,
+            ct.ma_san_pham AS MaSanPham,
+            ct.ten_san_pham AS TenSanPham,
+            COALESCE(ct.don_vi_tinh, dvt.ten_don_vi, 'Cái') AS DonViTinh,
+            COALESCE(sp.gia_ban, 0) AS GiaBanHienTai,
+            ct.so_luong_mua AS SoLuongMua,
+            ct.loai_giam_gia AS LoaiGiamGia,
+            ct.gia_tri_giam AS GiaTriGiam,
+            ct.so_luong_tang AS SoLuongTang,
+            ct.san_pham_tang_id AS SanPhamTangId,
+            ct.ten_san_pham_tang AS TenSanPhamTang,
+            ct.ghi_chu AS GhiChu
+        FROM chi_tiet_khuyen_mai ct
+        LEFT JOIN san_pham sp ON sp.id = ct.san_pham_id
+        LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
+        WHERE ct.chuong_trinh_id = @ChuongTrinhId
+        ORDER BY ct.id ASC;
+        """;
+
+        var list = (await connection.QueryAsync<ChiTietKhuyenMai>(sql, new { ChuongTrinhId = chuongTrinhId })).AsList();
+        for (int i = 0; i < list.Count; i++)
+        {
+            list[i].Stt = i + 1;
+        }
+
+        return list;
+    }
+
+    /// <summary>
+    /// Xóa một chương trình khuyến mãi.
+    /// </summary>
+    public async Task<bool> XoaChuongTrinhKhuyenMaiAsync(uint chuongTrinhId)
+    {
+        await using var connection = await OpenAsync();
+        await using var transaction = await connection.BeginTransactionAsync();
+
+        try
+        {
+            await connection.ExecuteAsync(
+                "DELETE FROM chi_tiet_khuyen_mai WHERE chuong_trinh_id = @Id;",
+                new { Id = chuongTrinhId },
+                transaction: transaction);
+
+            var rows = await connection.ExecuteAsync(
+                "DELETE FROM chuong_trinh_khuyen_mai WHERE id = @Id;",
+                new { Id = chuongTrinhId },
+                transaction: transaction);
+
+            await transaction.CommitAsync();
+            return rows > 0;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            SafeLog.WriteError("Lỗi XoaChuongTrinhKhuyenMaiAsync", ex);
+            throw;
+        }
+    }
+    #endregion
+
+    #region Sổ Quỹ Đầu Kỳ
+    /// <summary>
+    /// Đảm bảo bảng so_quy_dau_ky tồn tại để lưu số dư quỹ đầu kỳ do người dùng khai báo.
+    /// </summary>
+    public async Task EnsureBangSoQuyDauKyAsync(MySqlConnection connection, MySqlTransaction? transaction = null)
+    {
+        try
+        {
+            const string createTableSql = """
+            CREATE TABLE IF NOT EXISTS so_quy_dau_ky (
+                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                ngay_dau_ky DATE NOT NULL,
+                phuong_thuc VARCHAR(50) NOT NULL DEFAULT 'TIEN_MAT',
+                so_tien DECIMAL(15,2) NOT NULL DEFAULT 0,
+                noi_dung VARCHAR(255) NULL,
+                chi_nhanh_id INT UNSIGNED NOT NULL DEFAULT 1,
+                nguoi_tao_id INT UNSIGNED NULL,
+                ngay_tao DATETIME DEFAULT CURRENT_TIMESTAMP,
+                ngay_cap_nhat DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY uk_so_quy_dau_ky (phuong_thuc, ngay_dau_ky, chi_nhanh_id),
+                INDEX idx_sqdk_ngay (ngay_dau_ky)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            """;
+
+            await connection.ExecuteAsync(createTableSql, transaction: transaction);
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Không tạo được bảng so_quy_dau_ky", ex);
+        }
+    }
+
+    /// <summary>
+    /// Lấy danh sách các bản ghi số dư quỹ đầu kỳ của chi nhánh hiện tại.
+    /// </summary>
+    public async Task<IReadOnlyList<SoQuyDauKy>> GetDanhSachSoQuyDauKyAsync(string? search = null)
+    {
+        await using var connection = await OpenAsync();
+        await EnsureBangSoQuyDauKyAsync(connection);
+
+        var branchId = Session.CurrentUser?.ChiNhanhId ?? 1;
+
+        var sql = """
+        SELECT
+            id AS Id,
+            ngay_dau_ky AS NgayDauKy,
+            phuong_thuc AS PhuongThuc,
+            so_tien AS SoTien,
+            noi_dung AS NoiDung,
+            chi_nhanh_id AS ChiNhanhId,
+            ngay_tao AS NgayTao
+        FROM so_quy_dau_ky
+        WHERE chi_nhanh_id = @ChiNhanhId
+        """;
+
+        var param = new DynamicParameters();
+        param.Add("ChiNhanhId", branchId);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            sql += " AND (phuong_thuc LIKE @Search OR noi_dung LIKE @Search)";
+            param.Add("Search", $"%{search.Trim()}%");
+        }
+
+        sql += " ORDER BY ngay_dau_ky DESC, id DESC;";
+
+        return (await connection.QueryAsync<SoQuyDauKy>(sql, param)).AsList();
+    }
+
+    /// <summary>
+    /// Lưu (thêm mới hoặc cập nhật) một bản ghi số dư quỹ đầu kỳ.
+    /// Mỗi quỹ chỉ có một số dư cho mỗi ngày nên dùng khóa duy nhất (phuong_thuc, ngay_dau_ky, chi_nhanh_id).
+    /// </summary>
+    public async Task<uint> LuuSoQuyDauKyAsync(SoQuyDauKy item)
+    {
+        if (item is null)
+            throw new ArgumentNullException(nameof(item));
+
+        if (item.NgayDauKy == default)
+            throw new ArgumentException("Ngày đầu kỳ không được để trống.", nameof(item.NgayDauKy));
+
+        if (string.IsNullOrWhiteSpace(item.PhuongThuc))
+            throw new ArgumentException("Vui lòng chọn quỹ cho số dư đầu kỳ.", nameof(item.PhuongThuc));
+
+        var branchId = item.ChiNhanhId > 0 ? item.ChiNhanhId : (Session.CurrentUser?.ChiNhanhId ?? 1);
+        var userId = Session.CurrentUser?.Id;
+        var phuongThuc = item.PhuongThuc.Trim().ToUpperInvariant();
+        var ngay = item.NgayDauKy.Date;
+        var noiDung = string.IsNullOrWhiteSpace(item.NoiDung) ? "Số dư quỹ đầu kỳ" : item.NoiDung.Trim();
+
+        await using var connection = await OpenAsync();
+        await EnsureBangSoQuyDauKyAsync(connection);
+
+        if (item.Id == 0)
+        {
+            const string upsertSql = """
+            INSERT INTO so_quy_dau_ky (ngay_dau_ky, phuong_thuc, so_tien, noi_dung, chi_nhanh_id, nguoi_tao_id)
+            VALUES (@NgayDauKy, @PhuongThuc, @SoTien, @NoiDung, @ChiNhanhId, @NguoiTaoId)
+            ON DUPLICATE KEY UPDATE
+                id = LAST_INSERT_ID(id),
+                so_tien = @SoTien,
+                noi_dung = @NoiDung,
+                nguoi_tao_id = @NguoiTaoId,
+                ngay_cap_nhat = NOW();
+            SELECT LAST_INSERT_ID();
+            """;
+
+            return await connection.ExecuteScalarAsync<uint>(upsertSql, new
+            {
+                NgayDauKy = ngay,
+                PhuongThuc = phuongThuc,
+                SoTien = item.SoTien,
+                NoiDung = noiDung,
+                ChiNhanhId = branchId,
+                NguoiTaoId = userId
+            });
+        }
+
+        const string updateSql = """
+        UPDATE so_quy_dau_ky
+        SET ngay_dau_ky = @NgayDauKy,
+            phuong_thuc = @PhuongThuc,
+            so_tien = @SoTien,
+            noi_dung = @NoiDung,
+            chi_nhanh_id = @ChiNhanhId,
+            nguoi_tao_id = @NguoiTaoId,
+            ngay_cap_nhat = NOW()
+        WHERE id = @Id;
+        """;
+
+        await connection.ExecuteAsync(updateSql, new
+        {
+            item.Id,
+            NgayDauKy = ngay,
+            PhuongThuc = phuongThuc,
+            SoTien = item.SoTien,
+            NoiDung = noiDung,
+            ChiNhanhId = branchId,
+            NguoiTaoId = userId
+        });
+
+        return item.Id;
+    }
+
+    /// <summary>Xóa một bản ghi số dư quỹ đầu kỳ.</summary>
+    public async Task<bool> XoaSoQuyDauKyAsync(uint id)
+    {
+        await using var connection = await OpenAsync();
+        await EnsureBangSoQuyDauKyAsync(connection);
+
+        var rows = await connection.ExecuteAsync(
+            "DELETE FROM so_quy_dau_ky WHERE id = @Id;",
+            new { Id = id });
+
+        return rows > 0;
+    }
+
+    /// <summary>
+    /// Tổng số dư quỹ đầu kỳ của chi nhánh hiện tại (tùy chọn lọc theo một quỹ).
+    /// Dùng để cộng vào "quỹ đầu kỳ" khi tính tồn quỹ.
+    /// </summary>
+    public async Task<decimal> GetTongSoDuQuyDauKyAsync(string? phuongThuc = null)
+    {
+        try
+        {
+            await using var connection = await OpenAsync();
+            await EnsureBangSoQuyDauKyAsync(connection);
+
+            var sql = "SELECT COALESCE(SUM(so_tien), 0) FROM so_quy_dau_ky WHERE chi_nhanh_id = @ChiNhanhId";
+            var param = new DynamicParameters();
+            param.Add("ChiNhanhId", Session.CurrentUser?.ChiNhanhId ?? 1);
+
+            if (!string.IsNullOrWhiteSpace(phuongThuc))
+            {
+                sql += " AND phuong_thuc = @PhuongThuc";
+                param.Add("PhuongThuc", phuongThuc.Trim().ToUpperInvariant());
+            }
+
+            return await connection.ExecuteScalarAsync<decimal>(sql, param);
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Lỗi GetTongSoDuQuyDauKyAsync", ex);
+            return 0m;
+        }
+    }
+    #endregion
+
+    #region Thiết Lập Giá Khách Hàng
+    /// <summary>
+    /// Đảm bảo bảng lưu trữ thiết lập giá riêng cho khách hàng (gia_ban_khach_hang) tồn tại.
+    /// </summary>
+    public async Task EnsureBangGiaKhachHangAsync(MySqlConnection connection, MySqlTransaction? transaction = null)
+    {
+        try
+        {
+            const string createTableSql = """
+            CREATE TABLE IF NOT EXISTS gia_ban_khach_hang (
+                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                khach_hang_id INT UNSIGNED NOT NULL,
+                san_pham_id INT UNSIGNED NOT NULL,
+                don_vi_tinh_id INT UNSIGNED NULL,
+                gia_rieng DECIMAL(15, 2) NOT NULL DEFAULT 0,
+                chiet_khau DECIMAL(5, 2) NOT NULL DEFAULT 0,
+                ghi_chu VARCHAR(255) NULL,
+                ngay_ap_dung DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                ngay_cap_nhat DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY uq_khach_sanpham (khach_hang_id, san_pham_id),
+                INDEX idx_gbkh_khach (khach_hang_id),
+                INDEX idx_gbkh_sp (san_pham_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            """;
+
+            await connection.ExecuteAsync(createTableSql, transaction: transaction);
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Không tạo được bảng gia_ban_khach_hang", ex);
+        }
+    }
+
+    /// <summary>
+    /// Lấy danh sách các mặt hàng đã được thiết lập giá riêng cho một khách hàng.
+    /// </summary>
+    public async Task<IReadOnlyList<GiaBanKhachHangItem>> GetBangGiaKhachHangAsync(
+        uint khachHangId,
+        string? search = null,
+        uint? nhomSanPhamId = null)
+    {
+        await using var connection = await OpenAsync();
+        await EnsureBangGiaKhachHangAsync(connection);
+
+        var sql = """
+        SELECT 
+            gb.id AS Id,
+            gb.khach_hang_id AS KhachHangId,
+            gb.san_pham_id AS SanPhamId,
+            sp.ma_san_pham AS MaSanPham,
+            sp.ten_san_pham AS TenSanPham,
+            COALESCE(dvt.ten_don_vi, sp.don_vi_tinh, 'Cái') AS DonViTinh,
+            sp.don_vi_tinh_id AS DonViTinhId,
+            COALESCE(nsp.ten_nhom, sp.nhom_hang_3_cap_excel, 'Chưa phân nhóm') AS NhomSanPham,
+            sp.nhom_san_pham_id AS NhomSanPhamId,
+            COALESCE(sp.gia_ban, 0) AS GiaGoc,
+            gb.gia_rieng AS GiaRieng,
+            gb.ghi_chu AS GhiChu,
+            gb.ngay_ap_dung AS NgayApDung,
+            gb.ngay_cap_nhat AS NgayCapNhat
+        FROM gia_ban_khach_hang gb
+        INNER JOIN san_pham sp ON sp.id = gb.san_pham_id
+        LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
+        LEFT JOIN nhom_san_pham nsp ON nsp.id = sp.nhom_san_pham_id
+        WHERE gb.khach_hang_id = @KhachHangId
+        """;
+
+        var param = new DynamicParameters();
+        param.Add("KhachHangId", khachHangId);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            sql += " AND (sp.ma_san_pham LIKE @Search OR sp.ten_san_pham LIKE @Search)";
+            param.Add("Search", $"%{search.Trim()}%");
+        }
+
+        if (nhomSanPhamId.HasValue && nhomSanPhamId.Value > 0)
+        {
+            if (nhomSanPhamId.Value == 999999)
+            {
+                sql += " AND (sp.nhom_san_pham_id IS NULL OR sp.nhom_san_pham_id = 0)";
+            }
+            else
+            {
+                sql += " AND sp.nhom_san_pham_id = @NhomId";
+                param.Add("NhomId", nhomSanPhamId.Value);
+            }
+        }
+
+        sql += " ORDER BY sp.ten_san_pham, sp.id DESC;";
+
+        var list = (await connection.QueryAsync<GiaBanKhachHangItem>(sql, param)).AsList();
+        for (int i = 0; i < list.Count; i++)
+        {
+            list[i].Stt = i + 1;
+        }
+
+        return list;
+    }
+
+    /// <summary>
+    /// Thêm hoặc cập nhật giá bán riêng cho một sản phẩm của khách hàng.
+    /// Không làm thay đổi giá bán chung của sản phẩm trong bảng san_pham.
+    /// </summary>
+    public async Task<bool> LuuGiaBanKhachHangAsync(
+        uint khachHangId,
+        uint sanPhamId,
+        decimal giaRieng,
+        string? ghiChu = null,
+        DateTime? ngayApDung = null)
+    {
+        if (khachHangId == 0 || sanPhamId == 0)
+            throw new ArgumentException("Mã khách hàng và mã sản phẩm không hợp lệ.");
+
+        if (giaRieng < 0)
+            throw new ArgumentException("Giá bán riêng không được nhỏ hơn 0.");
+
+        await using var connection = await OpenAsync();
+        await EnsureBangGiaKhachHangAsync(connection);
+
+        const string sql = """
+        INSERT INTO gia_ban_khach_hang
+        (
+            khach_hang_id, san_pham_id, gia_rieng, ghi_chu, ngay_ap_dung
+        )
+        VALUES
+        (
+            @KhachHangId, @SanPhamId, @GiaRieng, @GhiChu, @NgayApDung
+        )
+        ON DUPLICATE KEY UPDATE
+            gia_rieng = @GiaRieng,
+            ghi_chu = @GhiChu,
+            ngay_ap_dung = @NgayApDung,
+            ngay_cap_nhat = NOW();
+        """;
+
+        var affected = await connection.ExecuteAsync(
+            sql,
+            new
+            {
+                KhachHangId = khachHangId,
+                SanPhamId = sanPhamId,
+                GiaRieng = giaRieng,
+                GhiChu = string.IsNullOrWhiteSpace(ghiChu) ? null : ghiChu.Trim(),
+                NgayApDung = ngayApDung ?? DateTime.Now
+            });
+
+        _ = LogSubAccountActivityAsync(
+            "Thiết lập giá",
+            "GIA_BAN_KHACH_HANG",
+            khachHangId,
+            $"SP{sanPhamId}",
+            $"Thiết lập giá bán riêng: {giaRieng:N0} đ cho sản phẩm #{sanPhamId} (Khách #{khachHangId})",
+            giaRieng);
+
+        return affected > 0;
+    }
+
+    /// <summary>
+    /// Xóa thiết lập giá bán riêng để mặt hàng quay về áp dụng giá chung.
+    /// </summary>
+    public async Task<bool> XoaGiaBanKhachHangAsync(uint id)
+    {
+        await using var connection = await OpenAsync();
+        await EnsureBangGiaKhachHangAsync(connection);
+
+        var affected = await connection.ExecuteAsync(
+            "DELETE FROM gia_ban_khach_hang WHERE id = @Id;",
+            new { Id = id });
+
+        return affected > 0;
+    }
+
+    /// <summary>
+    /// Lấy giá bán riêng của một sản phẩm đối với khách hàng (phục vụ kiểm tra nhanh khi bán hàng).
+    /// </summary>
+    public async Task<decimal?> LayGiaRiengKhachHangAsync(uint khachHangId, uint sanPhamId)
+    {
+        if (khachHangId == 0 || sanPhamId == 0)
+            return null;
+
+        try
+        {
+            await using var connection = await OpenAsync();
+            await EnsureBangGiaKhachHangAsync(connection);
+
+            const string sql = """
+            SELECT gia_rieng
+            FROM gia_ban_khach_hang
+            WHERE khach_hang_id = @KhachHangId AND san_pham_id = @SanPhamId
+            LIMIT 1;
+            """;
+
+            return await connection.QueryFirstOrDefaultAsync<decimal?>(
+                sql,
+                new { KhachHangId = khachHangId, SanPhamId = sanPhamId });
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Lấy tất cả giá riêng của khách hàng dưới dạng từ điển { SanPhamId => GiaRieng }
+    /// để áp dụng tự động cho giỏ hàng khi chọn khách hàng.
+    /// </summary>
+    public async Task<Dictionary<uint, decimal>> LayTatCaGiaRiengKhachHangAsync(uint khachHangId)
+    {
+        var result = new Dictionary<uint, decimal>();
+        if (khachHangId == 0)
+            return result;
+
+        try
+        {
+            await using var connection = await OpenAsync();
+            await EnsureBangGiaKhachHangAsync(connection);
+
+            const string sql = """
+            SELECT san_pham_id AS SanPhamId, gia_rieng AS GiaRieng
+            FROM gia_ban_khach_hang
+            WHERE khach_hang_id = @KhachHangId;
+            """;
+
+            var pairs = await connection.QueryAsync<(uint SanPhamId, decimal GiaRieng)>(
+                sql,
+                new { KhachHangId = khachHangId });
+
+            foreach (var p in pairs)
+            {
+                result[p.SanPhamId] = p.GiaRieng;
+            }
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Lỗi LayTatCaGiaRiengKhachHangAsync", ex);
+        }
+
+        return result;
+    }
+    #endregion
 }
+
 

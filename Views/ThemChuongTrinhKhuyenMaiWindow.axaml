@@ -1,0 +1,581 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="using:ShopHoa.Models"
+        x:Class="ShopHoa.Views.ThemChuongTrinhKhuyenMaiWindow"
+        Width="960"
+        Height="700"
+        MinWidth="880"
+        MinHeight="600"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Title="Thêm chương trình khuyến mãi"
+        Background="#F0F5FA"
+        RequestedThemeVariant="Light">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.fieldLabel">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#1C3A5E"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,0,3"/>
+        </Style>
+
+        <Style Selector="TextBlock.requiredStar">
+            <Setter Property="Foreground" Value="#D92D20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <Style Selector="TextBox.classicInput">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#8EB2D5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <Style Selector="TextBox.classicInput:focus">
+            <Setter Property="BorderBrush" Value="#2572B4"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+        </Style>
+
+        <Style Selector="TextBox.numberInput">
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="6,3"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#8EB2D5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Right"/>
+            <Setter Property="FontSize" Value="12.5"/>
+        </Style>
+
+        <Style Selector="TextBox.numberInput:focus">
+            <Setter Property="BorderBrush" Value="#2572B4"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+        </Style>
+
+        <Style Selector="ComboBox.classicCombo">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#8EB2D5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="CalendarDatePicker.classicDatePicker">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#8EB2D5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="AutoCompleteBox.classicAutoComplete">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#8EB2D5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <Style Selector="Button.actionBtn">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Button.saveBtn">
+            <Setter Property="Background" Value="#E2F0D9"/>
+            <Setter Property="Foreground" Value="#1E4620"/>
+            <Setter Property="BorderBrush" Value="#70AD47"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Button.saveBtn:pointerover">
+            <Setter Property="Background" Value="#C5E0B4"/>
+        </Style>
+        <Style Selector="Button.saveBtn:disabled">
+            <Setter Property="Opacity" Value="0.6"/>
+            <Setter Property="Cursor" Value="Wait"/>
+        </Style>
+
+        <Style Selector="Button.cancelBtn">
+            <Setter Property="Background" Value="#FCE4D6"/>
+            <Setter Property="Foreground" Value="#C00000"/>
+            <Setter Property="BorderBrush" Value="#F4B084"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Button.cancelBtn:pointerover">
+            <Setter Property="Background" Value="#F8CBAD"/>
+        </Style>
+
+        <Style Selector="Button.closeWindowBtn">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#0B4B82"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <Style Selector="Button.closeWindowBtn:pointerover">
+            <Setter Property="Background" Value="#FDE8E8"/>
+            <Setter Property="Foreground" Value="#C00000"/>
+        </Style>
+
+        <Style Selector="Button.itemDeleteBtn">
+            <Setter Property="Width" Value="26"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#C00000"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <Style Selector="Button.itemDeleteBtn:pointerover">
+            <Setter Property="Background" Value="#FDE8E8"/>
+        </Style>
+    </Window.Styles>
+
+    <!-- KHUNG BAO NGOÀI MODAL CHUYÊN NGHIỆP -->
+    <Border BorderBrush="#6DA2D9" BorderThickness="2" Margin="6" Background="#F0F5FA" CornerRadius="6"
+            BoxShadow="0 8 24 0 #25000000">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+            <!-- ======================================================== -->
+            <!-- KHU VỰC A. THANH TIÊU ĐỀ                                 -->
+            <!-- ======================================================== -->
+            <Border Grid.Row="0"
+                    Background="#CBE8FA"
+                    BorderBrush="#90C4E8"
+                    BorderThickness="0,0,0,1"
+                    Padding="14,9"
+                    CornerRadius="4,4,0,0">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <!-- Icon quà tặng + Tiêu đề -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Border Background="#0B4B82" CornerRadius="6" Width="26" Height="26" VerticalAlignment="Center">
+                            <TextBlock Text="🎁" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center" Spacing="1">
+                            <TextBlock Name="HeaderTitleText"
+                                       Text="THÊM CHƯƠNG TRÌNH KHUYẾN MÃI"
+                                       FontSize="14.5"
+                                       FontWeight="Bold"
+                                       Foreground="#0B4B82"/>
+                            <TextBlock Text="Danh mục → Khuyến mãi → Thêm chương trình khuyến mãi"
+                                       FontSize="11"
+                                       Foreground="#4A7599"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Nút đóng cửa sổ modal -->
+                    <Button Grid.Column="2"
+                            Classes="closeWindowBtn"
+                            Content="✕"
+                            ToolTip.Tip="Đóng cửa sổ"
+                            Click="CloseWindowButton_OnClick"/>
+                </Grid>
+            </Border>
+
+            <!-- ======================================================== -->
+            <!-- KHU VỰC B. NỘI DUNG CHÍNH (THÔNG TIN + BẢNG HÀNG HÓA)    -->
+            <!-- ======================================================== -->
+            <ScrollViewer Grid.Row="1" Padding="14,12" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="14">
+
+                    <!-- THẺ 1: THÔNG TIN CHƯƠNG TRÌNH (LƯỚI 2 CỘT) -->
+                    <Border Background="White" BorderBrush="#BED4E8" BorderThickness="1" CornerRadius="6" Padding="14,12">
+                        <StackPanel Spacing="10">
+                            <!-- Tiêu đề nhóm -->
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="📋" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Text="THÔNG TIN CHƯƠNG TRÌNH" FontSize="12.5" FontWeight="Bold" Foreground="#0B4B82" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- HÀNG 1: MÃ CHƯƠNG TRÌNH & TÊN CHƯƠNG TRÌNH -->
+                            <Grid ColumnDefinitions="*,16,2*" RowDefinitions="Auto,Auto">
+                                <!-- Cột 1: Mã chương trình -->
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <TextBlock Classes="fieldLabel" Text="Mã chương trình"/>
+                                        <TextBlock Classes="requiredStar" Text="*"/>
+                                        <TextBlock Text="(Tự động/sửa)" FontSize="11" Foreground="#6A87A5" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <TextBox Name="MaChuongTrinhTextBox"
+                                             Classes="classicInput"
+                                             Watermark="VD: KM20261017001"/>
+                                </StackPanel>
+
+                                <!-- Cột 2: Tên chương trình -->
+                                <StackPanel Grid.Column="2" Spacing="2">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <TextBlock Classes="fieldLabel" Text="Tên chương trình"/>
+                                        <TextBlock Classes="requiredStar" Text="*"/>
+                                    </StackPanel>
+                                    <TextBox Name="TenChuongTrinhTextBox"
+                                             Classes="classicInput"
+                                             Watermark="VD: Giảm giá ngày Phụ nữ Việt Nam 20/10..."/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- HÀNG 2: NGÀY BẮT ĐẦU & NGÀY KẾT THÚC -->
+                            <Grid ColumnDefinitions="*,16,*" RowDefinitions="Auto,Auto">
+                                <!-- Cột 1: Ngày bắt đầu -->
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <TextBlock Classes="fieldLabel" Text="Ngày bắt đầu"/>
+                                        <TextBlock Classes="requiredStar" Text="*"/>
+                                    </StackPanel>
+                                    <CalendarDatePicker Name="NgayBatDauPicker"
+                                                        Classes="classicDatePicker"
+                                                        HorizontalAlignment="Stretch"
+                                                        SelectedDateFormat="Short"/>
+                                </StackPanel>
+
+                                <!-- Cột 2: Ngày kết thúc -->
+                                <StackPanel Grid.Column="2" Spacing="2">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <TextBlock Classes="fieldLabel" Text="Ngày kết thúc"/>
+                                        <TextBlock Classes="requiredStar" Text="*"/>
+                                    </StackPanel>
+                                    <CalendarDatePicker Name="NgayKetThucPicker"
+                                                        Classes="classicDatePicker"
+                                                        HorizontalAlignment="Stretch"
+                                                        SelectedDateFormat="Short"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- HÀNG 3: ĐỐI TƯỢNG ÁP DỤNG & TRẠNG THÁI -->
+                            <Grid ColumnDefinitions="*,16,*" RowDefinitions="Auto,Auto">
+                                <!-- Cột 1: Đối tượng áp dụng -->
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                    <TextBlock Classes="fieldLabel" Text="Khách hàng áp dụng"/>
+                                    <ComboBox Name="NhomKhachHangComboBox"
+                                              Classes="classicCombo"
+                                              HorizontalAlignment="Stretch"
+                                              PlaceholderText="-- Tất cả khách hàng --">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="models:NhomKhachHang">
+                                                <TextBlock Text="{Binding TenNhom}" VerticalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <!-- Cột 2: Trạng thái -->
+                                <StackPanel Grid.Column="2" Spacing="2">
+                                    <TextBlock Classes="fieldLabel" Text="Trạng thái chương trình"/>
+                                    <ComboBox Name="TrangThaiComboBox"
+                                              Classes="classicCombo"
+                                              HorizontalAlignment="Stretch">
+                                        <ComboBoxItem Tag="DANG_HOAT_DONG" IsSelected="True">Đang diễn ra (Áp dụng ngay)</ComboBoxItem>
+                                        <ComboBoxItem Tag="CHUA_BAT_DAU">Chưa bắt đầu</ComboBoxItem>
+                                        <ComboBoxItem Tag="TAM_NGUNG">Tạm ngưng</ComboBoxItem>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- HÀNG 4: NỘI DUNG / GHI CHÚ -->
+                            <StackPanel Spacing="2">
+                                <TextBlock Classes="fieldLabel" Text="Nội dung / Ghi chú chương trình"/>
+                                <TextBox Name="GhiChuTextBox"
+                                         Classes="classicInput"
+                                         Height="50"
+                                         AcceptsReturn="True"
+                                         TextWrapping="Wrap"
+                                         VerticalContentAlignment="Top"
+                                         Text="Chương trình khuyến mãi ưu đãi khách hàng"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- THẺ 2: DANH SÁCH HÀNG HÓA ÁP DỤNG -->
+                    <Border Background="White" BorderBrush="#BED4E8" BorderThickness="1" CornerRadius="6" Padding="14,12">
+                        <StackPanel Spacing="10">
+                            <!-- Tiêu đề nhóm & Công cụ -->
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <TextBlock Text="🏷️" FontSize="13" VerticalAlignment="Center"/>
+                                    <TextBlock Text="DANH SÁCH HÀNG HÓA ÁP DỤNG" FontSize="12.5" FontWeight="Bold" Foreground="#0B4B82" VerticalAlignment="Center"/>
+                                    <Border Background="#E6EFF7" CornerRadius="10" Padding="8,2" VerticalAlignment="Center">
+                                        <TextBlock Name="SoLuongHangText" Text="0 hàng hóa" FontSize="11.5" FontWeight="SemiBold" Foreground="#1C5E96"/>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- Cụm thao tác nhanh hàng loạt -->
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <!-- Nút giảm nhanh toàn bộ -->
+                                    <Button Name="GiamNhanhButton"
+                                            Classes="actionBtn"
+                                            Height="28"
+                                            Padding="10,0"
+                                            FontSize="12"
+                                            Background="#EAF7EE"
+                                            Foreground="#1E6B37"
+                                            BorderBrush="#A3D9B1"
+                                            BorderThickness="1"
+                                            ToolTip.Tip="Đặt nhanh mức giảm cho toàn bộ sản phẩm trong bảng">
+                                        <Button.Flyout>
+                                            <Flyout Placement="BottomEdgeAlignedRight">
+                                                <Border Background="White" BorderBrush="#BED4E8" BorderThickness="1" CornerRadius="6" Padding="12" Width="240">
+                                                    <StackPanel Spacing="8">
+                                                        <TextBlock Text="⚡ Áp dụng nhanh cho tất cả" FontWeight="Bold" FontSize="12.5" Foreground="#0B4B82"/>
+                                                        <TextBlock Text="Mức giảm %:" FontSize="12" Foreground="#475467"/>
+                                                        <TextBox Name="GiamNhanhPhanTramTextBox" Classes="numberInput" Text="10"/>
+                                                        <Button Content="✓ Áp dụng ngay"
+                                                                Classes="actionBtn saveBtn"
+                                                                Height="28"
+                                                                HorizontalAlignment="Stretch"
+                                                                Click="GiamNhanhApply_OnClick"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </Flyout>
+                                        </Button.Flyout>
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="⚡" FontSize="12"/>
+                                            <TextBlock Text="Giảm nhanh toàn bộ" FontSize="12"/>
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- Nút xóa toàn bộ -->
+                                    <Button Name="XoaTatCaButton"
+                                            Classes="actionBtn"
+                                            Height="28"
+                                            Padding="10,0"
+                                            FontSize="12"
+                                            Background="#FFF1F0"
+                                            Foreground="#CF1322"
+                                            BorderBrush="#FFA39E"
+                                            BorderThickness="1"
+                                            Content="🗑️ Xóa tất cả"
+                                            Click="XoaTatCa_OnClick"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- THANH TÌM KIẾM & THÊM HÀNG HÓA -->
+                            <Grid ColumnDefinitions="*,10,Auto">
+                                <AutoCompleteBox Name="SanPhamAutoCompleteBox"
+                                                 Classes="classicAutoComplete"
+                                                 Watermark="🔍 Nhập mã, tên hoặc mã vạch hàng hóa để tìm và thêm..."
+                                                 FilterMode="None"
+                                                 ValueMemberBinding="{CompiledBinding MaSanPham, DataType=models:SanPham}"
+                                                 SelectionChanged="SanPhamAutoCompleteBox_OnSelectionChanged">
+                                    <AutoCompleteBox.ItemTemplate>
+                                        <DataTemplate x:DataType="models:SanPham">
+                                            <Grid ColumnDefinitions="100,*,Auto,Auto" Margin="4,2">
+                                                <TextBlock Text="{Binding MaSanPham}" FontWeight="Bold" Foreground="#0B4B82" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding TenSanPham}" Foreground="#1A2D42" Margin="8,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding DonViTinh}" Foreground="#667085" FontSize="11.5" Margin="6,0" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="3" Text="{Binding GiaBan, StringFormat='{}{0:N0} đ'}" Foreground="#2D6A42" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </AutoCompleteBox.ItemTemplate>
+                                </AutoCompleteBox>
+
+                                <Button Grid.Column="2"
+                                        Name="ThemHangButton"
+                                        Classes="actionBtn"
+                                        Background="#E6F4EA"
+                                        Foreground="#137333"
+                                        BorderBrush="#A8DAB5"
+                                        BorderThickness="1"
+                                        Content="➕ Thêm hàng"
+                                        Click="ThemHangButton_OnClick"/>
+                            </Grid>
+
+                            <!-- BẢNG DANH SÁCH CHI TIẾT HÀNG HÓA -->
+                            <Border BorderBrush="#C7DCED" BorderThickness="1" CornerRadius="4" Background="White">
+                                <StackPanel>
+                                    <!-- TIÊU ĐỀ CỘT -->
+                                    <Border Background="#E8F1F8" BorderBrush="#BED4E8" BorderThickness="0,0,0,1" Padding="8,7">
+                                        <Grid ColumnDefinitions="36,95,*,60,95,75,100,95,95,35">
+                                            <TextBlock Grid.Column="0" Text="STT" FontSize="12" FontWeight="Bold" Foreground="#1C3A5E" HorizontalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="MÃ HÀNG" FontSize="12" FontWeight="Bold" Foreground="#1C3A5E"/>
+                                            <TextBlock Grid.Column="2" Text="TÊN HÀNG HÓA" FontSize="12" FontWeight="Bold" Foreground="#1C3A5E"/>
+                                            <TextBlock Grid.Column="3" Text="ĐVT" FontSize="12" FontWeight="Bold" Foreground="#1C3A5E" HorizontalAlignment="Center"/>
+                                            <TextBlock Grid.Column="4" Text="GIÁ BÁN" FontSize="12" FontWeight="Bold" Foreground="#1C3A5E" HorizontalAlignment="Right"/>
+                                            <TextBlock Grid.Column="5" Text="SL MUA" FontSize="12" FontWeight="Bold" Foreground="#1C3A5E" HorizontalAlignment="Right"/>
+                                            <TextBlock Grid.Column="6" Text="HÌNH THỨC" FontSize="12" FontWeight="Bold" Foreground="#1C3A5E" HorizontalAlignment="Center"/>
+                                            <TextBlock Grid.Column="7" Text="MỨC GIẢM" FontSize="12" FontWeight="Bold" Foreground="#1C3A5E" HorizontalAlignment="Right"/>
+                                            <TextBlock Grid.Column="8" Text="GIÁ SAU GIẢM" FontSize="12" FontWeight="Bold" Foreground="#166534" HorizontalAlignment="Right"/>
+                                            <TextBlock Grid.Column="9" Text="" FontSize="12"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- VÙNG DỮ LIỆU CUỘN -->
+                                    <ScrollViewer MaxHeight="250" VerticalScrollBarVisibility="Auto">
+                                        <ItemsControl Name="ChiTietItemsControl">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="models:ChiTietKhuyenMai">
+                                                    <Border BorderBrush="#E5EEF5" BorderThickness="0,0,0,1" Padding="8,4" Background="White">
+                                                        <Grid ColumnDefinitions="36,95,*,60,95,75,100,95,95,35" VerticalAlignment="Center">
+                                                            <!-- STT -->
+                                                            <TextBlock Grid.Column="0" Text="{Binding Stt}" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                                                            <!-- Mã hàng -->
+                                                            <TextBlock Grid.Column="1" Text="{Binding MaSanPham}" FontSize="12.5" FontWeight="SemiBold" Foreground="#0B4B82" VerticalAlignment="Center"/>
+
+                                                            <!-- Tên hàng -->
+                                                            <TextBlock Grid.Column="2" Text="{Binding TenSanPham}" FontSize="12.5" Foreground="#1E293B" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="0,0,6,0"/>
+
+                                                            <!-- ĐVT -->
+                                                            <TextBlock Grid.Column="3" Text="{Binding DonViTinh}" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                                                            <!-- Giá bán gốc -->
+                                                            <TextBlock Grid.Column="4" Text="{Binding GiaBanHienTai, StringFormat='{}{0:N0} đ'}" FontSize="12" Foreground="#475467" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+
+                                                            <!-- SL mua tối thiểu -->
+                                                            <TextBox Grid.Column="5"
+                                                                     Classes="numberInput"
+                                                                     Text="{Binding SoLuongMua, Mode=TwoWay}"
+                                                                     Margin="4,0"
+                                                                     LostFocus="OnChiTietNumberLostFocus"/>
+
+                                                            <!-- Hình thức giảm (Phần trăm hoặc Tiền mặt) -->
+                                                            <ComboBox Grid.Column="6"
+                                                                      Classes="classicCombo"
+                                                                      Height="30"
+                                                                      Margin="4,0"
+                                                                      FontSize="11.5"
+                                                                      SelectedValue="{Binding LoaiGiamGia, Mode=TwoWay}"
+                                                                      SelectedValueBinding="{Binding Tag, RelativeSource={RelativeSource Self}}">
+                                                                <ComboBoxItem Tag="PHAN_TRAM">% Giảm</ComboBoxItem>
+                                                                <ComboBoxItem Tag="SO_TIEN">đ Tiền</ComboBoxItem>
+                                                            </ComboBox>
+
+                                                            <!-- Mức giảm -->
+                                                            <TextBox Grid.Column="7"
+                                                                     Classes="numberInput"
+                                                                     Text="{Binding GiaTriGiam, Mode=TwoWay}"
+                                                                     Margin="4,0"
+                                                                     LostFocus="OnChiTietNumberLostFocus"/>
+
+                                                            <!-- Giá sau giảm -->
+                                                            <TextBlock Grid.Column="8"
+                                                                       Text="{Binding GiaSauGiam, StringFormat='{}{0:N0} đ'}"
+                                                                       FontSize="12.5"
+                                                                       FontWeight="Bold"
+                                                                       Foreground="#166534"
+                                                                       HorizontalAlignment="Right"
+                                                                       VerticalAlignment="Center"/>
+
+                                                            <!-- Nút xóa dòng -->
+                                                            <Button Grid.Column="9"
+                                                                    Classes="itemDeleteBtn"
+                                                                    Content="✕"
+                                                                    ToolTip.Tip="Xóa hàng này khỏi chương trình"
+                                                                    Click="XoaDongChiTiet_OnClick"
+                                                                    Tag="{Binding}"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+
+                                    <!-- EMPTY STATE: KHI CHƯA CÓ HÀNG HÓA NÀO -->
+                                    <Border Name="EmptyStateBorder" Padding="24" Background="#FAFCFE" IsVisible="True">
+                                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                                            <TextBlock Text="🎁" FontSize="26" HorizontalAlignment="Center"/>
+                                            <TextBlock Text="Chưa có hàng hóa nào được thêm vào chương trình khuyến mãi"
+                                                       FontSize="13" FontWeight="SemiBold" Foreground="#475467" HorizontalAlignment="Center"/>
+                                            <TextBlock Text="Sử dụng ô tìm kiếm phía trên để chọn và thêm các hàng hóa được ưu đãi"
+                                                       FontSize="11.5" Foreground="#64748B" HorizontalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                        </StackPanel>
+                    </Border>
+
+                    <!-- DÒNG THÔNG BÁO LỖI / TRẠNG THÁI -->
+                    <Border Name="NotificationBorder"
+                            Background="#FFF3CD"
+                            BorderBrush="#FFEEBA"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="10,6"
+                            IsVisible="False">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <TextBlock Name="NotificationIconText" Text="⚠️" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Grid.Column="1"
+                                       Name="NotificationTextBlock"
+                                       FontSize="12.5"
+                                       FontWeight="SemiBold"
+                                       Foreground="#856404"
+                                       TextWrapping="Wrap"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ======================================================== -->
+            <!-- KHU VỰC C. THANH NÚT THAO TÁC (ĐẶT Ở CUỐI, CĂN PHẢI)     -->
+            <!-- ======================================================== -->
+            <Border Grid.Row="2"
+                    Background="#E6EFF7"
+                    BorderBrush="#BAD4EB"
+                    BorderThickness="0,1,0,0"
+                    Padding="16,10"
+                    CornerRadius="0,0,4,4">
+                <Grid ColumnDefinitions="*,Auto">
+                    <!-- Ghi chú nhắc nhở nghiệp vụ bên trái -->
+                    <TextBlock Text="* Các trường có dấu hoa thị đỏ là bắt buộc nhập."
+                               FontSize="11.5"
+                               FontStyle="Italic"
+                               Foreground="#536E8A"
+                               VerticalAlignment="Center"/>
+
+                    <!-- Cụm nút Lưu và Hủy bỏ căn phải -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
+                        <!-- NÚT LƯU CHÍNH -->
+                        <Button Name="SaveButton"
+                                Classes="actionBtn saveBtn"
+                                Content="💾  Lưu chương trình"
+                                Click="SaveButton_OnClick"/>
+
+                        <!-- NÚT HỦY BỎ PHỤ -->
+                        <Button Name="CancelButton"
+                                Classes="actionBtn cancelBtn"
+                                Content="🚫  Hủy bỏ"
+                                Click="CancelButton_OnClick"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+        </Grid>
+    </Border>
+</Window>
