@@ -1,4 +1,5 @@
 using System;
+using ShopHoa.Services;
 
 namespace ShopHoa.Models;
 
@@ -57,4 +58,10 @@ public sealed class NhanVienItem
         string.Equals(MaVaiTro, "QUAN_TRI", StringComparison.OrdinalIgnoreCase) ||
         string.Equals(MaVaiTro, "ADMIN", StringComparison.OrdinalIgnoreCase) ||
         (ChucVu?.IndexOf("Quản trị", StringComparison.OrdinalIgnoreCase) >= 0);
+
+    public bool CanEdit => Session.CurrentUser != null && (Quyen.HasPermission(Session.CurrentUser, PermissionKeys.UsersEdit) || Quyen.IsAdmin(Session.CurrentUser));
+    public bool CanDelete => Session.CurrentUser != null && (Quyen.HasPermission(Session.CurrentUser, PermissionKeys.UsersDelete) || Quyen.IsAdmin(Session.CurrentUser));
+    public bool CanLock => Session.CurrentUser != null && (Quyen.HasPermission(Session.CurrentUser, PermissionKeys.UsersLock) || Quyen.IsAdmin(Session.CurrentUser));
+    public bool CanUnlock => Session.CurrentUser != null && (Quyen.HasPermission(Session.CurrentUser, PermissionKeys.UsersUnlock) || Quyen.IsAdmin(Session.CurrentUser));
+    public bool CanAssignPermission => Session.CurrentUser != null && (Quyen.HasPermission(Session.CurrentUser, PermissionKeys.UsersAssignPermission) || Quyen.IsAdmin(Session.CurrentUser));
 }

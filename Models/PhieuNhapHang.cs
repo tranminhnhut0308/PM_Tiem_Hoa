@@ -12,6 +12,9 @@ public sealed partial class PhieuNhapHang : ObservableObject
 {
     public uint Id { get; set; }
 
+    /// <summary>Số thứ tự hiển thị trên danh sách (gán theo trang đang xem).</summary>
+    public int SoThuTu { get; set; }
+
     public string MaPhieuNhap { get; set; } = "";
 
     public uint ChiNhanhId { get; set; }
@@ -106,6 +109,9 @@ public sealed partial class PhieuNhapHang : ObservableObject
 
     /// <summary>Số công nợ còn lại, định dạng theo kiểu Việt Nam cho cột "Còn nợ".</summary>
     public string ConNoText => ConNo.ToString("N0", CultureInfo.GetCultureInfo("vi-VN")) + " đ";
+
+    /// <summary>Tổng tiền nhập, định dạng theo kiểu Việt Nam cho cột "Tổng tiền".</summary>
+    public string TongTienNhapText => TongTienNhap.ToString("N0", CultureInfo.GetCultureInfo("vi-VN")) + " đ";
 
     private static readonly IBrush NenDaNhapHang = new SolidColorBrush(Color.Parse("#E8F6F1"));
     private static readonly IBrush ChuDaNhapHang = new SolidColorBrush(Color.Parse("#087F6E"));

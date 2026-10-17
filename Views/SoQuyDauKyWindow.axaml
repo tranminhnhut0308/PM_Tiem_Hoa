@@ -2,245 +2,393 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:models="using:ShopHoa.Models"
         x:Class="ShopHoa.Views.SoQuyDauKyWindow"
-        x:DataType="models:SoQuyDauKy"
-        Width="1040"
-        Height="660"
-        MinWidth="900"
-        MinHeight="560"
+        Width="1160"
+        Height="720"
+        MinWidth="980"
+        MinHeight="580"
         WindowStartupLocation="CenterOwner"
         CanResize="True"
-        Title="Số dư quỹ đầu kỳ"
-        Background="#F0F5FA"
+        Title="Sổ quỹ đầu kỳ - WINWON"
+        Background="#F4F7F6"
         RequestedThemeVariant="Light">
 
     <Window.Styles>
+        <!-- Field label -->
         <Style Selector="TextBlock.fieldLabel">
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#1C3A5E"/>
-            <Setter Property="Margin" Value="0,0,0,3"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
         </Style>
 
+        <!-- Input controls -->
         <Style Selector="TextBox.classicInput">
-            <Setter Property="Height" Value="32"/>
-            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="10,0"/>
             <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="#1A2D42"/>
-            <Setter Property="BorderBrush" Value="#8EB2D5"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="FontSize" Value="13"/>
         </Style>
+        <Style Selector="TextBox.classicInput:focus">
+            <Setter Property="BorderBrush" Value="#0B4B82"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+        </Style>
 
         <Style Selector="ComboBox.classicCombo">
-            <Setter Property="Height" Value="32"/>
+            <Setter Property="Height" Value="36"/>
             <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="#1A2D42"/>
-            <Setter Property="BorderBrush" Value="#8EB2D5"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="4"/>
-            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10,0"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
 
         <Style Selector="CalendarDatePicker.classicDatePicker">
-            <Setter Property="Height" Value="32"/>
+            <Setter Property="Height" Value="36"/>
             <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="#1A2D42"/>
-            <Setter Property="BorderBrush" Value="#8EB2D5"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="8,0"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
 
-        <Style Selector="Button.actionBtn">
-            <Setter Property="Height" Value="34"/>
-            <Setter Property="Padding" Value="16,0"/>
-            <Setter Property="FontSize" Value="13"/>
+        <!-- Buttons -->
+        <Style Selector="Button.btnPrimary">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Background" Value="#0B4B82"/>
+            <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="16,0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
-
-        <Style Selector="Button.saveBtn">
-            <Setter Property="Background" Value="#E2F0D9"/>
-            <Setter Property="Foreground" Value="#1E4620"/>
-            <Setter Property="BorderBrush" Value="#70AD47"/>
-            <Setter Property="BorderThickness" Value="1"/>
-        </Style>
-        <Style Selector="Button.saveBtn:pointerover">
-            <Setter Property="Background" Value="#C5E0B4"/>
+        <Style Selector="Button.btnPrimary:pointerover">
+            <Setter Property="Background" Value="#083863"/>
         </Style>
 
-        <Style Selector="Button.cancelBtn">
-            <Setter Property="Background" Value="#FCE4D6"/>
-            <Setter Property="Foreground" Value="#C00000"/>
-            <Setter Property="BorderBrush" Value="#F4B084"/>
+        <Style Selector="Button.btnSecondary">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
             <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.btnSecondary:pointerover">
+            <Setter Property="Background" Value="#F1F5F9"/>
         </Style>
 
         <Style Selector="Button.rowBtn">
-            <Setter Property="Height" Value="26"/>
+            <Setter Property="Height" Value="28"/>
             <Setter Property="Padding" Value="10,0"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
         </Style>
 
+        <!-- DataGrid Styles -->
+        <Style Selector="DataGrid">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#F1F5F9"/>
+            <Setter Property="RowHeight" Value="46"/>
+        </Style>
         <Style Selector="DataGridColumnHeader">
-            <Setter Property="Background" Value="#E8F1F8"/>
-            <Setter Property="Foreground" Value="#1C3A5E"/>
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="Foreground" Value="#334155"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Padding" Value="10,9"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="SeparatorBrush" Value="#E2E8F0"/>
+        </Style>
+        <Style Selector="DataGridRow:pointerover">
+            <Setter Property="Background" Value="#F8FAFC"/>
+        </Style>
+        <Style Selector="DataGridRow:selected">
+            <Setter Property="Background" Value="#EFF6FF"/>
         </Style>
     </Window.Styles>
 
-    <Border BorderBrush="#6DA2D9" BorderThickness="2" Margin="6" Background="#F0F5FA" CornerRadius="6">
-        <Grid RowDefinitions="Auto,*,Auto">
+    <Grid RowDefinitions="Auto,*,Auto" Margin="18,14,18,14" RowSpacing="12">
 
-            <!-- HEADER -->
-            <Border Grid.Row="0"
-                    Background="#CBE8FA"
-                    BorderBrush="#90C4E8"
-                    BorderThickness="0,0,0,1"
-                    Padding="14,10"
-                    CornerRadius="4,4,0,0">
-                <Grid ColumnDefinitions="Auto,*,Auto">
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <Border Background="#0B4B82" CornerRadius="6" Width="26" Height="26" VerticalAlignment="Center">
-                            <TextBlock Text="💰" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <!-- 1. HEADER & BREADCRUMB & STATS CARDS -->
+        <Border Grid.Row="0" Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Padding="18,14">
+            <Grid ColumnDefinitions="*,Auto">
+                <!-- Title & Breadcrumb -->
+                <StackPanel Spacing="4" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="Dữ liệu đầu kỳ" Foreground="#64748B" FontSize="12" />
+                        <TextBlock Text="›" Foreground="#94A3B8" FontSize="12" />
+                        <TextBlock Text="Sổ quỹ đầu kỳ" Foreground="#0B4B82" FontWeight="SemiBold" FontSize="12" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2,0,0">
+                        <Border Width="38" Height="38" CornerRadius="10" Background="#EFF6FF" VerticalAlignment="Center">
+                            <TextBlock Text="💰" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <StackPanel VerticalAlignment="Center" Spacing="1">
-                            <TextBlock Text="SỐ DƯ QUỸ ĐẦU KỲ" FontSize="14.5" FontWeight="Bold" Foreground="#0B4B82"/>
+                        <StackPanel VerticalAlignment="Center" Spacing="2">
+                            <TextBlock Text="SỔ QUỸ ĐẦU KỲ" FontSize="19" FontWeight="Bold" Foreground="#0F172A"/>
                             <TextBlock Text="Khai báo số tiền hiện có trong từng quỹ tại thời điểm bắt đầu sử dụng phần mềm"
-                                       FontSize="11" Foreground="#4A7599"/>
+                                       FontSize="12.5" Foreground="#64748B"/>
                         </StackPanel>
                     </StackPanel>
+                </StackPanel>
 
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                        <TextBlock Text="Tổng số dư đầu kỳ:" FontSize="12.5" Foreground="#1C3A5E" VerticalAlignment="Center"/>
-                        <TextBlock Name="TongCongText" Text="0 đ" FontSize="14" FontWeight="Bold" Foreground="#0B6B3A" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
+                <!-- Summary Cards -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <!-- Tiền mặt đầu kỳ -->
+                    <Border Background="#F0FDF4" BorderBrush="#BBF7D0" BorderThickness="1" CornerRadius="8" Padding="14,8">
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="💵 TIỀN MẶT ĐẦU KỲ" FontSize="11" Foreground="#15803D" FontWeight="Bold"/>
+                            <TextBlock Name="TongTienMatText" Text="0 đ" FontSize="15" FontWeight="Bold" Foreground="#166534"/>
+                        </StackPanel>
+                    </Border>
 
-            <!-- BODY -->
-            <Grid Grid.Row="1" ColumnDefinitions="*,380" Margin="14,12">
+                    <!-- Ngân hàng đầu kỳ -->
+                    <Border Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="8" Padding="14,8">
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="💳 NGÂN HÀNG ĐẦU KỲ" FontSize="11" Foreground="#1D4ED8" FontWeight="Bold"/>
+                            <TextBlock Name="TongNganHangText" Text="0 đ" FontSize="15" FontWeight="Bold" Foreground="#1E40AF"/>
+                        </StackPanel>
+                    </Border>
 
-                <!-- LEFT: DANH SÁCH -->
-                <Border Grid.Column="0" Background="White" BorderBrush="#BED4E8" BorderThickness="1" CornerRadius="6">
-                    <Grid RowDefinitions="Auto,*">
-                        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="12,10">
-                            <TextBlock Text="DANH SÁCH SỐ DƯ ĐẦU KỲ" FontSize="12.5" FontWeight="Bold" Foreground="#0B4B82" VerticalAlignment="Center"/>
-                            <TextBox Grid.Column="1" Name="SearchTextBox" Classes="classicInput" Width="220"
-                                     Watermark="🔍 Tìm theo quỹ / nội dung..." TextChanged="SearchTextBox_OnTextChanged"/>
-                        </Grid>
+                    <!-- Tổng cộng -->
+                    <Border Background="#FFFBEB" BorderBrush="#FDE68A" BorderThickness="1" CornerRadius="8" Padding="14,8">
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="💰 TỔNG SỐ DƯ ĐẦU KỲ" FontSize="11" Foreground="#B45309" FontWeight="Bold"/>
+                            <TextBlock Name="TongCongText" Text="0 đ" FontSize="16" FontWeight="Bold" Foreground="#B45309"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
 
-                        <DataGrid Grid.Row="1"
-                                  Name="DanhSachGrid"
+        <!-- 2. BODY: LEFT (TABLE) + RIGHT (FORM) -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,390" ColumnSpacing="12">
+
+            <!-- LEFT: DANH SÁCH SỐ DƯ -->
+            <Border Grid.Column="0" Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Padding="14">
+                <Grid RowDefinitions="Auto,*">
+                    <!-- Left Toolbar -->
+                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,12" ColumnSpacing="10">
+                        <TextBox Grid.Column="0" Name="SearchTextBox" Classes="classicInput"
+                                 Watermark="🔍 Tìm theo tên quỹ hoặc nội dung ghi chú..."
+                                 TextChanged="SearchTextBox_OnTextChanged"/>
+
+                        <Button Grid.Column="1" Classes="btnSecondary" Height="36" Click="LamMoiButton_OnClick"
+                                ToolTip.Tip="Tải lại danh sách">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="🔄" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Text="Làm mới" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Border Grid.Column="2" Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1"
+                                CornerRadius="6" Padding="10,0" Height="36" VerticalAlignment="Center">
+                            <TextBlock Name="SoBanGhiText" Text="0 bản ghi" FontSize="12.5" FontWeight="Bold"
+                                       Foreground="#1D4ED8" VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+
+                    <!-- DataGrid & Empty State -->
+                    <Grid Grid.Row="1">
+                        <DataGrid Name="DanhSachGrid"
+                                  x:DataType="models:SoQuyDauKy"
                                   AutoGenerateColumns="False"
                                   IsReadOnly="True"
-                                  GridLinesVisibility="Horizontal"
+                                  CanUserResizeColumns="True"
+                                  CanUserReorderColumns="False"
                                   HorizontalScrollBarVisibility="Auto"
-                                  VerticalScrollBarVisibility="Auto"
-                                  RowHeight="42">
+                                  VerticalScrollBarVisibility="Auto">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="NGÀY" Binding="{Binding NgayDauKyHienThi}" Width="105"/>
-                                <DataGridTextColumn Header="QUỸ" Binding="{Binding TenQuy}" Width="130"/>
-                                <DataGridTextColumn Header="SỐ TIỀN" Binding="{Binding SoTienHienThi}" Width="150"/>
-                                <DataGridTextColumn Header="NỘI DUNG" Binding="{Binding NoiDung}" Width="*"/>
-                                <DataGridTemplateColumn Header="THAO TÁC" Width="150">
+                                <!-- STT -->
+                                <DataGridTextColumn Header="STT" Binding="{Binding Stt}" Width="55"/>
+
+                                <!-- NGÀY ĐẦU KỲ -->
+                                <DataGridTextColumn Header="NGÀY ĐẦU KỲ" Binding="{Binding NgayDauKyHienThi}" Width="110"/>
+
+                                <!-- QUỸ (BADGE) -->
+                                <DataGridTemplateColumn Header="QUỸ" Width="145">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="models:SoQuyDauKy">
+                                            <Border Background="{Binding QuyBadgeBrush}"
+                                                    BorderBrush="{Binding QuyBadgeBorderBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="10"
+                                                    Padding="8,3"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center"
+                                                    Margin="10,0">
+                                                <TextBlock Text="{Binding TenQuyIcon}"
+                                                           Foreground="{Binding QuyBadgeFgBrush}"
+                                                           FontSize="12"
+                                                           FontWeight="SemiBold"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <!-- SỐ TIỀN ĐẦU KỲ -->
+                                <DataGridTemplateColumn Header="SỐ TIỀN ĐẦU KỲ" Width="160">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="models:SoQuyDauKy">
+                                            <TextBlock Text="{Binding SoTienHienThi}"
+                                                       FontWeight="Bold"
+                                                       Foreground="#0B6B3A"
+                                                       FontSize="13.5"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Right"
+                                                       Margin="0,0,14,0"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <!-- NỘI DUNG -->
+                                <DataGridTextColumn Header="NỘI DUNG / GHI CHÚ" Binding="{Binding NoiDung}" Width="*"/>
+
+                                <!-- THAO TÁC -->
+                                <DataGridTemplateColumn Header="THAO TÁC" Width="145">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate x:DataType="models:SoQuyDauKy">
                                             <StackPanel Orientation="Horizontal" Spacing="6"
                                                         HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <Button Classes="rowBtn" Background="#E3F2ED" Foreground="#0B6B3A"
-                                                        Content="✏ Sửa" Click="SuaRow_OnClick" Tag="{Binding}"/>
-                                                <Button Classes="rowBtn" Background="#FEE2E2" Foreground="#B91C1C"
-                                                        Content="🗑 Xóa" Click="XoaRow_OnClick" Tag="{Binding}"/>
+                                                <Button Classes="rowBtn" Background="#EFF6FF" Foreground="#1D4ED8"
+                                                        BorderBrush="#BFDBFE" BorderThickness="1"
+                                                        Content="✏ Sửa" Click="SuaRow_OnClick" Tag="{Binding}"
+                                                        ToolTip.Tip="Chỉnh sửa số dư này"/>
+                                                <Button Classes="rowBtn" Background="#FEF2F2" Foreground="#DC2626"
+                                                        BorderBrush="#FECACA" BorderThickness="1"
+                                                        Content="🗑 Xóa" Click="XoaRow_OnClick" Tag="{Binding}"
+                                                        IsEnabled="{Binding CanDelete}"
+                                                        ToolTip.Tip="Xóa số dư này"/>
                                             </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
+
+                        <!-- Trạng thái trống (Empty State) -->
+                        <Border Name="EmptyStateBorder" Background="White" IsVisible="False" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <StackPanel Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="💰" FontSize="32" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Chưa có bản ghi số dư quỹ đầu kỳ nào" FontSize="14" FontWeight="Bold" Foreground="#334155" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Khai báo số dư trong biểu mẫu bên phải để bắt đầu." FontSize="12.5" Foreground="#64748B" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
                     </Grid>
-                </Border>
-
-                <!-- RIGHT: FORM -->
-                <Border Grid.Column="1" Background="White" BorderBrush="#BED4E8" BorderThickness="1" CornerRadius="6"
-                        Margin="12,0,0,0" Padding="16,14">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel Spacing="12">
-                            <TextBlock Name="FormTitle" Text="THÊM SỐ DƯ ĐẦU KỲ" FontSize="12.5" FontWeight="Bold" Foreground="#0B4B82"/>
-
-                            <StackPanel Spacing="2">
-                                <TextBlock Classes="fieldLabel" Text="Ngày đầu kỳ *"/>
-                                <CalendarDatePicker Name="NgayDauKyPicker" Classes="classicDatePicker"
-                                                    HorizontalAlignment="Stretch" SelectedDateFormat="Short"/>
-                            </StackPanel>
-
-                            <StackPanel Spacing="2">
-                                <TextBlock Classes="fieldLabel" Text="Quỹ *"/>
-                                <ComboBox Name="QuyComboBox" Classes="classicCombo" HorizontalAlignment="Stretch"
-                                          PlaceholderText="-- Chọn quỹ --">
-                                    <ComboBox.ItemTemplate>
-                                        <DataTemplate x:DataType="models:SoQuyLuaChon">
-                                            <TextBlock Text="{Binding HienThi}" VerticalAlignment="Center"/>
-                                        </DataTemplate>
-                                    </ComboBox.ItemTemplate>
-                                </ComboBox>
-                            </StackPanel>
-
-                            <StackPanel Spacing="2">
-                                <TextBlock Classes="fieldLabel" Text="Số tiền đầu kỳ *"/>
-                                <TextBox Name="SoTienTextBox" Classes="classicInput" Watermark="0"/>
-                            </StackPanel>
-
-                            <StackPanel Spacing="2">
-                                <TextBlock Classes="fieldLabel" Text="Nội dung / Ghi chú"/>
-                                <TextBox Name="NoiDungTextBox" Classes="classicInput" Height="56"
-                                         AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
-                                         Watermark="Số dư quỹ đầu kỳ"/>
-                            </StackPanel>
-
-                            <Border Name="NotificationBorder" Background="#FFF3CD" BorderBrush="#FFEEBA"
-                                    BorderThickness="1" CornerRadius="4" Padding="10,6" IsVisible="False">
-                                <TextBlock Name="NotificationTextBlock" FontSize="12.5" FontWeight="SemiBold"
-                                           Foreground="#856404" TextWrapping="Wrap"/>
-                            </Border>
-
-                            <StackPanel Orientation="Vertical" Spacing="8">
-                                <Button Name="SaveButton" Classes="actionBtn saveBtn" Content="💾  Lưu số dư"
-                                        HorizontalAlignment="Stretch" Click="SaveButton_OnClick"/>
-                                <Button Name="NewButton" Classes="actionBtn cancelBtn" Content="➕  Nhập mới"
-                                        HorizontalAlignment="Stretch" Click="NewButton_OnClick"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </ScrollViewer>
-                </Border>
-            </Grid>
-
-            <!-- FOOTER -->
-            <Border Grid.Row="2" Background="#E6EFF7" BorderBrush="#BAD4EB" BorderThickness="0,1,0,0"
-                    Padding="16,10" CornerRadius="0,0,4,4">
-                <Grid ColumnDefinitions="*,Auto">
-                    <TextBlock Text="* Số dư đầu kỳ được cộng vào tồn quỹ khi xem sổ quỹ."
-                               FontSize="11.5" FontStyle="Italic" Foreground="#536E8A" VerticalAlignment="Center"/>
-                    <Button Grid.Column="1" Classes="actionBtn" Background="#E6EFF7" Foreground="#0B4B82"
-                            BorderBrush="#90C4E8" BorderThickness="1" Content="Đóng" Click="CloseButton_OnClick"/>
                 </Grid>
             </Border>
 
+            <!-- RIGHT: BIỂU MẪU NHẬP LIỆU -->
+            <Border Grid.Column="1" Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Padding="18">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="14">
+                        <!-- Header Form -->
+                        <StackPanel Spacing="3">
+                            <TextBlock Name="FormTitle" Text="THÊM SỐ DƯ ĐẦU KỲ" FontSize="15" FontWeight="Bold" Foreground="#0B4B82"/>
+                            <TextBlock Text="Nhập số tiền thực tế ban đầu tại thời điểm chốt quỹ" FontSize="12" Foreground="#64748B"/>
+                        </StackPanel>
+
+                        <Separator Background="#E2E8F0" Height="1" Margin="0,2,0,4"/>
+
+                        <!-- Ngày đầu kỳ -->
+                        <StackPanel Spacing="2">
+                            <TextBlock Classes="fieldLabel" Text="Ngày đầu kỳ *"/>
+                            <CalendarDatePicker Name="NgayDauKyPicker" Classes="classicDatePicker"
+                                                HorizontalAlignment="Stretch" SelectedDateFormat="Short"/>
+                        </StackPanel>
+
+                        <!-- Quỹ -->
+                        <StackPanel Spacing="2">
+                            <TextBlock Classes="fieldLabel" Text="Quỹ nhận số dư *"/>
+                            <ComboBox Name="QuyComboBox" Classes="classicCombo" HorizontalAlignment="Stretch"
+                                      PlaceholderText="-- Chọn quỹ --">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="models:SoQuyLuaChon">
+                                        <TextBlock Text="{Binding HienThi}" VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Số tiền đầu kỳ -->
+                        <StackPanel Spacing="2">
+                            <TextBlock Classes="fieldLabel" Text="Số tiền đầu kỳ (VNĐ) *"/>
+                            <TextBox Name="SoTienTextBox" Classes="classicInput" Watermark="0"
+                                     FontWeight="SemiBold" FontSize="14" Foreground="#0B6B3A"
+                                     TextChanged="SoTienTextBox_OnTextChanged"/>
+
+                            <!-- Xem trước số tiền -->
+                            <Border Background="#F0FDF4" BorderBrush="#DCFCE7" BorderThickness="1"
+                                    CornerRadius="6" Padding="8,5" Margin="0,4,0,0">
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <TextBlock Text="Xem trước:" FontSize="11.5" Foreground="#15803D"/>
+                                    <TextBlock Name="SoTienPreviewText" Text="0 đ" FontSize="12.5" FontWeight="Bold" Foreground="#15803D"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Nội dung / Ghi chú -->
+                        <StackPanel Spacing="2">
+                            <TextBlock Classes="fieldLabel" Text="Nội dung / Diễn giải"/>
+                            <TextBox Name="NoiDungTextBox" Classes="classicInput" Height="70"
+                                     AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
+                                     Watermark="Nhập ghi chú hoặc lý do ghi nhận số dư đầu kỳ..."/>
+                        </StackPanel>
+
+                        <!-- Thông báo / Alert -->
+                        <Border Name="NotificationBorder" Background="#FFF3CD" BorderBrush="#FFEEBA"
+                                BorderThickness="1" CornerRadius="6" Padding="12,8" IsVisible="False">
+                            <TextBlock Name="NotificationTextBlock" FontSize="12.5" FontWeight="SemiBold"
+                                       Foreground="#856404" TextWrapping="Wrap"/>
+                        </Border>
+
+                        <!-- Action Buttons -->
+                        <StackPanel Orientation="Vertical" Spacing="8" Margin="0,6,0,0">
+                            <Button Name="SaveButton" Classes="btnPrimary" Content="💾  Lưu số dư đầu kỳ"
+                                    HorizontalAlignment="Stretch" Click="SaveButton_OnClick"/>
+                            <Button Name="NewButton" Classes="btnSecondary" Content="➕  Làm mới biểu mẫu"
+                                    HorizontalAlignment="Stretch" Click="NewButton_OnClick"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
         </Grid>
-    </Border>
+
+        <!-- 3. FOOTER -->
+        <Border Grid.Row="2" Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Padding="16,10">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="* Số dư đầu kỳ được bảo vệ theo chi nhánh và tự động kết chuyển vào số dư ban đầu của sổ quỹ."
+                           FontSize="12" FontStyle="Italic" Foreground="#64748B" VerticalAlignment="Center"/>
+                <Button Grid.Column="1" Classes="btnSecondary" Height="34" Click="CloseButton_OnClick" Content="Đóng cửa sổ"/>
+            </Grid>
+        </Border>
+
+    </Grid>
 </Window>

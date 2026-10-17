@@ -373,23 +373,23 @@
                                     <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center" Margin="8,0">
                                         <!-- Xem -->
                                         <Button Classes="rowBtn" Content="👁️ Xem"
-                                                Command="{Binding $parent[Window].DataContext.XemChiTietCommand}"
+                                                Command="{Binding $parent[Window].((vm:DanhSachNhanVienViewModel)DataContext).XemChiTietCommand}"
                                                 CommandParameter="{Binding}"
                                                 Background="#F8FAFC" Foreground="#334155" BorderBrush="#E2E8F0" BorderThickness="1"
                                                 ToolTip.Tip="Xem chi tiết nhân viên"/>
 
                                         <!-- Sửa -->
                                         <Button Classes="rowBtn" Content="✏️ Sửa"
-                                                IsVisible="{Binding $parent[Window].DataContext.CanEdit}"
-                                                Command="{Binding $parent[Window].DataContext.SuaNhanVienCommand}"
+                                                IsVisible="{Binding CanEdit}"
+                                                Command="{Binding $parent[Window].((vm:DanhSachNhanVienViewModel)DataContext).SuaNhanVienCommand}"
                                                 CommandParameter="{Binding}"
                                                 Background="#EFF6FF" Foreground="#1D4ED8" BorderBrush="#BFDBFE" BorderThickness="1"
                                                 ToolTip.Tip="Sửa thông tin nhân viên"/>
 
                                         <!-- Phân quyền -->
                                         <Button Classes="rowBtn" Content="🔑 Quyền"
-                                                IsVisible="{Binding $parent[Window].DataContext.CanAssignPermission}"
-                                                Command="{Binding $parent[Window].DataContext.PhanQuyenCommand}"
+                                                IsVisible="{Binding CanAssignPermission}"
+                                                Command="{Binding $parent[Window].((vm:DanhSachNhanVienViewModel)DataContext).PhanQuyenCommand}"
                                                 CommandParameter="{Binding}"
                                                 Background="#F5F3FF" Foreground="#6D28D9" BorderBrush="#DDD6FE" BorderThickness="1"
                                                 ToolTip.Tip="Phân quyền truy cập"/>
@@ -397,8 +397,8 @@
                                         <!-- Khóa (khi đang hoạt động) -->
                                         <Button Classes="rowBtn" Content="🔒 Khóa"
                                                 IsVisible="{Binding TrangThai}"
-                                                IsEnabled="{Binding $parent[Window].DataContext.CanLock}"
-                                                Command="{Binding $parent[Window].DataContext.KhoaNhanVienCommand}"
+                                                IsEnabled="{Binding CanLock}"
+                                                Command="{Binding $parent[Window].((vm:DanhSachNhanVienViewModel)DataContext).KhoaNhanVienCommand}"
                                                 CommandParameter="{Binding}"
                                                 Background="#FFFBEB" Foreground="#B45309" BorderBrush="#FDE68A" BorderThickness="1"
                                                 ToolTip.Tip="Khóa nhân viên này"/>
@@ -406,16 +406,16 @@
                                         <!-- Mở khóa (khi bị khóa) -->
                                         <Button Classes="rowBtn" Content="🔓 Mở"
                                                 IsVisible="{Binding !TrangThai}"
-                                                IsEnabled="{Binding $parent[Window].DataContext.CanUnlock}"
-                                                Command="{Binding $parent[Window].DataContext.MoKhoaNhanVienCommand}"
+                                                IsEnabled="{Binding CanUnlock}"
+                                                Command="{Binding $parent[Window].((vm:DanhSachNhanVienViewModel)DataContext).MoKhoaNhanVienCommand}"
                                                 CommandParameter="{Binding}"
                                                 Background="#ECFDF5" Foreground="#047857" BorderBrush="#A7F3D0" BorderThickness="1"
                                                 ToolTip.Tip="Mở khóa cho nhân viên"/>
 
                                         <!-- Xóa -->
                                         <Button Classes="rowBtn" Content="🗑️"
-                                                IsVisible="{Binding $parent[Window].DataContext.CanDelete}"
-                                                Command="{Binding $parent[Window].DataContext.XoaNhanVienCommand}"
+                                                IsVisible="{Binding CanDelete}"
+                                                Command="{Binding $parent[Window].((vm:DanhSachNhanVienViewModel)DataContext).XoaNhanVienCommand}"
                                                 CommandParameter="{Binding}"
                                                 Background="#FEF2F2" Foreground="#DC2626" BorderBrush="#FECACA" BorderThickness="1"
                                                 ToolTip.Tip="Xóa nhân viên khỏi hệ thống"/>
@@ -473,14 +473,7 @@
                     </Button>
 
                     <Border Background="#F1F5F9" CornerRadius="6" Padding="12,4" VerticalAlignment="Center">
-                        <TextBlock FontSize="12.5" FontWeight="SemiBold" Foreground="#1E293B">
-                            <TextBlock.Text>
-                                <MultiBinding StringFormat="Trang {0} / {1}">
-                                    <Binding Path="CurrentPage"/>
-                                    <Binding Path="TotalPages"/>
-                                </MultiBinding>
-                            </TextBlock.Text>
-                        </TextBlock>
+                        <TextBlock Text="{Binding PagingPagesText}" FontSize="12.5" FontWeight="SemiBold" Foreground="#1E293B"/>
                     </Border>
 
                     <Button Classes="pageBtn" Command="{Binding TrangSauCommand}" IsEnabled="{Binding CanGoNext}" ToolTip.Tip="Trang sau">

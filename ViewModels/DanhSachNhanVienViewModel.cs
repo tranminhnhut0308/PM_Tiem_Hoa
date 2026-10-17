@@ -9,6 +9,7 @@ using Avalonia.Layout;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ShopHoa.Models;
+using ShopHoa.Helpers;
 using ShopHoa.Services;
 using ShopHoa.Views;
 
@@ -50,6 +51,8 @@ public partial class DanhSachNhanVienViewModel : ObservableObject
     public string PagingSummary => TotalRecords == 0
         ? "0 nhân viên"
         : $"Hiển thị {(CurrentPage - 1) * PageSize + 1} - {Math.Min(CurrentPage * PageSize, TotalRecords)} trong tổng số {TotalRecords} nhân viên";
+
+    public string PagingPagesText => $"Trang {CurrentPage} / {TotalPages}";
 
     // Phân quyền
     public bool CanView => Session.CurrentUser != null && (Quyen.HasPermission(Session.CurrentUser, PermissionKeys.UsersView) || Quyen.IsAdmin(Session.CurrentUser));
@@ -138,6 +141,7 @@ public partial class DanhSachNhanVienViewModel : ObservableObject
     private void UpdatePagingProperties()
     {
         OnPropertyChanged(nameof(TotalPages));
+        OnPropertyChanged(nameof(PagingPagesText));
         OnPropertyChanged(nameof(PagingSummary));
         OnPropertyChanged(nameof(CanGoPrevious));
         OnPropertyChanged(nameof(CanGoNext));

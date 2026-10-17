@@ -39,6 +39,14 @@ public partial class MainWindowViewModel : ObservableObject
     private bool _baoCaoKhachHangLoaded;
     private bool _baoCaoNhaCungCapLoaded;
 
+    // Danh sách phiếu nhập (màn "Nhập hàng" → danh sách)
+    private CancellationTokenSource? _dsPhieuNhapSearchCts;
+    private int _dsPhieuNhapLoadVersion;
+
+    // Cờ yêu cầu mở thẳng màn lập phiếu khi vừa vào menu "Nhập hàng"
+    // (nút "＋ Nhập hàng" ở Hàng hóa / Báo cáo). Mặc định vào menu là xem danh sách.
+    private bool _moFormNhapHangKhiVaoMenu;
+
     /// <summary>
     /// Màn "Tổng quan" có ViewModel riêng. Giữ một instance sống suốt phiên để
     /// giữ nguyên bộ lọc người dùng đang chọn khi chuyển sang màn khác rồi quay lại.
@@ -1492,11 +1500,18 @@ public partial class MainWindowViewModel : ObservableObject
                     break;
 
                 case "Nhập hàng":
-                    // Mỗi lần bấm menu "Nhập hàng" phải khởi tạo phiếu mới:
-                    // sinh mã phiếu, gán nhân viên/ngày/trạng thái và nạp danh sách hàng hóa.
-                    // Thiếu bước này thì PhieuNhapMa rỗng => lưu phiếu sẽ lỗi
-                    // "Duplicate entry '' for key 'uk_pnh_ma'".
-                    await MoPhieuNhapHangAsync();
+                    // Vào menu "Nhập hàng" mặc định hiển thị DANH SÁCH phiếu nhập.
+                    // Riêng khi vào từ nút "＋ Nhập hàng" (Hàng hóa/Báo cáo) thì mở
+                    // thẳng màn lập phiếu mới theo cờ _moFormNhapHangKhiVaoMenu.
+                    if (_moFormNhapHangKhiVaoMenu)
+                    {
+                        _moFormNhapHangKhiVaoMenu = false;
+                        await MoPhieuNhapHangAsync();
+                    }
+                    else
+                    {
+                        await MoDanhSachPhieuNhapAsync();
+                    }
                     break;
 
                 case "Sổ quỹ":
@@ -4744,8 +4759,11 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
 
     public bool CanSavePhieuNhap => !IsSavingPhieuNhap;
 
-    partial void OnIsNhapHangFormVisibleChanged(bool value) =>
+    partial void OnIsNhapHangFormVisibleChanged(bool value)
+    {
         OnPropertyChanged(nameof(IsNhapHangListVisible));
+        OnPropertyChanged(nameof(IsDsPhieuNhapSelected));
+    }
 
     partial void OnPhieuNhapTongTienHangChanged(decimal value)
     {
@@ -4921,16 +4939,366 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             return;
         }
         // Nếu đang đứng ở màn Nhập hàng thì SelectedMenu không đổi,
-        // LoadSelectedSectionAsync sẽ không chạy nên phải tự khởi tạo phiếu mới.
+        // LoadSelectedSectionAsync sẽ không chạy nên phải tự mở form lập phiếu mới.
         if (SelectedMenu == "Nhập hàng")
         {
             await MoPhieuNhapHangAsync();
             return;
         }
 
-        // SelectedMenu đổi => case "Nhập hàng" trong LoadSelectedSectionAsync gọi
-        // MoPhieuNhapHangAsync() giúp, không gọi ở đây để tránh chạy 2 lần.
+        // SelectedMenu đổi sang "Nhập hàng": đánh cờ để case "Nhập hàng" trong
+        // LoadSelectedSectionAsync mở thẳng form lập phiếu thay vì danh sách.
+        _moFormNhapHangKhiVaoMenu = true;
         SelectedMenu = "Nhập hàng";
+    }
+
+    // ============================================================
+    // DANH SÁCH PHIẾU NHẬP HÀNG (màn chính của mục "Nhập hàng")
+    // ============================================================
+
+    public ObservableCollection<PhieuNhapHang> DsPhieuNhap { get; } = new();
+
+    [ObservableProperty] private string dsPhieuNhapSearch = "";
+    [ObservableProperty] private int dsPhieuNhapPage = 1;
+    [ObservableProperty] private int dsPhieuNhapPageSize = 10;
+    [ObservableProperty] private int dsPhieuNhapTotalCount;
+    [ObservableProperty] private bool isLoadingDsPhieuNhap;
+    [ObservableProperty] private string dsPhieuNhapLocThanhToan = "TAT_CA";
+    [ObservableProperty] private string dsPhieuNhapLocTrangThai = "TAT_CA";
+    [ObservableProperty] private DateTime? dsPhieuNhapTuNgay;
+    [ObservableProperty] private DateTime? dsPhieuNhapDenNgay;
+
+    public IReadOnlyList<int> DsPhieuNhapPageSizeOptions { get; } = new[] { 10, 20, 50 };
+
+    public bool IsDsPhieuNhapLocTatCa => DsPhieuNhapLocThanhToan == "TAT_CA";
+    public bool IsDsPhieuNhapLocDaThanhToan => DsPhieuNhapLocThanhToan == "DA_THANH_TOAN";
+    public bool IsDsPhieuNhapLocChuaThanhToan => DsPhieuNhapLocThanhToan == "CHUA_THANH_TOAN";
+    public bool IsDsPhieuNhapLocThanhToanMotPhan => DsPhieuNhapLocThanhToan == "MOT_PHAN";
+
+    public bool IsDsPhieuNhapTrangThaiTatCa => DsPhieuNhapLocTrangThai == "TAT_CA";
+    public bool IsDsPhieuNhapTrangThaiDaNhap => DsPhieuNhapLocTrangThai == "DA_NHAP_HANG";
+    public bool IsDsPhieuNhapTrangThaiLuuTam => DsPhieuNhapLocTrangThai == "LUU_TAM";
+
+    /// <summary>Màn danh sách phiếu nhập đang được hiển thị (khác màn lập phiếu).</summary>
+    public bool IsDsPhieuNhapSelected => SelectedMenu == "Nhập hàng" && IsNhapHangListVisible;
+
+    /// <summary>Mục "Nhập hàng" trên sidebar đang được chọn.</summary>
+    public bool IsNhapHangSelected => SelectedMenu == "Nhập hàng";
+
+    public int DsPhieuNhapTotalPages =>
+        DsPhieuNhapPageSize <= 0
+            ? 0
+            : (int)Math.Ceiling(DsPhieuNhapTotalCount / (double)DsPhieuNhapPageSize);
+
+    /// <summary>Ví dụ: "1 - 10 trong 42 phiếu".</summary>
+    public string DsPhieuNhapRangeText
+    {
+        get
+        {
+            if (DsPhieuNhapTotalCount == 0)
+                return "0 phiếu";
+
+            var from = (DsPhieuNhapPage - 1) * DsPhieuNhapPageSize + 1;
+            var to = Math.Min(from + DsPhieuNhapPageSize - 1, DsPhieuNhapTotalCount);
+
+            return $"{from} - {to} trong {DsPhieuNhapTotalCount} phiếu";
+        }
+    }
+
+    public bool HasDsPhieuNhapData => DsPhieuNhap.Count > 0;
+
+    public bool IsDsPhieuNhapEmpty => DsPhieuNhap.Count == 0;
+
+    public bool CanDsPhieuNhapTrangTruoc => DsPhieuNhapPage > 1;
+
+    public bool CanDsPhieuNhapTrangSau => DsPhieuNhapPage < DsPhieuNhapTotalPages;
+
+    /// <summary>Có bộ lọc nào đang áp dụng (ngoài mặc định) để hiện nút "Xoá lọc".</summary>
+    public bool CoBoLocDsPhieuNhap =>
+        !string.IsNullOrWhiteSpace(DsPhieuNhapSearch)
+        || DsPhieuNhapLocThanhToan != "TAT_CA"
+        || DsPhieuNhapLocTrangThai != "TAT_CA"
+        || DsPhieuNhapTuNgay.HasValue
+        || DsPhieuNhapDenNgay.HasValue;
+
+    [RelayCommand]
+    private async Task LoadDsPhieuNhapAsync()
+    {
+        if (!CanViewPurchases)
+        {
+            DsPhieuNhap.Clear();
+            DsPhieuNhapTotalCount = 0;
+            NotifyDsPhieuNhapListChanged();
+            return;
+        }
+
+        if (IsLoadingDsPhieuNhap)
+            return;
+
+        IsLoadingDsPhieuNhap = true;
+
+        // Version guard: bỏ qua kết quả của lần tải cũ nếu người dùng đã tìm/chuyển trang mới
+        var version = ++_dsPhieuNhapLoadVersion;
+
+        try
+        {
+            var page = DsPhieuNhapPage;
+            var (items, tongSoBanGhi) = await _db.GetPhieuNhapHangPagedAsync(
+                DsPhieuNhapSearch,
+                page,
+                DsPhieuNhapPageSize,
+                DsPhieuNhapLocThanhToan,
+                DsPhieuNhapTuNgay,
+                DsPhieuNhapDenNgay,
+                DsPhieuNhapLocTrangThai);
+
+            if (version != _dsPhieuNhapLoadVersion)
+                return;
+
+            // Trang vượt quá số trang thực tế (ví dụ sau khi tìm kiếm) -> quay về trang cuối
+            var totalPages = DsPhieuNhapPageSize <= 0
+                ? 0
+                : (int)Math.Ceiling(tongSoBanGhi / (double)DsPhieuNhapPageSize);
+
+            if (items.Count == 0 && totalPages > 0 && page > totalPages)
+            {
+                DsPhieuNhapPage = totalPages;
+                IsLoadingDsPhieuNhap = false;
+                await LoadDsPhieuNhapAsync();
+                return;
+            }
+
+            DsPhieuNhap.Clear();
+
+            var stt = (page - 1) * DsPhieuNhapPageSize;
+            foreach (var item in items)
+            {
+                item.SoThuTu = ++stt;
+                DsPhieuNhap.Add(item);
+            }
+
+            DsPhieuNhapTotalCount = tongSoBanGhi;
+            NotifyDsPhieuNhapListChanged();
+
+            StatusMessage = DsPhieuNhap.Count == 0
+                ? "Không có phiếu nhập phù hợp"
+                : $"Đã tải {DsPhieuNhap.Count} phiếu nhập (trang {DsPhieuNhapPage}/{Math.Max(1, totalPages)})";
+        }
+        catch (Exception ex)
+        {
+            if (version == _dsPhieuNhapLoadVersion)
+                StatusMessage = "Không thể tải danh sách phiếu nhập: " + ex.Message;
+
+            SafeLog.WriteError("Loi tai danh sach phieu nhap", ex);
+        }
+        finally
+        {
+            if (version == _dsPhieuNhapLoadVersion)
+                IsLoadingDsPhieuNhap = false;
+        }
+    }
+
+    private void NotifyDsPhieuNhapListChanged()
+    {
+        OnPropertyChanged(nameof(HasDsPhieuNhapData));
+        OnPropertyChanged(nameof(IsDsPhieuNhapEmpty));
+        OnPropertyChanged(nameof(DsPhieuNhapRangeText));
+        OnPropertyChanged(nameof(DsPhieuNhapTotalPages));
+        OnPropertyChanged(nameof(CanDsPhieuNhapTrangTruoc));
+        OnPropertyChanged(nameof(CanDsPhieuNhapTrangSau));
+        OnPropertyChanged(nameof(CoBoLocDsPhieuNhap));
+    }
+
+    [RelayCommand]
+    private async Task TimKiemDsPhieuNhapAsync()
+    {
+        DsPhieuNhapPage = 1;
+        await LoadDsPhieuNhapAsync();
+    }
+
+    [RelayCommand]
+    private async Task XoaBoLocDsPhieuNhapAsync()
+    {
+        DsPhieuNhapSearch = "";
+        DsPhieuNhapLocThanhToan = "TAT_CA";
+        DsPhieuNhapLocTrangThai = "TAT_CA";
+        DsPhieuNhapTuNgay = null;
+        DsPhieuNhapDenNgay = null;
+        DsPhieuNhapPage = 1;
+
+        NotifyDsPhieuNhapListChanged();
+        await LoadDsPhieuNhapAsync();
+    }
+
+    [RelayCommand]
+    private async Task LocDsPhieuNhapThanhToanAsync(string? loai)
+    {
+        var filter = string.IsNullOrWhiteSpace(loai) ? "TAT_CA" : loai;
+        if (DsPhieuNhapLocThanhToan == filter)
+            return;
+
+        DsPhieuNhapLocThanhToan = filter;
+
+        OnPropertyChanged(nameof(IsDsPhieuNhapLocTatCa));
+        OnPropertyChanged(nameof(IsDsPhieuNhapLocDaThanhToan));
+        OnPropertyChanged(nameof(IsDsPhieuNhapLocChuaThanhToan));
+        OnPropertyChanged(nameof(IsDsPhieuNhapLocThanhToanMotPhan));
+        OnPropertyChanged(nameof(CoBoLocDsPhieuNhap));
+
+        DsPhieuNhapPage = 1;
+        await LoadDsPhieuNhapAsync();
+    }
+
+    [RelayCommand]
+    private async Task LocDsPhieuNhapTrangThaiAsync(string? loai)
+    {
+        var filter = string.IsNullOrWhiteSpace(loai) ? "TAT_CA" : loai;
+        if (DsPhieuNhapLocTrangThai == filter)
+            return;
+
+        DsPhieuNhapLocTrangThai = filter;
+
+        OnPropertyChanged(nameof(IsDsPhieuNhapTrangThaiTatCa));
+        OnPropertyChanged(nameof(IsDsPhieuNhapTrangThaiDaNhap));
+        OnPropertyChanged(nameof(IsDsPhieuNhapTrangThaiLuuTam));
+        OnPropertyChanged(nameof(CoBoLocDsPhieuNhap));
+
+        DsPhieuNhapPage = 1;
+        await LoadDsPhieuNhapAsync();
+    }
+
+    /// <summary>Tìm kiếm khi người dùng gõ: chống debounce để không gọi database liên tục.</summary>
+    public void TimKiemDsPhieuNhapTuDong()
+    {
+        _dsPhieuNhapSearchCts?.Cancel();
+        _dsPhieuNhapSearchCts?.Dispose();
+        _dsPhieuNhapSearchCts = new CancellationTokenSource();
+        var token = _dsPhieuNhapSearchCts.Token;
+
+        _ = DebounceDsPhieuNhapAsync(token);
+    }
+
+    private async Task DebounceDsPhieuNhapAsync(CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(350, token);
+
+            if (token.IsCancellationRequested)
+                return;
+
+            await TimKiemDsPhieuNhapAsync();
+        }
+        catch (OperationCanceledException)
+        {
+            // Người dùng gõ tiếp -> huỷ lần tìm kiếm cũ
+        }
+    }
+
+    [RelayCommand]
+    private async Task DsPhieuNhapTrangDauAsync()
+    {
+        DsPhieuNhapPage = 1;
+        await LoadDsPhieuNhapAsync();
+    }
+
+    [RelayCommand]
+    private async Task DsPhieuNhapTrangCuoiAsync()
+    {
+        DsPhieuNhapPage = Math.Max(1, DsPhieuNhapTotalPages);
+        await LoadDsPhieuNhapAsync();
+    }
+
+    [RelayCommand]
+    private async Task DsPhieuNhapTrangTruocAsync()
+    {
+        if (DsPhieuNhapPage > 1)
+            DsPhieuNhapPage--;
+
+        await LoadDsPhieuNhapAsync();
+    }
+
+    [RelayCommand]
+    private async Task DsPhieuNhapTrangSauAsync()
+    {
+        if (DsPhieuNhapPage < DsPhieuNhapTotalPages)
+            DsPhieuNhapPage++;
+
+        await LoadDsPhieuNhapAsync();
+    }
+
+    partial void OnDsPhieuNhapSearchChanged(string value)
+    {
+        OnPropertyChanged(nameof(CoBoLocDsPhieuNhap));
+
+        // Mỗi lần tìm kiếm luôn quay về trang đầu
+        if (DsPhieuNhapPage != 1)
+            DsPhieuNhapPage = 1;
+    }
+
+    partial void OnDsPhieuNhapPageChanged(int value)
+    {
+        OnPropertyChanged(nameof(DsPhieuNhapTotalPages));
+        OnPropertyChanged(nameof(DsPhieuNhapRangeText));
+        OnPropertyChanged(nameof(CanDsPhieuNhapTrangTruoc));
+        OnPropertyChanged(nameof(CanDsPhieuNhapTrangSau));
+    }
+
+    partial void OnDsPhieuNhapPageSizeChanged(int value)
+    {
+        if (value <= 0)
+        {
+            DsPhieuNhapPageSize = 10;
+            return;
+        }
+
+        if (DsPhieuNhapPage != 1)
+            DsPhieuNhapPage = 1;
+
+        _ = LoadDsPhieuNhapAsync();
+    }
+
+    partial void OnDsPhieuNhapTotalCountChanged(int value)
+    {
+        OnPropertyChanged(nameof(DsPhieuNhapTotalPages));
+        OnPropertyChanged(nameof(DsPhieuNhapRangeText));
+    }
+
+    partial void OnDsPhieuNhapTuNgayChanged(DateTime? value)
+    {
+        OnPropertyChanged(nameof(CoBoLocDsPhieuNhap));
+
+        if (DsPhieuNhapPage != 1)
+            DsPhieuNhapPage = 1;
+
+        _ = LoadDsPhieuNhapAsync();
+    }
+
+    partial void OnDsPhieuNhapDenNgayChanged(DateTime? value)
+    {
+        OnPropertyChanged(nameof(CoBoLocDsPhieuNhap));
+
+        if (DsPhieuNhapPage != 1)
+            DsPhieuNhapPage = 1;
+
+        _ = LoadDsPhieuNhapAsync();
+    }
+
+    /// <summary>Nạp danh sách phiếu nhập khi màn danh sách được mở lần đầu.</summary>
+    private async Task MoDanhSachPhieuNhapAsync()
+    {
+        IsNhapHangFormVisible = false;
+
+        if (!CanViewPurchases)
+        {
+            DsPhieuNhap.Clear();
+            DsPhieuNhapTotalCount = 0;
+            NotifyDsPhieuNhapListChanged();
+            StatusMessage = "Bạn không có quyền xem danh sách phiếu nhập.";
+            return;
+        }
+
+        await LoadDsPhieuNhapAsync();
     }
 
     private void BoDangKyPhieuNhapItems()
@@ -5380,18 +5748,24 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             "Thành công – Phiếu nhập đã được lưu.",
             $"Mã phiếu: {maPhieuVuaLuu}\nTổng tiền nhập: {tongTienVuaLuu} đ{ghiChuDvt}");
 
-        // Chỉ reset SAU khi hộp thoại thành công đã đóng, và vẫn giữ nguyên
-        // màn hình "Lập phiếu nhập hàng" (IsNhapHangFormVisible vẫn = true).
-        // MoPhieuNhapHangAsync() xóa hàng hóa, nhà cung cấp, số hóa đơn đầu vào,
-        // ghi chú, chi phí khác, đã thanh toán, ngày nhập về hôm nay,
-        // tính lại tổng tiền và SINH MÃ PHIẾU MỚI từ database.
-        await MoPhieuNhapHangAsync();
+        // Sau khi hộp thoại thành công đóng: quay về DANH SÁCH phiếu nhập và làm
+        // mới để phiếu vừa lưu xuất hiện ngay ở đầu danh sách.
+        // Nếu người dùng chỉ có quyền tạo mà không có quyền xem danh sách thì
+        // giữ nguyên màn lập phiếu và mở phiếu mới như hành vi cũ.
+        if (CanViewPurchases)
+        {
+            IsNhapHangFormVisible = false;
+            DsPhieuNhapPage = 1;
+            await LoadDsPhieuNhapAsync();
+        }
+        else
+        {
+            await MoPhieuNhapHangAsync();
+        }
 
-        // MoPhieuNhapHangAsync() để PhieuNhapMa = "" nếu sinh mã thất bại
-        // (lỗi SQL/kết nối). Không được báo "sẵn sàng" khi mã còn rỗng.
-        StatusMessage = string.IsNullOrWhiteSpace(PhieuNhapMa)
-            ? $"✅ Đã lưu phiếu nhập {maPhieuVuaLuu}. Không tạo được mã phiếu mới, vui lòng mở lại màn hình."
-            : $"✅ Đã lưu phiếu nhập {maPhieuVuaLuu}. Sẵn sàng lập phiếu mới: {PhieuNhapMa}";
+        StatusMessage = soHangCapNhatDvt > 0
+            ? $"✅ Phiếu nhập {maPhieuVuaLuu} đã được lưu ({tongTienVuaLuu} đ) • Đã cập nhật ĐVT cho {soHangCapNhatDvt} mặt hàng."
+            : $"✅ Phiếu nhập {maPhieuVuaLuu} đã được lưu - tổng {tongTienVuaLuu} đ.";
     }
 
     partial void OnTienKhachDuaChanged(decimal value)
@@ -6116,6 +6490,8 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         OnPropertyChanged(nameof(IsNhaCungCapSelected));
         OnPropertyChanged(nameof(IsSoQuySelected));
         OnPropertyChanged(nameof(IsDataSectionSelected));
+        OnPropertyChanged(nameof(IsNhapHangSelected));
+        OnPropertyChanged(nameof(IsDsPhieuNhapSelected));
         OnPropertyChanged(nameof(IsBaoCaoSectionSelected));
         OnPropertyChanged(nameof(IsBaoCaoPhieuNhapSelected));
         OnPropertyChanged(nameof(IsBaoCaoBanHangSelected));

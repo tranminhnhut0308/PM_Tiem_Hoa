@@ -267,6 +267,38 @@ public partial class MainWindow : Window
         viewModel.TimKiemBaoCaoPhieuNhapTuDong();
     }
 
+    private void OnDsPhieuNhapSearchTextChanged(
+        object? sender,
+        TextChangedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel viewModel)
+            return;
+
+        if (sender is not TextBox textBox)
+            return;
+
+        viewModel.DsPhieuNhapSearch = textBox.Text ?? string.Empty;
+
+        viewModel.TimKiemDsPhieuNhapTuDong();
+    }
+
+    private void OnDsPhieuNhapRowDoubleTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel viewModel)
+            return;
+
+        if (sender is not ListBox listBox)
+            return;
+
+        if (listBox.SelectedItem is not PhieuNhapHang item)
+            return;
+
+        if (viewModel.XemChiTietPhieuNhapCommand.CanExecute(item))
+            viewModel.XemChiTietPhieuNhapCommand.Execute(item);
+    }
+
     private void OnBaoCaoPhieuNhapRowDoubleTapped(
     object? sender,
         TappedEventArgs e)

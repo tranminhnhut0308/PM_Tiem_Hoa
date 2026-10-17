@@ -7825,16 +7825,22 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Lấy danh sách phiếu nhập theo trang cho báo cáo.
-    /// Hỗ trợ tìm kiếm theo mã phiếu, mã NCC, tên NCC và lọc theo tình trạng thanh toán.
+    /// Lấy danh sách phiếu nhập theo trang cho báo cáo và màn "Danh sách phiếu nhập".
+    /// Hỗ trợ tìm kiếm theo mã phiếu, mã NCC, tên NCC; lọc theo tình trạng thanh toán,
+    /// khoảng thời gian nhập và trạng thái phiếu (đã nhập / lưu tạm).
     /// Chỉ đọc dữ liệu của trang hiện tại (LIMIT/OFFSET) kèm tổng số bản ghi,
     /// không tải toàn bộ bảng lên giao diện.
+    /// Các tham số lọc ngày/trạng thái là tuỳ chọn để giữ tương thích với các
+    /// nơi gọi cũ (chỉ truyền 4 tham số).
     /// </summary>
     public async Task<(IReadOnlyList<PhieuNhapHang> Items, int TongSoBanGhi)> GetPhieuNhapHangPagedAsync(
         string? search,
         int page,
         int pageSize,
-        string? tinhTrangThanhToan = null)
+        string? tinhTrangThanhToan = null,
+        DateTime? tuNgay = null,
+        DateTime? denNgay = null,
+        string? trangThaiPhieu = null)
     {
         if (page < 1)
             page = 1;
@@ -7857,6 +7863,19 @@ LIMIT 500;
             _ => ""
         };
 
+        var dateCondition = "";
+        if (tuNgay.HasValue)
+            dateCondition += "\n          AND p.thoi_gian_nhap >= @TuNgay";
+        if (denNgay.HasValue)
+            dateCondition += "\n          AND p.thoi_gian_nhap < @DenNgayExclusive";
+
+        var statusCondition = (trangThaiPhieu?.ToUpperInvariant()) switch
+        {
+            "DA_NHAP_HANG" => "\n          AND p.trang_thai = 'DA_NHAP_HANG'",
+            "LUU_TAM" => "\n          AND p.trang_thai = 'LUU_TAM'",
+            _ => ""
+        };
+
         var searchCondition = @"(@Search = ''
             OR p.ma_phieu_nhap LIKE CONCAT('%', @Search, '%')
             OR ncc.ma_nha_cung_cap LIKE CONCAT('%', @Search, '%')
@@ -7868,7 +7887,7 @@ LIMIT 500;
         LEFT JOIN nha_cung_cap ncc
             ON ncc.id = p.nha_cung_cap_id
         WHERE {searchCondition}
-          {paymentCondition};
+          {paymentCondition}{dateCondition}{statusCondition};
         """;
 
         var pageSql = $"""
@@ -7894,7 +7913,7 @@ LIMIT 500;
         LEFT JOIN nguoi_dung nd
             ON nd.id = p.nguoi_nhap_id
         WHERE {searchCondition}
-          {paymentCondition}
+          {paymentCondition}{dateCondition}{statusCondition}
         ORDER BY p.thoi_gian_nhap DESC, p.id DESC
         LIMIT @PageSize OFFSET @Offset;
         """;
@@ -7905,7 +7924,9 @@ LIMIT 500;
         {
             Search = keyword,
             PageSize = pageSize,
-            Offset = offset
+            Offset = offset,
+            TuNgay = tuNgay,
+            DenNgayExclusive = denNgay.HasValue ? denNgay.Value.Date.AddDays(1) : (DateTime?)null
         };
 
         var tongSoBanGhi = Convert.ToInt32(
@@ -12707,7 +12728,11 @@ LIMIT 500;
     /// <summary>
     /// Lấy danh sách các chương trình khuyến mãi trong hệ thống.
     /// </summary>
-    public async Task<IReadOnlyList<ChuongTrinhKhuyenMai>> GetDanhSachKhuyenMaiAsync(string? search = null, string? trangThai = null)
+    public async Task<IReadOnlyList<ChuongTrinhKhuyenMai>> GetDanhSachKhuyenMaiAsync(
+        string? search = null,
+        string? trangThai = null,
+        DateTime? tuNgay = null,
+        DateTime? denNgay = null)
     {
         await using var connection = await OpenAsync();
         await EnsureBangKhuyenMaiAsync(connection);
@@ -12740,26 +12765,95 @@ LIMIT 500;
 
         if (!string.IsNullOrWhiteSpace(trangThai) && trangThai != "TAT_CA")
         {
-            sql += " AND km.trang_thai = @TrangThai";
-            param.Add("TrangThai", trangThai);
+            if (trangThai == "DANG_HOAT_DONG")
+            {
+                sql += " AND km.trang_thai = 'DANG_HOAT_DONG' AND km.ngay_bat_dau <= NOW() AND km.ngay_ket_thuc >= CURDATE()";
+            }
+            else if (trangThai == "CHUA_BAT_DAU")
+            {
+                sql += " AND (km.trang_thai = 'CHUA_BAT_DAU' OR (km.trang_thai = 'DANG_HOAT_DONG' AND km.ngay_bat_dau > NOW()))";
+            }
+            else if (trangThai == "DA_KET_THUC")
+            {
+                sql += " AND (km.trang_thai = 'DA_KET_THUC' OR km.ngay_ket_thuc < CURDATE())";
+            }
+            else if (trangThai == "TAM_NGUNG")
+            {
+                sql += " AND km.trang_thai = 'TAM_NGUNG'";
+            }
+            else
+            {
+                sql += " AND km.trang_thai = @TrangThai";
+                param.Add("TrangThai", trangThai);
+            }
+        }
+
+        if (tuNgay.HasValue)
+        {
+            sql += " AND km.ngay_ket_thuc >= @TuNgay";
+            param.Add("TuNgay", tuNgay.Value.Date);
+        }
+
+        if (denNgay.HasValue)
+        {
+            sql += " AND km.ngay_bat_dau <= @DenNgay";
+            param.Add("DenNgay", denNgay.Value.Date.AddDays(1).AddTicks(-1));
         }
 
         sql += " ORDER BY km.id DESC;";
 
         var list = (await connection.QueryAsync<ChuongTrinhKhuyenMai>(sql, param)).AsList();
 
-        // Nạp số lượng sản phẩm áp dụng cho mỗi chương trình
+        // Nạp số lượng sản phẩm áp dụng và tóm tắt ưu đãi cho mỗi chương trình
         if (list.Count > 0)
         {
             const string countSql = "SELECT chuong_trinh_id AS CtId, COUNT(*) AS SoLuong FROM chi_tiet_khuyen_mai GROUP BY chuong_trinh_id;";
             var counts = (await connection.QueryAsync<(uint CtId, int SoLuong)>(countSql)).ToDictionary(x => x.CtId, x => x.SoLuong);
 
-            foreach (var item in list)
+            const string detailSummarySql = """
+            SELECT 
+                ct.chuong_trinh_id AS CtId,
+                ct.loai_giam_gia AS LoaiGiamGia,
+                ct.gia_tri_giam AS GiaTriGiam,
+                ct.so_luong_tang AS SoLuongTang,
+                ct.ten_san_pham_tang AS TenSanPhamTang
+            FROM chi_tiet_khuyen_mai ct
+            ORDER BY ct.id ASC;
+            """;
+            var details = (await connection.QueryAsync<(uint CtId, string LoaiGiamGia, decimal GiaTriGiam, decimal SoLuongTang, string? TenSanPhamTang)>(detailSummarySql))
+                .GroupBy(x => x.CtId)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            for (int i = 0; i < list.Count; i++)
             {
+                var item = list[i];
+                item.Stt = i + 1;
+
                 if (counts.TryGetValue(item.Id, out var count))
                 {
-                    for (int i = 0; i < count; i++)
+                    for (int c = 0; c < count; c++)
                         item.DanhSachChiTiet.Add(new ChiTietKhuyenMai());
+                }
+
+                if (details.TryGetValue(item.Id, out var det))
+                {
+                    if (det.SoLuongTang > 0)
+                    {
+                        var tenTang = string.IsNullOrWhiteSpace(det.TenSanPhamTang) ? "sản phẩm" : det.TenSanPhamTang;
+                        item.TomTatUuDai = $"Tặng {det.SoLuongTang:0.##} {tenTang} ({item.SoLuongSanPham} mặt hàng)";
+                    }
+                    else if (det.LoaiGiamGia == "PHAN_TRAM")
+                    {
+                        item.TomTatUuDai = det.GiaTriGiam > 0 ? $"Giảm {det.GiaTriGiam:0.##}% ({item.SoLuongSanPham} mặt hàng)" : $"{item.SoLuongSanPham} mặt hàng";
+                    }
+                    else
+                    {
+                        item.TomTatUuDai = det.GiaTriGiam > 0 ? $"Giảm {det.GiaTriGiam:N0} đ ({item.SoLuongSanPham} mặt hàng)" : $"{item.SoLuongSanPham} mặt hàng";
+                    }
+                }
+                else
+                {
+                    item.TomTatUuDai = item.SoLuongSanPham > 0 ? $"{item.SoLuongSanPham} mặt hàng áp dụng" : "Toàn bộ danh mục";
                 }
             }
         }
