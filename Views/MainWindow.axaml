@@ -1353,6 +1353,24 @@
               </Grid>
             </Button>
 
+            <!-- XUẤT HÀNG -->
+            <Button Classes="menu" Classes.active="{Binding IsXuatHangSelected}"
+              Command="{Binding MoGiaoDienXuatHangCommand}">
+              <Grid ColumnDefinitions="24,*">
+                <TextBlock Text="📤" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Xuất hàng" VerticalAlignment="Center" Margin="6,0,0,0" />
+              </Grid>
+            </Button>
+
+            <!-- NHẬP TRẢ LẠI -->
+            <Button Classes="menu" Classes.active="{Binding IsNhapTraLaiSelected}"
+              Command="{Binding MoGiaoDienNhapTraLaiCommand}">
+              <Grid ColumnDefinitions="24,*">
+                <TextBlock Text="↩" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Nhập trả lại" VerticalAlignment="Center" Margin="6,0,0,0" />
+              </Grid>
+            </Button>
+
             <!-- SỔ QUỸ -->
             <Button Classes="menu" Classes.active="{Binding IsSoQuySelected}"
               Command="{Binding ChonMenuCommand}" CommandParameter="Sổ quỹ"
@@ -1659,8 +1677,8 @@
     </Border>
 
     <Grid Grid.Column="1" Margin="34,28">
-  <Grid IsVisible="{Binding IsSalesPanelVisible}" ZIndex="10" Background="#F4F7F6">
-    <Border Background="#FFFFFF" CornerRadius="20" Padding="20" BorderBrush="#D8E5E0"
+  <Grid IsVisible="{Binding IsSalesPanelVisible}" ZIndex="10" Background="#F4F7F6"><views:ThemPhieuBanLeView ZIndex="10" />
+    <Border IsVisible="False" Background="#FFFFFF" CornerRadius="20" Padding="20" BorderBrush="#D8E5E0"
             BorderThickness="1" Margin="20" BoxShadow="0 10 30 #0A1F1B22">
       <Grid RowDefinitions="Auto,*" ColumnDefinitions="1*,1.1*,1*" ColumnSpacing="16" RowSpacing="16">
         
@@ -3257,7 +3275,11 @@
         </TabItem>
 
         <TabItem Header="Hóa đơn">
-          <Grid RowDefinitions="Auto,Auto,*" Margin="0,10,0,0" RowSpacing="14">
+          <Grid>
+            <!-- GIAO DIỆN 26: DANH SÁCH PHIẾU BÁN LẺ -->
+            <views:DanhSachPhieuBanLeView />
+            <!-- Màn hình cũ ẩn đi để bảo toàn các event handler code-behind -->
+            <Grid IsVisible="False" RowDefinitions="Auto,Auto,*" Margin="0,10,0,0" RowSpacing="14">
 
             <!-- 1. TIÊU ĐỀ & LÀM MỚI -->
             <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
@@ -3550,6 +3572,7 @@
             </Border>
 
           </Grid>
+        </Grid>
         </TabItem>
 
         <TabItem Header="Nhà cung cấp">
@@ -4907,7 +4930,11 @@
             </Grid>
 
             <!-- MÀN 2: LẬP PHIẾU NHẬP HÀNG (75% bảng / 25% panel) -->
-            <Grid IsVisible="{Binding IsNhapHangFormVisible}"
+            <!-- MÀN 2: THÊM PHIẾU NHẬP HÀNG (GIAO DIỆN 23 - THEME BLUE ACCENT) -->
+            <views:ThemPhieuNhapHangView IsVisible="{Binding IsNhapHangFormVisible}" />
+
+            <!-- FORM NHẬP HÀNG CŨ (ẨN ĐỂ THAY THẾ BẰNG ThemPhieuNhapHangView) -->
+            <Grid IsVisible="False"
               ColumnDefinitions="3*,*"
               ColumnSpacing="16"
               RowDefinitions="Auto,Auto,*"
@@ -4915,7 +4942,8 @@
 
               <!-- TIÊU ĐỀ -->
               <StackPanel Grid.Row="0" Grid.ColumnSpan="2">
-                <TextBlock Text="Lập phiếu nhập hàng"
+                <TextBlock Text="Thêm phiếu nhập hàng"
+
                   FontSize="26"
                   FontWeight="Bold"
                   Foreground="#163F38" />
@@ -6635,6 +6663,20 @@
           </Grid>
         </TabItem>
       </TabControl>
+
+      <!-- ============================================================ -->
+      <!-- GIAO DIỆN 25: THÊM PHIẾU XUẤT HÀNG                            -->
+      <!-- ============================================================ -->
+      <Grid IsVisible="{Binding IsXuatHangSelected}">
+        <views:ThemPhieuXuatHangView />
+      </Grid>
+
+      <!-- ============================================================ -->
+      <!-- GIAO DIỆN 28: DANH SÁCH PHIẾU NHẬP TRẢ LẠI                   -->
+      <!-- ============================================================ -->
+      <Grid IsVisible="{Binding IsNhapTraLaiSelected}">
+        <views:DanhSachPhieuNhapTraLaiView />
+      </Grid>
 
       <!-- BÁO CÁO CUỐI NGÀY                                           -->
       <!-- Grid ngoài bind vào MainWindowViewModel để đọc được           -->

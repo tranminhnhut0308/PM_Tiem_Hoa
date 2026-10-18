@@ -63,6 +63,8 @@ public partial class ChiTietPhieuNhapHang : ObservableObject
 
     public decimal ThanhTien => Math.Max(0, SoLuong * DonGiaNhap - GiamGia);
 
+    public string ThanhTienText => ThanhTien.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) + " đ";
+
     public ChiTietPhieuNhapHang()
     {
     }
@@ -83,6 +85,7 @@ public partial class ChiTietPhieuNhapHang : ObservableObject
             SoLuong = safeValue;
 
         OnPropertyChanged(nameof(ThanhTien));
+        OnPropertyChanged(nameof(ThanhTienText));
     }
 
     partial void OnDonGiaNhapChanged(decimal value)
@@ -91,6 +94,7 @@ public partial class ChiTietPhieuNhapHang : ObservableObject
             DonGiaNhap = 0;
 
         OnPropertyChanged(nameof(ThanhTien));
+        OnPropertyChanged(nameof(ThanhTienText));
     }
 
     partial void OnGiamGiaChanged(decimal value)
@@ -99,5 +103,6 @@ public partial class ChiTietPhieuNhapHang : ObservableObject
             GiamGia = 0;
 
         OnPropertyChanged(nameof(ThanhTien));
+        OnPropertyChanged(nameof(ThanhTienText));
     }
 }

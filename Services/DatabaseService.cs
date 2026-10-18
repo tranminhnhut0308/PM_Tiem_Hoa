@@ -9,7 +9,7 @@ using ShopHoa.Models;
 
 namespace ShopHoa.Services;
 
-public sealed class DatabaseService
+public sealed partial class DatabaseService
 {
     private readonly DatabaseConfigService _configService;
     private bool? _hasPhieuNhapExtraColumns;

@@ -1491,7 +1491,7 @@ public partial class MainWindowViewModel : ObservableObject
 
                 case "Hóa đơn":
                     // Mỗi lần vào Hóa đơn đều đọc lại database
-                    await LoadInvoicesAsync();
+                    await LoadInvoicesPagedAsync();
                     _invoicesLoaded = true;
                     break;
 
@@ -1512,6 +1512,14 @@ public partial class MainWindowViewModel : ObservableObject
                     {
                         await MoDanhSachPhieuNhapAsync();
                     }
+                    break;
+
+                case "Xuất hàng":
+                    await KhoiTaoPhieuXuatMoiAsync();
+                    break;
+
+                case "Nhập trả lại":
+                    await LoadDsPhieuTraAsync();
                     break;
 
                 case "Sổ quỹ":
@@ -4704,7 +4712,10 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
     [ObservableProperty] private string phieuNhapSoHoaDonDauVao = "";
     [ObservableProperty] private string phieuNhapGhiChu = "";
     [ObservableProperty] private string phieuNhapNhanVien = "";
+    [ObservableProperty] private string phieuNhapKhoNhan = "Kho Tổng (Kho mặc định)";
     [ObservableProperty] private NhaCungCap? selectedPhieuNhapNcc;
+
+    public bool HasSelectedPhieuNhapNcc => SelectedPhieuNhapNcc is not null;
     [ObservableProperty] private DateTime? phieuNhapNgayNhap = DateTime.Now;
     [ObservableProperty] private decimal phieuNhapTongTienHang;
     [ObservableProperty] private decimal phieuNhapChiPhiKhac;
@@ -4721,6 +4732,12 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
     private uint _phieuNhapId;
 
     public string PhieuNhapTongTienHangText => PhieuNhapTongTienHang.ToString("N0", CultureInfo.GetCultureInfo("vi-VN"));
+
+    public decimal PhieuNhapTongChietKhau => PhieuNhapItems.Sum(item => item.GiamGia);
+
+    public string PhieuNhapTongChietKhauText => PhieuNhapTongChietKhau.ToString("N0", CultureInfo.GetCultureInfo("vi-VN"));
+
+    public bool HasPhieuNhapTongChietKhau => PhieuNhapTongChietKhau > 0;
 
     public string PhieuNhapTongTienNhapText => PhieuNhapTongTienNhap.ToString("N0", CultureInfo.GetCultureInfo("vi-VN"));
 
@@ -4771,18 +4788,26 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
 
         OnPropertyChanged(nameof(PhieuNhapTongTienHangText));
         OnPropertyChanged(nameof(PhieuNhapTongTienNhapText));
+        OnPropertyChanged(nameof(PhieuNhapTongChietKhau));
+        OnPropertyChanged(nameof(PhieuNhapTongChietKhauText));
+        OnPropertyChanged(nameof(HasPhieuNhapTongChietKhau));
     }
 
     partial void OnPhieuNhapTongTienNhapChanged(decimal value)
     {
         OnPropertyChanged(nameof(PhieuNhapTongTienNhapText));
+        OnPropertyChanged(nameof(PhieuNhapConNo));
         OnPropertyChanged(nameof(PhieuNhapConNoText));
     }
 
     partial void OnPhieuNhapChiPhiKhacChanged(decimal value) => RecalculatePhieuNhapTotal();
 
+    partial void OnSelectedPhieuNhapNccChanged(NhaCungCap? value) =>
+        OnPropertyChanged(nameof(HasSelectedPhieuNhapNcc));
+
     partial void OnPhieuNhapDaThanhToanChanged(decimal value)
     {
+        OnPropertyChanged(nameof(PhieuNhapConNo));
         OnPropertyChanged(nameof(PhieuNhapConNoText));
         OnPropertyChanged(nameof(PhieuNhapNguonQuyText));
     }
@@ -4806,6 +4831,8 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
     private void RecalculatePhieuNhapTotal()
     {
         PhieuNhapTongTienNhap = PhieuNhapTongTienHang + PhieuNhapChiPhiKhac;
+        OnPropertyChanged(nameof(PhieuNhapConNo));
+        OnPropertyChanged(nameof(PhieuNhapConNoText));
     }
 
     private async Task LoadPhieuNhapDonViTinhOptionsAsync()
@@ -4900,6 +4927,9 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         SelectedPhieuNhapNcc = null;
 
         PhieuNhapNhanVien = Session.CurrentUser?.HoTen ?? "Chưa đăng nhập";
+        PhieuNhapKhoNhan = !string.IsNullOrWhiteSpace(Session.CurrentUser?.TenChiNhanh)
+            ? Session.CurrentUser.TenChiNhanh
+            : "Kho Tổng (Kho mặc định)";
         PhieuNhapNgayNhap = DateTime.Now;
 
         try
@@ -5465,6 +5495,9 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         for (var i = 0; i < PhieuNhapItems.Count; i++)
             PhieuNhapItems[i].Index = i + 1;
 
+        OnPropertyChanged(nameof(PhieuNhapTongChietKhau));
+        OnPropertyChanged(nameof(PhieuNhapTongChietKhauText));
+        OnPropertyChanged(nameof(HasPhieuNhapTongChietKhau));
         OnPropertyChanged(nameof(HasPhieuNhapItems));
         OnPropertyChanged(nameof(IsPhieuNhapEmpty));
     }
@@ -5526,6 +5559,36 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
     }
 
     [RelayCommand]
+    private void XoaChonNhaCungCapNhap()
+    {
+        SelectedPhieuNhapNcc = null;
+        ImportSupplierSearch = "";
+        PhieuNhapSupplierSuggestions.Clear();
+        OnPropertyChanged(nameof(HasPhieuNhapSupplierSuggestions));
+    }
+
+    [RelayCommand]
+    private async Task HuyPhieuNhapAsync()
+    {
+        if (PhieuNhapItems.Count > 0 || SelectedPhieuNhapNcc is not null || !string.IsNullOrWhiteSpace(PhieuNhapGhiChu))
+        {
+            var confirmed = await ShowConfirmationAsync(
+                "Hủy lập phiếu nhập",
+                "Bạn có chắc muốn hủy thao tác thêm phiếu nhập hàng? Dữ liệu đang nhập sẽ không được lưu.",
+                "Đồng ý hủy",
+                "Tiếp tục nhập");
+
+            if (!confirmed)
+                return;
+        }
+
+        BoDangKyPhieuNhapItems();
+        PhieuNhapItems.Clear();
+        IsNhapHangFormVisible = false;
+        StatusMessage = "Đã hủy thao tác thêm phiếu nhập hàng.";
+    }
+
+    [RelayCommand]
     private async Task ThemNhaCungCapNhapNhanhAsync()
     {
         if (!await KiemTraQuyenAsync(PermissionKeys.SuppliersCreate, "Bạn không có quyền thêm nhà cung cấp."))
@@ -5555,7 +5618,12 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
     }
 
     [RelayCommand]
-    private async Task HoanThanhPhieuNhapAsync()
+    private Task HoanThanhPhieuNhapAsync() => ThucHienHoanThanhPhieuNhapAsync(inPhieuSauKhiLuu: false);
+
+    [RelayCommand]
+    private Task LuuVaInPhieuNhapAsync() => ThucHienHoanThanhPhieuNhapAsync(inPhieuSauKhiLuu: true);
+
+    private async Task ThucHienHoanThanhPhieuNhapAsync(bool inPhieuSauKhiLuu)
     {
         if (!await KiemTraQuyenAsync(PermissionKeys.PurchasesCreate, "Bạn không có quyền lưu phiếu nhập hàng."))
         {
@@ -5691,6 +5759,28 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         }
 
         // ---- Đã lưu thành công ----
+
+        if (inPhieuSauKhiLuu && _phieuNhapId > 0)
+        {
+            try
+            {
+                var detail = await _db.GetPhieuNhapHangDetailAsync(_phieuNhapId);
+                if (detail is not null)
+                {
+                    var tiem = await LayThongTinTiemChoHoaDonAsync();
+                    var duongDan = PhieuNhapPrintService.LuuFileTam(detail, tiem);
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = duongDan,
+                        UseShellExecute = true
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                SafeLog.WriteError("Loi in phieu nhap sau khi luu", ex);
+            }
+        }
 
         // Phiếu vừa lưu phải xuất hiện trong "Báo cáo → Báo cáo phiếu nhập hàng"
         // và "Báo cáo → Báo cáo nhà cung cấp" nên đánh dấu cần tải lại thay vì giữ cache cũ.
@@ -6483,6 +6573,9 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         if (value != "Nhập hàng")
             IsPhieuNhapCalendarOpen = false;
 
+        if (value != "Xuất hàng")
+            IsPhieuXuatCalendarOpen = false;
+
         OnPropertyChanged(nameof(IsTongQuanSelected));
         OnPropertyChanged(nameof(IsHangHoaSelected));
         OnPropertyChanged(nameof(IsHoaDonSelected));
@@ -6500,6 +6593,8 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         OnPropertyChanged(nameof(IsBaoCaoNhaCungCapSelected));
         OnPropertyChanged(nameof(IsBaoCaoCuoiNgaySelected));
         OnPropertyChanged(nameof(IsThongTinTiemSelected));
+        OnPropertyChanged(nameof(IsXuatHangSelected));
+        OnPropertyChanged(nameof(IsNhapTraLaiSelected));
 
         CapNhatTrangThaiChonBaoCao();
 
@@ -6578,7 +6673,9 @@ public bool IsSoQuySelected => SelectedMenu == "Sổ quỹ";
 public bool IsDataSectionSelected =>
     !IsTongQuanSelected
     && !IsBaoCaoSectionSelected
-    && !IsThongTinTiemSelected;
+    && !IsThongTinTiemSelected
+    && !IsXuatHangSelected
+    && !IsNhapTraLaiSelected;
 
 /// <summary>Màn "Thông tin tiệm" có vùng nội dung riêng, không nằm trong TabControl dữ liệu.</summary>
 public bool IsThongTinTiemSelected => SelectedMenu == "Thông tin tiệm";
