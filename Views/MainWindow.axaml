@@ -1371,6 +1371,33 @@
               </Grid>
             </Button>
 
+            <!-- XUẤT TRẢ NCC -->
+            <Button Classes="menu" Classes.active="{Binding IsXuatTraNccSelected}"
+              Command="{Binding MoGiaoDienXuatTraNccCommand}">
+              <Grid ColumnDefinitions="24,*">
+                <TextBlock Text="↪" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Xuất trả NCC" VerticalAlignment="Center" Margin="6,0,0,0" />
+              </Grid>
+            </Button>
+
+            <!-- NHẬP KHÁC -->
+            <Button Classes="menu" Classes.active="{Binding IsNhapKhacSelected}"
+              Command="{Binding MoGiaoDienNhapKhacCommand}">
+              <Grid ColumnDefinitions="24,*">
+                <TextBlock Text="🔄" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Nhập khác" VerticalAlignment="Center" Margin="6,0,0,0" />
+              </Grid>
+            </Button>
+
+            <!-- XUẤT NỘI BỘ -->
+            <Button Classes="menu" Classes.active="{Binding IsXuatNoiBoSelected}"
+              Command="{Binding MoGiaoDienXuatNoiBoCommand}">
+              <Grid ColumnDefinitions="24,*">
+                <TextBlock Text="🏢" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Xuất nội bộ" VerticalAlignment="Center" Margin="6,0,0,0" />
+              </Grid>
+            </Button>
+
             <!-- SỔ QUỸ -->
             <Button Classes="menu" Classes.active="{Binding IsSoQuySelected}"
               Command="{Binding ChonMenuCommand}" CommandParameter="Sổ quỹ"
@@ -6675,7 +6702,43 @@
       <!-- GIAO DIỆN 28: DANH SÁCH PHIẾU NHẬP TRẢ LẠI                   -->
       <!-- ============================================================ -->
       <Grid IsVisible="{Binding IsNhapTraLaiSelected}">
-        <views:DanhSachPhieuNhapTraLaiView />
+        <Grid IsVisible="{Binding !IsThemPhieuNhapTraLaiVisible}">
+          <views:DanhSachPhieuNhapTraLaiView />
+        </Grid>
+        <Grid IsVisible="{Binding IsThemPhieuNhapTraLaiVisible}">
+          <views:ThemPhieuNhapTraLaiView />
+        </Grid>
+      </Grid>
+
+      <!-- ============================================================ -->
+      <!-- GIAO DIỆN 30: DANH SÁCH PHIẾU XUẤT HÀNG TRẢ LẠI (TRẢ HÀNG NCC) -->
+      <!-- ============================================================ -->
+      <Grid IsVisible="{Binding IsXuatTraNccSelected}">
+        <Grid IsVisible="{Binding !IsThemPhieuXuatTraVisible}">
+          <views:DanhSachPhieuXuatTraView />
+        </Grid>
+        <Grid IsVisible="{Binding IsThemPhieuXuatTraVisible}">
+          <views:ThemPhieuXuatTraView />
+        </Grid>
+      </Grid>
+
+      <!-- ============================================================ -->
+      <!-- GIAO DIỆN 32: DANH SÁCH PHIẾU NHẬP KHÁC                      -->
+      <!-- ============================================================ -->
+      <Grid IsVisible="{Binding IsNhapKhacSelected}">
+        <Grid IsVisible="{Binding !IsThemPhieuNhapKhacVisible}">
+          <views:DanhSachPhieuNhapKhacView />
+        </Grid>
+        <Grid IsVisible="{Binding IsThemPhieuNhapKhacVisible}">
+          <views:ThemPhieuNhapKhacView />
+        </Grid>
+      </Grid>
+
+      <!-- ============================================================ -->
+      <!-- GIAO DIỆN 34: DANH SÁCH PHIẾU XUẤT HÀNG NỘI BỘ               -->
+      <!-- ============================================================ -->
+      <Grid IsVisible="{Binding IsXuatNoiBoSelected}">
+        <views:DanhSachPhieuXuatNoiBoView />
       </Grid>
 
       <!-- BÁO CÁO CUỐI NGÀY                                           -->

@@ -1522,6 +1522,18 @@ public partial class MainWindowViewModel : ObservableObject
                     await LoadDsPhieuTraAsync();
                     break;
 
+                case "Xuất trả NCC":
+                    await LoadDsPhieuXuatTraAsync();
+                    break;
+
+                case "Nhập khác":
+                    await LoadDsPhieuNhapKhacAsync();
+                    break;
+
+                case "Xuất nội bộ":
+                    await LoadDsPhieuXuatNoiBoAsync();
+                    break;
+
                 case "Sổ quỹ":
                     await TaiSoQuyBoLocOptionsAsync();
                     await TaiLaiSoQuyAsync();
@@ -6595,6 +6607,9 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         OnPropertyChanged(nameof(IsThongTinTiemSelected));
         OnPropertyChanged(nameof(IsXuatHangSelected));
         OnPropertyChanged(nameof(IsNhapTraLaiSelected));
+        OnPropertyChanged(nameof(IsXuatTraNccSelected));
+        OnPropertyChanged(nameof(IsNhapKhacSelected));
+        OnPropertyChanged(nameof(IsXuatNoiBoSelected));
 
         CapNhatTrangThaiChonBaoCao();
 
@@ -6675,7 +6690,10 @@ public bool IsDataSectionSelected =>
     && !IsBaoCaoSectionSelected
     && !IsThongTinTiemSelected
     && !IsXuatHangSelected
-    && !IsNhapTraLaiSelected;
+    && !IsNhapTraLaiSelected
+    && !IsXuatTraNccSelected
+    && !IsNhapKhacSelected
+    && !IsXuatNoiBoSelected;
 
 /// <summary>Màn "Thông tin tiệm" có vùng nội dung riêng, không nằm trong TabControl dữ liệu.</summary>
 public bool IsThongTinTiemSelected => SelectedMenu == "Thông tin tiệm";
