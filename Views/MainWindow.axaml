@@ -1408,6 +1408,16 @@
               </Grid>
             </Button>
 
+            <!-- PHIẾU CHI -->
+            <Button Classes="menu" Classes.active="{Binding IsPhieuChiSelected}"
+              Command="{Binding ChonMenuCommand}" CommandParameter="Phiếu chi"
+              IsVisible="{Binding CanViewCashBook}">
+              <Grid ColumnDefinitions="24,*">
+                <TextBlock Text="💸" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Phiếu chi" VerticalAlignment="Center" Margin="6,0,0,0" />
+              </Grid>
+            </Button>
+
             <!-- DỮ LIỆU ĐẦU KỲ -->
             <Button Classes="menu">
               <Button.Flyout>
@@ -6741,6 +6751,20 @@
         <views:DanhSachPhieuXuatNoiBoView />
       </Grid>
 
+      <!-- ============================================================ -->
+      <!-- GIAO DIỆN 41/42: DANH SÁCH PHIẾU CHI + THÊM PHIẾU CHI         -->
+      <!-- Form thêm bind chung state form Sổ quỹ nên chỉ hiển thị        -->
+      <!-- một trong hai (IsThemPhieuChiVisible).                        -->
+      <!-- ============================================================ -->
+      <Grid IsVisible="{Binding IsPhieuChiSelected}">
+        <Grid IsVisible="{Binding !IsThemPhieuChiVisible}">
+          <views:DanhSachPhieuChiView />
+        </Grid>
+        <Grid IsVisible="{Binding IsThemPhieuChiVisible}">
+          <views:ThemPhieuChiView />
+        </Grid>
+      </Grid>
+
       <!-- BÁO CÁO CUỐI NGÀY                                           -->
       <!-- Grid ngoài bind vào MainWindowViewModel để đọc được           -->
       <!-- IsBaoCaoCuoiNgaySelected; UserControl bên trong nhận        -->
@@ -8082,14 +8106,21 @@
                 CornerRadius="0,0,16,16"
                 Padding="22,16">
 
-                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+                <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10">
 
                   <Button Grid.Column="1"
+                    Classes="sq-btn-secondary"
+                    Content="Sửa phiếu"
+                    IsVisible="{Binding !SoQuyChiTietDangXem.DaHuy}"
+                    IsEnabled="{Binding CanEditCashBook}"
+                    Command="{Binding SuaPhieuHienTaiCommand}" />
+
+                  <Button Grid.Column="2"
                     Classes="sq-btn-secondary"
                     Content="Đóng"
                     Command="{Binding DongChiTietPhieuCommand}" />
 
-                  <Button Grid.Column="2"
+                  <Button Grid.Column="3"
                     Classes="sq-btn-primary"
                     Content="Hủy phiếu"
                     IsVisible="{Binding !SoQuyChiTietDangXem.DaHuy}"
@@ -8098,6 +8129,234 @@
                 </Grid>
               </Border>
             </Grid>
+          </Grid>
+        </Border>
+      </Grid>
+
+      <!-- MODAL SỬA PHIẾU (SỔ QUỸ) -->
+      <!-- Mở từ nút "Sửa phiếu" của màn chi tiết hoặc nút "Sửa" trên dòng    -->
+      <!-- của Danh sách phiếu chi. Sửa được thời gian, số tiền, loại thu/chi, -->
+      <!-- quỹ, người nộp/nhận, nội dung và ghi chú; mã phiếu/người tạo giữ   -->
+      <!-- nguyên; phiếu đã hủy thì không mở được modal này.                  -->
+      <Grid IsVisible="{Binding IsSoQuySuaPhieuVisible}"
+        ZIndex="960"
+        Background="#66101A2B">
+
+        <Border Width="920"
+          MaxHeight="780"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Center"
+          Background="White"
+          BorderBrush="#E2ECE8"
+          BorderThickness="1"
+          CornerRadius="16"
+          BoxShadow="0 18 50 #40000000">
+
+          <Grid RowDefinitions="Auto,*,Auto">
+
+            <!-- TIÊU ĐỀ -->
+            <Border Grid.Row="0"
+              Background="#F7FAF9"
+              BorderBrush="#E2ECE8"
+              BorderThickness="0,0,0,1"
+              CornerRadius="16,16,0,0"
+              Padding="22,16">
+
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <StackPanel Orientation="Horizontal"
+                  Spacing="10"
+                  VerticalAlignment="Center">
+
+                  <Border Background="#FEF3F2"
+                    CornerRadius="12"
+                    Padding="10,5"
+                    VerticalAlignment="Center">
+                    <TextBlock Text="Sửa phiếu"
+                      FontSize="12"
+                      FontWeight="Bold"
+                      Foreground="#B42318" />
+                  </Border>
+
+                  <TextBlock Text="{Binding SoQuyPhieuDangSua.MaPhieu}"
+                    FontSize="19"
+                    FontWeight="Bold"
+                    Foreground="#163F38"
+                    VerticalAlignment="Center" />
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                  Classes="sq-icon"
+                  Content="✕"
+                  Width="32"
+                  Height="32"
+                  FontSize="13"
+                  ToolTip.Tip="Đóng"
+                  Command="{Binding DongSoQuySuaPhieuCommand}" />
+              </Grid>
+            </Border>
+
+            <!-- FORM 2 CỘT -->
+            <ScrollViewer Grid.Row="1"
+              Padding="22,18"
+              HorizontalScrollBarVisibility="Disabled">
+
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="22" RowSpacing="0">
+
+                <StackPanel Grid.Column="0" Spacing="14">
+
+                  <!-- Số tiền (định dạng tiền Việt Nam, chỉ nhận số) -->
+                  <StackPanel Spacing="0">
+                    <TextBlock Classes="sq-label" Text="Số tiền" />
+                    <Border BorderBrush="{Binding SoQuyVienSuaSoTien}"
+                      BorderThickness="1.5"
+                      CornerRadius="8">
+                      <controls:MoneyTextBox Value="{Binding SoQuySuaSoTien, Mode=TwoWay}"
+                        Height="34"
+                        Margin="0" />
+                    </Border>
+                    <TextBlock Classes="sq-error-text"
+                      Text="{Binding SoQuyLoiSuaSoTienText}"
+                      IsVisible="{Binding SoQuyHienLoiSuaSoTien}" />
+                  </StackPanel>
+
+                  <!-- Loại thu/chi -->
+                  <StackPanel Spacing="0">
+                    <TextBlock Classes="sq-label" Text="Loại thu/chi" />
+                    <ComboBox Classes="sq-input"
+                      ItemsSource="{Binding SoQuySuaLoaiOptions}"
+                      SelectedItem="{Binding SoQuySuaLoai, Mode=TwoWay}"
+                      HorizontalAlignment="Stretch">
+                      <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:SoQuyLuaChonItem">
+                          <TextBlock Text="{Binding HienThi}" FontSize="13" />
+                        </DataTemplate>
+                      </ComboBox.ItemTemplate>
+                      <ComboBox.SelectionBoxItemTemplate>
+                        <DataTemplate x:DataType="models:SoQuyLuaChonItem">
+                          <TextBlock Text="{Binding HienThi}" FontSize="13" />
+                        </DataTemplate>
+                      </ComboBox.SelectionBoxItemTemplate>
+                    </ComboBox>
+                  </StackPanel>
+
+                  <!-- Quỹ -->
+                  <StackPanel Spacing="0">
+                    <TextBlock Classes="sq-label" Text="Quỹ" />
+                    <ComboBox Classes="sq-input"
+                      ItemsSource="{Binding SoQuyPhieuQuyOptions}"
+                      SelectedItem="{Binding SoQuySuaQuy, Mode=TwoWay}"
+                      HorizontalAlignment="Stretch">
+                      <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:SoQuyLuaChon">
+                          <TextBlock Text="{Binding HienThi}" FontSize="13" />
+                        </DataTemplate>
+                      </ComboBox.ItemTemplate>
+                      <ComboBox.SelectionBoxItemTemplate>
+                        <DataTemplate x:DataType="models:SoQuyLuaChon">
+                          <TextBlock Text="{Binding HienThi}" FontSize="13" />
+                        </DataTemplate>
+                      </ComboBox.SelectionBoxItemTemplate>
+                    </ComboBox>
+                  </StackPanel>
+
+                  <!-- Nội dung -->
+                  <StackPanel Spacing="0">
+                    <TextBlock Classes="sq-label" Text="Nội dung" />
+                    <TextBox Classes="sq-input"
+                      Text="{Binding SoQuySuaNoiDung, Mode=TwoWay}"
+                      Watermark="Nội dung thu/chi..."
+                      AcceptsReturn="True"
+                      TextWrapping="Wrap"
+                      Height="96"
+                      VerticalContentAlignment="Top"
+                      Padding="12,10" />
+                  </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="14">
+
+                  <!-- Thời gian: ngày + giờ (hợp nhất lại thành SoQuySuaThoiGian) -->
+                  <StackPanel Spacing="0">
+                    <TextBlock Classes="sq-label" Text="Thời gian" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                      <DatePicker Grid.Column="0"
+                        Classes="sq-date"
+                        SelectedDate="{Binding SoQuySuaNgay, Mode=TwoWay}" />
+                      <TimePicker Grid.Column="1"
+                        SelectedTime="{Binding SoQuySuaGio, Mode=TwoWay}"
+                        Height="34"
+                        FontSize="11"
+                        HorizontalAlignment="Stretch" />
+                    </Grid>
+                  </StackPanel>
+
+                  <!-- Người nộp / người nhận -->
+                  <StackPanel Spacing="0">
+                    <TextBlock Classes="sq-label"
+                      Text="{Binding SoQuySuaNhanTenNguoi}" />
+                    <TextBox Classes="sq-input"
+                      Text="{Binding SoQuySuaTenNguoi, Mode=TwoWay}"
+                      Watermark="Nhập tên người nộp/nhận"
+                      HorizontalAlignment="Stretch" />
+                  </StackPanel>
+
+                  <!-- Ghi chú -->
+                  <StackPanel Spacing="0">
+                    <TextBlock Classes="sq-label" Text="Ghi chú" />
+                    <TextBox Classes="sq-input"
+                      Text="{Binding SoQuySuaGhiChu, Mode=TwoWay}"
+                      Watermark="Ghi chú phiếu..."
+                      AcceptsReturn="True"
+                      TextWrapping="Wrap"
+                      Height="96"
+                      VerticalContentAlignment="Top"
+                      Padding="12,10" />
+                  </StackPanel>
+
+                  <!-- Mã phiếu & người tạo: giữ nguyên, không cho sửa -->
+                  <Border Background="#F7FAF9"
+                    BorderBrush="#E2ECE8"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="12,10">
+                    <StackPanel Spacing="4">
+                      <TextBlock Classes="sq-label" Text="Mã phiếu (không sửa được)" Margin="0" />
+                      <TextBlock Text="{Binding SoQuyPhieuDangSua.MaPhieu}"
+                        FontSize="13"
+                        FontWeight="Bold"
+                        Foreground="#087F6E" />
+                      <TextBlock Text="{Binding SoQuyPhieuDangSua.NguoiTao}"
+                        FontSize="12"
+                        Foreground="#667085" />
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
+              </Grid>
+            </ScrollViewer>
+
+            <!-- FOOTER -->
+            <Border Grid.Row="2"
+              Background="#F7FAF9"
+              BorderBrush="#E2ECE8"
+              BorderThickness="0,1,0,0"
+              CornerRadius="0,0,16,16"
+              Padding="22,16">
+
+              <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+
+                <Button Grid.Column="1"
+                  Classes="sq-btn-secondary"
+                  Content="Đóng"
+                  Command="{Binding DongSoQuySuaPhieuCommand}" />
+
+                <Button Grid.Column="2"
+                  Classes="sq-btn-primary"
+                  Content="Lưu thay đổi"
+                  IsEnabled="{Binding !IsSoQuySuaPhieuDangLuu}"
+                  IsVisible="{Binding CanEditCashBook}"
+                  Command="{Binding LuuSoQuySuaPhieuCommand}" />
+              </Grid>
+            </Border>
           </Grid>
         </Border>
       </Grid>

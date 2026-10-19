@@ -276,7 +276,7 @@
         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
           <!-- Tất cả -->
           <Button Classes="filterChip"
-            Classes.active="{Binding IsInvoiceFilterAll}"
+            Classes.active="{Binding IsInvoiceTrangThaiAll}"
             Command="{Binding LocHoaDonTheoTrangThaiCommand}"
             CommandParameter="ALL">
             <TextBlock Text="Tất cả" />
@@ -284,7 +284,7 @@
 
           <!-- Đã thanh toán -->
           <Button Classes="filterChip"
-            Classes.active="{Binding IsInvoiceFilterPaid}"
+            Classes.active="{Binding IsInvoiceTrangThaiPaid}"
             Command="{Binding LocHoaDonTheoTrangThaiCommand}"
             CommandParameter="PAID">
             <TextBlock Text="Đã thanh toán" />
@@ -292,7 +292,7 @@
 
           <!-- Còn nợ -->
           <Button Classes="filterChip"
-            Classes.active="{Binding IsInvoiceFilterDebt}"
+            Classes.active="{Binding IsInvoiceTrangThaiDebt}"
             Command="{Binding LocHoaDonTheoTrangThaiCommand}"
             CommandParameter="DEBT">
             <TextBlock Text="Còn nợ" />
@@ -300,7 +300,7 @@
 
           <!-- Đã hủy -->
           <Button Classes="filterChip"
-            Classes.active="{Binding IsInvoiceFilterCancel}"
+            Classes.active="{Binding IsInvoiceTrangThaiCancel}"
             Command="{Binding LocHoaDonTheoTrangThaiCommand}"
             CommandParameter="CANCEL">
             <TextBlock Text="Đã hủy" />

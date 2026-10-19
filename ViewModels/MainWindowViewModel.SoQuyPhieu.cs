@@ -436,6 +436,8 @@ public sealed partial class MainWindowViewModel
 
             await TaiLaiSoQuyAsync();
 
+            await TaiLaiDsPhieuChiNeuDangMoAsync();
+
             _ = LamMoiTongQuanNeuDangMoAsync();
         }
         catch (Exception ex)
@@ -714,17 +716,22 @@ public sealed partial class MainWindowViewModel
     [RelayCommand]
     private Task LuuVaInSoQuyPhieuChiAsync() => LuuSoQuyPhieuAsync(false);
 
-    private async Task LuuSoQuyPhieuAsync(bool laPhieuThu)
+    /// <summary>
+    /// Lưu một phiếu từ form tạo. Trả về true khi phiếu đã được ghi vào database
+    /// thành công; màn hình Danh sách phiếu chi cần biết kết quả này để tự đóng
+    /// form của mình sau khi Lưu (xem <c>MainWindowViewModel.PhieuChi.cs</c>).
+    /// </summary>
+    private async Task<bool> LuuSoQuyPhieuAsync(bool laPhieuThu)
     {
         if (!await KiemTraQuyenAsync(
                 laPhieuThu ? PermissionKeys.CashBookCreateReceipt : PermissionKeys.CashBookCreatePayment,
                 laPhieuThu ? "Bạn không có quyền tạo phiếu thu." : "Bạn không có quyền tạo phiếu chi."))
         {
-            return;
+            return false;
         }
 
         if (IsSoQuyPhieuDangLuu)
-            return;
+            return false;
 
         // Bấm Lưu là bắt đầu hiển thị lỗi cho toàn bộ form.
         SoQuyFormDaCham = true;
@@ -736,7 +743,7 @@ public sealed partial class MainWindowViewModel
             StatusMessage = $"Không thể lưu phiếu {tenLoai}: "
                             + "vui lòng kiểm tra các ô được đánh dấu đỏ.";
 
-            return;
+            return false;
         }
 
         var idNhomChiPhi = uint.TryParse(
@@ -767,8 +774,13 @@ public sealed partial class MainWindowViewModel
 
             await TaiLaiSoQuyAsync();
 
+            // Màn Danh sách phiếu chi đang mở (nếu có) phải thấy ngay phiếu mới.
+            await TaiLaiDsPhieuChiNeuDangMoAsync();
+
             // Nạp lại Tổng quan nếu đang mở để số liệu thu/chi cập nhật kịp.
             _ = LamMoiTongQuanNeuDangMoAsync();
+
+            return true;
         }
         catch (Exception ex)
         {
@@ -779,6 +791,8 @@ public sealed partial class MainWindowViewModel
 
             StatusMessage = $"Không thể lưu phiếu {tenLoai}. Vui lòng thử lại. "
                             + $"(Chi tiết: {ex.Message})";
+
+            return false;
         }
         finally
         {
@@ -882,6 +896,9 @@ public sealed partial class MainWindowViewModel
 
             await TaiLaiSoQuyAsync();
 
+            // Màn Danh sách phiếu chi đang mở (nếu có) cũng phải thấy trạng thái mới.
+            await TaiLaiDsPhieuChiNeuDangMoAsync();
+
             // Mở lại chi tiết để người dùng thấy trạng thái vừa đổi.
             var gd = SoQuyGiaoDichs.FirstOrDefault(x => x.MaPhieu == maPhieu);
 
@@ -933,6 +950,17 @@ public sealed partial class MainWindowViewModel
 
     [ObservableProperty] private decimal soQuySuaSoTien;
     [ObservableProperty] private DateTime soQuySuaThoiGian = DateTime.Now;
+
+    /// <summary>
+    /// Hai ô gương của <see cref="SoQuySuaThoiGian"/> cho modal sửa phiếu:
+    /// Avalonia 11 không có DateTimeInput nên DatePicker nhận DateTimeOffset?
+    /// và TimePicker nhận TimeSpan?. Hai giá trị này luôn được hợp nhất lại
+    /// thành SoQuySuaThoiGian (kiểu DATETIME mà database đang lưu).
+    /// </summary>
+    [ObservableProperty] private DateTimeOffset? soQuySuaNgay;
+
+    [ObservableProperty] private TimeSpan? soQuySuaGio;
+
     [ObservableProperty] private string soQuySuaTenNguoi = "";
     [ObservableProperty] private string soQuySuaNoiDung = "";
     [ObservableProperty] private string soQuySuaGhiChu = "";
@@ -964,10 +992,43 @@ public sealed partial class MainWindowViewModel
 
         SoQuySuaLoiSoTien = value <= 0;
         RaiseSoQuyValidation();
+
+        // Ô số tiền của form sửa có viền/lời lẽ riêng nên phải báo thêm.
+        OnPropertyChanged(nameof(SoQuyHienLoiSuaSoTien));
+        OnPropertyChanged(nameof(SoQuyVienSuaSoTien));
     }
 
     partial void OnIsSoQuySuaPhieuVisibleChanged(bool value) =>
         OnPropertyChanged(nameof(SoQuySuaNhanTenNguoi));
+
+    /// <summary>Thời gian sửa đổi thì đẩy ngay xuống 2 ô ngày / giờ.</summary>
+    partial void OnSoQuySuaThoiGianChanged(DateTime value)
+    {
+        SoQuySuaNgay = value == default ? null : new DateTimeOffset(value.Date);
+        SoQuySuaGio = value == default ? null : value.TimeOfDay;
+        OnPropertyChanged(nameof(SoQuySuaThoiGianText));
+    }
+
+    partial void OnSoQuySuaNgayChanged(DateTimeOffset? value) => DongBoThoiGianSuaTuHop();
+
+    partial void OnSoQuySuaGioChanged(TimeSpan? value) => DongBoThoiGianSuaTuHop();
+
+    /// <summary>
+    /// Người dùng sửa ngày hoặc giờ trên form thì gộp lại thành một mốc thời
+    /// gian duy nhất. Chưa chọn ngày thì bỏ qua (không có gì để ghép).
+    /// </summary>
+    private void DongBoThoiGianSuaTuHop()
+    {
+        if (SoQuySuaNgay is null)
+            return;
+
+        var moi = SoQuySuaNgay.Value.Date + (SoQuySuaGio ?? TimeSpan.Zero);
+
+        if (SoQuySuaThoiGian == moi)
+            return;
+
+        SoQuySuaThoiGian = moi;
+    }
 
     [RelayCommand]
     private async Task SuaPhieuHienTaiAsync()
@@ -978,6 +1039,19 @@ public sealed partial class MainWindowViewModel
         }
         var chiTiet = SoQuyChiTietDangXem;
 
+        if (chiTiet is null || chiTiet.DaHuy)
+            return;
+
+        await MoFormSuaTuChiTietAsync(chiTiet);
+    }
+
+    /// <summary>
+    /// Nạp một phiếu vào form sửa rồi mở modal sửa. Dùng chung cho nút "Sửa" ở
+    /// màn chi tiết (Sổ quỹ) và nút "Sửa" trên dòng của Danh sách phiếu chi,
+    /// nên hai nơi đi đúng một luồng: nạp danh mục, điền dữ liệu, đóng chi tiết.
+    /// </summary>
+    private async Task MoFormSuaTuChiTietAsync(SoQuyChiTiet chiTiet)
+    {
         if (chiTiet is null || chiTiet.DaHuy)
             return;
 
@@ -1055,6 +1129,8 @@ public sealed partial class MainWindowViewModel
             StatusMessage = $"Đã sửa phiếu {maPhieu} thành công.";
 
             await TaiLaiSoQuyAsync();
+
+            await TaiLaiDsPhieuChiNeuDangMoAsync();
 
             _ = LamMoiTongQuanNeuDangMoAsync();
 

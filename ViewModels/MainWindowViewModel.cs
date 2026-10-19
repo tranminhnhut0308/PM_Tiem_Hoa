@@ -1539,6 +1539,10 @@ public partial class MainWindowViewModel : ObservableObject
                     await TaiLaiSoQuyAsync();
                     break;
 
+                case "Phiếu chi":
+                    await LoadDsPhieuChiAsync();
+                    break;
+
                 case "Thông tin tiệm":
                     // Luôn đọc lại database mỗi lần mở màn để thấy đúng thông
                     // tin đã lưu, kể cả khi vừa sửa xong ở phiên trước.
@@ -6610,6 +6614,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         OnPropertyChanged(nameof(IsXuatTraNccSelected));
         OnPropertyChanged(nameof(IsNhapKhacSelected));
         OnPropertyChanged(nameof(IsXuatNoiBoSelected));
+        OnPropertyChanged(nameof(IsPhieuChiSelected));
 
         CapNhatTrangThaiChonBaoCao();
 
@@ -6693,7 +6698,8 @@ public bool IsDataSectionSelected =>
     && !IsNhapTraLaiSelected
     && !IsXuatTraNccSelected
     && !IsNhapKhacSelected
-    && !IsXuatNoiBoSelected;
+    && !IsXuatNoiBoSelected
+    && !IsPhieuChiSelected;
 
 /// <summary>Màn "Thông tin tiệm" có vùng nội dung riêng, không nằm trong TabControl dữ liệu.</summary>
 public bool IsThongTinTiemSelected => SelectedMenu == "Thông tin tiệm";
