@@ -1,0 +1,127 @@
+<Window xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  x:Class="ShopHoa.Views.DoiMatKhauWindow"
+  Title="Đổi mật khẩu"
+  Width="480"
+  Height="520"
+  MinWidth="420"
+  MinHeight="460"
+  WindowStartupLocation="CenterOwner"
+  CanResize="False"
+  Background="#F8FAF9">
+
+  <Window.Styles>
+    <Style Selector="TextBox.input">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="Foreground" Value="#172033" />
+      <Setter Property="BorderBrush" Value="#D0D5DD" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Padding" Value="12,10" />
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="TextBox.input:focus">
+      <Setter Property="BorderBrush" Value="#087F6E" />
+      <Setter Property="BorderThickness" Value="1.5" />
+    </Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="Auto,*,Auto">
+    <!-- HEADER -->
+    <Border Grid.Row="0" Background="#087F6E" Padding="20,16">
+      <Grid ColumnDefinitions="Auto,*">
+        <Border Width="42" Height="42" CornerRadius="21" Background="#149481" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <TextBlock Text="🔒" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+        <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+          <TextBlock Text="ĐỔI MẬT KHẨU" FontSize="16" FontWeight="Bold" Foreground="White" />
+          <TextBlock Text="Cập nhật mật khẩu tài khoản đang đăng nhập" FontSize="12" Foreground="#C8EDE6" Margin="0,2,0,0" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- FORM BODY -->
+    <ScrollViewer Grid.Row="1" Padding="24,20">
+      <StackPanel Spacing="16">
+        <!-- USER INFO CARD -->
+        <Border Background="White" BorderBrush="#E2ECE8" BorderThickness="1" CornerRadius="10" Padding="14,10">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <Border Width="34" Height="34" CornerRadius="17" Background="#E6F4F1" VerticalAlignment="Center">
+              <TextBlock x:Name="TxtInitials" Text="U" FontWeight="Bold" Foreground="#087F6E" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+              <TextBlock x:Name="TxtFullName" Text="Tài khoản" FontWeight="SemiBold" FontSize="13" Foreground="#163F38" />
+              <TextBlock x:Name="TxtUsername" Text="username" FontSize="11" Foreground="#61736E" />
+            </StackPanel>
+            <Border Grid.Column="2" Background="#F2F4F7" CornerRadius="6" Padding="8,3" VerticalAlignment="Center">
+              <TextBlock x:Name="TxtRole" Text="Vai trò" FontSize="11" Foreground="#475467" />
+            </Border>
+          </Grid>
+        </Border>
+
+        <!-- MẬT KHẨU HIỆN TẠI -->
+        <StackPanel Spacing="6">
+          <TextBlock Text="Mật khẩu hiện tại *" FontSize="12" FontWeight="SemiBold" Foreground="#344B45" />
+          <TextBox x:Name="TxtCurrentPassword"
+            Classes="input"
+            PasswordChar="●"
+            Watermark="Nhập mật khẩu đang sử dụng..." />
+        </StackPanel>
+
+        <!-- MẬT KHẨU MỚI -->
+        <StackPanel Spacing="6">
+          <TextBlock Text="Mật khẩu mới *" FontSize="12" FontWeight="SemiBold" Foreground="#344B45" />
+          <TextBox x:Name="TxtNewPassword"
+            Classes="input"
+            PasswordChar="●"
+            Watermark="Tối thiểu 6 ký tự..." />
+        </StackPanel>
+
+        <!-- XÁC NHẬN MẬT KHẨU MỚI -->
+        <StackPanel Spacing="6">
+          <TextBlock Text="Xác nhận mật khẩu mới *" FontSize="12" FontWeight="SemiBold" Foreground="#344B45" />
+          <TextBox x:Name="TxtConfirmPassword"
+            Classes="input"
+            PasswordChar="●"
+            Watermark="Nhập lại mật khẩu mới..." />
+        </StackPanel>
+
+        <!-- THÔNG BÁO LỖI / THÀNH CÔNG -->
+        <Border x:Name="AlertBox" IsVisible="False" CornerRadius="8" Padding="12,8">
+          <TextBlock x:Name="TxtAlertMessage" FontSize="12" TextWrapping="Wrap" />
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- FOOTER -->
+    <Border Grid.Row="2" Background="White" BorderBrush="#E2ECE8" BorderThickness="0,1,0,0" Padding="20,14">
+      <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+        <Button Grid.Column="1"
+          Content="Đóng"
+          Background="White"
+          BorderBrush="#D0D5DD"
+          BorderThickness="1"
+          CornerRadius="8"
+          Padding="16,8"
+          FontSize="13"
+          Foreground="#344B45"
+          Cursor="Hand"
+          Click="OnCancelClick" />
+
+        <Button x:Name="BtnSave"
+          Grid.Column="2"
+          Content="Lưu thay đổi"
+          Background="#087F6E"
+          BorderBrush="#087F6E"
+          BorderThickness="1"
+          CornerRadius="8"
+          Padding="20,8"
+          FontSize="13"
+          FontWeight="SemiBold"
+          Foreground="White"
+          Cursor="Hand"
+          Click="OnSaveClick" />
+      </Grid>
+    </Border>
+  </Grid>
+</Window>

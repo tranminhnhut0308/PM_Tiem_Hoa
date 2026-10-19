@@ -38,6 +38,13 @@ public partial class MainWindowViewModel : ObservableObject
     private bool _baoCaoHangHoaLoaded;
     private bool _baoCaoKhachHangLoaded;
     private bool _baoCaoNhaCungCapLoaded;
+    private bool _baoCaoKetQuaKinhDoanhLoaded;
+    private bool _baoCaoVonKinhDoanhLoaded;
+    private bool _baoCaoTongHopNhapXuatLoaded;
+    private bool _baoCaoChiTietNhapXuatLoaded;
+    private bool _baoCaoTongHopKhuyenMaiLoaded;
+    private bool _baoCaoTinhHinhNhapXuatLoaded;
+    private bool _baoCaoChiTietCongNoTheoPhieuLoaded;
 
     // Danh sách phiếu nhập (màn "Nhập hàng" → danh sách)
     private CancellationTokenSource? _dsPhieuNhapSearchCts;
@@ -69,6 +76,27 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Màn "Báo cáo nhà cung cấp" cũng giữ một instance sống suốt phiên.</summary>
     public BaoCaoNhaCungCapViewModel BaoCaoNhaCungCap { get; }
 
+    /// <summary>Màn "Báo cáo kết quả kinh doanh" (P&amp;L) giữ một instance suốt phiên.</summary>
+    public BaoCaoKetQuaKinhDoanhViewModel BaoCaoKetQuaKinhDoanh { get; }
+
+    /// <summary>Màn "Báo cáo vốn kinh doanh" giữ một instance suốt phiên.</summary>
+    public BaoCaoVonKinhDoanhViewModel BaoCaoVonKinhDoanh { get; }
+
+    /// <summary>Màn "Báo cáo tổng hợp nhập xuất" (Giao diện 63) giữ một instance suốt phiên.</summary>
+    public BaoCaoTongHopNhapXuatViewModel BaoCaoTongHopNhapXuat { get; }
+
+    /// <summary>Màn "Báo cáo chi tiết nhập/xuất" (Giao diện 64 - Thẻ kho) giữ một instance suốt phiên.</summary>
+    public BaoCaoChiTietNhapXuatViewModel BaoCaoChiTietNhapXuat { get; }
+
+    /// <summary>Màn "Báo cáo tổng hợp khuyến mãi" (Giao diện 67) giữ một instance suốt phiên.</summary>
+    public BaoCaoTongHopKhuyenMaiViewModel BaoCaoTongHopKhuyenMai { get; }
+
+    /// <summary>Màn "Báo cáo tổng hợp tình hình nhập/xuất" (Giao diện 68) giữ một instance suốt phiên.</summary>
+    public BaoCaoTinhHinhNhapXuatViewModel BaoCaoTinhHinhNhapXuat { get; }
+
+    /// <summary>Màn "Báo cáo chi tiết công nợ theo phiếu" (Giao diện 71) giữ một instance suốt phiên.</summary>
+    public BaoCaoChiTietCongNoTheoPhieuViewModel BaoCaoChiTietCongNoTheoPhieu { get; }
+
     public BaoCaoCuoiNgayViewModel BaoCaoCuoiNgay { get; }
 
     /// <summary>
@@ -88,6 +116,51 @@ public partial class MainWindowViewModel : ObservableObject
         BaoCaoHangHoa = new BaoCaoHangHoaViewModel(_db);
         BaoCaoKhachHang = new BaoCaoKhachHangViewModel(_db);
         BaoCaoNhaCungCap = new BaoCaoNhaCungCapViewModel(_db);
+        BaoCaoKetQuaKinhDoanh = new BaoCaoKetQuaKinhDoanhViewModel(_db);
+        BaoCaoVonKinhDoanh = new BaoCaoVonKinhDoanhViewModel(_db);
+        BaoCaoTongHopNhapXuat = new BaoCaoTongHopNhapXuatViewModel(_db);
+        BaoCaoChiTietNhapXuat = new BaoCaoChiTietNhapXuatViewModel(_db);
+        BaoCaoTongHopKhuyenMai = new BaoCaoTongHopKhuyenMaiViewModel(_db);
+        BaoCaoTinhHinhNhapXuat = new BaoCaoTinhHinhNhapXuatViewModel(_db);
+        BaoCaoChiTietCongNoTheoPhieu = new BaoCaoChiTietCongNoTheoPhieuViewModel(_db)
+        {
+            LayCuaSoChinh = () => OwnerWindow,
+            CapNhatTrangThai = message => StatusMessage = message,
+            MoChiTietHoaDonAsync = async maHd =>
+            {
+                if (OwnerWindow is null) return;
+                try
+                {
+                    var invoices = await _db.GetInvoicesAsync();
+                    var inv = invoices.FirstOrDefault(i => string.Equals(i.MaHoaDon, maHd, StringComparison.OrdinalIgnoreCase));
+                    if (inv != null && XemHoaDonCommand.CanExecute(inv))
+                    {
+                        await XemHoaDonCommand.ExecuteAsync(inv);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    SafeLog.WriteError("Loi mo chi tiet hoa don tu bao cao", ex);
+                }
+            },
+            MoChiTietPhieuNhapAsync = async maPn =>
+            {
+                if (OwnerWindow is null) return;
+                try
+                {
+                    var (items, _) = await _db.GetPhieuNhapHangPagedAsync(maPn, 1, 10, "TAT_CA");
+                    var pn = items.FirstOrDefault(i => string.Equals(i.MaPhieuNhap, maPn, StringComparison.OrdinalIgnoreCase));
+                    if (pn != null && XemChiTietPhieuNhapCommand.CanExecute(pn))
+                    {
+                        await XemChiTietPhieuNhapCommand.ExecuteAsync(pn);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    SafeLog.WriteError("Loi mo chi tiet phieu nhap tu bao cao", ex);
+                }
+            }
+        };
 
         if (!CanViewDashboard)
         {
@@ -2491,6 +2564,207 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Giao diện 47 – Thêm nợ thanh toán (Nợ thanh toán → Thêm).
+    /// Ghi nhận thanh toán công nợ cho khách hàng hoặc nhà cung cấp.
+    /// </summary>
+    [RelayCommand]
+    private async Task ThemNoThanhToanAsync(object? parameter = null)
+    {
+        if (OwnerWindow is null)
+            return;
+
+        string? loaiDoiTac = parameter as string;
+        if (string.IsNullOrWhiteSpace(loaiDoiTac))
+        {
+            if (IsNhaCungCapSelected)
+                loaiDoiTac = "NHA_CUNG_CAP";
+            else if (IsKhachHangSelected)
+                loaiDoiTac = "KHACH_HANG";
+        }
+
+        if (loaiDoiTac == "KHACH_HANG")
+        {
+            if (!await KiemTraQuyenAsync(PermissionKeys.CustomersDebtPay, "Bạn không có quyền thu công nợ khách hàng."))
+                return;
+        }
+        else if (loaiDoiTac == "NHA_CUNG_CAP")
+        {
+            if (!await KiemTraQuyenAsync(PermissionKeys.SuppliersDebtPay, "Bạn không có quyền thanh toán công nợ nhà cung cấp."))
+                return;
+        }
+
+        try
+        {
+            var window = new ThemNoThanhToanWindow(loaiDoiTac);
+            var result = await window.ShowDialog<bool>(OwnerWindow);
+            if (result)
+            {
+                if (IsKhachHangSelected)
+                {
+                    _customersLoaded = false;
+                    await LoadCustomersAsync();
+                }
+                else if (IsNhaCungCapSelected)
+                {
+                    await LoadSupplierPageAsync();
+                }
+
+                if (IsSoQuySelected)
+                {
+                    await TaiLaiSoQuyAsync();
+                }
+
+                _ = LamMoiTongQuanNeuDangMoAsync();
+
+                StatusMessage = "Đã ghi nhận thanh toán công nợ thành công!";
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi khi thêm nợ thanh toán: " + ex.Message;
+            SafeLog.WriteError("Lỗi ThemNoThanhToanAsync", ex);
+        }
+    }
+
+    /// <summary>
+    /// Giao diện 48 – Tìm kiếm và tra cứu công nợ.
+    /// Cho phép tra cứu, đối chiếu và theo dõi công nợ phải thu và phải trả.
+    /// </summary>
+    [RelayCommand]
+    private async Task TimKiemCongNoAsync(string? loaiDoiTac = null)
+    {
+        if (OwnerWindow is null)
+            return;
+
+        if (!Quyen.HasPermission(Session.CurrentUser, PermissionKeys.CustomersDebtView) &&
+            !Quyen.HasPermission(Session.CurrentUser, PermissionKeys.SuppliersDebtView) &&
+            !Quyen.IsAdmin(Session.CurrentUser))
+        {
+            await ShowMessageAsync("Thông báo", "Bạn không có quyền xem dữ liệu công nợ.");
+            return;
+        }
+
+        try
+        {
+            if (string.IsNullOrWhiteSpace(loaiDoiTac))
+            {
+                if (IsNhaCungCapSelected)
+                    loaiDoiTac = "NHA_CUNG_CAP";
+                else if (IsKhachHangSelected)
+                    loaiDoiTac = "KHACH_HANG";
+            }
+
+            var window = new TimKiemCongNoWindow(loaiDoiTac);
+            await window.ShowDialog<bool>(OwnerWindow);
+
+            if (IsKhachHangSelected)
+            {
+                await LoadCustomersAsync();
+            }
+            else if (IsNhaCungCapSelected)
+            {
+                await LoadSupplierPageAsync();
+            }
+            if (IsSoQuySelected)
+            {
+                await TaiLaiSoQuyAsync();
+            }
+            _ = LamMoiTongQuanNeuDangMoAsync();
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi khi mở tra cứu công nợ: " + ex.Message;
+            SafeLog.WriteError("Lỗi TimKiemCongNoAsync", ex);
+        }
+    }
+
+    /// <summary>
+    /// Giao diện 53 – Kết chuyển hàng hóa (Số liệu → Kết chuyển hàng hóa).
+    /// Chuyển số lượng tồn và giá trị hàng hóa sang kỳ kế toán tiếp theo.
+    /// </summary>
+    [RelayCommand]
+    private async Task KetChuyenHangHoaAsync()
+    {
+        if (OwnerWindow is null)
+            return;
+
+        if (!Quyen.HasPermission(Session.CurrentUser, PermissionKeys.ProductsAdjustStock) &&
+            !Quyen.HasPermission(Session.CurrentUser, PermissionKeys.SettingsEdit) &&
+            !Quyen.IsAdmin(Session.CurrentUser))
+        {
+            await ShowMessageAsync("Thông báo", "Bạn không có quyền thực hiện kết chuyển hàng hóa.");
+            return;
+        }
+
+        try
+        {
+            var window = new KetChuyenHangHoaWindow();
+            var result = await window.ShowDialog<bool>(OwnerWindow);
+            if (result || window.DaKetChuyenThanhCong)
+            {
+                await RefreshProductsAsync();
+                _ = LamMoiTongQuanNeuDangMoAsync();
+                StatusMessage = "Đã kết chuyển hàng hóa sang kỳ mới thành công!";
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi khi kết chuyển hàng hóa: " + ex.Message;
+            SafeLog.WriteError("Lỗi KetChuyenHangHoaAsync", ex);
+        }
+    }
+
+    /// <summary>
+    /// Giao diện 54 – Kết chuyển công nợ (Số liệu → Kết chuyển công nợ).
+    /// Chuyển số dư công nợ phải thu và phải trả sang kỳ kế toán tiếp theo.
+    /// </summary>
+    [RelayCommand]
+    private async Task KetChuyenCongNoAsync()
+    {
+        if (OwnerWindow is null)
+            return;
+
+        if (!Quyen.HasPermission(Session.CurrentUser, PermissionKeys.CustomersDebtView) &&
+            !Quyen.HasPermission(Session.CurrentUser, PermissionKeys.SuppliersDebtView) &&
+            !Quyen.HasPermission(Session.CurrentUser, PermissionKeys.SettingsEdit) &&
+            !Quyen.IsAdmin(Session.CurrentUser))
+        {
+            await ShowMessageAsync("Thông báo", "Bạn không có quyền thực hiện kết chuyển công nợ.");
+            return;
+        }
+
+        try
+        {
+            var window = new KetChuyenCongNoWindow();
+            var result = await window.ShowDialog<bool>(OwnerWindow);
+            if (result || window.DaKetChuyenThanhCong)
+            {
+                if (IsKhachHangSelected)
+                {
+                    await LoadCustomersAsync();
+                }
+                else if (IsNhaCungCapSelected)
+                {
+                    await LoadSupplierPageAsync();
+                }
+
+                if (IsSoQuySelected)
+                {
+                    await TaiLaiSoQuyAsync();
+                }
+
+                _ = LamMoiTongQuanNeuDangMoAsync();
+                StatusMessage = "Đã kết chuyển công nợ sang kỳ mới thành công!";
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi khi kết chuyển công nợ: " + ex.Message;
+            SafeLog.WriteError("Lỗi KetChuyenCongNoAsync", ex);
+        }
+    }
+
+    /// <summary>
     /// Mở cửa sổ "Sổ quỹ → Số dư quỹ đầu kỳ".
     /// Cho phép khai báo số tiền hiện có trong từng quỹ tại thời điểm bắt đầu dùng phần mềm.
     /// </summary>
@@ -4203,6 +4477,55 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             TieuDe = "Báo cáo phiếu nhập hàng",
             BieuTuong = "📥",
             PermissionKey = PermissionKeys.ReportsPurchases
+        },
+        new BaoCaoMenuItem
+        {
+            Key = "ket-qua-kinh-doanh",
+            TieuDe = "Kết quả kinh doanh",
+            BieuTuong = "📈",
+            PermissionKey = PermissionKeys.ReportsProfit
+        },
+        new BaoCaoMenuItem
+        {
+            Key = "von-kinh-doanh",
+            TieuDe = "Báo cáo vốn kinh doanh",
+            BieuTuong = "💰",
+            PermissionKey = PermissionKeys.ReportsView
+        },
+        new BaoCaoMenuItem
+        {
+            Key = "tong-hop-nhap-xuat",
+            TieuDe = "Tổng hợp nhập xuất",
+            BieuTuong = "📊",
+            PermissionKey = PermissionKeys.ReportsProducts
+        },
+        new BaoCaoMenuItem
+        {
+            Key = "chi-tiet-nhap-xuat",
+            TieuDe = "Chi tiết nhập xuất (Thẻ kho)",
+            BieuTuong = "📋",
+            PermissionKey = PermissionKeys.ReportsProducts
+        },
+        new BaoCaoMenuItem
+        {
+            Key = "tong-hop-khuyen-mai",
+            TieuDe = "Tổng hợp khuyến mãi",
+            BieuTuong = "🎁",
+            PermissionKey = PermissionKeys.ReportsSales
+        },
+        new BaoCaoMenuItem
+        {
+            Key = "tinh-hinh-nhap-xuat",
+            TieuDe = "Tình hình nhập/xuất",
+            BieuTuong = "🔄",
+            PermissionKey = PermissionKeys.ReportsProducts
+        },
+        new BaoCaoMenuItem
+        {
+            Key = "chi-tiet-cong-no-theo-phieu",
+            TieuDe = "Chi tiết công nợ theo phiếu",
+            BieuTuong = "📑",
+            PermissionKey = PermissionKeys.ReportsView
         }
     };
 
@@ -4298,6 +4621,27 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
     public bool IsBaoCaoCuoiNgaySelected =>
         SelectedMenu == "Báo cáo" && SelectedReportKey == "cuoi-ngay";
 
+    public bool IsBaoCaoKetQuaKinhDoanhSelected =>
+        IsBaoCaoSectionSelected && SelectedReportKey == "ket-qua-kinh-doanh";
+
+    public bool IsBaoCaoVonKinhDoanhSelected =>
+        IsBaoCaoSectionSelected && SelectedReportKey == "von-kinh-doanh";
+
+    public bool IsBaoCaoTongHopNhapXuatSelected =>
+        IsBaoCaoSectionSelected && SelectedReportKey == "tong-hop-nhap-xuat";
+
+    public bool IsBaoCaoChiTietNhapXuatSelected =>
+        IsBaoCaoSectionSelected && SelectedReportKey == "chi-tiet-nhap-xuat";
+
+    public bool IsBaoCaoTongHopKhuyenMaiSelected =>
+        IsBaoCaoSectionSelected && SelectedReportKey == "tong-hop-khuyen-mai";
+
+    public bool IsBaoCaoTinhHinhNhapXuatSelected =>
+        IsBaoCaoSectionSelected && SelectedReportKey == "tinh-hinh-nhap-xuat";
+
+    public bool IsBaoCaoChiTietCongNoTheoPhieuSelected =>
+        IsBaoCaoSectionSelected && SelectedReportKey == "chi-tiet-cong-no-theo-phieu";
+
     partial void OnBaoCaoPhieuNhapSearchChanged(string value)
     {
         // Mỗi lần tìm kiếm luôn quay về trang đầu
@@ -4345,6 +4689,13 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         OnPropertyChanged(nameof(IsBaoCaoKhachHangSelected));
         OnPropertyChanged(nameof(IsBaoCaoNhaCungCapSelected));
         OnPropertyChanged(nameof(IsBaoCaoCuoiNgaySelected));
+        OnPropertyChanged(nameof(IsBaoCaoKetQuaKinhDoanhSelected));
+        OnPropertyChanged(nameof(IsBaoCaoVonKinhDoanhSelected));
+        OnPropertyChanged(nameof(IsBaoCaoTongHopNhapXuatSelected));
+        OnPropertyChanged(nameof(IsBaoCaoChiTietNhapXuatSelected));
+        OnPropertyChanged(nameof(IsBaoCaoTongHopKhuyenMaiSelected));
+        OnPropertyChanged(nameof(IsBaoCaoTinhHinhNhapXuatSelected));
+        OnPropertyChanged(nameof(IsBaoCaoChiTietCongNoTheoPhieuSelected));
     }
 
     [RelayCommand]
@@ -4361,6 +4712,13 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             "khach-hang" => PermissionKeys.ReportsSales,
             "phieu-nhap-hang" => PermissionKeys.ReportsPurchases,
             "nha-cung-cap" => PermissionKeys.ReportsPurchases,
+            "ket-qua-kinh-doanh" => PermissionKeys.ReportsProfit,
+            "von-kinh-doanh" => PermissionKeys.ReportsView,
+            "tong-hop-nhap-xuat" => PermissionKeys.ReportsProducts,
+            "chi-tiet-nhap-xuat" => PermissionKeys.ReportsProducts,
+            "tong-hop-khuyen-mai" => PermissionKeys.ReportsSales,
+            "tinh-hinh-nhap-xuat" => PermissionKeys.ReportsProducts,
+            "chi-tiet-cong-no-theo-phieu" => PermissionKeys.ReportsView,
             _ => PermissionKeys.ReportsView
         };
 
@@ -4427,6 +4785,55 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         {
             _baoCaoCuoiNgayLoaded = true;
             _ = BaoCaoCuoiNgay.TaiDuLieuAsync();
+        }
+
+        // Báo cáo kết quả kinh doanh tải lần đầu khi mở
+        if (item.Key == "ket-qua-kinh-doanh" && !_baoCaoKetQuaKinhDoanhLoaded)
+        {
+            _baoCaoKetQuaKinhDoanhLoaded = true;
+            _ = BaoCaoKetQuaKinhDoanh.TaiLaiAsync();
+        }
+
+        // Báo cáo vốn kinh doanh tải lần đầu khi mở
+        if (item.Key == "von-kinh-doanh" && !_baoCaoVonKinhDoanhLoaded)
+        {
+            _baoCaoVonKinhDoanhLoaded = true;
+            _ = BaoCaoVonKinhDoanh.TaiLaiAsync();
+        }
+
+        // Báo cáo tổng hợp nhập xuất tải lần đầu khi mở
+        if (item.Key == "tong-hop-nhap-xuat" && !_baoCaoTongHopNhapXuatLoaded)
+        {
+            _baoCaoTongHopNhapXuatLoaded = true;
+            _ = BaoCaoTongHopNhapXuat.TaiLaiAsync();
+        }
+
+        // Báo cáo chi tiết nhập xuất tải lần đầu khi mở
+        if (item.Key == "chi-tiet-nhap-xuat" && !_baoCaoChiTietNhapXuatLoaded)
+        {
+            _baoCaoChiTietNhapXuatLoaded = true;
+            _ = BaoCaoChiTietNhapXuat.TaiLaiAsync();
+        }
+
+        // Báo cáo tổng hợp khuyến mãi tải lần đầu khi mở
+        if (item.Key == "tong-hop-khuyen-mai" && !_baoCaoTongHopKhuyenMaiLoaded)
+        {
+            _baoCaoTongHopKhuyenMaiLoaded = true;
+            _ = BaoCaoTongHopKhuyenMai.TaiLaiAsync();
+        }
+
+        // Báo cáo tình hình nhập xuất tải lần đầu khi mở
+        if (item.Key == "tinh-hinh-nhap-xuat" && !_baoCaoTinhHinhNhapXuatLoaded)
+        {
+            _baoCaoTinhHinhNhapXuatLoaded = true;
+            _ = BaoCaoTinhHinhNhapXuat.TaiLaiAsync();
+        }
+
+        // Báo cáo chi tiết công nợ theo phiếu tải lần đầu khi mở
+        if (item.Key == "chi-tiet-cong-no-theo-phieu" && !_baoCaoChiTietCongNoTheoPhieuLoaded)
+        {
+            _baoCaoChiTietCongNoTheoPhieuLoaded = true;
+            _ = BaoCaoChiTietCongNoTheoPhieu.TaiLaiAsync();
         }
 
         StatusMessage = item.TieuDe;
@@ -6608,6 +7015,13 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         OnPropertyChanged(nameof(IsBaoCaoKhachHangSelected));
         OnPropertyChanged(nameof(IsBaoCaoNhaCungCapSelected));
         OnPropertyChanged(nameof(IsBaoCaoCuoiNgaySelected));
+        OnPropertyChanged(nameof(IsBaoCaoKetQuaKinhDoanhSelected));
+        OnPropertyChanged(nameof(IsBaoCaoVonKinhDoanhSelected));
+        OnPropertyChanged(nameof(IsBaoCaoTongHopNhapXuatSelected));
+        OnPropertyChanged(nameof(IsBaoCaoChiTietNhapXuatSelected));
+        OnPropertyChanged(nameof(IsBaoCaoTongHopKhuyenMaiSelected));
+        OnPropertyChanged(nameof(IsBaoCaoTinhHinhNhapXuatSelected));
+        OnPropertyChanged(nameof(IsBaoCaoChiTietCongNoTheoPhieuSelected));
         OnPropertyChanged(nameof(IsThongTinTiemSelected));
         OnPropertyChanged(nameof(IsXuatHangSelected));
         OnPropertyChanged(nameof(IsNhapTraLaiSelected));
@@ -6851,6 +7265,34 @@ private async Task<bool> KiemTraQuyenAsync(string key, string message)
     await ShowMessageAsync("Thông báo", message);
     return false;
 }
+
+    // ============================================================
+    // HỆ THỐNG VÀ TRỢ GIÚP (GIAO DIỆN 72)
+    // ============================================================
+
+    [RelayCommand]
+    public async Task MoDoiMatKhauAsync()
+    {
+        if (OwnerWindow is null) return;
+        var win = new DoiMatKhauWindow(OwnerWindow);
+        await win.ShowDialog(OwnerWindow);
+    }
+
+    [RelayCommand]
+    public async Task MoTroGiupAsync()
+    {
+        if (OwnerWindow is null) return;
+        var win = new TroGiupWindow(OwnerWindow);
+        await win.ShowDialog(OwnerWindow);
+    }
+
+    [RelayCommand]
+    public async Task MoCaiDatDatabaseAsync()
+    {
+        if (OwnerWindow is null) return;
+        var win = new DatabaseSettingsWindow(OwnerWindow);
+        await win.ShowDialog(OwnerWindow);
+    }
 
 }
 

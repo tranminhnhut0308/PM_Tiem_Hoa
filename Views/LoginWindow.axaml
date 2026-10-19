@@ -4,7 +4,7 @@
         x:Class="ShopHoa.Views.LoginWindow"
         x:DataType="vm:LoginViewModel"
 
-        Title="VỰA HOA NHÀ HUY - Đăng nhập"
+        Title="TIỆM HOA NHÀ HUY - Đăng nhập"
         Icon="/Assets/logo.ico"
 
         Width="1050"
@@ -700,7 +700,7 @@
 
     <!-- THÔNG TIN -->
 
-    <TextBlock Text="VỰA HOA NHÀ HUY  •  Quản lý cửa hàng"
+    <TextBlock Text="TIỆM HOA NHÀ HUY  •  Quản lý cửa hàng"
                Foreground="#98A2B3"
                FontSize="10"
                VerticalAlignment="Center"/>

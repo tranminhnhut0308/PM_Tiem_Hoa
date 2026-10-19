@@ -1,10 +1,10 @@
 @echo off
-title Vua Hoa Nha Huy - Tao Link Web 4G Cho Dien Thoai
+title Tiem Hoa Nha Huy - Tao Link Web 4G Cho Dien Thoai
 color 0B
 cd /d "%~dp0"
 
 echo ====================================================================
-echo        VUA HOA NHA HUY - TAO LINK XEM BAO CAO CHO DIEN THOAI
+echo        TIEM HOA NHA HUY - TAO LINK XEM BAO CAO CHO DIEN THOAI
 echo ====================================================================
 echo.
 

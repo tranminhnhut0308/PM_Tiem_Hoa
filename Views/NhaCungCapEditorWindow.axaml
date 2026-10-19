@@ -248,7 +248,7 @@
                                 <TextBox Name="TenNhaCungCapBox"
                                          Classes="modernInput"
                                          Text="{Binding Supplier.TenNhaCungCap, Mode=TwoWay}"
-                                         Watermark="Nhập tên nhà vườn, vựa hoa hoặc đại lý (bắt buộc)"/>
+                                         Watermark="Nhập tên nhà vườn, tiệm hoa hoặc đại lý (bắt buộc)"/>
                             </StackPanel>
                         </Grid>
 
@@ -448,7 +448,7 @@
                                 <TextBlock Classes="inputLabel" Text="Nhãn hiệu / Thương hiệu"/>
                                 <TextBox Classes="modernInput"
                                          Text="{Binding Supplier.NhanHieu, Mode=TwoWay}"
-                                         Watermark="Nhãn hiệu hoặc vựa hoa đại diện"/>
+                                         Watermark="Nhãn hiệu hoặc tiệm hoa đại diện"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,18,0,0">

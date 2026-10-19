@@ -56,6 +56,18 @@ public partial class MainWindow : Window
                 catch { }
             });
         };
+
+        this.KeyDown += (_, e) =>
+        {
+            if (e.Key == Key.F1)
+            {
+                if (DataContext is MainWindowViewModel vm)
+                {
+                    _ = vm.MoTroGiupCommand.ExecuteAsync(null);
+                    e.Handled = true;
+                }
+            }
+        };
     }
     private async void OpenSettingsButton_OnClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
