@@ -2,6 +2,8 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MySqlConnector;
+using ShopHoa.Helpers;
 using ShopHoa.Models;
 using ShopHoa.Services;
 
@@ -41,6 +43,12 @@ public partial class DatabaseSettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool dangXuLy;
 
+    /// <summary>
+    /// Các SSL Mode hợp lệ để hiển thị trong combobox. Bind theo chuỗi (không
+    /// dùng ComboBoxItem) nên giá trị đưa vào cấu hình luôn là tên enum hợp lệ.
+    /// </summary>
+    public IReadOnlyList<string> SslModeOptions { get; } = DatabaseConfigService.SslModeHopLe;
+
     public DatabaseSettingsViewModel()
     {
         _configService = new DatabaseConfigService();
@@ -57,7 +65,7 @@ public partial class DatabaseSettingsViewModel : ObservableObject
         Database = config.Database;
         User = config.User;
         Password = config.Password;
-        SslMode = config.SslMode;
+        SslMode = DatabaseConfigService.ChuanHoaSslMode(config.SslMode);
         ApiUrl = config.ApiUrl;
         UseApi = config.UseApi;
     }
@@ -76,9 +84,7 @@ public partial class DatabaseSettingsViewModel : ObservableObject
             Database = Database.Trim(),
             User = User.Trim(),
             Password = Password,
-            SslMode = string.IsNullOrWhiteSpace(SslMode)
-                ? "None"
-                : SslMode,
+            SslMode = DatabaseConfigService.ChuanHoaSslMode(SslMode),
             ApiUrl = string.IsNullOrWhiteSpace(ApiUrl) ? "http://localhost:5000" : ApiUrl.Trim(),
             UseApi = UseApi
         };
@@ -106,28 +112,63 @@ public partial class DatabaseSettingsViewModel : ObservableObject
         {
             var config = GetConfig();
 
-            _configService.Save(config);
-
+            // Kiểm tra bằng đúng thông số đang hiển thị trên form (chưa lưu).
+            // Chỉ lưu cấu hình khi kết nối thành công để giá trị sai không ghi đè
+            // lên cấu hình đang chạy được.
             var databaseService = new DatabaseService();
 
-            var success =
-                await databaseService.TestConnectionAsync();
+            await databaseService.TestConnectionAsync(config);
 
-            if (success)
-            {
-                ThongBao =
-                    "✓ Kết nối database thành công!";
-            }
+            _configService.Save(config);
+
+            ThongBao =
+                "✓ Kết nối database thành công! Đã lưu cấu hình.";
+        }
+        catch (MySqlException ex)
+        {
+            ThongBao =
+                "✕ " + MoTaLoiKetNoi(ex);
         }
         catch (Exception ex)
         {
             ThongBao =
-                "✕ Kết nối thất bại: " + ex.Message;
+                "✕ Kết nối thất bại: " + SafeLog.Redact(ex.Message);
         }
         finally
         {
             DangXuLy = false;
         }
+    }
+
+    /// <summary>
+    /// Dịch lỗi MySqlException thành thông báo người dùng hiểu được, phân biệt
+    /// sai tài khoản/mật khẩu, thiếu quyền, sai database, lỗi mạng và lỗi SSL.
+    /// Không đưa mật khẩu vào thông báo.
+    /// </summary>
+    private string MoTaLoiKetNoi(MySqlException ex)
+    {
+        var message = ex.Message ?? "";
+
+        if (message.Contains("SSL", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Lỗi SSL: máy chủ database không hỗ trợ SSL theo cấu hình đang chọn. "
+                 + "Hãy thử chọn SSL Mode = None hoặc Preferred.";
+        }
+
+        return ex.ErrorCode switch
+        {
+            MySqlErrorCode.AccessDenied =>
+                "Sai tài khoản hoặc mật khẩu database.",
+            MySqlErrorCode.DatabaseAccessDenied =>
+                $"Tài khoản '{User.Trim()}' không có quyền truy cập database '{Database.Trim()}'.",
+            MySqlErrorCode.UnknownDatabase =>
+                $"Không tìm thấy database '{Database.Trim()}' trên máy chủ.",
+            MySqlErrorCode.UnableToConnectToHost =>
+                $"Không kết nối được tới máy chủ '{Server.Trim()}:{Port}'. "
+                + "Kiểm tra địa chỉ, cổng và mạng.",
+            _ =>
+                "Kết nối thất bại: " + SafeLog.Redact(message)
+        };
     }
 
     [RelayCommand]

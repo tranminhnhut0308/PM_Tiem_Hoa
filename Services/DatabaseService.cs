@@ -47,7 +47,15 @@ public sealed partial class DatabaseService
 
     private string GetConnectionString()
     {
-        var config = _configService.Load();
+        return GetConnectionString(_configService.Load());
+    }
+
+    private static string GetConnectionString(DatabaseConfig config)
+    {
+        // SslMode được chuẩn hóa lại một lần nữa ở đây để mọi đường vào (cấu hình
+        // đã lưu, cấu hình nhập trên form) đều không thể đẩy giá trị không hợp lệ
+        // xuống MySqlConnector.
+        var sslMode = DatabaseConfigService.ChuanHoaSslMode(config.SslMode);
 
         return
             $"Server={config.Server};" +
@@ -55,7 +63,7 @@ public sealed partial class DatabaseService
             $"Database={config.Database};" +
             $"User ID={config.User};" +
             $"Password={config.Password};" +
-            $"SslMode={config.SslMode};" +
+            $"SslMode={sslMode};" +
             $"Allow User Variables=True;";
     }
 
@@ -70,9 +78,21 @@ public sealed partial class DatabaseService
 
     public async Task<bool> TestConnectionAsync()
     {
+        return await TestConnectionAsync(_configService.Load());
+    }
+
+    /// <summary>
+    /// Kiểm tra kết nối bằng đúng cấu hình đang nhập trên form (chưa lưu), nhờ đó
+    /// màn "Cài đặt kết nối Database" không phải ghi cấu hình xuống đĩa trước khi
+    /// biết kết nối có thành công hay không.
+    /// </summary>
+    public async Task<bool> TestConnectionAsync(DatabaseConfig config)
+    {
         try
         {
-            await using var connection = await OpenAsync();
+            await using var connection = new MySqlConnection(GetConnectionString(config));
+
+            await connection.OpenAsync();
 
             await connection.ExecuteScalarAsync<int>("SELECT 1;");
 
@@ -81,7 +101,7 @@ public sealed partial class DatabaseService
         catch (Exception ex)
         {
             Console.WriteLine("========== DATABASE ERROR ==========");
-            Console.WriteLine(ex.ToString());
+            Console.WriteLine(ex.GetType().Name + ": " + ex.Message);
             Console.WriteLine("====================================");
 
             throw;
