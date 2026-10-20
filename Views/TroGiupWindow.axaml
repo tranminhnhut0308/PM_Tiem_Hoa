@@ -1,0 +1,402 @@
+<Window xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  x:Class="ShopHoa.Views.TroGiupWindow"
+  Title="Hệ thống và Trợ giúp - TIỆM HOA WINWON"
+  Width="880"
+  Height="660"
+  MinWidth="750"
+  MinHeight="550"
+  WindowStartupLocation="CenterOwner"
+  CanResize="True"
+  Background="#F8FAF9">
+
+  <Window.Styles>
+    <Style Selector="TabControl">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="TabItem">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#61736E" />
+      <Setter Property="Padding" Value="16,12" />
+      <Setter Property="Margin" Value="0,0,8,0" />
+      <Setter Property="CornerRadius" Value="8,8,0,0" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="TabItem:selected">
+      <Setter Property="Foreground" Value="#087F6E" />
+      <Setter Property="Background" Value="White" />
+      <Setter Property="BorderBrush" Value="#087F6E" />
+    </Style>
+    <Style Selector="Border.infoCard">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="BorderBrush" Value="#E2ECE8" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="16" />
+      <Setter Property="BoxShadow" Value="0 1 4 0 #0A000000" />
+    </Style>
+    <Style Selector="Border.shortcutKey">
+      <Setter Property="Background" Value="#F2F4F7" />
+      <Setter Property="BorderBrush" Value="#D0D5DD" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="8,3" />
+      <Setter Property="MinWidth" Value="65" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="Auto,*,Auto">
+    <!-- TOP HEADER -->
+    <Border Grid.Row="0" Background="#087F6E" Padding="24,18">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <Border Width="48" Height="48" CornerRadius="24" Background="#149481" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <TextBlock Text="🌸" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+        <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+          <TextBlock Text="TIỆM HOA WINWON — HỆ THỐNG VÀ TRỢ GIÚP" FontSize="18" FontWeight="Bold" Foreground="White" />
+          <TextBlock Text="Thông tin phần mềm, phím tắt thao tác nhanh, hướng dẫn nghiệp vụ và cập nhật" FontSize="12.5" Foreground="#C8EDE6" Margin="0,3,0,0" />
+        </StackPanel>
+        <Border Grid.Column="2" Background="#149481" CornerRadius="12" Padding="12,6" VerticalAlignment="Center">
+          <TextBlock Text="Phiên bản v1.0.0" FontSize="12" FontWeight="Bold" Foreground="White" />
+        </Border>
+      </Grid>
+    </Border>
+
+    <!-- CONTENT WITH TABS -->
+    <TabControl Grid.Row="1" Margin="20,14,20,10">
+
+      <!-- TAB 1: GIỚI THIỆU PHẦN MỀM -->
+      <TabItem Header="🌟 Giới thiệu phần mềm">
+        <ScrollViewer Padding="4,12,8,12">
+          <StackPanel Spacing="16">
+            <!-- Brand Overview -->
+            <Border Classes="infoCard">
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <StackPanel Spacing="8">
+                  <TextBlock Text="Phần mềm Quản lý Cửa hàng Hoa WINWON" FontSize="16" FontWeight="Bold" Foreground="#163F38" />
+                  <TextBlock Text="Giải pháp chuyển đổi số toàn diện dành riêng cho cửa hàng hoa tươi, shop hoa nghệ thuật và dịch vụ quà tặng sự kiện. Hệ thống tối ưu hóa toàn bộ chuỗi quy trình bán hàng, kiểm soát hoa tươi, dòng tiền và công nợ."
+                    FontSize="13" Foreground="#475467" TextWrapping="Wrap" LineHeight="20" />
+                  <WrapPanel Margin="0,6,0,0">
+                    <Border Background="#E6F4F1" CornerRadius="6" Padding="8,4" Margin="0,0,8,6">
+                      <TextBlock Text="⚡ Nhanh chóng &amp; Mượt mà" FontSize="11" FontWeight="SemiBold" Foreground="#087F6E" />
+                    </Border>
+                    <Border Background="#EFF8FF" CornerRadius="6" Padding="8,4" Margin="0,0,8,6">
+                      <TextBlock Text="🔒 Bảo mật dữ liệu MySQL" FontSize="11" FontWeight="SemiBold" Foreground="#175CD3" />
+                    </Border>
+                    <Border Background="#FEF6EE" CornerRadius="6" Padding="8,4" Margin="0,0,8,6">
+                      <TextBlock Text="📊 Báo cáo chuyên sâu chuẩn kế toán" FontSize="11" FontWeight="SemiBold" Foreground="#B54708" />
+                    </Border>
+                  </WrapPanel>
+                </StackPanel>
+                <Border Grid.Column="1" Background="#F2F9F6" BorderBrush="#C2E6DC" BorderThickness="1" CornerRadius="10" Padding="14" Width="200" VerticalAlignment="Center">
+                  <StackPanel Spacing="6">
+                    <TextBlock Text="THÔNG TIN HỆ THỐNG" FontSize="11" FontWeight="Bold" Foreground="#087F6E" />
+                    <TextBlock Text="• Nền tảng: .NET 8 / Avalonia" FontSize="11.5" Foreground="#344B45" />
+                    <TextBlock Text="• Cơ sở dữ liệu: MySQL 8.x" FontSize="11.5" Foreground="#344B45" />
+                    <TextBlock Text="• Bản quyền: WINWON POS" FontSize="11.5" Foreground="#344B45" />
+                    <TextBlock Text="• Phát hành: 2026" FontSize="11.5" Foreground="#344B45" />
+                  </StackPanel>
+                </Border>
+              </Grid>
+            </Border>
+
+            <!-- 6 Module Grid -->
+            <TextBlock Text="CÁC PHÂN HỆ CHỨC NĂNG CỐT LÕI" FontSize="12.5" FontWeight="Bold" Foreground="#163F38" Margin="2,4,0,0" />
+            <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+              <Border Grid.Row="0" Grid.Column="0" Classes="infoCard">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="🛒 Bán hàng &amp; Thu ngân" FontWeight="Bold" Foreground="#087F6E" FontSize="13" />
+                  <TextBlock Text="Tạo hóa đơn, chọn nhanh mặt hàng hoa theo danh mục, tính tiền thối, in hóa đơn nhiệt và thanh toán đa kênh." FontSize="11.5" Foreground="#61736E" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Row="0" Grid.Column="1" Classes="infoCard">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="📦 Nhập hàng &amp; Kho hoa" FontWeight="Bold" Foreground="#087F6E" FontSize="13" />
+                  <TextBlock Text="Lập phiếu nhập NCC, kiểm kê tồn kho hoa tươi, xuất hàng nội bộ, nhập trả hàng và quản lý hao hụt." FontSize="11.5" Foreground="#61736E" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Row="0" Grid.Column="2" Classes="infoCard">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="💰 Quản lý Sổ quỹ" FontWeight="Bold" Foreground="#087F6E" FontSize="13" />
+                  <TextBlock Text="Lập phiếu thu/chi, phân loại dòng tiền theo quỹ tiền mặt, tài khoản ngân hàng và kiểm soát chi phí hoạt động." FontSize="11.5" Foreground="#61736E" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Row="1" Grid.Column="0" Classes="infoCard">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="🤝 Quản lý Công nợ" FontWeight="Bold" Foreground="#087F6E" FontSize="13" />
+                  <TextBlock Text="Theo dõi nợ phải thu của khách hàng, nợ phải trả nhà cung cấp, đối chiếu công nợ và chi tiết theo từng phiếu." FontSize="11.5" Foreground="#61736E" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Row="1" Grid.Column="1" Classes="infoCard">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="📈 Báo cáo &amp; Phân tích" FontWeight="Bold" Foreground="#087F6E" FontSize="13" />
+                  <TextBlock Text="Báo cáo kết quả kinh doanh, doanh thu theo nhân viên/khách hàng, xuất nhập tồn, thẻ kho và xuất file Excel." FontSize="11.5" Foreground="#61736E" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Row="1" Grid.Column="2" Classes="infoCard">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="⚙️ Dữ liệu &amp; Phân quyền" FontWeight="Bold" Foreground="#087F6E" FontSize="13" />
+                  <TextBlock Text="Quản lý tài khoản, phân quyền chi tiết, kết chuyển hàng hóa, kết chuyển công nợ và khóa sổ kỳ kế toán." FontSize="11.5" Foreground="#61736E" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+            </Grid>
+
+            <!-- Support Hotline Card -->
+            <Border Background="#FFFDF5" BorderBrush="#FEDF89" BorderThickness="1" CornerRadius="10" Padding="14">
+              <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                <TextBlock Text="📞" FontSize="24" VerticalAlignment="Center" Margin="0,0,12,0" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                  <TextBlock Text="Hỗ trợ kỹ thuật &amp; Chăm sóc khách hàng WINWON" FontWeight="SemiBold" FontSize="13" Foreground="#B54708" />
+                  <TextBlock Text="Hotline: 1900 8888 • CSKH: 0909 123 456 • Email: support@winwon.vn • Website: winwon.vn" FontSize="12" Foreground="#475467" />
+                </StackPanel>
+                <Border Grid.Column="2" Background="#FEF0C7" CornerRadius="8" Padding="10,4" VerticalAlignment="Center">
+                  <TextBlock Text="Hỗ trợ 24/7" FontSize="11" FontWeight="Bold" Foreground="#B54708" />
+                </Border>
+              </Grid>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- TAB 2: PHÍM TẮT THAO TÁC NHANH -->
+      <TabItem Header="⌨️ Phím tắt nhanh">
+        <ScrollViewer Padding="4,12,8,12">
+          <StackPanel Spacing="14">
+            <TextBlock Text="BẢNG TỔNG HỢP CÁC PHÍM TẮT THƯỜNG DÙNG TRONG HỆ THỐNG" FontSize="12.5" FontWeight="Bold" Foreground="#163F38" />
+
+            <Border Classes="infoCard" Padding="0" ClipToBounds="True">
+              <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                <!-- Header -->
+                <Border Grid.Row="0" Background="#F2F9F6" BorderBrush="#E2ECE8" BorderThickness="0,0,0,1" Padding="14,10">
+                  <Grid ColumnDefinitions="110,*,180">
+                    <TextBlock Text="PHÍM TẮT" FontWeight="Bold" FontSize="12" Foreground="#087F6E" />
+                    <TextBlock Grid.Column="1" Text="CHỨC NĂNG / NGHIỆP VỤ" FontWeight="Bold" FontSize="12" Foreground="#087F6E" />
+                    <TextBlock Grid.Column="2" Text="PHẠM VI ÁP DỤNG" FontWeight="Bold" FontSize="12" Foreground="#087F6E" />
+                  </Grid>
+                </Border>
+
+                <!-- Row F1 -->
+                <Border Grid.Row="1" BorderBrush="#E2ECE8" BorderThickness="0,0,0,1" Padding="14,8">
+                  <Grid ColumnDefinitions="110,*,180" VerticalAlignment="Center">
+                    <Border Classes="shortcutKey"><TextBlock Text="F1" FontWeight="Bold" FontSize="12" Foreground="#163F38" HorizontalAlignment="Center" /></Border>
+                    <TextBlock Grid.Column="1" Text="Mở màn hình Trợ giúp, Phím tắt và Giới thiệu hệ thống" FontSize="12.5" Foreground="#344B45" VerticalAlignment="Center" Margin="10,0,0,0" />
+                    <TextBlock Grid.Column="2" Text="Toàn hệ thống" FontSize="12" Foreground="#61736E" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+
+                <!-- Row F2 -->
+                <Border Grid.Row="2" BorderBrush="#E2ECE8" BorderThickness="0,0,0,1" Padding="14,8">
+                  <Grid ColumnDefinitions="110,*,180" VerticalAlignment="Center">
+                    <Border Classes="shortcutKey"><TextBlock Text="F2" FontWeight="Bold" FontSize="12" Foreground="#163F38" HorizontalAlignment="Center" /></Border>
+                    <TextBlock Grid.Column="1" Text="Mở nhanh giao diện Bán hàng (POS thu ngân)" FontSize="12.5" Foreground="#344B45" VerticalAlignment="Center" Margin="10,0,0,0" />
+                    <TextBlock Grid.Column="2" Text="Màn hình chính" FontSize="12" Foreground="#61736E" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+
+                <!-- Row F3 -->
+                <Border Grid.Row="3" BorderBrush="#E2ECE8" BorderThickness="0,0,0,1" Padding="14,8">
+                  <Grid ColumnDefinitions="110,*,180" VerticalAlignment="Center">
+                    <Border Classes="shortcutKey"><TextBlock Text="F3" FontWeight="Bold" FontSize="12" Foreground="#163F38" HorizontalAlignment="Center" /></Border>
+                    <TextBlock Grid.Column="1" Text="Đặt tiêu điểm vào ô tìm kiếm hàng hóa / khách hàng" FontSize="12.5" Foreground="#344B45" VerticalAlignment="Center" Margin="10,0,0,0" />
+                    <TextBlock Grid.Column="2" Text="Bán hàng, Hàng hóa" FontSize="12" Foreground="#61736E" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+
+                <!-- Row F4 -->
+                <Border Grid.Row="4" BorderBrush="#E2ECE8" BorderThickness="0,0,0,1" Padding="14,8">
+                  <Grid ColumnDefinitions="110,*,180" VerticalAlignment="Center">
+                    <Border Classes="shortcutKey"><TextBlock Text="F4" FontWeight="Bold" FontSize="12" Foreground="#163F38" HorizontalAlignment="Center" /></Border>
+                    <TextBlock Grid.Column="1" Text="Mở màn hình Lập phiếu nhập hàng từ nhà cung cấp" FontSize="12.5" Foreground="#344B45" VerticalAlignment="Center" Margin="10,0,0,0" />
+                    <TextBlock Grid.Column="2" Text="Toàn hệ thống" FontSize="12" Foreground="#61736E" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+
+                <!-- Row F5 -->
+                <Border Grid.Row="5" BorderBrush="#E2ECE8" BorderThickness="0,0,0,1" Padding="14,8">
+                  <Grid ColumnDefinitions="110,*,180" VerticalAlignment="Center">
+                    <Border Classes="shortcutKey"><TextBlock Text="F5" FontWeight="Bold" FontSize="12" Foreground="#163F38" HorizontalAlignment="Center" /></Border>
+                    <TextBlock Grid.Column="1" Text="Tải lại và làm mới dữ liệu màn hình hiện hành" FontSize="12.5" Foreground="#344B45" VerticalAlignment="Center" Margin="10,0,0,0" />
+                    <TextBlock Grid.Column="2" Text="Các danh sách &amp; Báo cáo" FontSize="12" Foreground="#61736E" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+
+                <!-- Row F9 -->
+                <Border Grid.Row="6" BorderBrush="#E2ECE8" BorderThickness="0,0,0,1" Padding="14,8">
+                  <Grid ColumnDefinitions="110,*,180" VerticalAlignment="Center">
+                    <Border Classes="shortcutKey"><TextBlock Text="F9" FontWeight="Bold" FontSize="12" Foreground="#163F38" HorizontalAlignment="Center" /></Border>
+                    <TextBlock Grid.Column="1" Text="Thanh toán nhanh hóa đơn bán hàng" FontSize="12.5" Foreground="#344B45" VerticalAlignment="Center" Margin="10,0,0,0" />
+                    <TextBlock Grid.Column="2" Text="Giao diện Bán hàng" FontSize="12" Foreground="#61736E" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+
+                <!-- Row Esc -->
+                <Border Grid.Row="7" BorderBrush="#E2ECE8" BorderThickness="0,0,0,1" Padding="14,8">
+                  <Grid ColumnDefinitions="110,*,180" VerticalAlignment="Center">
+                    <Border Classes="shortcutKey"><TextBlock Text="Esc" FontWeight="Bold" FontSize="12" Foreground="#163F38" HorizontalAlignment="Center" /></Border>
+                    <TextBlock Grid.Column="1" Text="Đóng hộp thoại hiện tại / Hủy bỏ thao tác đang thực hiện" FontSize="12.5" Foreground="#344B45" VerticalAlignment="Center" Margin="10,0,0,0" />
+                    <TextBlock Grid.Column="2" Text="Hộp thoại, Cửa sổ phụ" FontSize="12" Foreground="#61736E" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+
+                <!-- Row Ctrl + N -->
+                <Border Grid.Row="8" BorderBrush="#E2ECE8" BorderThickness="0,0,0,1" Padding="14,8">
+                  <Grid ColumnDefinitions="110,*,180" VerticalAlignment="Center">
+                    <Border Classes="shortcutKey"><TextBlock Text="Ctrl + N" FontWeight="Bold" FontSize="12" Foreground="#163F38" HorizontalAlignment="Center" /></Border>
+                    <TextBlock Grid.Column="1" Text="Tạo mới chứng từ, thêm mới đối tác hoặc sản phẩm" FontSize="12.5" Foreground="#344B45" VerticalAlignment="Center" Margin="10,0,0,0" />
+                    <TextBlock Grid.Column="2" Text="Các màn hình quản lý" FontSize="12" Foreground="#61736E" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+
+                <!-- Row Ctrl + P -->
+                <Border Grid.Row="9" BorderBrush="#E2ECE8" BorderThickness="0,0,0,1" Padding="14,8">
+                  <Grid ColumnDefinitions="110,*,180" VerticalAlignment="Center">
+                    <Border Classes="shortcutKey"><TextBlock Text="Ctrl + P" FontWeight="Bold" FontSize="12" Foreground="#163F38" HorizontalAlignment="Center" /></Border>
+                    <TextBlock Grid.Column="1" Text="In phiếu thu, phiếu chi hoặc hóa đơn hiện tại" FontSize="12.5" Foreground="#344B45" VerticalAlignment="Center" Margin="10,0,0,0" />
+                    <TextBlock Grid.Column="2" Text="Hóa đơn, Chứng từ" FontSize="12" Foreground="#61736E" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+
+                <!-- Row Ctrl + E -->
+                <Border Grid.Row="10" Padding="14,8">
+                  <Grid ColumnDefinitions="110,*,180" VerticalAlignment="Center">
+                    <Border Classes="shortcutKey"><TextBlock Text="Ctrl + E" FontWeight="Bold" FontSize="12" Foreground="#163F38" HorizontalAlignment="Center" /></Border>
+                    <TextBlock Grid.Column="1" Text="Xuất báo cáo hiện tại ra file Excel (.xlsx)" FontSize="12.5" Foreground="#344B45" VerticalAlignment="Center" Margin="10,0,0,0" />
+                    <TextBlock Grid.Column="2" Text="Tất cả các báo cáo" FontSize="12" Foreground="#61736E" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+              </Grid>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- TAB 3: HƯỚNG DẪN SỬ DỤNG -->
+      <TabItem Header="📖 Hướng dẫn sử dụng">
+        <ScrollViewer Padding="4,12,8,12">
+          <StackPanel Spacing="14">
+            <TextBlock Text="CÁC QUY TRÌNH NGHIỆP VỤ CỐT LÕI TẠI CỬA HÀNG HOA" FontSize="12.5" FontWeight="Bold" Foreground="#163F38" />
+
+            <!-- Quy trình 1 -->
+            <Border Classes="infoCard">
+              <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="Auto,*">
+                  <Border Background="#E6F4F1" CornerRadius="6" Padding="8,4" VerticalAlignment="Center">
+                    <TextBlock Text="QUY TRÌNH 1" FontSize="11" FontWeight="Bold" Foreground="#087F6E" />
+                  </Border>
+                  <TextBlock Grid.Column="1" Text="Bán hàng hoa tươi &amp; Lập hóa đơn" FontWeight="Bold" FontSize="14" Foreground="#163F38" VerticalAlignment="Center" Margin="10,0,0,0" />
+                </Grid>
+                <TextBlock Text="1. Bấm nút 'Bán hàng' (hoặc nhấn phím F2) để vào giao diện POS.&#x0a;2. Tìm kiếm tên hoa hoặc quét mã vạch để thêm sản phẩm vào giỏ hàng.&#x0a;3. Chọn khách hàng (nếu có khách quen để tích lũy doanh số / nợ).&#x0a;4. Chọn phương thức thanh toán (Tiền mặt, Chuyển khoản, hoặc Cho nợ).&#x0a;5. Bấm 'Thanh toán' (F9) để hoàn tất và in hóa đơn cho khách."
+                  FontSize="12" Foreground="#475467" LineHeight="20" TextWrapping="Wrap" Margin="0,4,0,0" />
+              </StackPanel>
+            </Border>
+
+            <!-- Quy trình 2 -->
+            <Border Classes="infoCard">
+              <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="Auto,*">
+                  <Border Background="#EFF8FF" CornerRadius="6" Padding="8,4" VerticalAlignment="Center">
+                    <TextBlock Text="QUY TRÌNH 2" FontSize="11" FontWeight="Bold" Foreground="#175CD3" />
+                  </Border>
+                  <TextBlock Grid.Column="1" Text="Nhập hàng hoa từ Nhà cung cấp &amp; Cập nhật tồn kho" FontWeight="Bold" FontSize="14" Foreground="#163F38" VerticalAlignment="Center" Margin="10,0,0,0" />
+                </Grid>
+                <TextBlock Text="1. Vào menu 'Nhập hàng' → bấm '＋ Lập phiếu nhập' (hoặc F4).&#x0a;2. Chọn nhà cung cấp hoa tươi (nhà vườn, vựa hoa Đà Lạt,...).&#x0a;3. Chọn các mặt hàng nhập, điền số lượng và giá vốn nhập thực tế.&#x0a;4. Nhập số tiền trả trước cho NCC và chọn nguồn quỹ thanh toán.&#x0a;5. Bấm 'Lưu phiếu nhập' để hệ thống tự động cộng tồn kho và ghi nhận nợ NCC nếu còn thiếu."
+                  FontSize="12" Foreground="#475467" LineHeight="20" TextWrapping="Wrap" Margin="0,4,0,0" />
+              </StackPanel>
+            </Border>
+
+            <!-- Quy trình 3 -->
+            <Border Classes="infoCard">
+              <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="Auto,*">
+                  <Border Background="#FEF6EE" CornerRadius="6" Padding="8,4" VerticalAlignment="Center">
+                    <TextBlock Text="QUY TRÌNH 3" FontSize="11" FontWeight="Bold" Foreground="#B54708" />
+                  </Border>
+                  <TextBlock Grid.Column="1" Text="Thu chi &amp; Quản lý dòng tiền Sổ quỹ" FontWeight="Bold" FontSize="14" Foreground="#163F38" VerticalAlignment="Center" Margin="10,0,0,0" />
+                </Grid>
+                <TextBlock Text="1. Vào menu 'Sổ quỹ' để theo dõi tổng thu, tổng chi và số dư quỹ tiền mặt/ngân hàng.&#x0a;2. Bấm '＋ Lập phiếu thu' khi thu các khoản tiền khác ngoài bán hàng.&#x0a;3. Bấm '＋ Lập phiếu chi' khi thanh toán tiền điện, nước, mặt bằng, bao bì phụ kiện hoa.&#x0a;4. Xem báo cáo Sổ quỹ chi tiết theo thời gian để cân đối dòng tiền trong ngày."
+                  FontSize="12" Foreground="#475467" LineHeight="20" TextWrapping="Wrap" Margin="0,4,0,0" />
+              </StackPanel>
+            </Border>
+
+            <!-- Quy trình 4 -->
+            <Border Classes="infoCard">
+              <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="Auto,*">
+                  <Border Background="#FDF2FA" CornerRadius="6" Padding="8,4" VerticalAlignment="Center">
+                    <TextBlock Text="QUY TRÌNH 4" FontSize="11" FontWeight="Bold" Foreground="#C11574" />
+                  </Border>
+                  <TextBlock Grid.Column="1" Text="Theo dõi Công nợ &amp; Thanh toán từng phiếu" FontWeight="Bold" FontSize="14" Foreground="#163F38" VerticalAlignment="Center" Margin="10,0,0,0" />
+                </Grid>
+                <TextBlock Text="1. Xem tổng nợ tại menu 'Khách hàng' hoặc 'Nhà cung cấp'.&#x0a;2. Vào 'Báo cáo' → 'Chi tiết công nợ theo phiếu' để theo dõi chi tiết từng đơn hàng còn nợ.&#x0a;3. Khi đối tác thanh toán, vào 'Nợ thanh toán' hoặc bấm thanh toán trực tiếp trên chứng từ.&#x0a;4. Hệ thống sẽ tự động cập nhật giảm nợ và ghi tăng phiếu thu trong sổ quỹ."
+                  FontSize="12" Foreground="#475467" LineHeight="20" TextWrapping="Wrap" Margin="0,4,0,0" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- TAB 4: CẬP NHẬT PHẦN MỀM -->
+      <TabItem Header="🔄 Cập nhật phần mềm">
+        <ScrollViewer Padding="4,12,8,12">
+          <StackPanel Spacing="16">
+            <Border Classes="infoCard">
+              <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                <Border Width="48" Height="48" CornerRadius="24" Background="#E6F4F1" VerticalAlignment="Center">
+                  <TextBlock Text="💻" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center" Spacing="4">
+                  <TextBlock Text="Phiên bản hiện tại: WINWON Hoa Shop v1.0.0" FontSize="15" FontWeight="Bold" Foreground="#163F38" />
+                  <TextBlock Text="Hệ thống tự động đồng bộ và thông báo khi có phiên bản cập nhật mới từ máy chủ." FontSize="12.5" Foreground="#61736E" />
+                </StackPanel>
+                <Border Grid.Column="2" Background="#ECFDF3" CornerRadius="8" Padding="10,4" VerticalAlignment="Center">
+                  <TextBlock Text="Đang hoạt động tốt" FontSize="11.5" FontWeight="Bold" Foreground="#027A48" />
+                </Border>
+              </Grid>
+            </Border>
+
+            <Border Background="#F9FAFB" BorderBrush="#EAECF0" BorderThickness="1" CornerRadius="10" Padding="20">
+              <StackPanel Spacing="14" HorizontalAlignment="Center" MaxWidth="520">
+                <TextBlock Text="KIỂM TRA VÀ TẢI BẢN CẬP NHẬT MỚI" FontSize="14" FontWeight="Bold" Foreground="#163F38" HorizontalAlignment="Center" />
+                <TextBlock Text="Bấm nút bên dưới để mở cửa sổ kiểm tra phiên bản mới, xem ghi chú phát hành (changelog) và nâng cấp tự động mà không làm mất dữ liệu."
+                  FontSize="12" Foreground="#475467" TextAlignment="Center" TextWrapping="Wrap" />
+
+                <Button Content="🚀 Mở trình kiểm tra và cập nhật phần mềm..."
+                  Background="#087F6E"
+                  Foreground="White"
+                  FontWeight="SemiBold"
+                  FontSize="13"
+                  Padding="22,10"
+                  CornerRadius="8"
+                  HorizontalAlignment="Center"
+                  Cursor="Hand"
+                  Click="OnOpenUpdateWindowClick" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+    </TabControl>
+
+    <!-- FOOTER -->
+    <Border Grid.Row="2" Background="White" BorderBrush="#E2ECE8" BorderThickness="0,1,0,0" Padding="20,12">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Text="WINWON Software © 2026. Hotline: 1900 8888" FontSize="11.5" Foreground="#98A2B3" VerticalAlignment="Center" />
+        <Button Grid.Column="1"
+          Content="Đóng"
+          Background="White"
+          BorderBrush="#D0D5DD"
+          BorderThickness="1"
+          CornerRadius="8"
+          Padding="20,8"
+          FontSize="13"
+          Foreground="#344B45"
+          Cursor="Hand"
+          Click="OnCloseClick" />
+      </Grid>
+    </Border>
+  </Grid>
+</Window>

@@ -87,7 +87,7 @@ fi
 
 cat <<EOF > "$DESKTOP_DIR/shophoa.desktop"
 [Desktop Entry]
-Name=Vựa Hoa Nhà Huy
+Name=Tiệm Hoa Nhà Huy
 Comment=Phần mềm Quản lý Shop Hoa
 Exec=$INSTALL_DIR/ShopHoa
 Icon=$ICON_PATH

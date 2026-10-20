@@ -8,7 +8,7 @@
   x:Class="ShopHoa.Views.MainWindow"
   x:Name="RootWindow"
   x:DataType="vm:MainWindowViewModel"
-  Title="VỰA HOA NHÀ HUY"
+  Title="TIỆM HOA NHÀ HUY"
   Icon="/Assets/logo.ico"
   Width="1500"
   Height="900"
@@ -1255,7 +1255,7 @@
         <ImageBrush Source="avares://ShopHoa/Assets/anh_menu.png" Stretch="UniformToFill" />
       </Border.Background>
       <Grid RowDefinitions="Auto,*,Auto">
-        <!-- LOGO VỰA HOA NHÀ HUY -->
+        <!-- LOGO TIỆM HOA NHÀ HUY -->
         <StackPanel Margin="0,20,0,18" HorizontalAlignment="Center" VerticalAlignment="Center">
           <!-- Biểu tượng hoa cách điệu -->
           <Path Data="M12,2 C12,2 9,7 9,11 C9,15 12,20 12,20 C12,20 15,15 15,11 C15,7 12,2 12,2 Z M12,20 C12,20 6,18 4,13 C2,8 5,6 5,6 C5,6 8,9 10,14 C11,16 12,20 12,20 Z M12,20 C12,20 18,18 20,13 C22,8 19,6 19,6 C19,6 16,9 14,14 C13,16 12,20 12,20 Z"
@@ -1266,8 +1266,8 @@
                 HorizontalAlignment="Center"
                 Margin="0,0,0,6"/>
           
-          <!-- Chữ VỰA HOA -->
-          <TextBlock Text="VỰA HOA"
+          <!-- Chữ TIỆM HOA -->
+          <TextBlock Text="TIỆM HOA"
                      Foreground="#FFFDF5"
                      FontSize="13"
                      FontWeight="SemiBold"
@@ -1418,6 +1418,54 @@
               </Grid>
             </Button>
 
+            <!-- PHIẾU CHI -->
+            <Button Classes="menu" Classes.active="{Binding IsPhieuChiSelected}"
+              Command="{Binding ChonMenuCommand}" CommandParameter="Phiếu chi"
+              IsVisible="{Binding CanViewCashBook}">
+              <Grid ColumnDefinitions="24,*">
+                <TextBlock Text="💸" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Phiếu chi" VerticalAlignment="Center" Margin="6,0,0,0" />
+              </Grid>
+            </Button>
+
+            <!-- CÔNG NỢ -->
+            <Button Classes="menu">
+              <Button.Flyout>
+                <MenuFlyout Placement="RightEdgeAlignedTop">
+                  <MenuItem Header="🔍 Tìm kiếm công nợ..."
+                            Command="{Binding TimKiemCongNoCommand}" />
+                  <MenuItem Header="💳 Thêm nợ thanh toán..."
+                            Command="{Binding ThemNoThanhToanCommand}" />
+                  <MenuItem Header="⚖ Thêm công nợ đầu kỳ..."
+                            Command="{Binding ThemCongNoDauKyCommand}" />
+                  <MenuItem Header="🔄 Kết chuyển công nợ..."
+                            Command="{Binding KetChuyenCongNoCommand}" />
+                </MenuFlyout>
+              </Button.Flyout>
+              <Grid ColumnDefinitions="24,*,Auto">
+                <TextBlock Text="⚖" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Công nợ" VerticalAlignment="Center" Margin="6,0,0,0" />
+                <TextBlock Grid.Column="2" Text="▸" FontSize="11" Foreground="#85C7B7" VerticalAlignment="Center" Margin="0,0,4,0" />
+              </Grid>
+            </Button>
+
+            <!-- SỐ LIỆU -->
+            <Button Classes="menu">
+              <Button.Flyout>
+                <MenuFlyout Placement="RightEdgeAlignedTop">
+                  <MenuItem Header="🔄 Kết chuyển hàng hóa..."
+                            Command="{Binding KetChuyenHangHoaCommand}" />
+                  <MenuItem Header="⚖ Kết chuyển công nợ..."
+                            Command="{Binding KetChuyenCongNoCommand}" />
+                </MenuFlyout>
+              </Button.Flyout>
+              <Grid ColumnDefinitions="24,*,Auto">
+                <TextBlock Text="📊" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Số liệu" VerticalAlignment="Center" Margin="6,0,0,0" />
+                <TextBlock Grid.Column="2" Text="▸" FontSize="11" Foreground="#85C7B7" VerticalAlignment="Center" Margin="0,0,4,0" />
+              </Grid>
+            </Button>
+
             <!-- DỮ LIỆU ĐẦU KỲ -->
             <Button Classes="menu">
               <Button.Flyout>
@@ -1425,12 +1473,16 @@
                   <MenuItem Header="📦 Hàng hóa đầu kỳ">
                     <MenuItem Header="➕ Thêm hàng tồn đầu kỳ..."
                               Command="{Binding ThemHangTonDauKyCommand}" />
+                    <MenuItem Header="🔄 Kết chuyển hàng hóa..."
+                              Command="{Binding KetChuyenHangHoaCommand}" />
                   </MenuItem>
                   <MenuItem Header="💳 Công nợ đầu kỳ">
                     <MenuItem Header="📊 Quản lý công nợ theo kỳ..."
                               Command="{Binding MoQuanLyCongNoTheoKyCommand}" />
                     <MenuItem Header="➕ Thêm công nợ đầu kỳ..."
                               Command="{Binding ThemCongNoDauKyCommand}" />
+                    <MenuItem Header="🔄 Kết chuyển công nợ..."
+                              Command="{Binding KetChuyenCongNoCommand}" />
                   </MenuItem>
                   <MenuItem Header="💰 Sổ quỹ đầu kỳ">
                     <MenuItem Header="➕ Khai báo số dư quỹ đầu kỳ..."
@@ -1520,6 +1572,38 @@
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
             </Border>
+
+            <!-- HỆ THỐNG -->
+            <Button Classes="menu">
+              <Button.Flyout>
+                <MenuFlyout Placement="RightEdgeAlignedTop">
+                  <MenuItem Header="🔌 Cài đặt kết nối Database..."
+                            Command="{Binding MoCaiDatDatabaseCommand}" />
+                  <MenuItem Header="🔒 Đổi mật khẩu..."
+                            Command="{Binding MoDoiMatKhauCommand}" />
+                  <MenuItem Header="🏪 Thông tin tiệm..."
+                            Command="{Binding ChonMenuCommand}"
+                            CommandParameter="Thông tin tiệm"
+                            IsVisible="{Binding CanViewStoreInfo}" />
+                  <MenuItem Header="👥 Quản lý tài khoản..."
+                            Command="{Binding MoDanhSachNhanVienCommand}"
+                            IsVisible="{Binding CanManageUsers}" />
+                </MenuFlyout>
+              </Button.Flyout>
+              <Grid ColumnDefinitions="24,*,Auto">
+                <TextBlock Text="⚙️" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Hệ thống" VerticalAlignment="Center" Margin="6,0,0,0" />
+                <TextBlock Grid.Column="2" Text="▸" FontSize="11" Foreground="#85C7B7" VerticalAlignment="Center" Margin="0,0,4,0" />
+              </Grid>
+            </Button>
+
+            <!-- TRỢ GIÚP (F1) -->
+            <Button Classes="menu" Command="{Binding MoTroGiupCommand}">
+              <Grid ColumnDefinitions="24,*,Auto">
+                <TextBlock Text="❓" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Trợ giúp (F1)" VerticalAlignment="Center" Margin="6,0,0,0" />
+              </Grid>
+            </Button>
           </StackPanel>
         </ScrollViewer>
 
@@ -1666,6 +1750,51 @@
                         <TextBlock Text="🏢" FontSize="14" Foreground="#1976D2"
                           VerticalAlignment="Center" />
                         <TextBlock Text="Thêm khách nội bộ" FontSize="13" Foreground="#263B35"
+                          VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+
+                    <!-- Mục Đổi mật khẩu -->
+                    <Button Background="Transparent"
+                      BorderThickness="0"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Left"
+                      Padding="10,8"
+                      Command="{Binding MoDoiMatKhauCommand}">
+                      <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="🔒" FontSize="14" Foreground="#087F6E"
+                          VerticalAlignment="Center" />
+                        <TextBlock Text="Đổi mật khẩu" FontSize="13" Foreground="#263B35"
+                          VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+
+                    <!-- Mục Cài đặt Database -->
+                    <Button Background="Transparent"
+                      BorderThickness="0"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Left"
+                      Padding="10,8"
+                      Command="{Binding MoCaiDatDatabaseCommand}">
+                      <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="🔌" FontSize="14" Foreground="#087F6E"
+                          VerticalAlignment="Center" />
+                        <TextBlock Text="Cài đặt Database" FontSize="13" Foreground="#263B35"
+                          VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+
+                    <!-- Mục Trợ giúp & Phím tắt -->
+                    <Button Background="Transparent"
+                      BorderThickness="0"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Left"
+                      Padding="10,8"
+                      Command="{Binding MoTroGiupCommand}">
+                      <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="❓" FontSize="14" Foreground="#087F6E"
+                          VerticalAlignment="Center" />
+                        <TextBlock Text="Trợ giúp &amp; Phím tắt" FontSize="13" Foreground="#263B35"
                           VerticalAlignment="Center" />
                       </StackPanel>
                     </Button>
@@ -2804,7 +2933,7 @@
           <Grid RowDefinitions="Auto,Auto,*" Margin="0,14,16,0" RowSpacing="12">
 
             <!-- 1. THANH CÔNG CỤ -->
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
               <TextBox Classes="searchInput" Height="38" VerticalAlignment="Top"
                 Watermark="🔍 Tìm theo mã, tên, số điện thoại..."
                 Text="{Binding CustomerSearch, Mode=TwoWay}"
@@ -2889,18 +3018,33 @@
                 Margin="0,0,10,0"
                 Command="{Binding ThemCongNoDauKyCommand}"
                 CommandParameter="KHACH_HANG"
+<<<<<<< HEAD
               -->
               <Button Grid.Column="6" Classes="toolbar-action" Content="🏷 Thiết lập giá"
+=======
+                ToolTip.Tip="Khai báo số dư công nợ đầu kỳ của khách hàng" />
+              <Button Grid.Column="6" Classes="toolbar-action" Content="💵 Nợ thanh toán"
+                Margin="0,0,10,0"
+                Command="{Binding ThemNoThanhToanCommand}"
+                CommandParameter="KHACH_HANG"
+                ToolTip.Tip="Giao diện 47: Thêm thanh toán nợ cho khách hàng" />
+              <Button Grid.Column="7" Classes="toolbar-action" Content="🔍 Tra cứu nợ"
+                Margin="0,0,10,0"
+                Command="{Binding TimKiemCongNoCommand}"
+                CommandParameter="KHACH_HANG"
+                ToolTip.Tip="Giao diện 48: Tìm kiếm và tra cứu công nợ" />
+              <Button Grid.Column="8" Classes="toolbar-action" Content="🏷 Thiết lập giá"
+>>>>>>> 521239ce4fe05229990644535db4e61b88de2bdb
                 Margin="0,0,10,0"
                 Command="{Binding ThietLapGiaKhachHangDangChonCommand}"
                 ToolTip.Tip="Thiết lập bảng giá bán riêng cho khách hàng đang chọn"
                 IsVisible="{Binding CanEditCustomer}" />
-              <Button Grid.Column="7" Classes="toolbar-action" Content="🏢 Khách nội bộ"
+              <Button Grid.Column="9" Classes="toolbar-action" Content="🏢 Khách nội bộ"
                 Margin="0,0,10,0"
                 Command="{Binding ThemKhachHangNoiBoCommand}"
                 ToolTip.Tip="Thêm đối tác / khách hàng nội bộ (Danh mục → Đối tác → Nội bộ)"
                 IsVisible="{Binding CanCreateCustomer}" />
-              <Button Grid.Column="8" Classes="toolbar-primary" Content="＋ Thêm mới"
+              <Button Grid.Column="10" Classes="toolbar-primary" Content="＋ Thêm mới"
                 Margin="0"
                 Command="{Binding ThemMoiKhachHangCommand}"
                 IsVisible="{Binding CanCreateCustomer}" />
@@ -3868,6 +4012,14 @@
                   Command="{Binding ThemCongNoDauKyCommand}"
                   CommandParameter="NHA_CUNG_CAP"
                   ToolTip.Tip="Khai báo số dư công nợ đầu kỳ của nhà cung cấp" />
+                <Button Classes="toolbar-action" Content="💵 Nợ thanh toán" Margin="0"
+                  Command="{Binding ThemNoThanhToanCommand}"
+                  CommandParameter="NHA_CUNG_CAP"
+                  ToolTip.Tip="Giao diện 47: Thêm thanh toán nợ cho nhà cung cấp" />
+                <Button Classes="toolbar-action" Content="🔍 Tra cứu nợ" Margin="0"
+                  Command="{Binding TimKiemCongNoCommand}"
+                  CommandParameter="NHA_CUNG_CAP"
+                  ToolTip.Tip="Giao diện 48: Tìm kiếm và tra cứu công nợ" />
                 <Button Classes="toolbar-primary" Content="＋ Thêm nhà cung cấp" Margin="0"
                   Command="{Binding ThemNhaCungCapCommand}"
                   IsVisible="{Binding CanCreateSupplier}" />
@@ -6987,6 +7139,20 @@
         <views:DanhSachPhieuXuatNoiBoView />
       </Grid>
 
+      <!-- ============================================================ -->
+      <!-- GIAO DIỆN 41/42: DANH SÁCH PHIẾU CHI + THÊM PHIẾU CHI         -->
+      <!-- Form thêm bind chung state form Sổ quỹ nên chỉ hiển thị        -->
+      <!-- một trong hai (IsThemPhieuChiVisible).                        -->
+      <!-- ============================================================ -->
+      <Grid IsVisible="{Binding IsPhieuChiSelected}">
+        <Grid IsVisible="{Binding !IsThemPhieuChiVisible}">
+          <views:DanhSachPhieuChiView />
+        </Grid>
+        <Grid IsVisible="{Binding IsThemPhieuChiVisible}">
+          <views:ThemPhieuChiView />
+        </Grid>
+      </Grid>
+
       <!-- BÁO CÁO CUỐI NGÀY                                           -->
       <!-- Grid ngoài bind vào MainWindowViewModel để đọc được           -->
       <!-- IsBaoCaoCuoiNgaySelected; UserControl bên trong nhận        -->
@@ -7026,6 +7192,55 @@
       <!-- BÁO CÁO NHÀ CUNG CẤP                                         -->
       <Grid IsVisible="{Binding IsBaoCaoNhaCungCapSelected}">
         <views:BaoCaoNhaCungCapView DataContext="{Binding BaoCaoNhaCungCap}" />
+      </Grid>
+
+      <!-- ============================================================ -->
+      <!-- BÁO CÁO KẾT QUẢ KINH DOANH (GIAO DIỆN 57)                    -->
+      <!-- ============================================================ -->
+      <Grid IsVisible="{Binding IsBaoCaoKetQuaKinhDoanhSelected}">
+        <views:BaoCaoKetQuaKinhDoanhView DataContext="{Binding BaoCaoKetQuaKinhDoanh}" />
+      </Grid>
+
+      <!-- ============================================================ -->
+      <!-- BÁO CÁO VỐN KINH DOANH (GIAO DIỆN 58)                        -->
+      <!-- ============================================================ -->
+      <Grid IsVisible="{Binding IsBaoCaoVonKinhDoanhSelected}">
+        <views:BaoCaoVonKinhDoanhView DataContext="{Binding BaoCaoVonKinhDoanh}" />
+      </Grid>
+
+      <!-- ============================================================ -->
+      <!-- BÁO CÁO TỔNG HỢP NHẬP XUẤT (GIAO DIỆN 63)                    -->
+      <!-- ============================================================ -->
+      <Grid IsVisible="{Binding IsBaoCaoTongHopNhapXuatSelected}">
+        <views:BaoCaoTongHopNhapXuatView DataContext="{Binding BaoCaoTongHopNhapXuat}" />
+      </Grid>
+
+      <!-- ============================================================ -->
+      <!-- BÁO CÁO CHI TIẾT NHẬP/XUẤT - THẺ KHO (GIAO DIỆN 64)          -->
+      <!-- ============================================================ -->
+      <Grid IsVisible="{Binding IsBaoCaoChiTietNhapXuatSelected}">
+        <views:BaoCaoChiTietNhapXuatView DataContext="{Binding BaoCaoChiTietNhapXuat}" />
+      </Grid>
+
+      <!-- ============================================================ -->
+      <!-- BÁO CÁO TỔNG HỢP KHUYẾN MÃI (GIAO DIỆN 67)                   -->
+      <!-- ============================================================ -->
+      <Grid IsVisible="{Binding IsBaoCaoTongHopKhuyenMaiSelected}">
+        <views:BaoCaoTongHopKhuyenMaiView DataContext="{Binding BaoCaoTongHopKhuyenMai}" />
+      </Grid>
+
+      <!-- ============================================================ -->
+      <!-- BÁO CÁO TỔNG HỢP TÌNH HÌNH NHẬP/XUẤT (GIAO DIỆN 68)          -->
+      <!-- ============================================================ -->
+      <Grid IsVisible="{Binding IsBaoCaoTinhHinhNhapXuatSelected}">
+        <views:BaoCaoTinhHinhNhapXuatView DataContext="{Binding BaoCaoTinhHinhNhapXuat}" />
+      </Grid>
+
+      <!-- ============================================================ -->
+      <!-- BÁO CÁO CHI TIẾT CÔNG NỢ THEO PHIẾU (GIAO DIỆN 71)           -->
+      <!-- ============================================================ -->
+      <Grid IsVisible="{Binding IsBaoCaoChiTietCongNoTheoPhieuSelected}">
+        <views:BaoCaoChiTietCongNoTheoPhieuView DataContext="{Binding BaoCaoChiTietCongNoTheoPhieu}" />
       </Grid>
 
       <!-- ============================================================ -->
@@ -8328,14 +8543,21 @@
                 CornerRadius="0,0,16,16"
                 Padding="22,16">
 
-                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+                <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10">
 
                   <Button Grid.Column="1"
+                    Classes="sq-btn-secondary"
+                    Content="Sửa phiếu"
+                    IsVisible="{Binding !SoQuyChiTietDangXem.DaHuy}"
+                    IsEnabled="{Binding CanEditCashBook}"
+                    Command="{Binding SuaPhieuHienTaiCommand}" />
+
+                  <Button Grid.Column="2"
                     Classes="sq-btn-secondary"
                     Content="Đóng"
                     Command="{Binding DongChiTietPhieuCommand}" />
 
-                  <Button Grid.Column="2"
+                  <Button Grid.Column="3"
                     Classes="sq-btn-primary"
                     Content="Hủy phiếu"
                     IsVisible="{Binding !SoQuyChiTietDangXem.DaHuy}"
@@ -8344,6 +8566,234 @@
                 </Grid>
               </Border>
             </Grid>
+          </Grid>
+        </Border>
+      </Grid>
+
+      <!-- MODAL SỬA PHIẾU (SỔ QUỸ) -->
+      <!-- Mở từ nút "Sửa phiếu" của màn chi tiết hoặc nút "Sửa" trên dòng    -->
+      <!-- của Danh sách phiếu chi. Sửa được thời gian, số tiền, loại thu/chi, -->
+      <!-- quỹ, người nộp/nhận, nội dung và ghi chú; mã phiếu/người tạo giữ   -->
+      <!-- nguyên; phiếu đã hủy thì không mở được modal này.                  -->
+      <Grid IsVisible="{Binding IsSoQuySuaPhieuVisible}"
+        ZIndex="960"
+        Background="#66101A2B">
+
+        <Border Width="920"
+          MaxHeight="780"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Center"
+          Background="White"
+          BorderBrush="#E2ECE8"
+          BorderThickness="1"
+          CornerRadius="16"
+          BoxShadow="0 18 50 #40000000">
+
+          <Grid RowDefinitions="Auto,*,Auto">
+
+            <!-- TIÊU ĐỀ -->
+            <Border Grid.Row="0"
+              Background="#F7FAF9"
+              BorderBrush="#E2ECE8"
+              BorderThickness="0,0,0,1"
+              CornerRadius="16,16,0,0"
+              Padding="22,16">
+
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <StackPanel Orientation="Horizontal"
+                  Spacing="10"
+                  VerticalAlignment="Center">
+
+                  <Border Background="#FEF3F2"
+                    CornerRadius="12"
+                    Padding="10,5"
+                    VerticalAlignment="Center">
+                    <TextBlock Text="Sửa phiếu"
+                      FontSize="12"
+                      FontWeight="Bold"
+                      Foreground="#B42318" />
+                  </Border>
+
+                  <TextBlock Text="{Binding SoQuyPhieuDangSua.MaPhieu}"
+                    FontSize="19"
+                    FontWeight="Bold"
+                    Foreground="#163F38"
+                    VerticalAlignment="Center" />
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                  Classes="sq-icon"
+                  Content="✕"
+                  Width="32"
+                  Height="32"
+                  FontSize="13"
+                  ToolTip.Tip="Đóng"
+                  Command="{Binding DongSoQuySuaPhieuCommand}" />
+              </Grid>
+            </Border>
+
+            <!-- FORM 2 CỘT -->
+            <ScrollViewer Grid.Row="1"
+              Padding="22,18"
+              HorizontalScrollBarVisibility="Disabled">
+
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="22" RowSpacing="0">
+
+                <StackPanel Grid.Column="0" Spacing="14">
+
+                  <!-- Số tiền (định dạng tiền Việt Nam, chỉ nhận số) -->
+                  <StackPanel Spacing="0">
+                    <TextBlock Classes="sq-label" Text="Số tiền" />
+                    <Border BorderBrush="{Binding SoQuyVienSuaSoTien}"
+                      BorderThickness="1.5"
+                      CornerRadius="8">
+                      <controls:MoneyTextBox Value="{Binding SoQuySuaSoTien, Mode=TwoWay}"
+                        Height="34"
+                        Margin="0" />
+                    </Border>
+                    <TextBlock Classes="sq-error-text"
+                      Text="{Binding SoQuyLoiSuaSoTienText}"
+                      IsVisible="{Binding SoQuyHienLoiSuaSoTien}" />
+                  </StackPanel>
+
+                  <!-- Loại thu/chi -->
+                  <StackPanel Spacing="0">
+                    <TextBlock Classes="sq-label" Text="Loại thu/chi" />
+                    <ComboBox Classes="sq-input"
+                      ItemsSource="{Binding SoQuySuaLoaiOptions}"
+                      SelectedItem="{Binding SoQuySuaLoai, Mode=TwoWay}"
+                      HorizontalAlignment="Stretch">
+                      <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:SoQuyLuaChonItem">
+                          <TextBlock Text="{Binding HienThi}" FontSize="13" />
+                        </DataTemplate>
+                      </ComboBox.ItemTemplate>
+                      <ComboBox.SelectionBoxItemTemplate>
+                        <DataTemplate x:DataType="models:SoQuyLuaChonItem">
+                          <TextBlock Text="{Binding HienThi}" FontSize="13" />
+                        </DataTemplate>
+                      </ComboBox.SelectionBoxItemTemplate>
+                    </ComboBox>
+                  </StackPanel>
+
+                  <!-- Quỹ -->
+                  <StackPanel Spacing="0">
+                    <TextBlock Classes="sq-label" Text="Quỹ" />
+                    <ComboBox Classes="sq-input"
+                      ItemsSource="{Binding SoQuyPhieuQuyOptions}"
+                      SelectedItem="{Binding SoQuySuaQuy, Mode=TwoWay}"
+                      HorizontalAlignment="Stretch">
+                      <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:SoQuyLuaChon">
+                          <TextBlock Text="{Binding HienThi}" FontSize="13" />
+                        </DataTemplate>
+                      </ComboBox.ItemTemplate>
+                      <ComboBox.SelectionBoxItemTemplate>
+                        <DataTemplate x:DataType="models:SoQuyLuaChon">
+                          <TextBlock Text="{Binding HienThi}" FontSize="13" />
+                        </DataTemplate>
+                      </ComboBox.SelectionBoxItemTemplate>
+                    </ComboBox>
+                  </StackPanel>
+
+                  <!-- Nội dung -->
+                  <StackPanel Spacing="0">
+                    <TextBlock Classes="sq-label" Text="Nội dung" />
+                    <TextBox Classes="sq-input"
+                      Text="{Binding SoQuySuaNoiDung, Mode=TwoWay}"
+                      Watermark="Nội dung thu/chi..."
+                      AcceptsReturn="True"
+                      TextWrapping="Wrap"
+                      Height="96"
+                      VerticalContentAlignment="Top"
+                      Padding="12,10" />
+                  </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="14">
+
+                  <!-- Thời gian: ngày + giờ (hợp nhất lại thành SoQuySuaThoiGian) -->
+                  <StackPanel Spacing="0">
+                    <TextBlock Classes="sq-label" Text="Thời gian" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                      <DatePicker Grid.Column="0"
+                        Classes="sq-date"
+                        SelectedDate="{Binding SoQuySuaNgay, Mode=TwoWay}" />
+                      <TimePicker Grid.Column="1"
+                        SelectedTime="{Binding SoQuySuaGio, Mode=TwoWay}"
+                        Height="34"
+                        FontSize="11"
+                        HorizontalAlignment="Stretch" />
+                    </Grid>
+                  </StackPanel>
+
+                  <!-- Người nộp / người nhận -->
+                  <StackPanel Spacing="0">
+                    <TextBlock Classes="sq-label"
+                      Text="{Binding SoQuySuaNhanTenNguoi}" />
+                    <TextBox Classes="sq-input"
+                      Text="{Binding SoQuySuaTenNguoi, Mode=TwoWay}"
+                      Watermark="Nhập tên người nộp/nhận"
+                      HorizontalAlignment="Stretch" />
+                  </StackPanel>
+
+                  <!-- Ghi chú -->
+                  <StackPanel Spacing="0">
+                    <TextBlock Classes="sq-label" Text="Ghi chú" />
+                    <TextBox Classes="sq-input"
+                      Text="{Binding SoQuySuaGhiChu, Mode=TwoWay}"
+                      Watermark="Ghi chú phiếu..."
+                      AcceptsReturn="True"
+                      TextWrapping="Wrap"
+                      Height="96"
+                      VerticalContentAlignment="Top"
+                      Padding="12,10" />
+                  </StackPanel>
+
+                  <!-- Mã phiếu & người tạo: giữ nguyên, không cho sửa -->
+                  <Border Background="#F7FAF9"
+                    BorderBrush="#E2ECE8"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="12,10">
+                    <StackPanel Spacing="4">
+                      <TextBlock Classes="sq-label" Text="Mã phiếu (không sửa được)" Margin="0" />
+                      <TextBlock Text="{Binding SoQuyPhieuDangSua.MaPhieu}"
+                        FontSize="13"
+                        FontWeight="Bold"
+                        Foreground="#087F6E" />
+                      <TextBlock Text="{Binding SoQuyPhieuDangSua.NguoiTao}"
+                        FontSize="12"
+                        Foreground="#667085" />
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
+              </Grid>
+            </ScrollViewer>
+
+            <!-- FOOTER -->
+            <Border Grid.Row="2"
+              Background="#F7FAF9"
+              BorderBrush="#E2ECE8"
+              BorderThickness="0,1,0,0"
+              CornerRadius="0,0,16,16"
+              Padding="22,16">
+
+              <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+
+                <Button Grid.Column="1"
+                  Classes="sq-btn-secondary"
+                  Content="Đóng"
+                  Command="{Binding DongSoQuySuaPhieuCommand}" />
+
+                <Button Grid.Column="2"
+                  Classes="sq-btn-primary"
+                  Content="Lưu thay đổi"
+                  IsEnabled="{Binding !IsSoQuySuaPhieuDangLuu}"
+                  IsVisible="{Binding CanEditCashBook}"
+                  Command="{Binding LuuSoQuySuaPhieuCommand}" />
+              </Grid>
+            </Border>
           </Grid>
         </Border>
       </Grid>

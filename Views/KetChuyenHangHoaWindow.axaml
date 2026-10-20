@@ -1,0 +1,215 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="using:ShopHoa.Models"
+        x:Class="ShopHoa.Views.KetChuyenHangHoaWindow"
+        Width="920"
+        Height="700"
+        MinWidth="800"
+        MinHeight="600"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Title="Số liệu → Kết chuyển hàng hóa - WINWON"
+        Icon="/Assets/logo.ico"
+        Background="#F0F5FA"
+        RequestedThemeVariant="Light">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.fieldLabel">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#1C3A5E"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+
+        <Style Selector="TextBlock.requiredStar">
+            <Setter Property="Foreground" Value="#D92D20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <Style Selector="ComboBox.classicCombo">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#8EB2D5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="TextBox.classicInput">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#8EB2D5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <Style Selector="Button.actionBtn">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="18,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Border.kpiCard">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#D1E2F2"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14,10"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
+        <!-- 1. HEADER BANNER -->
+        <Border Grid.Row="0" Background="#1E5B94" Padding="20,14">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="3">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="🔄" FontSize="18" VerticalAlignment="Center"/>
+                        <TextBlock Text="KẾT CHUYỂN HÀNG HÓA SANG KỲ MỚI" 
+                                   FontSize="16" FontWeight="Bold" Foreground="White"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="Kết chuyển số lượng tồn và giá trị hàng hóa từ kỳ kế toán nguồn sang kỳ kế toán đích an toàn, không làm nhân đôi số liệu"
+                               FontSize="12" Foreground="#D5E6F7"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="✕" Width="30" Height="30"
+                        Background="#2B6DA8" Foreground="White" CornerRadius="15"
+                        Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                        Cursor="Hand" Click="CloseButton_OnClick" ToolTip.Tip="Đóng cửa sổ"/>
+            </Grid>
+        </Border>
+
+        <!-- 2. BỘ CHỌN KỲ KẾ TOÁN & KHO HÀNG -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#D1E2F2" BorderThickness="0,0,0,1" Padding="16,12">
+            <Grid ColumnDefinitions="*,16,*,16,*,Auto" VerticalAlignment="Center">
+                <!-- KỲ NGUỒN -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Kỳ kết chuyển từ (Nguồn)" Classes="fieldLabel"/>
+                    <ComboBox x:Name="KyNguonComboBox" Classes="classicCombo" HorizontalAlignment="Stretch"
+                              SelectionChanged="KyComboBox_SelectionChanged"/>
+                </StackPanel>
+
+                <!-- KỲ ĐÍCH -->
+                <StackPanel Grid.Column="2">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Kỳ kết chuyển đến (Đích) " Classes="fieldLabel"/>
+                        <TextBlock Text="*" Classes="requiredStar"/>
+                    </StackPanel>
+                    <ComboBox x:Name="KyDichComboBox" Classes="classicCombo" HorizontalAlignment="Stretch"
+                              SelectionChanged="KyComboBox_SelectionChanged"/>
+                </StackPanel>
+
+                <!-- KHO HÀNG -->
+                <StackPanel Grid.Column="4">
+                    <TextBlock Text="Kho hàng áp dụng" Classes="fieldLabel"/>
+                    <ComboBox x:Name="KhoHangComboBox" Classes="classicCombo" HorizontalAlignment="Stretch"
+                              SelectionChanged="KhoComboBox_SelectionChanged"/>
+                </StackPanel>
+
+                <!-- NÚT TẢI LẠI / KIỂM TRA -->
+                <Button Grid.Column="5" x:Name="CheckButton" Classes="actionBtn"
+                        Background="#EAF3FB" Foreground="#1E5B94" BorderBrush="#9EC5E8" BorderThickness="1"
+                        VerticalAlignment="Bottom" Height="34" Margin="16,0,0,0"
+                        Click="CheckButton_OnClick">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="🔍" VerticalAlignment="Center"/>
+                        <TextBlock Text="Kiểm tra dữ liệu" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- 3. THÔNG BÁO KIỂM TRA & THẺ KPI THỐNG KÊ -->
+        <StackPanel Grid.Row="2" Margin="16,10,16,6" Spacing="8">
+            <!-- BẢNG CẢNH BÁO / TRẠNG THÁI KIỂM TRA -->
+            <Border x:Name="StatusNoticeBorder" IsVisible="False"
+                    Background="#EFF8FF" BorderBrush="#B2DDFF" BorderThickness="1" CornerRadius="6" Padding="12,8">
+                <Grid ColumnDefinitions="Auto,*">
+                    <TextBlock x:Name="StatusNoticeIcon" Text="ℹ️" FontSize="15" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" x:Name="StatusNoticeText" Text="Thông báo trạng thái"
+                               FontSize="12.5" Foreground="#175CD3" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+
+            <!-- THẺ KPI THỐNG KÊ TỒN KHO -->
+            <Grid ColumnDefinitions="*,12,*,12,*">
+                <Border Grid.Column="0" Classes="kpiCard">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="TỔNG SỐ MẶT HÀNG" FontSize="11" FontWeight="SemiBold" Foreground="#667085"/>
+                        <TextBlock x:Name="TxtTongMatHang" Text="0" FontSize="18" FontWeight="Bold" Foreground="#1D2939"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Classes="kpiCard">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="TỔNG SỐ LƯỢNG TỒN" FontSize="11" FontWeight="SemiBold" Foreground="#667085"/>
+                        <TextBlock x:Name="TxtTongSoLuong" Text="0" FontSize="18" FontWeight="Bold" Foreground="#027A48"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="4" Classes="kpiCard">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="TỔNG GIÁ TRỊ TỒN KHO" FontSize="11" FontWeight="SemiBold" Foreground="#667085"/>
+                        <TextBlock x:Name="TxtTongGiaTri" Text="0 đ" FontSize="18" FontWeight="Bold" Foreground="#175CD3"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+
+        <!-- 4. DANH SÁCH HÀNG HÓA KẾT CHUYỂN (PREVIEW GRID) -->
+        <Border Grid.Row="3" Margin="16,4,16,10" Background="White" BorderBrush="#D1E2F2" BorderThickness="1" CornerRadius="6">
+            <DataGrid x:Name="HangHoaDataGrid"
+                      x:DataType="models:KetChuyenHangHoaItem"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      GridLinesVisibility="All"
+                      CanUserResizeColumns="True"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="STT" Binding="{Binding SoThuTu}" Width="50"/>
+                    <DataGridTextColumn Header="Mã hàng" Binding="{Binding MaSanPham}" Width="120"/>
+                    <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding TenSanPham}" Width="*"/>
+                    <DataGridTextColumn Header="ĐVT" Binding="{Binding DonViTinh}" Width="80"/>
+                    <DataGridTextColumn Header="Kho hàng" Binding="{Binding TenKho}" Width="140"/>
+                    <DataGridTextColumn Header="Số lượng tồn" Binding="{Binding SoLuongHienThi}" Width="110"/>
+                    <DataGridTextColumn Header="Giá vốn bình quân" Binding="{Binding GiaVonHienThi}" Width="130"/>
+                    <DataGridTextColumn Header="Thành tiền" Binding="{Binding ThanhTienHienThi}" Width="140"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- 5. FOOTER THAO TÁC & GHI CHÚ -->
+        <Border Grid.Row="4" Background="White" BorderBrush="#D1E2F2" BorderThickness="0,1,0,0" Padding="16,10">
+            <Grid ColumnDefinitions="*,Auto">
+                <!-- GHI CHÚ -->
+                <TextBox x:Name="GhiChuTextBox" Classes="classicInput"
+                         Watermark="Ghi chú kết chuyển (tùy chọn)..." Margin="0,0,16,0"/>
+
+                <!-- CÁC NÚT THAO TÁC -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                    <Button x:Name="CancelButton" Classes="actionBtn"
+                            Background="#F2F4F7" Foreground="#344054" BorderBrush="#D0D5DD" BorderThickness="1"
+                            Content="❌  Đóng" Click="CancelButton_OnClick"/>
+
+                    <Button x:Name="ExecuteButton" Classes="actionBtn"
+                            Background="#087F6E" Foreground="White"
+                            Content="🔄  Thực hiện kết chuyển" Click="ExecuteButton_OnClick"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

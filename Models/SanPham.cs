@@ -1,3 +1,4 @@
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Avalonia.Media.Imaging;
 
@@ -21,6 +22,8 @@ public sealed partial class SanPham : ObservableObject
     private decimal giaBan;
 
     public decimal GiaVon { get; set; }
+
+    public string GiaVonHienThi => GiaVon.ToString("N0", CultureInfo.GetCultureInfo("vi-VN")) + " đ";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HetHang))]

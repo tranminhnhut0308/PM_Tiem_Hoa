@@ -476,15 +476,11 @@
                                FontSize="13"
                                Margin="0,13,0,2"/>
 
-                    <ComboBox SelectedValue="{Binding SslMode}"
-                              SelectedValueBinding="{Binding}"
-                              MinHeight="46">
-
-                        <ComboBoxItem Content="None"/>
-                        <ComboBoxItem Content="Preferred"/>
-                        <ComboBoxItem Content="Required"/>
-
-                    </ComboBox>
+                    <!-- Bind trực tiếp theo chuỗi để giá trị lưu vào cấu hình luôn
+                         là tên SSL Mode hợp lệ, không phải đối tượng ComboBoxItem. -->
+                    <ComboBox ItemsSource="{Binding SslModeOptions}"
+                              SelectedItem="{Binding SslMode, Mode=TwoWay}"
+                              MinHeight="46" />
 
 
                     <!-- STATUS -->

@@ -38,6 +38,22 @@ public partial class SoQuyGiaoDich : ObservableObject
     /// <summary>Mã phương thức quỹ (tiền mặt, chuyển khoản...).</summary>
     public string PhuongThuc { get; set; } = "";
 
+    /// <summary>
+    /// Mã phương thức đã đổi sang nhãn tiếng Việt để hiển thị trên bảng.
+    /// Cùng cách đổi mã với <see cref="SoQuyChiTiet.PhuongThucHienThi"/> nên
+    /// cột "Quỹ" của Sổ quỹ, Danh sách phiếu chi và màn chi tiết luôn giống nhau.
+    /// </summary>
+    public string PhuongThucHienThi => string.IsNullOrWhiteSpace(PhuongThuc)
+        ? "Chưa ghi nhận"
+        : PhuongThuc.Trim().ToUpperInvariant() switch
+        {
+            "TIEN_MAT" => "Tiền mặt",
+            "CHUYEN_KHOAN" or "CHUYEN_KHOAN_NGAN_HANG" or "NGAN_HANG" => "Ngân hàng",
+            "THE" or "THE_TIN_DUNG" => "Thẻ",
+            "VI_DIEN_TU" or "VI" => "Ví điện tử",
+            _ => PhuongThuc
+        };
+
     /// <summary>Mã trạng thái chứng từ trong database (HOAN_THANH / HUY).</summary>
     public string TrangThai { get; set; } = "";
 

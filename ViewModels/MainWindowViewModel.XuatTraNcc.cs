@@ -11,6 +11,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ShopHoa.Helpers;
 using ShopHoa.Models;
+using ShopHoa.Services;
 
 namespace ShopHoa.ViewModels;
 
@@ -590,7 +591,10 @@ public partial class MainWindowViewModel
 
         try
         {
-            var (suppliers, _) = await _db.GetNhaCungCapPagedAsync(kw.Trim(), 1, 10);
+            var (suppliers, _) = await _db.GetNhaCungCapPagedAsync(
+                new BoLocNhaCungCap { TimKiem = kw.Trim() },
+                1,
+                10);
             foreach (var s in suppliers)
             {
                 PhieuXuatTraSupplierSuggestions.Add(s);

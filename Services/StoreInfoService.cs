@@ -21,6 +21,15 @@ namespace ShopHoa.Services;
 /// </summary>
 public sealed class StoreInfoService
 {
+    /// <summary>Tên tiệm mặc định dùng khi database chưa có thông tin.</summary>
+    private const string TenTiemMacDinh = "TIỆM HOA NHÀ HUY";
+
+    /// <summary>
+    /// Tên tiệm mặc định của bản cũ ("Vựa Hoa"). Vẫn nhận ra giá trị này để dữ
+    /// liệu cũ chưa đổi tên tiếp tục rơi vào nhánh đọc từ bảng <c>don_vi</c>.
+    /// </summary>
+    private const string TenTiemMacDinhCu = "VỰA HOA NHÀ HUY";
+
     private readonly Func<Task<MySqlConnection>> _taoKetNoi;
 
     public StoreInfoService(Func<Task<MySqlConnection>> taoKetNoi)
@@ -69,7 +78,7 @@ public sealed class StoreInfoService
             // ứng dụng hoặc lần sau đều không sinh thêm dòng.
             await connection.ExecuteAsync(
                 "INSERT IGNORE INTO thong_tin_tiem (id, ten_tiem, loi_cam_on) "
-                + "VALUES (1, 'VỰA HOA NHÀ HUY', 'Cảm ơn quý khách!');");
+                + $"VALUES (1, '{TenTiemMacDinh}', 'Cảm ơn quý khách!');");
 
             return true;
         }
@@ -115,7 +124,10 @@ public sealed class StoreInfoService
 
             var info = await connection.QueryFirstOrDefaultAsync<ThongTinTiem>(sql);
 
-            if (info is null || string.IsNullOrWhiteSpace(info.TenTiem) || info.TenTiem == "VỰA HOA NHÀ HUY")
+            if (info is null
+                || string.IsNullOrWhiteSpace(info.TenTiem)
+                || info.TenTiem == TenTiemMacDinh
+                || info.TenTiem == TenTiemMacDinhCu)
             {
                 try
                 {

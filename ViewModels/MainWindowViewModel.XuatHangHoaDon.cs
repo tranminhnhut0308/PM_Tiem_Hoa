@@ -426,6 +426,22 @@ public partial class MainWindowViewModel
                 </tr>
             """));
 
+            // CSS để trong raw string thường (không interpolation) vì CSS dùng
+            // nhiều dấu { } liên tiếp; để trực tiếp trong $""" thì compiler bắt
+            // phải tăng số ký tự $ (xem CS9006).
+            var css = """
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 30px; color: #1e293b; }
+                    .header { text-align: center; margin-bottom: 24px; }
+                    .title { font-size: 24px; font-weight: bold; color: #0f172a; text-transform: uppercase; }
+                    .code { font-size: 14px; color: #0284c7; margin-top: 4px; font-weight: 600; }
+                    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; font-size: 13.5px; background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 13px; }
+                    th, td { border: 1px solid #cbd5e1; padding: 8px 10px; }
+                    th { background-color: #f1f5f9; color: #334155; text-align: left; }
+                    .total-box { margin-top: 16px; text-align: right; font-size: 15px; font-weight: bold; }
+                    .sign-grid { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr 1fr; text-align: center; font-size: 13px; }
+                """;
+
             var html = $"""
             <!DOCTYPE html>
             <html>
@@ -433,16 +449,7 @@ public partial class MainWindowViewModel
                 <meta charset="utf-8">
                 <title>Phiếu Xuất Kho - {phieu.MaPhieuXuat}</title>
                 <style>
-                    body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 30px; color: #1e293b; }}
-                    .header {{ text-align: center; margin-bottom: 24px; }}
-                    .title {{ font-size: 24px; font-weight: bold; color: #0f172a; text-transform: uppercase; }}
-                    .code {{ font-size: 14px; color: #0284c7; margin-top: 4px; font-weight: 600; }}
-                    .info-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; font-size: 13.5px; background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0; }}
-                    table {{ width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 13px; }}
-                    th, td {{ border: 1px solid #cbd5e1; padding: 8px 10px; }}
-                    th {{ background-color: #f1f5f9; color: #334155; text-align: left; }}
-                    .total-box {{ margin-top: 16px; text-align: right; font-size: 15px; font-weight: bold; }}
-                    .sign-grid {{ margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr 1fr; text-align: center; font-size: 13px; }}
+                {css}
                 </style>
             </head>
             <body>
@@ -533,10 +540,10 @@ public partial class MainWindowViewModel
     public bool CanInvoiceTrangTruoc => InvoicePage > 1 && !IsLoadingInvoices;
     public bool CanInvoiceTrangSau => InvoicePage < InvoiceTotalPages && !IsLoadingInvoices;
 
-    public bool IsInvoiceFilterAll => InvoiceTrangThaiLoc == "ALL";
-    public bool IsInvoiceFilterPaid => InvoiceTrangThaiLoc == "PAID";
-    public bool IsInvoiceFilterDebt => InvoiceTrangThaiLoc == "DEBT";
-    public bool IsInvoiceFilterCancel => InvoiceTrangThaiLoc == "CANCEL";
+    public bool IsInvoiceTrangThaiAll => InvoiceTrangThaiLoc == "ALL";
+    public bool IsInvoiceTrangThaiPaid => InvoiceTrangThaiLoc == "PAID";
+    public bool IsInvoiceTrangThaiDebt => InvoiceTrangThaiLoc == "DEBT";
+    public bool IsInvoiceTrangThaiCancel => InvoiceTrangThaiLoc == "CANCEL";
 
     public bool CoBoLocHoaDon => !string.IsNullOrWhiteSpace(InvoiceSearch)
                                  || InvoiceTuNgay.HasValue
@@ -580,10 +587,10 @@ public partial class MainWindowViewModel
     public async Task LocHoaDonTheoTrangThaiAsync(string param)
     {
         InvoiceTrangThaiLoc = (param ?? "ALL").ToUpperInvariant();
-        OnPropertyChanged(nameof(IsInvoiceFilterAll));
-        OnPropertyChanged(nameof(IsInvoiceFilterPaid));
-        OnPropertyChanged(nameof(IsInvoiceFilterDebt));
-        OnPropertyChanged(nameof(IsInvoiceFilterCancel));
+        OnPropertyChanged(nameof(IsInvoiceTrangThaiAll));
+        OnPropertyChanged(nameof(IsInvoiceTrangThaiPaid));
+        OnPropertyChanged(nameof(IsInvoiceTrangThaiDebt));
+        OnPropertyChanged(nameof(IsInvoiceTrangThaiCancel));
         OnPropertyChanged(nameof(CoBoLocHoaDon));
 
         InvoicePage = 1;
@@ -599,10 +606,10 @@ public partial class MainWindowViewModel
         InvoiceTrangThaiLoc = "ALL";
         InvoicePhuongThucLoc = "ALL";
 
-        OnPropertyChanged(nameof(IsInvoiceFilterAll));
-        OnPropertyChanged(nameof(IsInvoiceFilterPaid));
-        OnPropertyChanged(nameof(IsInvoiceFilterDebt));
-        OnPropertyChanged(nameof(IsInvoiceFilterCancel));
+        OnPropertyChanged(nameof(IsInvoiceTrangThaiAll));
+        OnPropertyChanged(nameof(IsInvoiceTrangThaiPaid));
+        OnPropertyChanged(nameof(IsInvoiceTrangThaiDebt));
+        OnPropertyChanged(nameof(IsInvoiceTrangThaiCancel));
         OnPropertyChanged(nameof(CoBoLocHoaDon));
 
         InvoicePage = 1;

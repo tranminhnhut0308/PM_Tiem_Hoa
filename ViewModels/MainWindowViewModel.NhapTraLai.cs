@@ -11,6 +11,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ShopHoa.Helpers;
 using ShopHoa.Models;
+using ShopHoa.Services;
 
 namespace ShopHoa.ViewModels;
 
@@ -551,7 +552,7 @@ public partial class MainWindowViewModel
         }
 
         var kw = keyword.Trim().ToLowerInvariant();
-        var matches = KhachHangs
+        var matches = (await _db.GetKhachHangAsync(keyword.Trim()))
             .Where(k => (!string.IsNullOrWhiteSpace(k.TenKhachHang) && k.TenKhachHang.ToLowerInvariant().Contains(kw))
                      || (!string.IsNullOrWhiteSpace(k.SoDienThoai) && k.SoDienThoai.Contains(kw))
                      || (!string.IsNullOrWhiteSpace(k.MaKhachHang) && k.MaKhachHang.ToLowerInvariant().Contains(kw)))
@@ -625,7 +626,7 @@ public partial class MainWindowViewModel
         // Nếu hóa đơn có khách hàng, tự động điền khách hàng
         if (hd.KhachHangId.HasValue && hd.KhachHangId.Value > 0 && SelectedPhieuTraKhachHang is null)
         {
-            var kh = KhachHangs.FirstOrDefault(k => k.Id == hd.KhachHangId.Value);
+            var kh = await _db.GetKhachHangByIdAsync(hd.KhachHangId.Value);
             if (kh is not null)
             {
                 SelectedPhieuTraKhachHang = kh;
