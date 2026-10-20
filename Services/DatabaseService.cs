@@ -3176,7 +3176,7 @@ public sealed partial class DatabaseService
     /// </list>
     /// Nhờ vậy thẻ thống kê và tổng các dòng trong bảng luôn dùng chung một quy tắc.
     /// </summary>
-    public async Task<(int TongSoKhachHang, int SoKhachMoi, decimal TongNoHienTai, decimal TongBan)>
+    public async Task<ThongKeDanhSachKhachHang>
         GetThongKeDanhSachKhachHangAsync(int soNgay = SoNgayKhachMoiMacDinh)
     {
         var coBangTraHang = await HasBangTraHangAsync();
@@ -3197,6 +3197,8 @@ public sealed partial class DatabaseService
                 ),
                 0
             ) AS SoKhachMoi,
+            COALESCE(SUM(CASE WHEN kh.loai_khach_hang = 'DOAN' OR kh.loai_khach_hang = 'DOANH_NGHIEP' THEN 1 ELSE 0 END), 0) AS SoKhachDoanhNghiep,
+            COALESCE(SUM(CASE WHEN kh.loai_khach_hang = 'CA_NHAN' OR kh.loai_khach_hang IS NULL OR kh.loai_khach_hang = '' THEN 1 ELSE 0 END), 0) AS SoKhachCaNhan,
             COALESCE(SUM({tien.NoHienTai}), 0) AS TongNoHienTai,
             COALESCE(SUM({tien.TongBan}), 0) AS TongBan
         FROM khach_hang kh
@@ -3209,9 +3211,9 @@ public sealed partial class DatabaseService
             sql,
             new { SoNgay = soNgay < 1 ? SoNgayKhachMoiMacDinh : soNgay });
 
-        return row is null
-            ? (0, 0, 0m, 0m)
-            : (row.TongSoKhachHang, row.SoKhachMoi, row.TongNoHienTai, row.TongBan);
+        return row ?? new ThongKeDanhSachKhachHang();
+
+
     }
 
     /// <summary>Danh sách nhóm khách hàng đang hoạt động, dùng cho ComboBox trong form nhập/sửa.</summary>

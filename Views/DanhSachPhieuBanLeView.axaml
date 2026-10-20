@@ -86,7 +86,7 @@
   </UserControl.Styles>
 
   <!-- MÀN HÌNH: DANH SÁCH PHIẾU BÁN LẺ (HÓA ĐƠN) -->
-  <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="12" Margin="16,14,16,16">
+  <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="12" Margin="0,2,0,0">
 
     <!-- ============================================================ -->
     <!-- HEADER BAR: Tiêu đề + Các nút hành động chính -->
@@ -146,7 +146,7 @@
 
           <!-- Nút Tạo phiếu bán lẻ -->
           <Button Classes="btnPrimary"
-            Command="{Binding MoGiaoDienBanHangCommand}"
+            Command="{Binding MoGiaoDienBanHangCommand}" IsVisible="{Binding CanViewSales}"
             Padding="16,8"
             FontSize="13"
             VerticalAlignment="Center"

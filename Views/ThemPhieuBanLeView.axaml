@@ -100,7 +100,7 @@
 
   <!-- KHUNG VIỀN CHÍNH CỬA SỔ BÁN HÀNG -->
   <Border Background="#FFFFFF" CornerRadius="16" Padding="18" BorderBrush="#CBD5E1"
-          BorderThickness="1" Margin="12" BoxShadow="0 10 30 #0F172A1E">
+          BorderThickness="1" Margin="0,2,0,0" BoxShadow="0 4 16 #0F172A14">
     <Grid RowDefinitions="Auto,Auto,*" RowSpacing="12">
 
       <!-- ============================================================ -->
@@ -160,6 +160,17 @@
 
         <!-- Action buttons on Top-Right -->
         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Button Classes="btnOutline"
+                  Height="34"
+                  Padding="12,6"
+                  Command="{Binding ChonHoaDonSubTabCommand}"
+                  CommandParameter="1"
+                  ToolTip.Tip="Chuyển sang xem danh sách hóa đơn bán lẻ">
+            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+              <TextBlock Text="📋" FontSize="12" />
+              <TextBlock Text="Danh sách hóa đơn" FontSize="12" FontWeight="SemiBold" />
+            </StackPanel>
+          </Button>
           <Button Classes="btnOutline"
                   Content="🧾 Đơn mới"
                   Height="34"

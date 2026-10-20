@@ -1,0 +1,327 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ShopHoa.ViewModels"
+             xmlns:models="using:ShopHoa.Models"
+             xmlns:converters="using:ShopHoa.Converters"
+             x:Class="ShopHoa.Views.QuanLyKhoTheoKyView"
+             x:DataType="vm:QuanLyKhoTheoKyViewModel"
+             Background="#F4F7F6">
+
+    <UserControl.Resources>
+        <converters:ThousandsSeparatorConverter x:Key="ThousandsSeparatorConverter" />
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="TextBox.gridNumberInput">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Background" Value="#F8FCFA"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#BCD3E6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="HorizontalContentAlignment" Value="Right"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="12.5"/>
+        </Style>
+
+        <Style Selector="TextBox.gridNumberInput:focus">
+            <Setter Property="BorderBrush" Value="#087F6E"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+
+        <Style Selector="Border.statCard">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#D8E5E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="BoxShadow" Value="0 2 8 #0A000000"/>
+        </Style>
+
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background" Value="#E2EFEA" />
+            <Setter Property="Foreground" Value="#164B40" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="8,8" />
+            <Setter Property="FontSize" Value="12.5" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="0,4,0,0">
+
+        <!-- 1. BẢNG THỐNG KÊ NHANH (CARDS) -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,*,*,*,*,*" ColumnSpacing="10" Margin="0,0,0,12">
+            <!-- Card 1: Số mặt hàng -->
+            <Border Grid.Column="0" Classes="statCard">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="Mặt hàng trong kỳ" FontSize="11.5" Foreground="#61736E" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding TongSoMatHang, StringFormat={}{0:N0} loại}" FontSize="16" FontWeight="Bold" Foreground="#164B40"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 2: Tồn đầu kỳ thực tế -->
+            <Border Grid.Column="1" Classes="statCard">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="Tồn đầu kỳ thực tế" FontSize="11.5" Foreground="#61736E" FontWeight="SemiBold"/>
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="{Binding TongSoLuongThucTeDauKy, StringFormat={}{0:N0}}" FontSize="16" FontWeight="Bold" Foreground="#087F6E"/>
+                        <TextBlock Text="{Binding TongSoLuongDieuChinh, StringFormat='(Đ/c: {0:+0;-0;0})'}"
+                                   FontSize="11.5" Foreground="#D92D20" VerticalAlignment="Center"
+                                   IsVisible="{Binding TongSoLuongDieuChinh, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 3: Giá trị tồn đầu -->
+            <Border Grid.Column="2" Classes="statCard">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="Tổng giá trị tồn đầu" FontSize="11.5" Foreground="#61736E" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding TongGiaTriTonDauKy, StringFormat={}{0:N0} đ}" FontSize="16" FontWeight="Bold" Foreground="#B45309"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 4: Nhập trong kỳ -->
+            <Border Grid.Column="3" Classes="statCard">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="Nhập trong kỳ" FontSize="11.5" Foreground="#61736E" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding TongNhapTrongKy, StringFormat=+{0:N0}}" FontSize="16" FontWeight="Bold" Foreground="#1570EF"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 5: Xuất bán trong kỳ -->
+            <Border Grid.Column="4" Classes="statCard">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="Xuất bán trong kỳ" FontSize="11.5" Foreground="#61736E" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding TongXuatTrongKy, StringFormat=-{0:N0}}" FontSize="16" FontWeight="Bold" Foreground="#D92D20"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 6: Tồn hiện tại / Tồn cuối -->
+            <Border Grid.Column="5" Classes="statCard" Background="#EBF7F3" BorderBrush="#087F6E">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="Tồn hiện tại (Tồn cuối)" FontSize="11.5" Foreground="#087F6E" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding TongTonHienTai, StringFormat={}{0:N0}}" FontSize="16" FontWeight="Bold" Foreground="#065F52"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- 2. THANH ĐIỀU HƯỚNG KỲ & BỘ NÚT HÀNH ĐỘNG CHÍNH -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#D8E5E0" BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,0,10">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+
+                <!-- CHỌN KỲ KINH DOANH -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <TextBlock Text="Kỳ kinh doanh:" FontWeight="Bold" Foreground="#164B40" VerticalAlignment="Center" FontSize="13.5"/>
+                    <ComboBox ItemsSource="{Binding DanhSachKy}"
+                              SelectedItem="{Binding SelectedKy, Mode=TwoWay}"
+                              Height="36" MinWidth="220" CornerRadius="6"
+                              Background="#F7FAF9" BorderBrush="#C2D6CF">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="models:KyKeToan">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding TenKy}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding TrangThaiText}" FontSize="11" VerticalAlignment="Center"
+                                               Foreground="{Binding TrangThaiKhoaSo, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <!-- BADGE TRẠNG THÁI KỲ -->
+                    <Border Background="#E6F4EA" CornerRadius="6" Padding="8,4" VerticalAlignment="Center"
+                            IsVisible="{Binding SelectedKy.IsDangMo, FallbackValue=false}">
+                        <TextBlock Text="🟢 Đang mở bán" FontSize="12" FontWeight="Bold" Foreground="#137333"/>
+                    </Border>
+                    <Border Background="#FEE4E2" CornerRadius="6" Padding="8,4" VerticalAlignment="Center"
+                            IsVisible="{Binding SelectedKy.TrangThaiKhoaSo, FallbackValue=false}">
+                        <TextBlock Text="🔒 Đã kết kỳ (Khóa sổ)" FontSize="12" FontWeight="Bold" Foreground="#B42318"/>
+                    </Border>
+
+                    <!-- THỜI GIAN KỲ -->
+                    <TextBlock Text="{Binding SelectedKy.ThoiGianHienThi}" Foreground="#61736E" FontSize="12" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                </StackPanel>
+
+                <!-- BỘ NÚT THAO TÁC NGHIỆP VỤ -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                    <!-- Nút Tạo kỳ mới -->
+                    <Button Classes="toolbar-primary" Height="36" Padding="12,0" Margin="0"
+                            Content="＋ Kỳ mới" Command="{Binding TaoKyMoiCommand}"
+                            ToolTip.Tip="Khởi tạo một kỳ kinh doanh mới và tự động kế thừa tồn kho"/>
+
+                    <!-- Nút Load tồn kỳ trước -->
+                    <Button Classes="toolbar-action" Height="36" Padding="12,0" Margin="0"
+                            Content="🔄 Load tồn kỳ trước" Command="{Binding LoadTonKyTruocCommand}"
+                            ToolTip.Tip="Nạp lại số lượng tồn cuối từ kỳ trước sang làm tồn đầu kỳ này"
+                            IsEnabled="{Binding SelectedKy.IsDangMo, FallbackValue=false}"/>
+
+                    <!-- Nút Thêm hàng vào kỳ -->
+                    <Button Classes="toolbar-action" Height="36" Padding="12,0" Margin="0"
+                            Content="＋ Thêm hàng vào kỳ" Command="{Binding ThemHangVaoKyCommand}"
+                            ToolTip.Tip="Bổ sung thêm hoa tươi từ danh mục để bán trong kỳ này"
+                            IsEnabled="{Binding SelectedKy.IsDangMo, FallbackValue=false}"/>
+
+                    <!-- Nút Nhập hàng (chuyển nhanh sang lập phiếu nhập) -->
+                    <Button Classes="toolbar-primary" Height="36" Padding="12,0" Margin="0"
+                            Background="#1976D2"
+                            Content="📥 Nhập hàng" Command="{Binding ChuyenSangNhapHangCommand}"
+                            ToolTip.Tip="Chuyển sang trang Lập phiếu nhập hàng để bổ sung kho cho kỳ này"/>
+
+                    <!-- Nút Lưu thay đổi -->
+                    <Button Classes="toolbar-primary" Height="36" Padding="14,0" Margin="0"
+                            Background="#087F6E"
+                            Content="💾 Lưu thay đổi" Command="{Binding LuuDieuChinhCommand}"
+                            ToolTip.Tip="Lưu lại các số lượng điều chỉnh kiểm kê, giá vốn và giá bán vừa sửa"
+                            IsEnabled="{Binding SelectedKy.IsDangMo, FallbackValue=false}"/>
+
+                    <!-- Nút Kết kỳ -->
+                    <Button Classes="toolbar-action" Height="36" Padding="12,0" Margin="0"
+                            BorderBrush="#D92D20" Foreground="#D92D20"
+                            Content="🔒 Kết kỳ" Command="{Binding KetKyCommand}"
+                            ToolTip.Tip="Chốt số liệu tồn cuối kỳ và khóa sổ kỳ này"
+                            IsVisible="{Binding SelectedKy.IsDangMo, FallbackValue=false}"/>
+
+                    <!-- Nút Mở lại kỳ (nếu đã kết kỳ) -->
+                    <Button Classes="toolbar-action" Height="36" Padding="12,0" Margin="0"
+                            BorderBrush="#F79009" Foreground="#B54708"
+                            Content="🔓 Mở lại kỳ" Command="{Binding MoLaiKyCommand}"
+                            ToolTip.Tip="Mở lại kỳ để chỉnh sửa lại số liệu"
+                            IsVisible="{Binding SelectedKy.TrangThaiKhoaSo, FallbackValue=false}"/>
+
+                    <!-- Nút Xuất Excel -->
+                    <Button Classes="toolbar-action" Height="36" Padding="12,0" Margin="0"
+                            Content="📊 Xuất Excel" Command="{Binding XuatExcelCommand}"
+                            ToolTip.Tip="Xuất toàn bộ bảng tồn kho theo kỳ này ra file Excel"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 3. THANH TÌM KIẾM & LỌC THEO NHÓM -->
+        <Grid Grid.Row="2" ColumnDefinitions="320,240,*,Auto" ColumnSpacing="10" Margin="0,0,0,8">
+            <TextBox Grid.Column="0" Classes="searchInput" Height="36"
+                     Watermark="⌕  Tìm theo mã hoa, tên hoa..."
+                     Text="{Binding SearchText, Mode=TwoWay}"/>
+
+            <ComboBox Grid.Column="1" ItemsSource="{Binding NhomOptions}"
+                      SelectedItem="{Binding SelectedNhom, Mode=TwoWay}"
+                      Height="36" HorizontalAlignment="Stretch" CornerRadius="6"
+                      Background="White" BorderBrush="#D8E5E0">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:ProductOption">
+                        <TextBlock Text="{Binding Name}" FontSize="12.5" VerticalAlignment="Center"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <TextBlock Grid.Column="3" Text="{Binding StatusMessage}"
+                       Foreground="#61736E" FontSize="12" VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"/>
+        </Grid>
+
+        <!-- 4. BẢNG DỮ LIỆU TỒN KHO THEO KỲ (EDITABLE DATAGRID) -->
+        <Border Grid.Row="3" Background="White" BorderBrush="#D8E5E0" BorderThickness="1" CornerRadius="10" ClipToBounds="True">
+            <DataGrid ItemsSource="{Binding HangHoas}"
+                      AutoGenerateColumns="False"
+                      CanUserResizeColumns="True"
+                      CanUserSortColumns="True"
+                      GridLinesVisibility="Horizontal"
+                      IsReadOnly="False">
+                <DataGrid.Columns>
+                    <!-- STT -->
+                    <DataGridTextColumn Header="STT" Binding="{Binding Stt}" Width="45" IsReadOnly="True"/>
+
+                    <!-- MÃ HÀNG -->
+                    <DataGridTextColumn Header="Mã hoa" Binding="{Binding MaHangHoa}" Width="110" IsReadOnly="True" FontWeight="SemiBold"/>
+
+                    <!-- TÊN HÀNG -->
+                    <DataGridTextColumn Header="Tên hoa / Sản phẩm" Binding="{Binding TenHangHoa}" Width="220" IsReadOnly="True" FontWeight="Bold"/>
+
+                    <!-- ĐVT -->
+                    <DataGridTextColumn Header="ĐVT" Binding="{Binding DonViTinh}" Width="70" IsReadOnly="True"/>
+
+                    <!-- NHÓM HÀNG -->
+                    <DataGridTextColumn Header="Nhóm hàng" Binding="{Binding NhomHangHoa}" Width="130" IsReadOnly="True"/>
+
+                    <!-- TỒN ĐẦU KỲ -->
+                    <DataGridTextColumn Header="Tồn đầu kỳ" Binding="{Binding SoLuongDauKy, StringFormat={}{0:N0}}" Width="95" IsReadOnly="True"/>
+
+                    <!-- ĐIỀU CHỈNH (+/- HAO HỤT) (Ô NHẬP TRỰC TIẾP) -->
+                    <DataGridTemplateColumn Header="Điều chỉnh (+/-)" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:HangHoaKyKhoItem">
+                                <TextBox Classes="gridNumberInput"
+                                         Text="{Binding SoLuongDieuChinh, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip.Tip="Nhập số âm nếu hao hụt/hoa hỏng (vd: -5), hoặc số dương nếu kiểm kê tăng"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- TỒN THỰC TẾ ĐẦU KỲ -->
+                    <DataGridTextColumn Header="Tồn thực tế" Binding="{Binding SoLuongThucTeDauKy, StringFormat={}{0:N0}}" Width="95" IsReadOnly="True" FontWeight="Bold" Foreground="#087F6E"/>
+
+                    <!-- GIÁ VỐN ĐẦU KỲ (Ô NHẬP TRỰC TIẾP) -->
+                    <DataGridTemplateColumn Header="Giá vốn đầu kỳ (đ)" Width="130">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:HangHoaKyKhoItem">
+                                <TextBox Classes="gridNumberInput"
+                                         Text="{Binding GiaVonDauKy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip.Tip="Giá vốn áp dụng cho đầu kỳ này"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- GIÁ BÁN KỲ NÀY (Ô NHẬP TRỰC TIẾP) -->
+                    <DataGridTemplateColumn Header="Giá bán kỳ này (đ)" Width="130">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:HangHoaKyKhoItem">
+                                <TextBox Classes="gridNumberInput"
+                                         Text="{Binding GiaBanDauKy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip.Tip="Giá bán lẻ áp dụng cho kỳ này tại quầy POS"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- THÀNH TIỀN TỒN ĐẦU -->
+                    <DataGridTextColumn Header="Thành tiền đầu kỳ" Binding="{Binding ThanhTienDauKy, Converter={StaticResource ThousandsSeparatorConverter}, StringFormat={}{0} đ}" Width="135" IsReadOnly="True" Foreground="#B45309"/>
+
+                    <!-- NHẬP TRONG KỲ -->
+                    <DataGridTextColumn Header="Nhập trong kỳ" Binding="{Binding SoLuongNhap, StringFormat=+{0:N0}}" Width="110" IsReadOnly="True" Foreground="#1570EF" FontWeight="SemiBold"/>
+
+                    <!-- XUẤT TRONG KỲ -->
+                    <DataGridTextColumn Header="Xuất bán" Binding="{Binding SoLuongXuat, StringFormat=-{0:N0}}" Width="95" IsReadOnly="True" Foreground="#D92D20" FontWeight="SemiBold"/>
+
+                    <!-- TỒN HIỆN TẠI / TỒN CUỐI -->
+                    <DataGridTextColumn Header="Tồn hiện tại" Binding="{Binding TonCuoiKyHienThi, StringFormat={}{0:N0}}" Width="105" IsReadOnly="True" FontWeight="Bold" Foreground="#087F6E"/>
+
+                    <!-- MỞ BÁN TRONG KỲ NÀY -->
+                    <DataGridTemplateColumn Header="Mở bán" Width="80">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:HangHoaKyKhoItem">
+                                <CheckBox IsChecked="{Binding DangMoBan, Mode=TwoWay}"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          ToolTip.Tip="Tick chọn: Hoa này có bán trong kỳ (hiển thị ở POS); Bỏ chọn: Không bán mùa này"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- THAO TÁC XÓA -->
+                    <DataGridTemplateColumn Header="" Width="50">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:HangHoaKyKhoItem">
+                                <Button Content="✕" Width="24" Height="24" CornerRadius="12"
+                                        Padding="0" Background="#FEE4E2" Foreground="#D92D20" BorderThickness="0"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        ToolTip.Tip="Bỏ mặt hàng ra khỏi kỳ kinh doanh này"
+                                        Command="{Binding $parent[UserControl].((vm:QuanLyKhoTheoKyViewModel)DataContext).XoaHangKhoiKyCommand}"
+                                        CommandParameter="{Binding}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+    </Grid>
+</UserControl>

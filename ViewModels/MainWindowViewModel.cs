@@ -25,7 +25,19 @@ public partial class MainWindowViewModel : ObservableObject
     private Task? _customerLoadTask;
     private CancellationTokenSource? _productSearchCts;
     private int _productLoadVersion;
-    public Window? OwnerWindow { get; set; }
+    private Window? _ownerWindow;
+    public Window? OwnerWindow
+    {
+        get => _ownerWindow;
+        set
+        {
+            _ownerWindow = value;
+            if (QuanLyKhoTheoKy != null)
+                QuanLyKhoTheoKy.OwnerWindow = value;
+            if (QuanLyCongNoTheoKy != null)
+                QuanLyCongNoTheoKy.OwnerWindow = value;
+        }
+    }
     private bool _customersLoaded;
     private bool _invoicesLoaded;
     private bool _overviewLoaded;
@@ -80,6 +92,12 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Màn "Thông tin tiệm". Giữ instance sống suốt phiên như các màn khác.</summary>
     public ThongTinTiemViewModel ThongTinTiem { get; }
 
+    /// <summary>Phân hệ Quản lý tồn kho theo kỳ kinh doanh.</summary>
+    public QuanLyKhoTheoKyViewModel QuanLyKhoTheoKy { get; }
+
+    /// <summary>Phân hệ Quản lý công nợ theo kỳ kinh doanh.</summary>
+    public QuanLyCongNoTheoKyViewModel QuanLyCongNoTheoKy { get; }
+
     public MainWindowViewModel()
     {
         Dashboard = new DashboardViewModel(_db);
@@ -88,6 +106,17 @@ public partial class MainWindowViewModel : ObservableObject
         BaoCaoHangHoa = new BaoCaoHangHoaViewModel(_db);
         BaoCaoKhachHang = new BaoCaoKhachHangViewModel(_db);
         BaoCaoNhaCungCap = new BaoCaoNhaCungCapViewModel(_db);
+
+        QuanLyKhoTheoKy = new QuanLyKhoTheoKyViewModel(_db)
+        {
+            OwnerWindow = OwnerWindow,
+            ChuyenSangNhapHangAction = () => SelectedMenu = "Nhập hàng"
+        };
+
+        QuanLyCongNoTheoKy = new QuanLyCongNoTheoKyViewModel(_db)
+        {
+            OwnerWindow = OwnerWindow
+        };
 
         if (!CanViewDashboard)
         {
@@ -137,6 +166,74 @@ public partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty] private string selectedMenu = "Tổng quan";
     [ObservableProperty] private int selectedDataTabIndex = 0;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsHangHoaDanhMucSelected))]
+    [NotifyPropertyChangedFor(nameof(IsHangHoaTonKhoSelected))]
+    [NotifyPropertyChangedFor(nameof(IsHangHoaDanhMucEmpty))]
+    private int selectedHangHoaSubTabIndex = 0;
+
+    public bool IsHangHoaDanhMucSelected => SelectedHangHoaSubTabIndex == 0;
+    public bool IsHangHoaTonKhoSelected => SelectedHangHoaSubTabIndex == 1;
+    public bool IsHangHoaDanhMucEmpty => IsSanPhamListEmpty && IsHangHoaDanhMucSelected;
+
+    [RelayCommand]
+    private void ChonHangHoaSubTab(object? param)
+    {
+        if (param != null && int.TryParse(param.ToString(), out var idx))
+        {
+            SelectedHangHoaSubTabIndex = idx;
+        }
+        else
+        {
+            SelectedHangHoaSubTabIndex = 0;
+        }
+
+        if (SelectedHangHoaSubTabIndex == 1)
+        {
+            _ = QuanLyKhoTheoKy.KhoiTaoAsync();
+        }
+    }
+
+    [RelayCommand]
+    private void MoQuanLyTonKhoTheoKy()
+    {
+        SelectedMenu = "Hàng hóa";
+        SelectedHangHoaSubTabIndex = 1;
+        _ = QuanLyKhoTheoKy.KhoiTaoAsync();
+    }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsBanHangSubTabSelected))]
+    [NotifyPropertyChangedFor(nameof(IsHoaDonSubTabSelected))]
+    private int selectedHoaDonSubTabIndex = 0;
+
+    public bool IsBanHangSubTabSelected => SelectedHoaDonSubTabIndex == 0;
+    public bool IsHoaDonSubTabSelected => SelectedHoaDonSubTabIndex == 1;
+
+    [RelayCommand]
+    private async Task ChonHoaDonSubTabAsync(object? param)
+    {
+        if (param != null && int.TryParse(param.ToString(), out var idx))
+        {
+            SelectedHoaDonSubTabIndex = idx;
+        }
+        else
+        {
+            SelectedHoaDonSubTabIndex = 0;
+        }
+
+        if (SelectedHoaDonSubTabIndex == 0)
+        {
+            if (ProductSearchResults.Count == 0)
+            {
+                await TimKiemHoaBanAsync("");
+            }
+        }
+        else if (SelectedHoaDonSubTabIndex == 1)
+        {
+            await LoadInvoicesPagedAsync();
+        }
+    }
+
     [ObservableProperty] private string selectedReportKey = "";
     [ObservableProperty] private string statusMessage = "Sẵn sàng";
     [ObservableProperty] private bool isImporting;
@@ -325,6 +422,12 @@ public partial class MainWindowViewModel : ObservableObject
 
     /// <summary>Tổng tiền bán của toàn bộ khách hàng.</summary>
     [ObservableProperty] private decimal customerTotalSales;
+
+    /// <summary>Số lượng khách hàng cá nhân.</summary>
+    [ObservableProperty] private int customerCaNhanCount;
+
+    /// <summary>Số lượng khách hàng doanh nghiệp.</summary>
+    [ObservableProperty] private int customerDoanhNghiepCount;
 
     // =========================================================
     // BỘ LỌC DANH SÁCH KHÁCH HÀNG (NHÓM + TÌNH TRẠNG CÔNG NỢ)
@@ -1489,8 +1592,16 @@ public partial class MainWindowViewModel : ObservableObject
                     _customersLoaded = true;
                     break;
 
+                case "Công nợ":
+                    await QuanLyCongNoTheoKy.KhoiTaoAsync();
+                    break;
+
                 case "Hóa đơn":
-                    // Mỗi lần vào Hóa đơn đều đọc lại database
+                    if (SelectedHoaDonSubTabIndex == 0 && ProductSearchResults.Count == 0)
+                    {
+                        await TimKiemHoaBanAsync("");
+                    }
+                    if (SelectedHoaDonSubTabIndex == 1)
                     await LoadInvoicesPagedAsync();
                     _invoicesLoaded = true;
                     break;
@@ -1630,6 +1741,7 @@ public partial class MainWindowViewModel : ObservableObject
         ProductTotalCount = tongSoKhop;
 
         OnPropertyChanged(nameof(IsSanPhamListEmpty));
+        OnPropertyChanged(nameof(IsHangHoaDanhMucEmpty));
     }
 
     private async Task LoadOverviewAsync()
@@ -1749,6 +1861,8 @@ public partial class MainWindowViewModel : ObservableObject
 
             CustomerAllCount = thongKe.TongSoKhachHang;
             CustomerNewCount = thongKe.SoKhachMoi;
+            CustomerCaNhanCount = thongKe.SoKhachCaNhan;
+            CustomerDoanhNghiepCount = thongKe.SoKhachDoanhNghiep;
             CustomerTotalDebt = thongKe.TongNoHienTai;
             CustomerTotalSales = thongKe.TongBan;
 
@@ -2346,6 +2460,7 @@ public partial class MainWindowViewModel : ObservableObject
 
                     SanPhams[index] = refreshed;
                     OnPropertyChanged(nameof(IsSanPhamListEmpty));
+        OnPropertyChanged(nameof(IsHangHoaDanhMucEmpty));
                 }
             }
 
@@ -2419,6 +2534,20 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private async Task ThemHangTonDauKyAsync(SanPham? sanPham = null)
     {
+        SelectedMenu = "Hàng hóa";
+        SelectedHangHoaSubTabIndex = 1;
+
+        if (sanPham != null && !string.IsNullOrWhiteSpace(sanPham.MaSanPham))
+        {
+            QuanLyKhoTheoKy.SearchText = sanPham.MaSanPham;
+        }
+
+        await QuanLyKhoTheoKy.KhoiTaoAsync();
+        StatusMessage = "Đang xem Quản lý tồn kho theo kỳ kinh doanh.";
+    }
+
+    private async Task ThemHangTonDauKyCuAsync(SanPham? sanPham = null)
+    {
         if (OwnerWindow is null)
             return;
 
@@ -2442,6 +2571,78 @@ public partial class MainWindowViewModel : ObservableObject
 
     /// <summary>
     /// Mở cửa sổ "Dữ liệu đầu kỳ → Công nợ đầu kỳ → Thêm công nợ đầu kỳ".
+    /// <summary>
+    /// Chuyển sang phân hệ Quản lý công nợ theo kỳ.
+    /// </summary>
+    [RelayCommand]
+    private void MoQuanLyCongNoTheoKy()
+    {
+        SelectedMenu = "Công nợ";
+        _ = QuanLyCongNoTheoKy.KhoiTaoAsync();
+    }
+
+    /// <summary>
+    /// Thu nợ / Thanh toán cho khách hàng (mở hộp thoại ThuNoKhachHangWindow).
+    /// </summary>
+    [RelayCommand]
+    private async Task ThuNoKhachHangAsync(object? param)
+    {
+        uint customerId = 0;
+        string customerName = "";
+        decimal conNo = 0m;
+
+        if (param is KhachHangRowViewModel row)
+        {
+            customerId = row.CustomerId;
+            customerName = row.TenKhachHang;
+            conNo = row.NoHienTai;
+        }
+        else if (param is KhachHang kh)
+        {
+            customerId = kh.Id;
+            customerName = kh.TenKhachHang;
+            conNo = kh.NoHienTai;
+        }
+        else if (param is KhachHangKyCongNoItem kyItem)
+        {
+            customerId = kyItem.KhachHangId;
+            customerName = kyItem.TenKhachHang;
+            conNo = kyItem.NoCuoiKy;
+        }
+        else if (SelectedCustomer is not null)
+        {
+            customerId = SelectedCustomer.CustomerId;
+            customerName = SelectedCustomer.TenKhachHang;
+            conNo = SelectedCustomer.NoHienTai;
+        }
+
+        if (customerId == 0 || OwnerWindow is null)
+            return;
+
+        try
+        {
+            var dialog = new ThuNoKhachHangWindow(customerName, conNo);
+            var ketQua = await dialog.ShowDialog<ThuNoHoaDonKetQua?>(OwnerWindow);
+            if (ketQua is null)
+                return;
+
+            var res = await _db.ThuNoKhachHangAsync(customerId, ketQua.SoTien, ketQua.PhuongThuc, ketQua.GhiChu);
+            await LoadCustomersAsync();
+            if (IsSoQuySelected)
+                await TaiLaiSoQuyAsync();
+
+            StatusMessage = $"Đã thu nợ {ketQua.SoTien:N0} đ từ {customerName}. Còn nợ: {res.ConNoConLai:N0} đ.";
+            await NotificationWindow.ShowSuccessAsync(
+                $"Đã thu {ketQua.SoTien:N0} đ từ {customerName}.\nCòn nợ lại: {res.ConNoConLai:N0} đ.",
+                owner: OwnerWindow);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi thu nợ: " + ex.Message;
+            SafeLog.WriteError("Lỗi ThuNoKhachHangAsync", ex);
+        }
+    }
+
     /// Cho phép khai báo số dư công nợ của khách hàng hoặc nhà cung cấp tại thời điểm đầu kỳ.
     /// </summary>
     [RelayCommand]
@@ -2645,6 +2846,7 @@ public partial class MainWindowViewModel : ObservableObject
             SanPhams.Add(refreshed ?? editor.Product);
             ProductTotalCount = SanPhams.Count;
             OnPropertyChanged(nameof(IsSanPhamListEmpty));
+        OnPropertyChanged(nameof(IsHangHoaDanhMucEmpty));
             StatusMessage = $"Đã thêm sản phẩm {editor.Product.MaSanPham}";
             _ = LoadNhomSanPhamAsync();
 
@@ -3150,6 +3352,7 @@ public partial class MainWindowViewModel : ObservableObject
         ProductTotalCount = products.Count; // Cập nhật lại số lượng theo kết quả thực tế sau khi lọc
 
         OnPropertyChanged(nameof(IsSanPhamListEmpty));
+        OnPropertyChanged(nameof(IsHangHoaDanhMucEmpty));
 
         var dangTimKiem = !string.IsNullOrWhiteSpace(ProductSearch);
         var tenNhomDangChon = SelectedNhomSanPham?.Id > 0 && SelectedNhomSanPham.Id != 999999 ? SelectedNhomSanPham.Name : null;
@@ -3171,6 +3374,7 @@ public partial class MainWindowViewModel : ObservableObject
         ProductTotalCount = 0;
 
         OnPropertyChanged(nameof(IsSanPhamListEmpty));
+        OnPropertyChanged(nameof(IsHangHoaDanhMucEmpty));
 
         SafeLog.WriteError("Tải danh sách hàng hóa", ex);
 
@@ -3869,7 +4073,9 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
 
         ResetDonHangVeMacDinh();
 
-        IsSalesPanelVisible = true;
+        SelectedMenu = "Hóa đơn";
+        SelectedHoaDonSubTabIndex = 0;
+        IsSalesPanelVisible = false;
 
         StatusMessage = "Đã tạo đơn hàng mới. Chọn sản phẩm để bắt đầu.";
 
@@ -3925,6 +4131,14 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
 
     [RelayCommand]
     private void DongGiaoDienBanHang()
+    {
+        IsSalesPanelVisible = false;
+        ResetDonHangVeMacDinh();
+        SelectedHoaDonSubTabIndex = 1;
+        _ = LoadInvoicesPagedAsync();
+    }
+
+    private void DongGiaoDienBanHangCu()
     {
         IsSalesPanelVisible = false;
 
@@ -6127,6 +6341,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
 
         _invoicesLoaded = false;
         ChonMenu("Hóa đơn");
+        SelectedHoaDonSubTabIndex = 1;
 
         // Dashboard phải thấy ngay hóa đơn vừa tạo (doanh thu, số hóa đơn,
         // hoạt động gần đây, top hàng bán chạy, top khách hàng).
@@ -6574,10 +6789,11 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         SelectedDataTabIndex = value switch
         {
             "Khách hàng" => 1,
-            "Hóa đơn" => 2,
-            "Nhà cung cấp" => 3,
-            "Nhập hàng" => 4,
-            "Sổ quỹ" => 5,
+            "Công nợ" => 2,
+            "Hóa đơn" => 3,
+            "Nhà cung cấp" => 4,
+            "Nhập hàng" => 5,
+            "Sổ quỹ" => 6,
             _ => 0
         };
 
@@ -6592,6 +6808,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         OnPropertyChanged(nameof(IsHangHoaSelected));
         OnPropertyChanged(nameof(IsHoaDonSelected));
         OnPropertyChanged(nameof(IsKhachHangSelected));
+        OnPropertyChanged(nameof(IsCongNoSelected));
         OnPropertyChanged(nameof(IsNhaCungCapSelected));
         OnPropertyChanged(nameof(IsSoQuySelected));
         OnPropertyChanged(nameof(IsDataSectionSelected));
@@ -6613,6 +6830,24 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
 
         CapNhatTrangThaiChonBaoCao();
 
+        if (value == "Hóa đơn")
+        {
+            if (!CanViewSales && CanViewInvoices)
+                SelectedHoaDonSubTabIndex = 1;
+            else if (!CanViewInvoices && CanViewSales)
+                SelectedHoaDonSubTabIndex = 0;
+        }
+
+        if (value == "Công nợ")
+        {
+            _ = QuanLyCongNoTheoKy.KhoiTaoAsync();
+        }
+
+        if (value == "Hàng hóa" && SelectedHangHoaSubTabIndex == 1)
+        {
+            _ = QuanLyKhoTheoKy.TaiDanhSachKyAsync();
+        }
+
         _ = LoadSelectedSectionAsync(value);
     }
 
@@ -6622,7 +6857,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         string[] names =
         [
             nameof(CanViewDashboard), nameof(CanViewProducts), nameof(CanViewPurchases),
-            nameof(CanViewInvoices), nameof(CanViewSales), nameof(CanViewCustomers),
+            nameof(CanViewInvoices), nameof(CanViewSales), nameof(CanViewSalesOrInvoices), nameof(CanViewCustomers),
             nameof(CanViewSuppliers), nameof(CanViewCashBook), nameof(CanViewReports),
             nameof(CanViewUsers), nameof(CanViewSettings), nameof(CanViewStoreInfo),
             nameof(CanManageUsers),
@@ -6679,6 +6914,7 @@ public bool IsTongQuanSelected => SelectedMenu == "Tổng quan";
 public bool IsHangHoaSelected => SelectedMenu == "Hàng hóa";
 public bool IsHoaDonSelected => SelectedMenu == "Hóa đơn";
 public bool IsKhachHangSelected => SelectedMenu == "Khách hàng";
+public bool IsCongNoSelected => SelectedMenu == "Công nợ";
 public bool IsNhaCungCapSelected => SelectedMenu == "Nhà cung cấp";
 public bool IsSoQuySelected => SelectedMenu == "Sổ quỹ";
 
@@ -6708,6 +6944,7 @@ public bool CanViewProducts => Quyen.HasPermission(Session.CurrentUser, Permissi
 public bool CanViewPurchases => Quyen.HasPermission(Session.CurrentUser, PermissionKeys.PurchasesView) || Quyen.IsAdmin(Session.CurrentUser);
 public bool CanViewInvoices => Quyen.HasPermission(Session.CurrentUser, PermissionKeys.InvoicesView) || Quyen.IsAdmin(Session.CurrentUser);
 public bool CanViewSales => Quyen.HasPermission(Session.CurrentUser, PermissionKeys.SalesView) || Quyen.HasPermission(Session.CurrentUser, PermissionKeys.SalesPayment) || Quyen.IsAdmin(Session.CurrentUser);
+public bool CanViewSalesOrInvoices => CanViewInvoices || CanViewSales;
 public bool CanViewCustomers => Quyen.HasPermission(Session.CurrentUser, PermissionKeys.CustomersView) || Quyen.IsAdmin(Session.CurrentUser);
 public bool CanViewSuppliers => Quyen.HasPermission(Session.CurrentUser, PermissionKeys.SuppliersView) || Quyen.IsAdmin(Session.CurrentUser);
 public bool CanViewCashBook => Quyen.HasPermission(Session.CurrentUser, PermissionKeys.CashBookView) || Quyen.IsAdmin(Session.CurrentUser);

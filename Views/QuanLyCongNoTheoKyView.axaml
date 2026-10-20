@@ -1,0 +1,348 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ShopHoa.ViewModels"
+             xmlns:models="using:ShopHoa.Models"
+             xmlns:converters="using:ShopHoa.Converters"
+             x:Class="ShopHoa.Views.QuanLyCongNoTheoKyView"
+             x:DataType="vm:QuanLyCongNoTheoKyViewModel"
+             Background="#F4F7F6">
+
+    <UserControl.Styles>
+        <Style Selector="Border.statCard">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#D8E5E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="BoxShadow" Value="0 2 8 #0A000000"/>
+        </Style>
+
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background" Value="#E2EFEA" />
+            <Setter Property="Foreground" Value="#164B40" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="8,8" />
+            <Setter Property="FontSize" Value="12.5" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="0,4,0,0">
+
+        <!-- 1. THỐNG KÊ TỔNG HỢP (CARDS) -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,*,*,*,*,*" ColumnSpacing="10" Margin="0,0,0,12">
+            <!-- Card 1: Số khách nợ -->
+            <Border Grid.Column="0" Classes="statCard">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="Khách còn nợ" FontSize="11.5" Foreground="#61736E" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding TongSoKhachNo, StringFormat={}{0:N0} khách}" FontSize="16" FontWeight="Bold" Foreground="#164B40"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 2: Nợ đầu kỳ -->
+            <Border Grid.Column="1" Classes="statCard">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="Nợ đầu kỳ" FontSize="11.5" Foreground="#61736E" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding TongNoDauKyText}" FontSize="16" FontWeight="Bold" Foreground="#475467"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 3: Phát sinh trong kỳ -->
+            <Border Grid.Column="2" Classes="statCard">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="Phát sinh trong kỳ" FontSize="11.5" Foreground="#61736E" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding TongPhatSinhText}" FontSize="16" FontWeight="Bold" Foreground="#1570EF"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 4: Đã thu trong kỳ -->
+            <Border Grid.Column="3" Classes="statCard">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="Đã thu trong kỳ" FontSize="11.5" Foreground="#61736E" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding TongDaThuText}" FontSize="16" FontWeight="Bold" Foreground="#087F6E"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 5: Nợ hiện tại (cuối kỳ) -->
+            <Border Grid.Column="4" Classes="statCard" Background="#FFF5F5" BorderBrush="#FDA29B">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="Nợ hiện tại (cuối kỳ)" FontSize="11.5" Foreground="#B42318" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding TongNoHienTaiText}" FontSize="16" FontWeight="Bold" Foreground="#D92D20"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 6: Ưu tiên nhắc nợ cao -->
+            <Border Grid.Column="5" Classes="statCard" Background="#FEF3F2" BorderBrush="#FECDCA">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="Cần ưu tiên nhắc nợ" FontSize="11.5" Foreground="#B42318" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding SoKhachNoUuTienCao, StringFormat={}{0:N0} khách}" FontSize="16" FontWeight="Bold" Foreground="#B42318"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- 2. THANH CHỌN KỲ & THAO TÁC KỲ (TOOLBAR) -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#D8E5E0" BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,0,10">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+
+                <!-- CHỌN KỲ KINH DOANH -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <TextBlock Text="Kỳ công nợ:" FontWeight="Bold" Foreground="#164B40" VerticalAlignment="Center" FontSize="13.5"/>
+                    <ComboBox ItemsSource="{Binding DanhSachKy}"
+                              SelectedItem="{Binding SelectedKy, Mode=TwoWay}"
+                              Height="36" MinWidth="220" CornerRadius="6"
+                              Background="#F7FAF9" BorderBrush="#C2D6CF">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="models:KyKeToan">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding TenKy}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding TrangThaiText}" FontSize="11" VerticalAlignment="Center"
+                                               Foreground="{Binding TrangThaiKhoaSo, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <!-- BADGE TRẠNG THÁI KỲ -->
+                    <Border Background="#E6F4EA" CornerRadius="6" Padding="8,4" VerticalAlignment="Center"
+                            IsVisible="{Binding SelectedKy.IsDangMo, FallbackValue=false}">
+                        <TextBlock Text="🟢 Đang mở" FontSize="12" FontWeight="Bold" Foreground="#137333"/>
+                    </Border>
+                    <Border Background="#FEE4E2" CornerRadius="6" Padding="8,4" VerticalAlignment="Center"
+                            IsVisible="{Binding SelectedKy.TrangThaiKhoaSo, FallbackValue=false}">
+                        <TextBlock Text="🔒 Đã kết kỳ (Khóa sổ)" FontSize="12" FontWeight="Bold" Foreground="#B42318"/>
+                    </Border>
+
+                    <!-- THỜI GIAN KỲ -->
+                    <TextBlock Text="{Binding SelectedKy.ThoiGianHienThi}" Foreground="#61736E" FontSize="12" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                </StackPanel>
+
+                <!-- BỘ NÚT THAO TÁC NGHIỆP VỤ CÔNG NỢ -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                    <!-- Nút Tạo kỳ mới -->
+                    <Button Classes="toolbar-primary" Height="36" Padding="12,0" Margin="0"
+                            Content="＋ Kỳ mới" Command="{Binding TaoKyMoiCommand}"
+                            ToolTip.Tip="Khởi tạo một kỳ kinh doanh mới"/>
+
+                    <!-- Nút Load nợ kỳ trước -->
+                    <Button Classes="toolbar-action" Height="36" Padding="12,0" Margin="0"
+                            Content="🔄 Load nợ kỳ trước" Command="{Binding LoadTonKyTruocCommand}"
+                            ToolTip.Tip="Nạp lại số nợ cuối từ kỳ trước sang làm nợ đầu kỳ này"
+                            IsEnabled="{Binding SelectedKy.IsDangMo, FallbackValue=false}"/>
+
+                    <!-- Nút Khai báo công nợ đầu kỳ -->
+                    <Button Classes="toolbar-action" Height="36" Padding="12,0" Margin="0"
+                            Content="💳 Nợ đầu kỳ" Command="{Binding ThemCongNoDauKyCommand}"
+                            ToolTip.Tip="Khai báo số dư công nợ ban đầu của khách hàng"/>
+
+                    <!-- Nút Kết kỳ -->
+                    <Button Classes="toolbar-action" Height="36" Padding="12,0" Margin="0"
+                            BorderBrush="#D92D20" Foreground="#D92D20"
+                            Content="🔒 Kết kỳ" Command="{Binding KetKyCommand}"
+                            ToolTip.Tip="Chốt số liệu công nợ cuối kỳ và chuyển số dư sang kỳ mới"
+                            IsVisible="{Binding SelectedKy.IsDangMo, FallbackValue=false}"/>
+
+                    <!-- Nút Mở lại kỳ (nếu đã kết kỳ) -->
+                    <Button Classes="toolbar-action" Height="36" Padding="12,0" Margin="0"
+                            BorderBrush="#F79009" Foreground="#B54708"
+                            Content="🔓 Mở lại kỳ" Command="{Binding MoLaiKyCommand}"
+                            ToolTip.Tip="Mở lại kỳ để chỉnh sửa lại số liệu"
+                            IsVisible="{Binding SelectedKy.TrangThaiKhoaSo, FallbackValue=false}"/>
+
+                    <!-- Nút Xuất Excel -->
+                    <Button Classes="toolbar-action" Height="36" Padding="12,0" Margin="0"
+                            Content="📊 Xuất Excel" Command="{Binding XuatExcelCommand}"
+                            ToolTip.Tip="Xuất danh sách công nợ theo kỳ ra file Excel"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 3. THANH TÌM KIẾM & BỘ LỌC ĐA TIÊU CHÍ (SỐ KỲ, MỨC ĐỘ ƯU TIÊN, MỨC NỢ) -->
+        <Border Grid.Row="2" Background="White" BorderBrush="#D8E5E0" BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,0,10">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="10" VerticalAlignment="Center">
+
+                <!-- Ô tìm kiếm -->
+                <TextBox Grid.Column="0" Classes="searchInput" Height="36" VerticalContentAlignment="Center"
+                         Watermark="🔍 Tìm theo mã KH, tên khách hàng, số điện thoại..."
+                         Text="{Binding SearchText, Mode=TwoWay}" Margin="0"/>
+
+                <!-- Lọc số kỳ còn nợ -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <TextBlock Text="Số kỳ nợ:" FontSize="12.5" Foreground="#61736E" VerticalAlignment="Center"/>
+                    <ComboBox SelectedIndex="{Binding SelectedSoKyFilterIndex, Mode=TwoWay}"
+                              Height="36" Width="150" CornerRadius="6">
+                        <ComboBoxItem Content="Tất cả số kỳ"/>
+                        <ComboBoxItem Content="Nợ 1 kỳ"/>
+                        <ComboBoxItem Content="Nợ 2 kỳ"/>
+                        <ComboBoxItem Content="Nợ ≥ 3 kỳ (Ưu tiên)"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Lọc mức độ ưu tiên nhắc nợ -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <TextBlock Text="Ưu tiên:" FontSize="12.5" Foreground="#61736E" VerticalAlignment="Center"/>
+                    <ComboBox SelectedIndex="{Binding SelectedUuTienFilterIndex, Mode=TwoWay}"
+                              Height="36" Width="150" CornerRadius="6">
+                        <ComboBoxItem Content="Tất cả mức độ"/>
+                        <ComboBoxItem Content="🔴 Ưu tiên cao"/>
+                        <ComboBoxItem Content="🟡 Ưu tiên TB"/>
+                        <ComboBoxItem Content="🟢 Ưu tiên thấp"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Lọc theo số tiền nợ -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <TextBlock Text="Mức tiền nợ:" FontSize="12.5" Foreground="#61736E" VerticalAlignment="Center"/>
+                    <ComboBox SelectedIndex="{Binding SelectedMucNoFilterIndex, Mode=TwoWay}"
+                              Height="36" Width="140" CornerRadius="6">
+                        <ComboBoxItem Content="Tất cả số tiền"/>
+                        <ComboBoxItem Content="Dưới 2 triệu"/>
+                        <ComboBoxItem Content="2 - 5 triệu"/>
+                        <ComboBoxItem Content="Trên 5 triệu"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Nút Tải lại -->
+                <Button Grid.Column="4" Classes="toolbar-action" Height="36" Padding="12,0" Margin="0"
+                        Content="🔄 Làm mới" Command="{Binding TaiCongNoTheoKyCommand}"/>
+            </Grid>
+        </Border>
+
+        <!-- 4. BẢNG DANH SÁCH KHÁCH HÀNG CÒN NỢ THEO KỲ -->
+        <Border Grid.Row="3" Background="White" BorderBrush="#D8E5E0" BorderThickness="1" CornerRadius="10" Padding="0" ClipToBounds="True">
+            <Grid RowDefinitions="Auto,*">
+
+                <!-- ĐANG TẢI -->
+                <ProgressBar Grid.Row="0" IsIndeterminate="True" Height="3" Foreground="#087F6E" Background="Transparent"
+                             IsVisible="{Binding IsLoading}"/>
+
+                <DataGrid Grid.Row="1" ItemsSource="{Binding KhachNos}"
+                          SelectedItem="{Binding SelectedKhachNo, Mode=TwoWay}"
+                          AutoGenerateColumns="False" CanUserReorderColumns="False"
+                          CanUserResizeColumns="True" CanUserSortColumns="True"
+                          GridLinesVisibility="Horizontal" RowHeight="44"
+                          Background="White" BorderThickness="0"
+                          HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+
+                    <DataGrid.Columns>
+                        <!-- Mã KH -->
+                        <DataGridTextColumn Header="MÃ KH" Binding="{Binding MaKhachHang}" Width="110" IsReadOnly="True"/>
+
+                        <!-- Tên khách hàng -->
+                        <DataGridTemplateColumn Header="TÊN KHÁCH HÀNG" Width="2*" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:KhachHangKyCongNoItem">
+                                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="8,0">
+                                        <Border Width="26" Height="26" CornerRadius="13" Background="#E3F2ED" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ChuCaiDau}" FontSize="11" FontWeight="Bold" Foreground="#087F6E"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding TenKhachHang}" FontWeight="SemiBold" Foreground="#163F38"
+                                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Điện thoại -->
+                        <DataGridTextColumn Header="ĐIỆN THOẠI" Binding="{Binding SoDienThoai}" Width="120" IsReadOnly="True"/>
+
+                        <!-- Nhóm khách -->
+                        <DataGridTextColumn Header="NHÓM KHÁCH" Binding="{Binding NhomKhachHang}" Width="140" IsReadOnly="True"/>
+
+                        <!-- Nợ đầu kỳ -->
+                        <DataGridTextColumn Header="NỢ ĐẦU KỲ" Binding="{Binding NoDauKyText}" Width="130" IsReadOnly="True">
+                            <DataGridTextColumn.CellStyle>
+                                <Style Selector="DataGridCell">
+                                    <Setter Property="HorizontalContentAlignment" Value="Right"/>
+                                    <Setter Property="Foreground" Value="#475467"/>
+                                </Style>
+                            </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Phát sinh trong kỳ -->
+                        <DataGridTextColumn Header="PHÁT SINH" Binding="{Binding PhatSinhText}" Width="130" IsReadOnly="True">
+                            <DataGridTextColumn.CellStyle>
+                                <Style Selector="DataGridCell">
+                                    <Setter Property="HorizontalContentAlignment" Value="Right"/>
+                                    <Setter Property="Foreground" Value="#1570EF"/>
+                                </Style>
+                            </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Đã thu trong kỳ -->
+                        <DataGridTextColumn Header="ĐÃ THU" Binding="{Binding DaThuText}" Width="130" IsReadOnly="True">
+                            <DataGridTextColumn.CellStyle>
+                                <Style Selector="DataGridCell">
+                                    <Setter Property="HorizontalContentAlignment" Value="Right"/>
+                                    <Setter Property="Foreground" Value="#087F6E"/>
+                                </Style>
+                            </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Nợ hiện tại (cuối kỳ) -->
+                        <DataGridTextColumn Header="NỢ HIỆN TẠI" Binding="{Binding NoCuoiKyText}" Width="140" IsReadOnly="True">
+                            <DataGridTextColumn.CellStyle>
+                                <Style Selector="DataGridCell">
+                                    <Setter Property="HorizontalContentAlignment" Value="Right"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Foreground" Value="#D92D20"/>
+                                </Style>
+                            </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Số kỳ nợ -->
+                        <DataGridTemplateColumn Header="SỐ KỲ NỢ" Width="100" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:KhachHangKyCongNoItem">
+                                    <Border Background="#F2F4F7" CornerRadius="12" Padding="8,3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding SoKyNoText}" FontSize="11.5" FontWeight="SemiBold" Foreground="#344054"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Mức độ ưu tiên nhắc nợ -->
+                        <DataGridTemplateColumn Header="ƯU TIÊN NHẮC NỢ" Width="140" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:KhachHangKyCongNoItem">
+                                    <Border Background="{Binding MucDoUuTienBadgeBrush}" CornerRadius="12" Padding="8,3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding MucDoUuTienText}" FontSize="11.5" FontWeight="Bold" Foreground="{Binding MucDoUuTienTextBrush}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Ghi chú / Nhắc nợ -->
+                        <DataGridTextColumn Header="GHI CHÚ NHẮC NỢ" Binding="{Binding GhiChu}" Width="180"/>
+
+                        <!-- Thao tác: Thu nợ / Thanh toán -->
+                        <DataGridTemplateColumn Header="THAO TÁC" Width="130">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:KhachHangKyCongNoItem">
+                                    <Button Classes="toolbar-primary" Height="28" Padding="10,0" Margin="4,0"
+                                            Background="#087F6E"
+                                            Content="💵 Thu nợ"
+                                            Command="{Binding $parent[UserControl].((vm:QuanLyCongNoTheoKyViewModel)DataContext).ThuNoKhachHangCommand}"
+                                            CommandParameter="{Binding}"
+                                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                                            ToolTip.Tip="Mở form thu nợ / thanh toán cho khách hàng này"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- THÔNG BÁO KHI DANH SÁCH RỖNG -->
+                <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                            Spacing="8" IsVisible="{Binding !KhachNos.Count}">
+                    <TextBlock Text="🎉" FontSize="36" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Không có khách hàng nào còn nợ trong kỳ này"
+                               FontSize="15" FontWeight="SemiBold" Foreground="#164B40" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Tất cả khách hàng đã thanh toán đủ hoặc không phát sinh công nợ."
+                               FontSize="12.5" Foreground="#61736E" HorizontalAlignment="Center"/>
+                </StackPanel>
+
+            </Grid>
+        </Border>
+
+    </Grid>
+</UserControl>

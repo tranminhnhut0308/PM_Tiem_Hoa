@@ -1,0 +1,162 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="using:ShopHoa.Models"
+        x:Class="ShopHoa.Views.TaoKyMoiDialog"
+        Width="580"
+        Height="540"
+        MinWidth="540"
+        MinHeight="500"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Title="Khởi tạo kỳ kho / kỳ kinh doanh mới"
+        Background="#F4F7F6"
+        RequestedThemeVariant="Light">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.fieldLabel">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#1C3A5E"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+
+        <Style Selector="TextBox.classicInput">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#BCD3E6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <Style Selector="ComboBox.classicCombo">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#BCD3E6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+    </Window.Styles>
+
+    <Border Background="White" CornerRadius="12" Margin="14" BorderBrush="#D1E2DA" BorderThickness="1"
+            BoxShadow="0 8 24 #15000000">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+            <!-- HEADER -->
+            <Border Grid.Row="0" Background="#E7F3EF" BorderBrush="#C2E0D6" BorderThickness="0,0,0,1"
+                    Padding="16,12" CornerRadius="12,12,0,0">
+                <StackPanel>
+                    <TextBlock Text="KHỞI TẠO KỲ KHO MỚI" FontSize="16" FontWeight="Bold" Foreground="#087F6E"/>
+                    <TextBlock Text="Khai báo kỳ kinh doanh mới, tự động kế thừa số lượng tồn cuối từ kỳ trước sang."
+                               FontSize="12" Foreground="#4A6B63" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- FORM BODY -->
+            <ScrollViewer Grid.Row="1" Padding="18,14">
+                <StackPanel Spacing="12">
+
+                    <!-- LỰA CHỌN LOẠI KỲ: THEO THÁNG HOẶC TÙY CHỈNH -->
+                    <Border Background="#F7FAF9" BorderBrush="#E2ECE8" BorderThickness="1" CornerRadius="8" Padding="12,10">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Hình thức kỳ kinh doanh:" FontWeight="SemiBold" Foreground="#164B40" FontSize="13"/>
+                            <StackPanel Orientation="Horizontal" Spacing="20">
+                                <RadioButton Name="TheoThangRadio" Content="Theo từng tháng (Khuyến nghị)" IsChecked="True"
+                                             Checked="LoaiKyRadio_OnChecked"/>
+                                <RadioButton Name="TuyChinhRadio" Content="Đợt vụ / Mùa lễ tự chọn"
+                                             Checked="LoaiKyRadio_OnChecked"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- KHU VỰC CHỌN THÁNG (Hiển thị khi chọn TheoThangRadio) -->
+                    <StackPanel Name="ThangPanel" Spacing="6">
+                        <Grid ColumnDefinitions="*,*">
+                            <StackPanel Margin="0,0,6,0">
+                                <TextBlock Classes="fieldLabel" Text="Tháng *"/>
+                                <ComboBox Name="ThangComboBox" Classes="classicCombo" HorizontalAlignment="Stretch"
+                                          SelectionChanged="ThangNam_OnSelectionChanged"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                                <TextBlock Classes="fieldLabel" Text="Năm *"/>
+                                <ComboBox Name="NamComboBox" Classes="classicCombo" HorizontalAlignment="Stretch"
+                                          SelectionChanged="ThangNam_OnSelectionChanged"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- KHU VỰC TỰ ĐẶT TÊN & CHỌN NGÀY -->
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="fieldLabel" Text="Tên kỳ *"/>
+                        <TextBox Name="TenKyTextBox" Classes="classicInput" Watermark="Ví dụ: Tháng 11 Năm 2026, Đợt Lễ 20/10..."/>
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="*,*">
+                        <StackPanel Margin="0,0,6,0">
+                            <TextBlock Classes="fieldLabel" Text="Ngày bắt đầu *"/>
+                            <CalendarDatePicker Name="NgayBatDauPicker" HorizontalAlignment="Stretch" Height="34"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                            <TextBlock Classes="fieldLabel" Text="Ngày kết thúc *"/>
+                            <CalendarDatePicker Name="NgayKetThucPicker" HorizontalAlignment="Stretch" Height="34"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="fieldLabel" Text="Mã kỳ (Hệ thống tự sinh)"/>
+                        <TextBox Name="MaKyTextBox" Classes="classicInput" IsReadOnly="True" Background="#F1F4F7"/>
+                    </StackPanel>
+
+                    <!-- KẾ THỪA TỒN KHO TỪ KỲ TRƯỚC -->
+                    <Border Background="#EBF5F1" BorderBrush="#BEE3D5" BorderThickness="1" CornerRadius="8" Padding="12,10">
+                        <StackPanel Spacing="8">
+                            <CheckBox Name="KeThuaTonCheckBox" Content="Tự động kế thừa tồn cuối kỳ trước làm tồn đầu kỳ này"
+                                      IsChecked="True" FontWeight="SemiBold" Foreground="#087F6E"
+                                      IsCheckedChanged="KeThuaTonCheckBox_OnCheckedChanged"/>
+
+                            <StackPanel Name="KyTruocPanel" Spacing="4" Margin="24,0,0,0">
+                                <TextBlock Text="Kỳ trước được chọn để kế thừa tồn kho:" FontSize="12" Foreground="#4A6B63"/>
+                                <ComboBox Name="KyTruocComboBox" Classes="classicCombo" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- GHI CHÚ -->
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="fieldLabel" Text="Ghi chú kỳ"/>
+                        <TextBox Name="GhiChuTextBox" Classes="classicInput" Height="60" AcceptsReturn="True" TextWrapping="Wrap"
+                                 Watermark="Ghi chú về đợt bán hàng, sự kiện hoặc lưu ý kiểm kê..."/>
+                    </StackPanel>
+
+                    <!-- DÒNG LỖI -->
+                    <TextBlock Name="ErrorTextBlock" Foreground="#D92D20" FontWeight="SemiBold" FontSize="12"
+                               TextWrapping="Wrap" IsVisible="False"/>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- FOOTER BUTTONS -->
+            <Border Grid.Row="2" Background="#F7FAF9" BorderBrush="#E2ECE8" BorderThickness="0,1,0,0"
+                    Padding="16,12" CornerRadius="0,0,12,12">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                    <Button Name="CancelButton" Content="✕ Hủy bỏ" Padding="16,8" CornerRadius="8"
+                            Background="#F0F3F2" Foreground="#52645E" BorderThickness="0"
+                            Click="CancelButton_OnClick"/>
+
+                    <Button Name="SaveButton" Content="✓ Tạo &amp; Mở kỳ mới" Padding="20,8" CornerRadius="8"
+                            Background="#087F6E" Foreground="White" FontWeight="Bold" BorderThickness="0"
+                            Click="SaveButton_OnClick"/>
+                </StackPanel>
+            </Border>
+
+        </Grid>
+    </Border>
+</Window>

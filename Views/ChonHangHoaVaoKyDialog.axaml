@@ -1,0 +1,113 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="using:ShopHoa.Models"
+        x:Class="ShopHoa.Views.ChonHangHoaVaoKyDialog"
+        Width="780"
+        Height="600"
+        MinWidth="700"
+        MinHeight="500"
+        WindowStartupLocation="CenterOwner"
+        Title="Bổ sung hàng hóa vào kỳ kinh doanh"
+        Background="#F4F7F6"
+        RequestedThemeVariant="Light">
+
+    <Window.Styles>
+        <Style Selector="TextBox.searchInput">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1A2D42"/>
+            <Setter Property="BorderBrush" Value="#BCD3E6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background" Value="#E5F2EE" />
+            <Setter Property="Foreground" Value="#164B40" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="8,6" />
+        </Style>
+    </Window.Styles>
+
+    <Border Background="White" CornerRadius="12" Margin="14" BorderBrush="#D1E2DA" BorderThickness="1"
+            BoxShadow="0 8 24 #15000000">
+        <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+            <!-- HEADER -->
+            <Border Grid.Row="0" Background="#E7F3EF" BorderBrush="#C2E0D6" BorderThickness="0,0,0,1"
+                    Padding="16,12" CornerRadius="12,12,0,0">
+                <StackPanel>
+                    <TextBlock Text="BỔ SUNG HOA VÀO KỲ KINH DOANH" FontSize="15" FontWeight="Bold" Foreground="#087F6E"/>
+                    <TextBlock Text="Chọn các mặt hàng từ danh mục để kích hoạt kinh doanh và theo dõi tồn kho trong kỳ này."
+                               FontSize="12" Foreground="#4A6B63" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- TOOLBAR: SEARCH & FILTER -->
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Padding="16,10">
+                <TextBox Name="SearchTextBox" Classes="searchInput"
+                         Watermark="⌕ Tìm theo tên hoa, mã hoa..."
+                         TextChanged="SearchTextBox_OnTextChanged"/>
+
+                <ComboBox Grid.Column="1" Name="NhomComboBox" Height="34" CornerRadius="6"
+                          BorderBrush="#BCD3E6" Background="White"
+                          PlaceholderText="-- Tất cả nhóm hàng --"
+                          SelectionChanged="NhomComboBox_OnSelectionChanged"/>
+
+                <CheckBox Grid.Column="2" Name="ChonTatCaCheckBox" Content="Chọn tất cả"
+                          FontWeight="SemiBold" Foreground="#087F6E" VerticalAlignment="Center"
+                          IsCheckedChanged="ChonTatCaCheckBox_OnIsCheckedChanged"/>
+            </Grid>
+
+            <!-- LIST PRODUCTS TABLE -->
+            <Border Grid.Row="2" Margin="16,0,16,10" BorderBrush="#E2ECE8" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+                <DataGrid Name="SanPhamDataGrid"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          CanUserResizeColumns="True">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Chọn" Width="60">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:SanPham">
+                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTextColumn Header="Mã hàng" Binding="{Binding MaSanPham}" Width="120"/>
+                        <DataGridTextColumn Header="Tên hoa / Sản phẩm" Binding="{Binding TenSanPham}" Width="*"/>
+                        <DataGridTextColumn Header="Nhóm hàng" Binding="{Binding NhomSanPham}" Width="150"/>
+                        <DataGridTextColumn Header="ĐVT" Binding="{Binding DonViTinh}" Width="80"/>
+                        <DataGridTextColumn Header="Giá bán tham khảo" Binding="{Binding GiaBan, StringFormat={}{0:N0} đ}" Width="130"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- FOOTER -->
+            <Border Grid.Row="3" Background="#F7FAF9" BorderBrush="#E2ECE8" BorderThickness="0,1,0,0"
+                    Padding="16,12" CornerRadius="0,0,12,12">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Name="ThongKeChonTextBlock" Text="Đã chọn 0 mặt hàng"
+                               Foreground="#087F6E" FontWeight="SemiBold" FontSize="13"
+                               VerticalAlignment="Center"/>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                        <Button Content="✕ Hủy bỏ" Padding="16,8" CornerRadius="8"
+                                Background="#F0F3F2" Foreground="#52645E" BorderThickness="0"
+                                Click="CancelButton_OnClick"/>
+
+                        <Button Name="SaveButton" Content="＋ Thêm vào kỳ này" Padding="20,8" CornerRadius="8"
+                                Background="#087F6E" Foreground="White" FontWeight="Bold" BorderThickness="0"
+                                Click="SaveButton_OnClick"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+        </Grid>
+    </Border>
+</Window>
