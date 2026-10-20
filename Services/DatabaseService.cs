@@ -13383,6 +13383,127 @@ LIMIT 500;
 
         return result;
     }
+
+    /// <summary>
+    /// Lấy danh sách khách hàng thuộc một nhóm khách hàng cụ thể.
+    /// </summary>
+    public async Task<IReadOnlyList<KhachHang>> GetKhachHangTheoNhomAsync(uint nhomId)
+    {
+        await using var connection = await OpenAsync();
+        const string sql = """
+        SELECT
+            kh.id AS Id,
+            kh.ma_khach_hang AS MaKhachHang,
+            kh.ten_khach_hang AS TenKhachHang,
+            kh.loai_khach_hang AS LoaiKhachHang,
+            kh.so_dien_thoai AS SoDienThoai,
+            kh.dia_chi AS DiaChi,
+            kh.nhom_khach_hang_id AS NhomKhachHangId,
+            nkh.ten_nhom AS NhomKhachHang
+        FROM khach_hang kh
+        LEFT JOIN nhom_khach_hang nkh ON nkh.id = kh.nhom_khach_hang_id
+        WHERE kh.trang_thai = 1 AND kh.nhom_khach_hang_id = @NhomId
+        ORDER BY kh.ten_khach_hang;
+        """;
+
+        return (await connection.QueryAsync<KhachHang>(sql, new { NhomId = nhomId })).AsList();
+    }
+
+    /// <summary>
+    /// Thiết lập giá riêng hàng loạt cho nhiều khách hàng và nhiều sản phẩm cùng lúc.
+    /// Dùng transaction đảm bảo toàn vẹn.
+    /// </summary>
+    public async Task<int> LuuGiaBanKhachHangHangLoatAsync(
+        IReadOnlyList<uint> khachHangIds,
+        IReadOnlyList<(uint SanPhamId, decimal GiaRieng, string? GhiChu, DateTime? NgayApDung)> danhSachGia)
+    {
+        if (khachHangIds == null || khachHangIds.Count == 0 || danhSachGia == null || danhSachGia.Count == 0)
+            return 0;
+
+        await using var connection = await OpenAsync();
+        await EnsureBangGiaKhachHangAsync(connection);
+        await using var transaction = await connection.BeginTransactionAsync();
+
+        const string sql = """
+        INSERT INTO gia_ban_khach_hang
+        (
+            khach_hang_id, san_pham_id, gia_rieng, ghi_chu, ngay_ap_dung
+        )
+        VALUES
+        (
+            @KhachHangId, @SanPhamId, @GiaRieng, @GhiChu, @NgayApDung
+        )
+        ON DUPLICATE KEY UPDATE
+            gia_rieng = @GiaRieng,
+            ghi_chu = @GhiChu,
+            ngay_ap_dung = @NgayApDung,
+            ngay_cap_nhat = NOW();
+        """;
+
+        var totalSaved = 0;
+        try
+        {
+            foreach (var khId in khachHangIds)
+            {
+                if (khId == 0) continue;
+
+                foreach (var item in danhSachGia)
+                {
+                    if (item.SanPhamId == 0 || item.GiaRieng < 0)
+                        continue;
+
+                    var affected = await connection.ExecuteAsync(
+                        sql,
+                        new
+                        {
+                            KhachHangId = khId,
+                            SanPhamId = item.SanPhamId,
+                            GiaRieng = item.GiaRieng,
+                            GhiChu = string.IsNullOrWhiteSpace(item.GhiChu) ? null : item.GhiChu.Trim(),
+                            NgayApDung = item.NgayApDung ?? DateTime.Now
+                        },
+                        transaction: transaction);
+
+                    if (affected > 0) totalSaved++;
+                }
+            }
+
+            await transaction.CommitAsync();
+
+            _ = LogSubAccountActivityAsync(
+                "Thiết lập giá theo nhóm",
+                "GIA_BAN_KHACH_HANG",
+                null,
+                null,
+                $"Thiết lập giá riêng cho {khachHangIds.Count} khách hàng với {danhSachGia.Count} sản phẩm ({totalSaved} bản ghi)",
+                null);
+
+            return totalSaved;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            SafeLog.WriteError("Lỗi LuuGiaBanKhachHangHangLoatAsync", ex);
+            throw;
+        }
+    }
+
+    private static object? _GetDummyPricingResult()
+    {
+        object? result = null;
+        if (result != null)
+        {
+            while (true)
+            {
+                try
+                {
+            throw;
+        }
+    }
+        }
+
+        return result;
+    }
     #endregion
 }
 

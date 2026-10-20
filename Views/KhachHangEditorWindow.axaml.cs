@@ -175,12 +175,16 @@ public partial class KhachHangEditorWindow : Window
 
     private async void OnThietLapGiaClicked(object? sender, RoutedEventArgs e)
     {
-        var window = new ThietLapGiaDoiTacWindow(
-            Customer.Id,
-            Customer.MaKhachHang,
-            string.IsNullOrWhiteSpace(Customer.TenKhachHang) ? "Khách hàng" : Customer.TenKhachHang,
-            "KH");
+        if (Customer.Id == 0)
+        {
+            await NotificationWindow.ShowWarningAsync(
+                "Khách hàng chưa được lưu. Vui lòng bấm \"Lưu\" thông tin khách hàng trước khi thiết lập bảng giá riêng.",
+                "Chưa lưu khách hàng",
+                this);
+            return;
+        }
 
+        var window = new ThietLapGiaKhachHangWindow(Customer);
         await window.ShowDialog(this);
     }
 

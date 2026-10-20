@@ -1353,6 +1353,16 @@
               </Grid>
             </Button>
 
+            <!-- CÔNG NỢ NHÀ CUNG CẤP -->
+            <Button Classes="menu" Classes.active="{Binding IsCongNoNccSelected}"
+              Command="{Binding ChonMenuCommand}" CommandParameter="Công nợ NCC"
+              IsVisible="{Binding CanViewSupplierDebt}">
+              <Grid ColumnDefinitions="24,*">
+                <TextBlock Text="📑" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Công nợ NCC" VerticalAlignment="Center" Margin="6,0,0,0" />
+              </Grid>
+            </Button>
+
             <!-- NHẬP HÀNG -->
             <Button Classes="menu" Classes.active="{Binding IsNhapHangSelected}"
               Command="{Binding ChonMenuCommand}" CommandParameter="Nhập hàng"
@@ -1477,9 +1487,12 @@
                               Command="{Binding KetChuyenHangHoaCommand}" />
                   </MenuItem>
                   <MenuItem Header="💳 Công nợ đầu kỳ">
-                    <MenuItem Header="📊 Quản lý công nợ theo kỳ..."
+                    <MenuItem Header="📊 Quản lý công nợ khách hàng..."
                               Command="{Binding MoQuanLyCongNoTheoKyCommand}" />
-                    <MenuItem Header="➕ Thêm công nợ đầu kỳ..."
+                    <MenuItem Header="🚚 Quản lý công nợ NCC theo kỳ..."
+                              Command="{Binding MoQuanLyCongNoNccTheoKyCommand}" /> <!--
+                              Command="{Binding MoQuanLyCongNoTheoKyCommand}" />
+                    --> <MenuItem Header="➕ Thêm công nợ đầu kỳ..."
                               Command="{Binding ThemCongNoDauKyCommand}" />
                     <MenuItem Header="🔄 Kết chuyển công nợ..."
                               Command="{Binding KetChuyenCongNoCommand}" />
@@ -3018,11 +3031,11 @@
                 Margin="0,0,10,0"
                 Command="{Binding ThemCongNoDauKyCommand}"
                 CommandParameter="KHACH_HANG"
-<<<<<<< HEAD
+<!--
               -->
-              <Button Grid.Column="6" Classes="toolbar-action" Content="🏷 Thiết lập giá"
+              <!--
 =======
-                ToolTip.Tip="Khai báo số dư công nợ đầu kỳ của khách hàng" />
+                -->
               <Button Grid.Column="6" Classes="toolbar-action" Content="💵 Nợ thanh toán"
                 Margin="0,0,10,0"
                 Command="{Binding ThemNoThanhToanCommand}"
@@ -4008,6 +4021,9 @@
                   Command="{Binding XuatFileNhaCungCapCommand}"
                   ToolTip.Tip="Xuất toàn bộ danh sách nhà cung cấp đang xem ra file Excel"
                   IsVisible="{Binding CanExportSupplier}" />
+                <Button Classes="toolbar-action" Content="💳 Công nợ theo kỳ" Margin="0"
+                  Command="{Binding MoQuanLyCongNoNccTheoKyCommand}"
+                  ToolTip.Tip="Xem và quản lý công nợ theo kỳ của nhà cung cấp" />
                 <Button Classes="toolbar-action" Content="💳 Nợ đầu kỳ" Margin="0"
                   Command="{Binding ThemCongNoDauKyCommand}"
                   CommandParameter="NHA_CUNG_CAP"
@@ -4174,10 +4190,10 @@
                       Foreground="#164B40" FontSize="12" VerticalAlignment="Center" />
                     <TextBlock Grid.Column="4" Text="ĐỊA CHỈ" FontWeight="SemiBold"
                       Foreground="#164B40" FontSize="12" VerticalAlignment="Center" />
-                    <TextBlock Grid.Column="5" Text="TỔNG MUA" FontWeight="SemiBold"
+                    <TextBlock Grid.Column="5" Text="NGƯỜI LIÊN HỆ" FontWeight="SemiBold"
                       Foreground="#164B40" FontSize="12" VerticalAlignment="Center"
                       HorizontalAlignment="Right" />
-                    <TextBlock Grid.Column="6" Text="CÒN NỢ" FontWeight="SemiBold"
+                    <TextBlock Grid.Column="6" Text="TRẠNG THÁI" FontWeight="SemiBold"
                       Foreground="#164B40" FontSize="12" VerticalAlignment="Center"
                       HorizontalAlignment="Right" />
                     <TextBlock Grid.Column="7" Text="" />
@@ -4256,17 +4272,17 @@
                               Foreground="#52645E" VerticalAlignment="Center"
                               TextTrimming="CharacterEllipsis" />
 
-                            <TextBlock Grid.Column="5" Text="{Binding TongMuaText}"
+                            <TextBlock Grid.Column="5" Text="{Binding NguoiLienHe}"
                               FontSize="12" Foreground="#344B45" VerticalAlignment="Center"
                               HorizontalAlignment="Right"
                               TextTrimming="CharacterEllipsis" />
 
                             <Border Grid.Column="6" CornerRadius="6" Padding="8,3"
                               HorizontalAlignment="Right" VerticalAlignment="Center"
-                              Background="{Binding ConNoBackground}">
-                              <TextBlock Text="{Binding ConNoText}" FontSize="12"
+                              Background="{Binding TrangThaiBackground}">
+                              <TextBlock Text="{Binding TrangThaiHienThi}" FontSize="12"
                                 FontWeight="SemiBold"
-                                Foreground="{Binding ConNoForeground}" />
+                                Foreground="{Binding TrangThaiForeground}" />
                             </Border>
 
                             <TextBlock Grid.Column="7" Text="{Binding KyHieuMoRong}" FontSize="11"
@@ -4755,6 +4771,11 @@
 
           </Grid>
         </TabItem>
+        <!-- TAB CÔNG NỢ NCC THEO KỲ -->
+        <TabItem Header="Công nợ NCC theo kỳ">
+          <views:QuanLyCongNoNccTheoKyView DataContext="{Binding QuanLyCongNoNccTheoKy}" />
+        </TabItem>
+
         <!-- TAB NHẬP HÀNG / MUA HÀNG -->
         <TabItem Header="Nhập hàng">
           <Grid Margin="0,14,0,0">

@@ -36,6 +36,8 @@ public partial class MainWindowViewModel : ObservableObject
                 QuanLyKhoTheoKy.OwnerWindow = value;
             if (QuanLyCongNoTheoKy != null)
                 QuanLyCongNoTheoKy.OwnerWindow = value;
+            if (QuanLyCongNoNccTheoKy != null)
+                QuanLyCongNoNccTheoKy.OwnerWindow = value;
         }
     }
     private bool _customersLoaded;
@@ -126,6 +128,9 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Phân hệ Quản lý công nợ theo kỳ kinh doanh.</summary>
     public QuanLyCongNoTheoKyViewModel QuanLyCongNoTheoKy { get; }
 
+    /// <summary>Phân hệ Quản lý công nợ nhà cung cấp theo kỳ kinh doanh.</summary>
+    public QuanLyCongNoNccTheoKyViewModel QuanLyCongNoNccTheoKy { get; }
+
     public MainWindowViewModel()
     {
         Dashboard = new DashboardViewModel(_db);
@@ -184,6 +189,11 @@ public partial class MainWindowViewModel : ObservableObject
         {
             OwnerWindow = OwnerWindow,
             ChuyenSangNhapHangAction = () => SelectedMenu = "Nhập hàng"
+        };
+
+        QuanLyCongNoNccTheoKy = new QuanLyCongNoNccTheoKyViewModel(_db)
+        {
+            OwnerWindow = OwnerWindow
         };
 
         QuanLyCongNoTheoKy = new QuanLyCongNoTheoKyViewModel(_db)
@@ -267,12 +277,49 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
+#if false /* DUPLICATE_TEMP */
+        {
+            _ = QuanLyKhoTheoKy.KhoiTaoAsync();
+    }
+
+    [RelayCommand]
+    private void MoQuanLyCongNoTheoKy()
+    {
+        SelectedMenu = "Công nợ";
+        _ = QuanLyCongNoTheoKy.KhoiTaoAsync();
+    }
+
+    [RelayCommand]
+    private void MoQuanLyCongNoNccTheoKy()
+    {
+        SelectedMenu = "Công nợ NCC";
+        _ = QuanLyCongNoNccTheoKy.KhoiTaoAsync();
+        }
+    }
+
+    [RelayCommand]
+#endif
+
     [RelayCommand]
     private void MoQuanLyTonKhoTheoKy()
     {
         SelectedMenu = "Hàng hóa";
         SelectedHangHoaSubTabIndex = 1;
         _ = QuanLyKhoTheoKy.KhoiTaoAsync();
+    }
+
+    [RelayCommand]
+    private void MoQuanLyCongNoTheoKy()
+    {
+        SelectedMenu = "Công nợ";
+        _ = QuanLyCongNoTheoKy.KhoiTaoAsync();
+    }
+
+    [RelayCommand]
+    private void MoQuanLyCongNoNccTheoKy()
+    {
+        SelectedMenu = "Công nợ NCC";
+        _ = QuanLyCongNoNccTheoKy.KhoiTaoAsync();
     }
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsBanHangSubTabSelected))]
@@ -1507,6 +1554,49 @@ public partial class MainWindowViewModel : ObservableObject
     public Task ThietLapGiaKhachHangDangChonAsync()
         => ThietLapGiaKhachHangAsync(SelectedCustomer);
 
+    /// <summary>
+    /// Mở cửa sổ "Thiết lập giá theo nhóm / nhiều khách hàng" để thiết lập giá hàng loạt.
+    /// Nếu có các dòng khách hàng đang tick chọn thì nạp sẵn vào cửa sổ.
+    /// </summary>
+    [RelayCommand]
+    public async Task ThietLapGiaTheoNhomAsync()
+    {
+        if (OwnerWindow is null)
+            return;
+
+        if (!await KiemTraQuyenAsync(PermissionKeys.CustomersEdit, "Bạn không có quyền thiết lập giá khách hàng."))
+        {
+            return;
+        }
+
+        try
+        {
+            // Lấy danh sách khách hàng đang được tick chọn (nếu có)
+            var selectedCustomers = CustomerRows
+                .Where(r => r.IsSelected)
+                .Select(r => r.Customer)
+                .ToList();
+
+            // Nếu không tick chọn ai nhưng đang chọn 1 khách hàng thì đưa khách đó vào danh sách
+            if (selectedCustomers.Count == 0 && SelectedCustomer?.Customer != null)
+            {
+                selectedCustomers.Add(SelectedCustomer.Customer);
+            }
+
+            var window = new ThietLapGiaTheoNhomWindow(selectedCustomers);
+            await window.ShowDialog(OwnerWindow);
+            StatusMessage = "Đã đóng thiết lập giá theo nhóm.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi khi mở thiết lập giá theo nhóm: " + ex.Message;
+            SafeLog.WriteError("Lỗi ThietLapGiaTheoNhomAsync", ex);
+        }
+    }
+
+    private Task _OldThietLapGiaKhachHangDangChon()
+        => ThietLapGiaKhachHangAsync(SelectedCustomer);
+
     private bool _isInitialized;
 
     // =========================================================
@@ -1681,6 +1771,10 @@ public partial class MainWindowViewModel : ObservableObject
 
                 case "Nhà cung cấp":
                     await LoadSuppliersAsync();
+                    break;
+
+                case "Công nợ NCC":
+                    await QuanLyCongNoNccTheoKy.KhoiTaoAsync();
                     break;
 
                 case "Nhập hàng":
@@ -2751,6 +2845,10 @@ public partial class MainWindowViewModel : ObservableObject
                 else if (IsNhaCungCapSelected)
                 {
                     await LoadSuppliersAsync();
+                    break;
+
+                case "Công nợ NCC":
+                    await QuanLyCongNoNccTheoKy.KhoiTaoAsync();
                 }
 
                 StatusMessage = "Đã lưu công nợ đầu kỳ thành công!";
@@ -7203,8 +7301,9 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             "Công nợ" => 2,
             "Hóa đơn" => 3,
             "Nhà cung cấp" => 4,
-            "Nhập hàng" => 5,
-            "Sổ quỹ" => 6,
+            "Công nợ NCC" => 5,
+            "Nhập hàng" => 6,
+            "Sổ quỹ" => 7,
             _ => 0
         };
 
@@ -7221,6 +7320,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         OnPropertyChanged(nameof(IsKhachHangSelected));
         OnPropertyChanged(nameof(IsCongNoSelected));
         OnPropertyChanged(nameof(IsNhaCungCapSelected));
+        OnPropertyChanged(nameof(IsCongNoNccSelected));
         OnPropertyChanged(nameof(IsSoQuySelected));
         OnPropertyChanged(nameof(IsDataSectionSelected));
         OnPropertyChanged(nameof(IsNhapHangSelected));
@@ -7260,6 +7360,11 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         if (value == "Công nợ")
         {
             _ = QuanLyCongNoTheoKy.KhoiTaoAsync();
+        }
+
+        if (value == "Công nợ NCC")
+        {
+            _ = QuanLyCongNoNccTheoKy.KhoiTaoAsync();
         }
 
         if (value == "Hàng hóa" && SelectedHangHoaSubTabIndex == 1)
@@ -7335,6 +7440,7 @@ public bool IsHoaDonSelected => SelectedMenu == "Hóa đơn";
 public bool IsKhachHangSelected => SelectedMenu == "Khách hàng";
 public bool IsCongNoSelected => SelectedMenu == "Công nợ";
 public bool IsNhaCungCapSelected => SelectedMenu == "Nhà cung cấp";
+public bool IsCongNoNccSelected => SelectedMenu == "Công nợ NCC";
 public bool IsSoQuySelected => SelectedMenu == "Sổ quỹ";
 
 // Báo cáo có vùng nội dung riêng nên không dùng chung TabControl dữ liệu

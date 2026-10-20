@@ -21,6 +21,10 @@ public sealed partial class NhaCungCapRowViewModel : ObservableObject
     private static readonly IBrush NenCanhBao = new SolidColorBrush(Color.Parse("#FDF1E7"));
     private static readonly IBrush ChuCanhBao = new SolidColorBrush(Color.Parse("#B45309"));
     private static readonly IBrush ChuKhongConNo = new SolidColorBrush(Color.Parse("#52645E"));
+    private static readonly IBrush BrushTrangThaiHoatDong = new SolidColorBrush(Color.Parse("#087F6E"));
+    private static readonly IBrush BrushTrangThaiNgung = new SolidColorBrush(Color.Parse("#B42318"));
+    private static readonly IBrush BrushBgHoatDong = new SolidColorBrush(Color.Parse("#E6F4EA"));
+    private static readonly IBrush BrushBgNgung = new SolidColorBrush(Color.Parse("#FEE4E2"));
 
     public NhaCungCap Supplier { get; private set; }
 
@@ -68,6 +72,14 @@ public sealed partial class NhaCungCapRowViewModel : ObservableObject
     public string Email => HienThi(Supplier.Email);
 
     public string DiaChi => HienThi(Supplier.DiaChi);
+
+    public string NguoiLienHe => HienThi(Supplier.NguoiLienHe ?? Supplier.LienHe);
+
+    public string TrangThaiHienThi => Supplier.TrangThai ? "Đang hợp tác" : "Ngừng hợp tác";
+
+    public IBrush TrangThaiForeground => Supplier.TrangThai ? BrushTrangThaiHoatDong : BrushTrangThaiNgung;
+
+    public IBrush TrangThaiBackground => Supplier.TrangThai ? BrushBgHoatDong : BrushBgNgung;
 
     public string NgayTaoText => Supplier.NgayTao?.ToString("dd/MM/yyyy") ?? ChuaCo;
 
