@@ -140,15 +140,14 @@ public partial class MainWindowViewModel
     }
 
     /// <summary>
-    /// Mở màn hình "Nghiệp vụ → Xuất hàng nội bộ → Danh sách phiếu xuất hàng nội bộ".
+    /// Mở trung tâm "Xuất hàng" - danh sách hợp nhất (xuất nội bộ nằm trong đó).
     /// </summary>
     [RelayCommand]
     public async Task MoGiaoDienXuatNoiBoAsync()
     {
         IsSalesPanelVisible = false;
-        SelectedMenu = "Xuất nội bộ";
-        DsPhieuXuatNoiBoPage = 1;
-        await LoadDsPhieuXuatNoiBoAsync();
+        SelectedMenu = "Xuất hàng";
+        await MoDanhSachPhieuXuatHopAsync();
     }
 
     /// <summary>

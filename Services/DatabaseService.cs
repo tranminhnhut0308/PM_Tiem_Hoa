@@ -2570,13 +2570,16 @@ public sealed partial class DatabaseService
         if (existing is not null)
             return existing;
 
+        // ma_nhom là cột NOT NULL nên bắt buộc phải có giá trị khi thêm nhóm mới.
+        var maNhom = await SinhMaNhomKhachHangAsync(connection, "NHN");
+
         const string insertSql = """
-        INSERT INTO nhom_khach_hang (ten_nhom, phan_tram_giam_gia, ghi_chu, trang_thai)
-        VALUES ('Nội bộ', 0, 'Nhóm khách hàng / đối tác nội bộ', 1);
+        INSERT INTO nhom_khach_hang (ma_nhom, ten_nhom, phan_tram_giam_gia, ghi_chu, trang_thai)
+        VALUES (@MaNhom, 'Nội bộ', 0, 'Nhóm khách hàng / đối tác nội bộ', 1);
         SELECT LAST_INSERT_ID();
         """;
 
-        var id = await connection.ExecuteScalarAsync<uint>(insertSql);
+        var id = await connection.ExecuteScalarAsync<uint>(insertSql, new { MaNhom = maNhom });
         return new NhomKhachHang
         {
             Id = id,
@@ -2584,6 +2587,31 @@ public sealed partial class DatabaseService
             PhanTramGiamGia = 0,
             TrangThai = true
         };
+    }
+
+    /// <summary>Sinh mã nhóm khách hàng kế tiếp theo dạng {prefix} + số thứ tự.</summary>
+    private static async Task<string> SinhMaNhomKhachHangAsync(MySqlConnection connection, string prefix)
+    {
+        var nextNumber = await connection.ExecuteScalarAsync<long>(
+            """
+            SELECT COALESCE(MAX(CAST(SUBSTRING(ma_nhom, 4) AS UNSIGNED)), 0) + 1
+            FROM nhom_khach_hang
+            WHERE ma_nhom REGEXP '^[A-Z]{3}[0-9]{1,8}$';
+            """);
+
+        if (nextNumber <= 0)
+            nextNumber = 1;
+
+        var code = $"{prefix}{nextNumber:D4}";
+        while (await connection.ExecuteScalarAsync<int>(
+                   "SELECT COUNT(1) FROM nhom_khach_hang WHERE ma_nhom = @Code",
+                   new { Code = code }) > 0)
+        {
+            nextNumber++;
+            code = $"{prefix}{nextNumber:D4}";
+        }
+
+        return code;
     }
 
     public async Task<IReadOnlyList<KhachHang>> GetKhachHangAsync(
@@ -9703,29 +9731,18 @@ LIMIT 500;
 
             // Cộng số dư quỹ đầu kỳ do người dùng khai báo (bảng so_quy_dau_ky)
             // vào quỹ đầu kỳ để tồn quỹ luôn phản ánh đúng tiền thực có.
-            var soDuQuyDauKy = await GetTongSoDuQuyDauKyAsync(loc.PhuongThuc);
+            // Chỉ cộng những khai báo có ngày đầu kỳ không vượt quá mốc bắt đầu
+            // của kỳ đang xem, để khai báo của kỳ sau không làm lệch số.
+            var soDuQuyDauKy = await GetTongSoDuQuyDauKyAsync(loc.PhuongThuc, loc.TuNgay);
 
             var quyDauKy = (row?.QuyDauKy ?? 0m) + soDuQuyDauKy;
             var tongThu = row?.TongThu ?? 0m;
             var tongChi = row?.TongChi ?? 0m;
             var tonQuy = quyDauKy + tongThu - tongChi;
 
-            // Nghiệp vụ: khi lọc phiếu thu thì tổng chi = 0, tồn quỹ = 0.
-            // Khi lọc phiếu chi thì tổng thu = 0, tồn quỹ = 0.
-            // Khi lọc tất cả thì hiển thị đầy đủ tổng thu, tổng chi và tồn quỹ thực tế.
-            if (loc.LoaiChungTu == SoQuyBoLoc.ChiPhieuThu)
-            {
-                tongChi = 0m;
-                tonQuy = 0m;
-                quyDauKy = 0m;
-            }
-            else if (loc.LoaiChungTu == SoQuyBoLoc.ChiPhieuChi)
-            {
-                tongThu = 0m;
-                tonQuy = 0m;
-                quyDauKy = 0m;
-            }
-
+            // Bốn thẻ tổng quan luôn phản ánh đúng số liệu của kỳ đang xem:
+            // quỹ đầu kỳ + tổng thu - tổng chi = tồn quỹ. Chip "loại chứng từ"
+            // chỉ lọc danh sách bên dưới, không bóp méo số liệu của kỳ.
             return new SoQuyTongHop
             {
                 QuyDauKy = quyDauKy,
@@ -10522,118 +10539,9 @@ LIMIT 500;
         }
     }
 
-    /// <summary>
-    /// Lấy danh sách nhân viên có phân trang, tìm kiếm và bộ lọc theo trạng thái, chức vụ / vai trò.
-    /// Dùng cho màn hình "Danh mục → Đối tác → Nhân viên".
-    /// </summary>
-    public async Task<(IReadOnlyList<NhanVienItem> Items, int TongSoBanGhi)> GetNhanVienPagedAsync(
-        string? search,
-        int page,
-        int pageSize,
-        string? trangThaiLoc = null,
-        uint? vaiTroId = null)
-    {
-        await using var connection = await OpenAsync();
-        await EnsureNguoiDungContactColumnsAsync(connection);
-
-        var keyword = (search ?? string.Empty).Trim();
-        var safePage = page < 1 ? 1 : page;
-        var safePageSize = pageSize < 1 ? 20 : pageSize;
-        var offset = (safePage - 1) * safePageSize;
-
-        var parameters = new DynamicParameters();
-        parameters.Add("PageSize", safePageSize);
-        parameters.Add("Offset", offset);
-
-        var whereConditions = new List<string>();
-
-        bool coSdt = _coCotSoDienThoaiNguoiDung == true;
-        bool coEmail = _coCotEmailNguoiDung == true;
-
-        if (!string.IsNullOrWhiteSpace(keyword))
-        {
-            parameters.Add("Search", $"%{keyword}%");
-            var searchConds = new List<string>
-            {
-                "nd.ten_dang_nhap LIKE @Search",
-                "nd.ho_ten LIKE @Search",
-                "nd.ma_nguoi_dung LIKE @Search"
-            };
-
-            if (coSdt)
-                searchConds.Add("nd.so_dien_thoai LIKE @Search");
-            if (coEmail)
-                searchConds.Add("nd.email LIKE @Search");
-
-            whereConditions.Add($"({string.Join(" OR ", searchConds)})");
-        }
-
-        if (!string.IsNullOrWhiteSpace(trangThaiLoc) && !string.Equals(trangThaiLoc, "TAT_CA", StringComparison.OrdinalIgnoreCase))
-        {
-            if (string.Equals(trangThaiLoc, "DANG_LAM_VIEC", StringComparison.OrdinalIgnoreCase) || string.Equals(trangThaiLoc, "1"))
-            {
-                whereConditions.Add("nd.trang_thai = 1");
-            }
-            else if (string.Equals(trangThaiLoc, "KHOA", StringComparison.OrdinalIgnoreCase) || string.Equals(trangThaiLoc, "0"))
-            {
-                whereConditions.Add("nd.trang_thai = 0");
-            }
-        }
-
-        if (vaiTroId.HasValue && vaiTroId.Value > 0)
-        {
-            parameters.Add("VaiTroId", vaiTroId.Value);
-            whereConditions.Add("EXISTS (SELECT 1 FROM nguoi_dung_vai_tro r_vt WHERE r_vt.nguoi_dung_id = nd.id AND r_vt.vai_tro_id = @VaiTroId)");
-        }
-
-        var whereClause = whereConditions.Count > 0
-            ? "WHERE " + string.Join(" AND ", whereConditions)
-            : "";
-
-        var countSql = $"""
-        SELECT COUNT(DISTINCT nd.id)
-        FROM nguoi_dung nd
-        {whereClause}
-        """;
-
-        var totalRecords = await connection.ExecuteScalarAsync<int>(countSql, parameters);
-
-        var sdtCol = coSdt ? "nd.so_dien_thoai" : "''";
-        var emailCol = coEmail ? "nd.email" : "''";
-
-        var dataSql = $"""
-        SELECT 
-            nd.id AS Id,
-            nd.ma_nguoi_dung AS MaNguoiDung,
-            nd.ten_dang_nhap AS TenDangNhap,
-            nd.ho_ten AS HoTen,
-            {sdtCol} AS SoDienThoai,
-            {emailCol} AS Email,
-            nd.chi_nhanh_id AS ChiNhanhId,
-            cn.ten_chi_nhanh AS TenChiNhanh,
-            nd.trang_thai AS TrangThai,
-            nd.lan_dang_nhap_cuoi AS LanDangNhapCuoi,
-            nd.ngay_tao AS NgayTao,
-            GROUP_CONCAT(DISTINCT vt.ten_vai_tro ORDER BY vt.id SEPARATOR ', ') AS ChucVu,
-            GROUP_CONCAT(DISTINCT vt.ma_vai_tro ORDER BY vt.id SEPARATOR ',') AS MaVaiTro
-        FROM nguoi_dung nd
-        LEFT JOIN chi_nhanh cn ON cn.id = nd.chi_nhanh_id
-        LEFT JOIN nguoi_dung_vai_tro ndvt ON ndvt.nguoi_dung_id = nd.id
-        LEFT JOIN vai_tro vt ON vt.id = ndvt.vai_tro_id
-        {whereClause}
-        GROUP BY nd.id, nd.ma_nguoi_dung, nd.ten_dang_nhap, nd.ho_ten, nd.chi_nhanh_id, cn.ten_chi_nhanh, nd.trang_thai, nd.lan_dang_nhap_cuoi, nd.ngay_tao
-        ORDER BY nd.id ASC
-        LIMIT @PageSize OFFSET @Offset
-        """;
-
-        var items = (await connection.QueryAsync<NhanVienItem>(dataSql, parameters)).AsList();
-        for (int i = 0; i < items.Count; i++)
-        {
-            items[i].Stt = offset + i + 1;
-        }
-
-        return (items, totalRecords);
-    }
+    // Phần truy vấn danh sách nhân viên (hồ sơ nhân sự) nằm trong file partial
+    // DatabaseService.NhanVien.cs để gom những thay đổi liên quan tới màn
+    // "Quản lý nhân viên" về một chỗ.
 
     /// <summary>
     /// Kiểm tra ràng buộc trước khi xóa nhân viên:
@@ -10658,11 +10566,11 @@ LIMIT 500;
         try
         {
             var hasHoaDonCol = await connection.ExecuteScalarAsync<int>(
-                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'hoa_don' AND COLUMN_NAME IN ('nguoi_tao_id', 'thu_ngan_id');");
+                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'hoa_don_ban_hang' AND COLUMN_NAME = 'nguoi_ban_id';");
             if (hasHoaDonCol > 0)
             {
                 var soHoaDon = await connection.ExecuteScalarAsync<int>(
-                    "SELECT COUNT(*) FROM hoa_don WHERE (nguoi_tao_id = @Id OR thu_ngan_id = @Id);",
+                    "SELECT COUNT(*) FROM hoa_don_ban_hang WHERE nguoi_ban_id = @Id;",
                     new { Id = nhanVienId });
                 if (soHoaDon > 0)
                 {
@@ -10676,11 +10584,11 @@ LIMIT 500;
         try
         {
             var hasPhieuNhapCol = await connection.ExecuteScalarAsync<int>(
-                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'phieu_nhap' AND COLUMN_NAME IN ('nguoi_tao_id', 'nguoi_nhap_id');");
+                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'phieu_nhap_hang' AND COLUMN_NAME = 'nguoi_nhap_id';");
             if (hasPhieuNhapCol > 0)
             {
                 var soPhieuNhap = await connection.ExecuteScalarAsync<int>(
-                    "SELECT COUNT(*) FROM phieu_nhap WHERE (nguoi_tao_id = @Id OR nguoi_nhap_id = @Id);",
+                    "SELECT COUNT(*) FROM phieu_nhap_hang WHERE nguoi_nhap_id = @Id;",
                     new { Id = nhanVienId });
                 if (soPhieuNhap > 0)
                 {
@@ -10690,19 +10598,19 @@ LIMIT 500;
         }
         catch { }
 
-        // 3. Kiểm tra sổ quỹ
+        // 3. Kiểm tra phiếu chi / thu
         try
         {
-            var hasSoQuyCol = await connection.ExecuteScalarAsync<int>(
-                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'so_quy' AND COLUMN_NAME = 'nguoi_tao_id';");
-            if (hasSoQuyCol > 0)
+            var hasPhieuChiCol = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'phieu_chi' AND COLUMN_NAME = 'nguoi_thuc_hien_id';");
+            if (hasPhieuChiCol > 0)
             {
-                var soPhieuQuy = await connection.ExecuteScalarAsync<int>(
-                    "SELECT COUNT(*) FROM so_quy WHERE nguoi_tao_id = @Id;",
+                var soPhieuChi = await connection.ExecuteScalarAsync<int>(
+                    "SELECT COUNT(*) FROM phieu_chi WHERE nguoi_thuc_hien_id = @Id;",
                     new { Id = nhanVienId });
-                if (soPhieuQuy > 0)
+                if (soPhieuChi > 0)
                 {
-                    return (false, $"Nhân viên này đã lập {soPhieuQuy} phiếu thu / chi trong sổ quỹ. Để bảo toàn chứng từ thu chi, không thể xóa tài khoản. Bạn có thể sử dụng chức năng Khóa nhân viên.");
+                    return (false, $"Nhân viên này đã lập {soPhieuChi} phiếu thu / chi trong hệ thống. Để bảo toàn chứng từ thu chi, không thể xóa tài khoản. Bạn có thể sử dụng chức năng Khóa nhân viên.");
                 }
             }
         }
@@ -13113,10 +13021,15 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Tổng số dư quỹ đầu kỳ của chi nhánh hiện tại (tùy chọn lọc theo một quỹ).
-    /// Dùng để cộng vào "quỹ đầu kỳ" khi tính tồn quỹ.
+    /// Tổng số dư quỹ đầu kỳ của chi nhánh hiện tại (tùy chọn lọc theo một quỹ
+    /// và theo mốc ngày). Dùng để cộng vào "quỹ đầu kỳ" khi tính tồn quỹ.
+    /// <para>
+    /// <paramref name="ngayDauKyToiDa"/> giới hạn lấy những khai báo có ngày đầu kỳ
+    /// không vượt quá mốc đang xem. Nhờ vậy khi xem một kỳ thì quỹ đầu kỳ chỉ cộng
+    /// những khai báo đã có trước kỳ đó, còn khai báo của kỳ sau không làm lệch số.
+    /// </para>
     /// </summary>
-    public async Task<decimal> GetTongSoDuQuyDauKyAsync(string? phuongThuc = null)
+    public async Task<decimal> GetTongSoDuQuyDauKyAsync(string? phuongThuc = null, DateTime? ngayDauKyToiDa = null)
     {
         try
         {
@@ -13133,12 +13046,151 @@ LIMIT 500;
                 param.Add("PhuongThuc", phuongThuc.Trim().ToUpperInvariant());
             }
 
+            if (ngayDauKyToiDa.HasValue)
+            {
+                sql += " AND ngay_dau_ky <= @NgayDauKyToiDa";
+                param.Add("NgayDauKyToiDa", ngayDauKyToiDa.Value.Date);
+            }
+
             return await connection.ExecuteScalarAsync<decimal>(sql, param);
         }
         catch (Exception ex)
         {
             SafeLog.WriteError("Lỗi GetTongSoDuQuyDauKyAsync", ex);
             return 0m;
+        }
+    }
+
+    /// <summary>
+    /// Các bản ghi số dư quỹ đầu kỳ đã khai báo cho đúng một mốc ngày đầu kỳ.
+    /// Dùng cho màn Sổ quỹ để biết kỳ đang xem đã khởi tạo quỹ chưa và điền sẵn
+    /// số tiền vào ô nhập khi sửa lại.
+    /// </summary>
+    public async Task<IReadOnlyList<SoQuyDauKy>> GetSoQuyDauKyTheoKyAsync(DateTime ngayDauKy, string? phuongThuc = null)
+    {
+        try
+        {
+            await using var connection = await OpenAsync();
+            await EnsureBangSoQuyDauKyAsync(connection);
+
+            var sql = """
+            SELECT
+                id AS Id,
+                ngay_dau_ky AS NgayDauKy,
+                phuong_thuc AS PhuongThuc,
+                so_tien AS SoTien,
+                noi_dung AS NoiDung,
+                chi_nhanh_id AS ChiNhanhId,
+                ngay_tao AS NgayTao
+            FROM so_quy_dau_ky
+            WHERE chi_nhanh_id = @ChiNhanhId AND ngay_dau_ky = @NgayDauKy
+            """;
+
+            var param = new DynamicParameters();
+            param.Add("ChiNhanhId", Session.CurrentUser?.ChiNhanhId ?? 1);
+            param.Add("NgayDauKy", ngayDauKy.Date);
+
+            if (!string.IsNullOrWhiteSpace(phuongThuc))
+            {
+                sql += " AND phuong_thuc = @PhuongThuc";
+                param.Add("PhuongThuc", phuongThuc.Trim().ToUpperInvariant());
+            }
+
+            sql += " ORDER BY phuong_thuc;";
+
+            return (await connection.QueryAsync<SoQuyDauKy>(sql, param)).AsList();
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Lỗi GetSoQuyDauKyTheoKyAsync", ex);
+            return Array.Empty<SoQuyDauKy>();
+        }
+    }
+
+    /// <summary>
+    /// Toàn bộ các bản ghi số dư quỹ đầu kỳ đã khai báo, tuỳ chọn lọc theo quỹ
+    /// và theo mốc ngày tối đa. Dùng cho màn Sổ quỹ khi xem "toàn thời gian"
+    /// để biết quỹ đầu kỳ đã có khai báo nào hay chưa.
+    /// </summary>
+    public async Task<IReadOnlyList<SoQuyDauKy>> GetSoQuyDauKyListAsync(
+        string? phuongThuc = null,
+        DateTime? ngayDauKyToiDa = null)
+    {
+        try
+        {
+            await using var connection = await OpenAsync();
+            await EnsureBangSoQuyDauKyAsync(connection);
+
+            var sql = """
+            SELECT
+                id AS Id,
+                ngay_dau_ky AS NgayDauKy,
+                phuong_thuc AS PhuongThuc,
+                so_tien AS SoTien,
+                noi_dung AS NoiDung,
+                chi_nhanh_id AS ChiNhanhId,
+                ngay_tao AS NgayTao
+            FROM so_quy_dau_ky
+            WHERE chi_nhanh_id = @ChiNhanhId
+            """;
+
+            var param = new DynamicParameters();
+            param.Add("ChiNhanhId", Session.CurrentUser?.ChiNhanhId ?? 1);
+
+            if (!string.IsNullOrWhiteSpace(phuongThuc))
+            {
+                sql += " AND phuong_thuc = @PhuongThuc";
+                param.Add("PhuongThuc", phuongThuc.Trim().ToUpperInvariant());
+            }
+
+            if (ngayDauKyToiDa.HasValue)
+            {
+                sql += " AND ngay_dau_ky <= @NgayDauKyToiDa";
+                param.Add("NgayDauKyToiDa", ngayDauKyToiDa.Value.Date);
+            }
+
+            sql += " ORDER BY ngay_dau_ky, phuong_thuc;";
+
+            return (await connection.QueryAsync<SoQuyDauKy>(sql, param)).AsList();
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Lỗi GetSoQuyDauKyListAsync", ex);
+            return Array.Empty<SoQuyDauKy>();
+        }
+    }
+
+    /// <summary>
+    /// Xoá số dư quỹ đầu kỳ đã khai báo cho một quỹ tại một mốc ngày.
+    /// Dùng khi người dùng muốn bỏ khai báo của một kỳ trên màn Sổ quỹ.
+    /// </summary>
+    public async Task<bool> XoaSoQuyDauKyTheoKyAsync(DateTime ngayDauKy, string phuongThuc)
+    {
+        try
+        {
+            await using var connection = await OpenAsync();
+            await EnsureBangSoQuyDauKyAsync(connection);
+
+            var rows = await connection.ExecuteAsync(
+                """
+                DELETE FROM so_quy_dau_ky
+                WHERE chi_nhanh_id = @ChiNhanhId
+                  AND ngay_dau_ky = @NgayDauKy
+                  AND phuong_thuc = @PhuongThuc;
+                """,
+                new
+                {
+                    ChiNhanhId = Session.CurrentUser?.ChiNhanhId ?? 1,
+                    NgayDauKy = ngayDauKy.Date,
+                    PhuongThuc = (phuongThuc ?? "").Trim().ToUpperInvariant()
+                });
+
+            return rows > 0;
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Lỗi XoaSoQuyDauKyTheoKyAsync", ex);
+            return false;
         }
     }
     #endregion

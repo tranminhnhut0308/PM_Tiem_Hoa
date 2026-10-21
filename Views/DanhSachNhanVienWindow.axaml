@@ -10,7 +10,7 @@
         MinHeight="620"
         WindowStartupLocation="CenterOwner"
         CanResize="True"
-        Title="Danh mục → Đối tác → Nhân viên - WINWON"
+        Title="Quản trị → Quản lý tài khoản - WINWON"
         Background="#F4F7F6"
         RequestedThemeVariant="Light">
 
@@ -152,31 +152,29 @@
                 <StackPanel Spacing="4" VerticalAlignment="Center">
                     <!-- Breadcrumb -->
                     <StackPanel Orientation="Horizontal" Spacing="6">
-                        <TextBlock Text="Danh mục" Foreground="#64748B" FontSize="12" />
+                        <TextBlock Text="Quản trị" Foreground="#64748B" FontSize="12" />
                         <TextBlock Text="›" Foreground="#94A3B8" FontSize="12" />
-                        <TextBlock Text="Đối tác" Foreground="#64748B" FontSize="12" />
-                        <TextBlock Text="›" Foreground="#94A3B8" FontSize="12" />
-                        <TextBlock Text="Nhân viên" Foreground="#0B4B82" FontWeight="SemiBold" FontSize="12" />
+                        <TextBlock Text="Tài khoản" Foreground="#0B4B82" FontWeight="SemiBold" FontSize="12" />
                     </StackPanel>
 
                     <!-- Title -->
                     <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2,0,0">
                         <Border Width="38" Height="38" CornerRadius="10" Background="#EFF6FF" VerticalAlignment="Center">
-                            <TextBlock Text="👥" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="👤" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center" Spacing="2">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="Danh sách nhân viên" FontSize="20" FontWeight="Bold" Foreground="#0F172A"/>
+                                <TextBlock Text="Danh sách tài khoản" FontSize="20" FontWeight="Bold" Foreground="#0F172A"/>
                                 <Border Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="12" Padding="8,2" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding TotalRecords, StringFormat='{}{0} nhân viên'}" FontSize="11.5" FontWeight="Bold" Foreground="#1D4ED8"/>
+                                    <TextBlock Text="{Binding TotalRecords, StringFormat='{}{0} tài khoản'}" FontSize="11.5" FontWeight="Bold" Foreground="#1D4ED8"/>
                                 </Border>
                             </StackPanel>
-                            <TextBlock Text="Quản lý hồ sơ nhân sự, chức vụ, bộ phận và trạng thái làm việc" FontSize="12.5" Foreground="#64748B"/>
+                            <TextBlock Text="Quản lý tài khoản đăng nhập, vai trò và quyền truy cập của hệ thống" FontSize="12.5" Foreground="#64748B"/>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Actions: Thêm nhân viên + Làm mới -->
+                <!-- Actions: Thêm tài khoản + Làm mới -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                     <Button Classes="btnAction" Command="{Binding LoadDataCommand}" ToolTip.Tip="Tải lại danh sách">
                         <StackPanel Orientation="Horizontal" Spacing="6">
@@ -188,10 +186,10 @@
                     <Button Classes="btnPrimary"
                             Command="{Binding ThemNhanVienCommand}"
                             IsVisible="{Binding CanCreate}"
-                            ToolTip.Tip="Thêm nhân viên mới">
+                            ToolTip.Tip="Thêm tài khoản đăng nhập mới">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <TextBlock Text="➕" FontSize="12" VerticalAlignment="Center"/>
-                            <TextBlock Text="Thêm nhân viên" VerticalAlignment="Center"/>
+                            <TextBlock Text="Thêm tài khoản" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -201,18 +199,18 @@
         <!-- 2. SEARCH & FILTER TOOLBAR -->
         <Border Grid.Row="1" Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Padding="14,12">
             <Grid ColumnDefinitions="320,180,220,Auto,*,Auto" ColumnSpacing="10">
-                <!-- Ô tìm kiếm theo mã, họ tên, số điện thoại -->
+                <!-- Ô tìm kiếm theo tên đăng nhập, họ tên, số điện thoại -->
                 <TextBox Grid.Column="0" Classes="searchInput"
                          Text="{Binding SearchKeyword, Mode=TwoWay}"
-                         Watermark="🔍 Tìm theo mã NV, họ tên, số điện thoại..."/>
+                         Watermark="🔍 Tìm theo tên đăng nhập, họ tên, số điện thoại..."/>
 
-                <!-- Lọc theo trạng thái làm việc -->
+                <!-- Lọc theo trạng thái tài khoản -->
                 <ComboBox Grid.Column="1" Classes="filterCombo"
                           HorizontalAlignment="Stretch"
                           ItemsSource="{Binding TrangThaiOptions}"
                           SelectedItem="{Binding SelectedTrangThai, Mode=TwoWay}"/>
 
-                <!-- Lọc theo chức vụ / bộ phận -->
+                <!-- Lọc theo vai trò -->
                 <ComboBox Grid.Column="2" Classes="filterCombo"
                           HorizontalAlignment="Stretch"
                           ItemsSource="{Binding RoleOptions}"
@@ -267,15 +265,16 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <!-- Mã nhân viên -->
-                        <DataGridTemplateColumn Header="Mã NV" Width="115">
+                        <!-- Tên đăng nhập -->
+                        <DataGridTemplateColumn Header="Tên đăng nhập" Width="140">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="models:NhanVienItem">
-                                    <TextBlock Text="{Binding MaNhanVien}" 
-                                               FontWeight="Bold" 
-                                               Foreground="#0B4B82" 
-                                               VerticalAlignment="Center" 
-                                               Margin="12,0"/>
+                                    <TextBlock Text="{Binding TenDangNhap}"
+                                               FontWeight="Bold"
+                                               Foreground="#0B4B82"
+                                               VerticalAlignment="Center"
+                                               Margin="12,0"
+                                               TextTrimming="CharacterEllipsis"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -327,14 +326,14 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <!-- Chức vụ / Bộ phận -->
-                        <DataGridTemplateColumn Header="Chức vụ / Bộ phận" Width="160">
+                        <!-- Vai trò -->
+                        <DataGridTemplateColumn Header="Vai trò" Width="180">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="models:NhanVienItem">
                                     <Border Background="#F1F5F9" CornerRadius="6" Padding="8,4" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="12,0">
-                                        <TextBlock Text="{Binding ChucVu, FallbackValue='Nhân viên'}" 
-                                                   Foreground="#334155" 
-                                                   FontSize="12" 
+                                        <TextBlock Text="{Binding VaiTro, FallbackValue='Chưa phân vai trò'}"
+                                                   Foreground="#334155"
+                                                   FontSize="12"
                                                    FontWeight="Medium"
                                                    TextTrimming="CharacterEllipsis"/>
                                     </Border>
@@ -351,7 +350,7 @@
                                         <Border Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="12" Padding="8,3" HorizontalAlignment="Left" IsVisible="{Binding TrangThai}">
                                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                                 <Ellipse Width="6" Height="6" Fill="#10B981" />
-                                                <TextBlock Text="Đang làm việc" Foreground="#047857" FontSize="11.5" FontWeight="Medium" />
+                                                <TextBlock Text="Hoạt động" Foreground="#047857" FontSize="11.5" FontWeight="Medium" />
                                             </StackPanel>
                                         </Border>
                                         <!-- Đã khóa / Ngừng làm việc -->
@@ -376,7 +375,7 @@
                                                 Command="{Binding $parent[Window].((vm:DanhSachNhanVienViewModel)DataContext).XemChiTietCommand}"
                                                 CommandParameter="{Binding}"
                                                 Background="#F8FAFC" Foreground="#334155" BorderBrush="#E2E8F0" BorderThickness="1"
-                                                ToolTip.Tip="Xem chi tiết nhân viên"/>
+                                                ToolTip.Tip="Xem chi tiết tài khoản"/>
 
                                         <!-- Sửa -->
                                         <Button Classes="rowBtn" Content="✏️ Sửa"
@@ -384,7 +383,7 @@
                                                 Command="{Binding $parent[Window].((vm:DanhSachNhanVienViewModel)DataContext).SuaNhanVienCommand}"
                                                 CommandParameter="{Binding}"
                                                 Background="#EFF6FF" Foreground="#1D4ED8" BorderBrush="#BFDBFE" BorderThickness="1"
-                                                ToolTip.Tip="Sửa thông tin nhân viên"/>
+                                                ToolTip.Tip="Sửa thông tin tài khoản"/>
 
                                         <!-- Phân quyền -->
                                         <Button Classes="rowBtn" Content="🔑 Quyền"
@@ -401,7 +400,7 @@
                                                 Command="{Binding $parent[Window].((vm:DanhSachNhanVienViewModel)DataContext).KhoaNhanVienCommand}"
                                                 CommandParameter="{Binding}"
                                                 Background="#FFFBEB" Foreground="#B45309" BorderBrush="#FDE68A" BorderThickness="1"
-                                                ToolTip.Tip="Khóa nhân viên này"/>
+                                                ToolTip.Tip="Khóa tài khoản này"/>
 
                                         <!-- Mở khóa (khi bị khóa) -->
                                         <Button Classes="rowBtn" Content="🔓 Mở"
@@ -410,7 +409,7 @@
                                                 Command="{Binding $parent[Window].((vm:DanhSachNhanVienViewModel)DataContext).MoKhoaNhanVienCommand}"
                                                 CommandParameter="{Binding}"
                                                 Background="#ECFDF5" Foreground="#047857" BorderBrush="#A7F3D0" BorderThickness="1"
-                                                ToolTip.Tip="Mở khóa cho nhân viên"/>
+                                                ToolTip.Tip="Mở khóa cho tài khoản"/>
 
                                         <!-- Xóa -->
                                         <Button Classes="rowBtn" Content="🗑️"
@@ -418,7 +417,7 @@
                                                 Command="{Binding $parent[Window].((vm:DanhSachNhanVienViewModel)DataContext).XoaNhanVienCommand}"
                                                 CommandParameter="{Binding}"
                                                 Background="#FEF2F2" Foreground="#DC2626" BorderBrush="#FECACA" BorderThickness="1"
-                                                ToolTip.Tip="Xóa nhân viên khỏi hệ thống"/>
+                                                ToolTip.Tip="Xóa tài khoản khỏi hệ thống"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -430,7 +429,7 @@
                 <Border Background="White" IsVisible="{Binding IsEmpty}" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="40">
                     <StackPanel Spacing="10" HorizontalAlignment="Center">
                         <TextBlock Text="👥" FontSize="44" HorizontalAlignment="Center" Foreground="#94A3B8"/>
-                        <TextBlock Text="Không tìm thấy nhân viên nào" FontSize="16" FontWeight="SemiBold" Foreground="#334155" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Không tìm thấy tài khoản nào" FontSize="16" FontWeight="SemiBold" Foreground="#334155" HorizontalAlignment="Center"/>
                         <TextBlock Text="Thử tìm kiếm với từ khóa khác hoặc bấm nút Xóa lọc bên trên." FontSize="13" Foreground="#64748B" HorizontalAlignment="Center"/>
                         <Button Classes="btnAction" Content="Xóa bộ lọc" Command="{Binding XoaBoLocCommand}" HorizontalAlignment="Center" Margin="0,8,0,0"/>
                     </StackPanel>
@@ -440,7 +439,7 @@
                 <Border Background="#40FFFFFF" IsVisible="{Binding IsLoading}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
                         <ProgressBar IsIndeterminate="True" Width="200" Height="4" Foreground="#0B4B82"/>
-                        <TextBlock Text="Đang tải dữ liệu nhân viên..." FontSize="13" Foreground="#64748B" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Đang tải dữ liệu tài khoản..." FontSize="13" Foreground="#64748B" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Border>
             </Grid>

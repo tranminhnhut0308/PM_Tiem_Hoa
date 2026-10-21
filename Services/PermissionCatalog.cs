@@ -136,6 +136,16 @@ public static class PermissionCatalog
             PermissionKeys.UsersResetPassword,
             PermissionKeys.UsersChangePassword
         }),
+        new GroupDefinition("Employees", "Quản lý nhân viên", new[]
+        {
+            PermissionKeys.EmployeesView,
+            PermissionKeys.EmployeesCreate,
+            PermissionKeys.EmployeesEdit,
+            PermissionKeys.EmployeesDelete,
+            PermissionKeys.EmployeesExport,
+            PermissionKeys.EmployeesManageAccount,
+            PermissionKeys.EmployeesManageDepartment
+        }),
         new GroupDefinition("Settings", "Cấu hình hệ thống", new[]
         {
             PermissionKeys.SettingsView,
@@ -266,6 +276,15 @@ public static class PermissionCatalog
         [PermissionKeys.UsersResetPassword] = "Đặt lại mật khẩu",
         [PermissionKeys.UsersChangePassword] = "Tự đổi mật khẩu",
 
+        // Nhân viên
+        [PermissionKeys.EmployeesView] = "Xem danh sách nhân viên",
+        [PermissionKeys.EmployeesCreate] = "Thêm hồ sơ nhân viên",
+        [PermissionKeys.EmployeesEdit] = "Sửa hồ sơ nhân viên",
+        [PermissionKeys.EmployeesDelete] = "Xóa hồ sơ nhân viên",
+        [PermissionKeys.EmployeesExport] = "Export danh sách nhân viên",
+        [PermissionKeys.EmployeesManageAccount] = "Cấp / khóa tài khoản cho nhân viên",
+        [PermissionKeys.EmployeesManageDepartment] = "Quản lý bộ phận / chi nhánh",
+
         // Cấu hình hệ thống
         [PermissionKeys.SettingsView] = "Xem cấu hình hệ thống",
         [PermissionKeys.SettingsEdit] = "Cấu hình hệ thống",
@@ -287,6 +306,7 @@ public static class PermissionCatalog
             ["CashBook"] = PermissionKeys.CashBookView,
             ["Reports"] = PermissionKeys.ReportsView,
             ["Users"] = PermissionKeys.UsersView,
+            ["Employees"] = PermissionKeys.EmployeesView,
             ["Settings"] = PermissionKeys.SettingsView
         };
 
@@ -333,6 +353,8 @@ public static class PermissionCatalog
                 PermissionKeys.ReportsProfit, PermissionKeys.ReportsCost, PermissionKeys.ReportsPrint,
                 PermissionKeys.ReportsExport,
                 PermissionKeys.UsersChangePassword,
+                PermissionKeys.EmployeesView, PermissionKeys.EmployeesExport,
+                PermissionKeys.EmployeesManageDepartment,
                 PermissionKeys.SettingsView, PermissionKeys.SettingsEdit,
                 PermissionKeys.StoreInfoView, PermissionKeys.StoreInfoEdit
             },

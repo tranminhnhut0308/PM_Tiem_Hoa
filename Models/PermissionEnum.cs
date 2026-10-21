@@ -123,6 +123,15 @@ public static class PermissionKeys
     public const string UsersResetPassword = "taikhoan.dat_lai_mat_khau";
     public const string UsersChangePassword = "taikhoan.doi_mat_khau";
 
+    // ===== Quản lý nhân viên (hồ sơ nhân sự) =====
+    public const string EmployeesView = "nhanvien.xem";
+    public const string EmployeesCreate = "nhanvien.them";
+    public const string EmployeesEdit = "nhanvien.sua";
+    public const string EmployeesDelete = "nhanvien.xoa";
+    public const string EmployeesExport = "nhanvien.export";
+    public const string EmployeesManageAccount = "nhanvien.quan_ly_tai_khoan";
+    public const string EmployeesManageDepartment = "nhanvien.quan_ly_bo_phan";
+
     // ===== Cấu hình hệ thống =====
     public const string SettingsView = "caidat.xem";
     public const string SettingsEdit = "caidat.sua";

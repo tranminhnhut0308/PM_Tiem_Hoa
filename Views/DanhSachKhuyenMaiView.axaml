@@ -1,0 +1,435 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:models="using:ShopHoa.Models"
+  xmlns:vm="using:ShopHoa.ViewModels"
+  x:Class="ShopHoa.Views.DanhSachKhuyenMaiView"
+  x:Name="RootView"
+  x:DataType="vm:DanhSachKhuyenMaiViewModel">
+
+  <UserControl.Styles>
+    <!-- THẺ THỐNG KÊ -->
+    <Style Selector="Border.kmCard">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="BorderBrush" Value="#E4EDEA" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BoxShadow" Value="0 1 4 0 #0D000000" />
+    </Style>
+
+    <Style Selector="Border.kmMetric">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="BorderBrush" Value="#E4EDEA" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BoxShadow" Value="0 1 3 0 #0A000000" />
+      <Setter Property="Padding" Value="14,12" />
+    </Style>
+
+    <!-- NÚT PHỤ -->
+    <Style Selector="Button.kmBtn">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#D5E3DF" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="12,7" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="#344B45" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.kmBtn:pointerover">
+      <Setter Property="Background" Value="#EFF6F4" />
+      <Setter Property="BorderBrush" Value="#B9D6CF" />
+      <Setter Property="Foreground" Value="#0B5F52" />
+    </Style>
+    <Style Selector="Button.kmBtn:disabled">
+      <Setter Property="Opacity" Value="0.45" />
+    </Style>
+
+    <!-- NÚT CHÍNH -->
+    <Style Selector="Button.kmPrimary">
+      <Setter Property="Background" Value="#087F6E" />
+      <Setter Property="BorderBrush" Value="#087F6E" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="14,7" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.kmPrimary:pointerover">
+      <Setter Property="Background" Value="#066E61" />
+    </Style>
+
+    <!-- NÚT THAO TÁC TRONG BẢNG -->
+    <Style Selector="Button.kmRowAction">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="BorderBrush" Value="#CBD5E1" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="7,3" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="#334155" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.kmRowAction:pointerover">
+      <Setter Property="Background" Value="#EFF6F4" />
+      <Setter Property="BorderBrush" Value="#B9D6CF" />
+      <Setter Property="Foreground" Value="#0B5F52" />
+    </Style>
+
+    <!-- Ô NHẬP / BỘ LỌC -->
+    <Style Selector="TextBox.kmInput">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="BorderBrush" Value="#CBD5E1" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="10,7" />
+      <Setter Property="FontSize" Value="12.5" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="ComboBox.kmInput">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="BorderBrush" Value="#CBD5E1" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="FontSize" Value="12.5" />
+      <Setter Property="Height" Value="34" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="CalendarDatePicker.kmInput">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="BorderBrush" Value="#CBD5E1" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="FontSize" Value="12.5" />
+      <Setter Property="Height" Value="34" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid Margin="0,2,0,0" RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="12">
+
+    <!-- ============================================================ -->
+    <!-- 1. TIÊU ĐỀ + VÙNG THAO TÁC                                   -->
+    <!-- ============================================================ -->
+    <Grid Grid.Row="0" RowDefinitions="Auto,Auto" RowSpacing="10">
+      <StackPanel Grid.Row="0" Spacing="4">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <TextBlock Text="Quản lý chương trình khuyến mãi"
+            FontSize="22"
+            FontWeight="Bold"
+            Foreground="#163F38" />
+          <Border Background="#E6F4F1" CornerRadius="12" Padding="9,3" VerticalAlignment="Center">
+            <TextBlock Text="{Binding TongSoHienThi}"
+              FontSize="11"
+              FontWeight="SemiBold"
+              Foreground="#087F6E" />
+          </Border>
+        </StackPanel>
+        <TextBlock Text="Thiết lập, theo dõi và cấu hình các chương trình ưu đãi áp dụng cho hàng hóa, hóa đơn hoặc tặng hàng kèm."
+          FontSize="12"
+          Foreground="#61736E"
+          TextWrapping="Wrap" />
+      </StackPanel>
+
+      <!-- Vùng thao tác: WrapPanel để tự xuống hàng khi khung hẹp -->
+      <WrapPanel Grid.Row="1"
+        Orientation="Horizontal"
+        HorizontalAlignment="Right">
+        <Button Classes="kmBtn"
+          Content="↻ Làm mới"
+          Margin="0,0,8,0"
+          Command="{Binding TaiDanhSachCommand}" />
+        <Button Classes="kmBtn"
+          Content="🧹 Xóa bộ lọc"
+          Margin="0,0,8,0"
+          Command="{Binding XoaBoLocCommand}" />
+        <Button Classes="kmPrimary"
+          Content="＋ Thêm chương trình"
+          Command="{Binding ThemChuongTrinhCommand}"
+          IsVisible="{Binding CanThemChuongTrinh}" />
+      </WrapPanel>
+    </Grid>
+
+    <!-- ============================================================ -->
+    <!-- 2. THẺ THỐNG KÊ                                             -->
+    <!-- ============================================================ -->
+    <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*" ColumnSpacing="10">
+
+      <Border Grid.Column="0" Classes="kmMetric">
+        <StackPanel Spacing="4">
+          <TextBlock Text="TỔNG CHƯƠNG TRÌNH" FontSize="11" FontWeight="SemiBold" Foreground="#61736E" />
+          <TextBlock Text="{Binding TongSoChuongTrinh}"
+            FontSize="20"
+            FontWeight="Bold"
+            Foreground="#163F38" />
+          <TextBlock Text="Toàn bộ chương trình đã tạo" FontSize="11" Foreground="#879691" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+
+      <Border Grid.Column="1" Classes="kmMetric">
+        <StackPanel Spacing="4">
+          <TextBlock Text="ĐANG DIỄN RA" FontSize="11" FontWeight="SemiBold" Foreground="#61736E" />
+          <TextBlock Text="{Binding SoDangDienRa}"
+            FontSize="20"
+            FontWeight="Bold"
+            Foreground="#137333" />
+          <TextBlock Text="Có hiệu lực tại thời điểm hiện tại" FontSize="11" Foreground="#879691" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+
+      <Border Grid.Column="2" Classes="kmMetric">
+        <StackPanel Spacing="4">
+          <TextBlock Text="SẮP ÁP DỤNG" FontSize="11" FontWeight="SemiBold" Foreground="#61736E" />
+          <TextBlock Text="{Binding SoSapApDung}"
+            FontSize="20"
+            FontWeight="Bold"
+            Foreground="#1A73E8" />
+          <TextBlock Text="Đã tạo nhưng chưa tới hạn" FontSize="11" Foreground="#879691" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+
+      <Border Grid.Column="3" Classes="kmMetric" Background="#FFF8F6" BorderBrush="#FCDCD5">
+        <StackPanel Spacing="4">
+          <TextBlock Text="KẾT THÚC / TẠM NGƯNG" FontSize="11" FontWeight="SemiBold" Foreground="#B42318" />
+          <TextBlock Text="{Binding SoKetThucNgung}"
+            FontSize="20"
+            FontWeight="Bold"
+            Foreground="#B42318" />
+          <TextBlock Text="Không còn hiệu lực" FontSize="11" Foreground="#D92D20" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- ============================================================ -->
+    <!-- 3. THANH BỘ LỌC                                             -->
+    <!-- ============================================================ -->
+    <Border Grid.Row="2" Classes="kmCard" Padding="14,10">
+      <WrapPanel VerticalAlignment="Center">
+
+        <!-- Từ khóa -->
+        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,0" VerticalAlignment="Center">
+          <TextBlock Text="Tìm kiếm:" FontSize="12" FontWeight="SemiBold" Foreground="#344B45" VerticalAlignment="Center" />
+          <TextBox Classes="kmInput"
+            Width="250"
+            Height="34"
+            Watermark="🔍 Mã hoặc tên chương trình..."
+            Text="{Binding TimKiem, Mode=TwoWay}" />
+        </StackPanel>
+
+        <!-- Trạng thái -->
+        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,0" VerticalAlignment="Center">
+          <TextBlock Text="Trạng thái:" FontSize="12" FontWeight="SemiBold" Foreground="#344B45" VerticalAlignment="Center" />
+          <ComboBox Classes="kmInput"
+            ItemsSource="{Binding TrangThaiOptions}"
+            SelectedItem="{Binding SelectedTrangThai, Mode=TwoWay}"
+            MinWidth="170" />
+        </StackPanel>
+
+        <!-- Khoảng thời gian -->
+        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,0" VerticalAlignment="Center">
+          <TextBlock Text="Từ ngày:" FontSize="12" FontWeight="SemiBold" Foreground="#344B45" VerticalAlignment="Center" />
+          <CalendarDatePicker Classes="kmInput"
+            SelectedDate="{Binding TuNgay, Mode=TwoWay}"
+            Watermark="dd/MM/yyyy"
+            Width="150" />
+          <TextBlock Text="Đến ngày:" FontSize="12" FontWeight="SemiBold" Foreground="#344B45" VerticalAlignment="Center" />
+          <CalendarDatePicker Classes="kmInput"
+            SelectedDate="{Binding DenNgay, Mode=TwoWay}"
+            Watermark="dd/MM/yyyy"
+            Width="150" />
+        </StackPanel>
+
+        <!-- Kết quả lọc -->
+        <Border Background="#E6F4F1" CornerRadius="8" Padding="10,4" VerticalAlignment="Center">
+          <TextBlock Text="{Binding KetQuaLocText}" FontSize="11.5" FontWeight="SemiBold" Foreground="#087F6E" />
+        </Border>
+      </WrapPanel>
+    </Border>
+
+    <!-- ============================================================ -->
+    <!-- 4. BẢNG DỮ LIỆU                                             -->
+    <!-- ============================================================ -->
+    <Border Grid.Row="3" Classes="kmCard" Padding="0" ClipToBounds="True">
+      <Grid>
+        <DataGrid ItemsSource="{Binding Items}"
+          IsVisible="{Binding CoDuLieu}"
+          AutoGenerateColumns="False"
+          IsReadOnly="True"
+          CanUserReorderColumns="False"
+          CanUserResizeColumns="True"
+          CanUserSortColumns="True"
+          GridLinesVisibility="Horizontal"
+          HorizontalScrollBarVisibility="Auto"
+          VerticalScrollBarVisibility="Auto"
+          HeadersVisibility="Column"
+          RowHeight="38"
+          BorderThickness="0">
+
+          <DataGrid.Columns>
+            <!-- STT -->
+            <DataGridTextColumn Header="STT" Binding="{Binding Stt}" Width="55" />
+
+            <!-- Mã chương trình -->
+            <DataGridTemplateColumn Header="MÃ CHƯƠNG TRÌNH" Width="135">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate x:DataType="models:ChuongTrinhKhuyenMai">
+                  <TextBlock Text="{Binding MaChuongTrinh}"
+                    FontWeight="SemiBold"
+                    Foreground="#087F6E"
+                    VerticalAlignment="Center"
+                    Padding="10,0" />
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+
+            <!-- Tên chương trình -->
+            <DataGridTemplateColumn Header="TÊN CHƯƠNG TRÌNH" Width="220">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate x:DataType="models:ChuongTrinhKhuyenMai">
+                  <TextBlock Text="{Binding TenChuongTrinh}"
+                    FontWeight="SemiBold"
+                    Foreground="#163F38"
+                    VerticalAlignment="Center"
+                    TextTrimming="CharacterEllipsis"
+                    Padding="10,0" />
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+
+            <!-- Loại ưu đãi -->
+            <DataGridTextColumn Header="LOẠI ƯU ĐÃI" Binding="{Binding LoaiKhuyenMaiHienThi}" Width="125" />
+
+            <!-- Ưu đãi -->
+            <DataGridTextColumn Header="ƯU ĐÃI" Binding="{Binding UuDaiHienThi}" Width="180" />
+
+            <!-- Thời gian áp dụng -->
+            <DataGridTextColumn Header="THỜI GIAN ÁP DỤNG" Binding="{Binding ThoiGianHienThi}" Width="175" />
+
+            <!-- Đối tượng áp dụng -->
+            <DataGridTextColumn Header="ĐỐI TƯỢNG" Binding="{Binding DoiTuongHienThi}" Width="160" />
+
+            <!-- Số mặt hàng -->
+            <DataGridTextColumn Header="MẶT HÀNG" Binding="{Binding SoLuongSanPham}" Width="95" />
+
+            <!-- Trạng thái -->
+            <DataGridTemplateColumn Header="TRẠNG THÁI" Width="125">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate x:DataType="models:ChuongTrinhKhuyenMai">
+                  <Border Background="{Binding TrangThaiBadgeBg}"
+                    BorderBrush="{Binding TrangThaiBadgeBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Padding="9,3"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                    <TextBlock Text="{Binding TrangThaiHienThi}"
+                      FontSize="11"
+                      FontWeight="SemiBold"
+                      Foreground="{Binding TrangThaiBadgeFg}" />
+                  </Border>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+
+            <!-- Thao tác -->
+            <DataGridTemplateColumn Header="THAO TÁC" Width="150">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate x:DataType="models:ChuongTrinhKhuyenMai">
+                  <StackPanel Orientation="Horizontal"
+                    Spacing="6"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                    <Button Classes="kmRowAction"
+                      Content="✏️ Sửa"
+                      Command="{Binding ElementName=RootView, Path=DataContext.SuaChuongTrinhCommand}"
+                      CommandParameter="{Binding}"
+                      IsVisible="{Binding CanEdit}" />
+                    <Button Classes="kmRowAction"
+                      Content="🗑️ Xóa"
+                      Command="{Binding ElementName=RootView, Path=DataContext.XoaChuongTrinhCommand}"
+                      CommandParameter="{Binding}"
+                      IsVisible="{Binding CanDelete}" />
+                  </StackPanel>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+          </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- TRẠNG THÁI KHÔNG CÓ DỮ LIỆU -->
+        <StackPanel IsVisible="{Binding KhongCoDuLieu}"
+          VerticalAlignment="Center"
+          HorizontalAlignment="Center"
+          Spacing="8">
+          <TextBlock Text="🎁" FontSize="36" HorizontalAlignment="Center" />
+          <TextBlock Text="Chưa có chương trình khuyến mãi"
+            FontSize="15"
+            FontWeight="SemiBold"
+            Foreground="#61736E"
+            HorizontalAlignment="Center" />
+          <TextBlock Text="Thử thay đổi bộ lọc trạng thái, thời gian hoặc từ khóa tìm kiếm"
+            FontSize="12"
+            Foreground="#879691"
+            HorizontalAlignment="Center" />
+        </StackPanel>
+
+        <!-- LỚP PHỦ ĐANG TẢI -->
+        <Border Background="#66FFFFFF"
+          IsVisible="{Binding DangTai}"
+          HorizontalAlignment="Stretch"
+          VerticalAlignment="Stretch">
+          <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
+            <ProgressBar IsIndeterminate="True" Width="200" Height="4" />
+            <TextBlock Text="Đang tải dữ liệu khuyến mãi..." FontSize="12" Foreground="#087F6E" HorizontalAlignment="Center" />
+          </StackPanel>
+        </Border>
+      </Grid>
+    </Border>
+
+    <!-- ============================================================ -->
+    <!-- 5. PHÂN TRANG                                                -->
+    <!-- ============================================================ -->
+    <Grid Grid.Row="4" ColumnDefinitions="*,Auto,*" ColumnSpacing="12">
+
+      <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <TextBlock Text="Hiển thị" FontSize="12" Foreground="#61736E" VerticalAlignment="Center" />
+        <ComboBox Classes="kmInput"
+          ItemsSource="{Binding SoDongOptions}"
+          SelectedItem="{Binding SelectedSoDong, Mode=TwoWay}"
+          MinWidth="140" />
+      </StackPanel>
+
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+        <Button Classes="kmBtn" Content="⏮" Command="{Binding VeTrangDauCommand}"
+          IsEnabled="{Binding CanVeTrangDau}" ToolTip.Tip="Trang đầu" MinWidth="38" />
+        <Button Classes="kmBtn" Content="⏪" Command="{Binding VeTrangTruocCommand}"
+          IsEnabled="{Binding CanVeTrangTruoc}" ToolTip.Tip="Trang trước" MinWidth="38" />
+        <Border Background="#E6F4F1" CornerRadius="8" Padding="12,6" VerticalAlignment="Center">
+          <TextBlock Text="{Binding PagingInfoText}"
+            FontSize="12"
+            FontWeight="SemiBold"
+            Foreground="#087F6E"
+            VerticalAlignment="Center" />
+        </Border>
+        <Button Classes="kmBtn" Content="⏩" Command="{Binding VeTrangSauCommand}"
+          IsEnabled="{Binding CanVeTrangSau}" ToolTip.Tip="Trang sau" MinWidth="38" />
+        <Button Classes="kmBtn" Content="⏭" Command="{Binding VeTrangCuoiCommand}"
+          IsEnabled="{Binding CanVeTrangCuoi}" ToolTip.Tip="Trang cuối" MinWidth="38" />
+      </StackPanel>
+
+      <TextBlock Grid.Column="2"
+        Text="Dữ liệu được tải trực tiếp từ cơ sở dữ liệu"
+        FontSize="11.5"
+        Foreground="#879691"
+        HorizontalAlignment="Right"
+        VerticalAlignment="Center" />
+    </Grid>
+  </Grid>
+</UserControl>

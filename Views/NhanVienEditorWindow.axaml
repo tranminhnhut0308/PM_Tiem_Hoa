@@ -1,0 +1,253 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ShopHoa.ViewModels"
+        xmlns:models="using:ShopHoa.Models"
+        x:Class="ShopHoa.Views.NhanVienEditorWindow"
+        x:DataType="vm:NhanVienEditorViewModel"
+        Width="640"
+        Height="720"
+        MinWidth="560"
+        MinHeight="600"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Title="{Binding TieuDe}"
+        Background="#F4F7F6"
+        RequestedThemeVariant="Light">
+
+    <Window.Styles>
+        <Style Selector="TextBox.input">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Foreground" Value="#1E293B" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+        <Style Selector="TextBox.input:focus">
+            <Setter Property="BorderBrush" Value="#0B4B82" />
+            <Setter Property="BorderThickness" Value="1.5" />
+        </Style>
+        <Style Selector="ComboBox.input">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Foreground" Value="#1E293B" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="TextBlock.label">
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="Foreground" Value="#475569" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+        <Style Selector="TextBlock.hint">
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="Foreground" Value="#94A3B8" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="Border.section">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="BorderBrush" Value="#E2E8F0" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="18,16" />
+        </Style>
+        <Style Selector="Button.btnPrimary">
+            <Setter Property="Height" Value="38" />
+            <Setter Property="Background" Value="#0B4B82" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="20,0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.btnPrimary:pointerover">
+            <Setter Property="Background" Value="#083863" />
+        </Style>
+        <Style Selector="Button.btnPrimary:disabled">
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+        <Style Selector="Button.btnAction">
+            <Setter Property="Height" Value="38" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Foreground" Value="#334155" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="16,0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.btnAction:pointerover">
+            <Setter Property="Background" Value="#F1F5F9" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="20,16,20,16" RowSpacing="12">
+
+        <!-- HEADER -->
+        <Border Grid.Row="0" Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Padding="18,14">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Border Width="38" Height="38" CornerRadius="10" Background="#EFF6FF" VerticalAlignment="Center">
+                    <TextBlock Text="👤" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Text="{Binding TieuDe}" FontSize="19" FontWeight="Bold" Foreground="#0F172A" />
+                    <TextBlock Text="Hồ sơ nhân sự và tài khoản đăng nhập là hai phần độc lập."
+                               FontSize="12.5" Foreground="#64748B" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- NỘI DUNG -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="12">
+
+                <!-- HỒ SƠ NHÂN VIÊN -->
+                <Border Classes="section">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="HỒ SƠ NHÂN VIÊN" FontSize="13" FontWeight="Bold" Foreground="#0B4B82" />
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="label" Text="Họ và tên *" />
+                            <TextBox Classes="input" Text="{Binding HoTen, Mode=TwoWay}" Watermark="Nhập họ và tên nhân viên" />
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Classes="label" Text="Chức vụ (nhân sự)" />
+                                <TextBox Classes="input" Text="{Binding ChucVu, Mode=TwoWay}" Watermark="Ví dụ: Thu ngân, Kỹ thuật viên" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock Classes="label" Text="Bộ phận / Chi nhánh" />
+                                <ComboBox Classes="input"
+                                          ItemsSource="{Binding BoPhanOptions}"
+                                          SelectedItem="{Binding SelectedBoPhan, Mode=TwoWay}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="models:ProductOption">
+                                            <TextBlock Text="{Binding Name}" FontSize="13" VerticalAlignment="Center" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Classes="label" Text="Số điện thoại" />
+                                <TextBox Classes="input" Text="{Binding SoDienThoai, Mode=TwoWay}" Watermark="Ví dụ: 0901234567" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock Classes="label" Text="Email" />
+                                <TextBox Classes="input" Text="{Binding Email, Mode=TwoWay}" Watermark="email@example.com" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Classes="label" Text="Ngày vào làm" />
+                                <DatePicker Classes="input" SelectedDate="{Binding NgayVaoLam, Mode=TwoWay}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock Classes="label" Text="Trạng thái làm việc" />
+                                <CheckBox IsChecked="{Binding TrangThai, Mode=TwoWay}"
+                                          Content="Đang làm việc"
+                                          Foreground="#334155"
+                                          VerticalAlignment="Center" />
+                                <TextBlock Classes="hint" Text="Bỏ chọn để chuyển nhân viên sang trạng thái ngừng hoạt động." />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- TÀI KHOẢN ĐĂNG NHẬP -->
+                <Border Classes="section" IsVisible="{Binding IsCheDoThemMoi}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="TÀI KHOẢN ĐĂNG NHẬP (TÙY CHỌN)" FontSize="13" FontWeight="Bold" Foreground="#0B4B82" />
+                        <CheckBox IsChecked="{Binding TaoTaiKhoan, Mode=TwoWay}"
+                                  Content="Cấp tài khoản đăng nhập cho nhân viên này"
+                                  Foreground="#334155" />
+                        <TextBlock Classes="hint"
+                                   Text="Nhân viên không bắt buộc phải có tài khoản. Nếu không cấp tài khoản, hồ sơ vẫn được lưu và có thể cấp tài khoản sau." />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="section" IsVisible="{Binding HienThiPhanTaiKhoan}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="TÀI KHOẢN ĐĂNG NHẬP" FontSize="13" FontWeight="Bold" Foreground="#0B4B82" />
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="label" Text="Tên đăng nhập *" />
+                            <TextBox Classes="input" Text="{Binding TenDangNhap, Mode=TwoWay}" Watermark="Nhập tên đăng nhập" />
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Classes="label" Text="Mật khẩu *" />
+                                <TextBox Classes="input" PasswordChar="●" Text="{Binding MatKhau, Mode=TwoWay}" Watermark="Nhập mật khẩu" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock Classes="label" Text="Nhập lại mật khẩu *" />
+                                <TextBox Classes="input" PasswordChar="●" Text="{Binding NhapLaiMatKhau, Mode=TwoWay}" Watermark="Nhập lại mật khẩu" />
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="label" Text="Vai trò phần mềm" />
+                            <ComboBox Classes="input"
+                                      ItemsSource="{Binding VaiTroOptions}"
+                                      SelectedItem="{Binding SelectedVaiTro, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="models:Role">
+                                        <TextBlock Text="{Binding TenVaiTro}" FontSize="13" VerticalAlignment="Center" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <TextBlock Classes="hint" Text="Phân quyền chi tiết được cấu hình tại màn &quot;Quản lý tài khoản&quot;." />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- TÀI KHOẢN ĐÃ CÓ -->
+                <Border Classes="section" IsVisible="{Binding HienThiTaiKhoanDaCo}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="TÀI KHOẢN ĐĂNG NHẬP ĐÃ CÓ" FontSize="13" FontWeight="Bold" Foreground="#0B4B82" />
+                        <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto" RowSpacing="6">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Classes="label" Text="Tên đăng nhập:" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding TenDangNhapHienTai}" FontSize="13" Foreground="#0F172A" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Classes="label" Text="Vai trò:" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding VaiTroHienTai}" FontSize="13" Foreground="#0F172A" />
+                        </Grid>
+                        <TextBlock Classes="hint"
+                                   Text="Để đổi mật khẩu hoặc phân quyền, hãy mở màn &quot;Quản lý tài khoản&quot; ở mục Quản trị." />
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- FOOTER -->
+        <Border Grid.Row="2" Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Padding="16,10">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBlock Grid.Column="0" Text="{Binding ThongBaoLoi}" Foreground="#DC2626" FontSize="12"
+                           VerticalAlignment="Center" TextWrapping="Wrap" />
+                <Button Grid.Column="1" Classes="btnAction" Click="Huy_Click" Margin="0,0,10,0">
+                    <TextBlock Text="Hủy" VerticalAlignment="Center" />
+                </Button>
+                <Button Grid.Column="2" Classes="btnPrimary" Command="{Binding LuuCommand}">
+                    <TextBlock Text="Lưu hồ sơ" VerticalAlignment="Center" />
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

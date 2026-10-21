@@ -117,14 +117,15 @@ public partial class MainWindowViewModel
     }
 
     /// <summary>
-    /// Mở màn hình "Nghiệp vụ → Nhập trả lại → Danh sách phiếu nhập trả lại".
+    /// Mở phân hệ "Hoàn trả hàng" (nhập trả lại) nằm trong tab Bán hàng &amp; Hóa đơn.
     /// </summary>
     [RelayCommand]
     public async Task MoGiaoDienNhapTraLaiAsync()
     {
         IsSalesPanelVisible = false;
         IsThemPhieuNhapTraLaiVisible = false;
-        SelectedMenu = "Nhập trả lại";
+        SelectedMenu = "Hóa đơn";
+        SelectedHoaDonSubTabIndex = 2;
         DsPhieuTraPage = 1;
         await LoadDsPhieuTraAsync();
     }

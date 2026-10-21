@@ -121,7 +121,7 @@
               <Border Grid.Row="0" Grid.Column="2" Classes="infoCard">
                 <StackPanel Spacing="4">
                   <TextBlock Text="💰 Quản lý Sổ quỹ" FontWeight="Bold" Foreground="#087F6E" FontSize="13" />
-                  <TextBlock Text="Lập phiếu thu/chi, phân loại dòng tiền theo quỹ tiền mặt, tài khoản ngân hàng và kiểm soát chi phí hoạt động." FontSize="11.5" Foreground="#61736E" TextWrapping="Wrap" />
+                  <TextBlock Text="Quản lý theo kỳ: lập phiếu thu/chi, phân loại dòng tiền theo quỹ tiền mặt, tài khoản ngân hàng, khởi tạo quỹ đầu kỳ và kiểm soát chi phí hoạt động." FontSize="11.5" Foreground="#61736E" TextWrapping="Wrap" />
                 </StackPanel>
               </Border>
               <Border Grid.Row="1" Grid.Column="0" Classes="infoCard">
@@ -316,7 +316,7 @@
                   </Border>
                   <TextBlock Grid.Column="1" Text="Thu chi &amp; Quản lý dòng tiền Sổ quỹ" FontWeight="Bold" FontSize="14" Foreground="#163F38" VerticalAlignment="Center" Margin="10,0,0,0" />
                 </Grid>
-                <TextBlock Text="1. Vào menu 'Sổ quỹ' để theo dõi tổng thu, tổng chi và số dư quỹ tiền mặt/ngân hàng.&#x0a;2. Bấm '＋ Lập phiếu thu' khi thu các khoản tiền khác ngoài bán hàng.&#x0a;3. Bấm '＋ Lập phiếu chi' khi thanh toán tiền điện, nước, mặt bằng, bao bì phụ kiện hoa.&#x0a;4. Xem báo cáo Sổ quỹ chi tiết theo thời gian để cân đối dòng tiền trong ngày."
+                <TextBlock Text="1. Vào menu 'Sổ quỹ' để theo dõi tổng thu, tổng chi và số dư quỹ tiền mặt/ngân hàng. Màn này quản lý chung cả phiếu thu và phiếu chi, không còn màn 'Phiếu chi' riêng.&#x0a;2. Chọn kỳ ở ô 'THỜI GIAN' (tháng/năm/quý/tùy chỉnh) để xem số liệu của kỳ cần theo dõi.&#x0a;3. Nếu kỳ đang xem chưa có quỹ đầu kỳ, bấm '＋ Khởi tạo quỹ đầu kỳ' và khai số tiền có sẵn trong quỹ tại ngày bắt đầu kỳ (khai 0 cũng được nếu quỹ mở vốn).&#x0a;4. Bấm '＋ Phiếu thu' khi thu tiền ngoài bán hàng, bấm '－ Phiếu chi' khi chi tiền điện, nước, mặt bằng, bao bì phụ kiện hoa.&#x0a;5. Trên từng dòng phiếu có sẵn nút Xem / Sửa / In / Hủy; bấm 'Xem' để mở chi tiết hoặc hủy phiếu.&#x0a;6. Xem báo cáo Sổ quỹ chi tiết theo thời gian để cân đối dòng tiền trong ngày."
                   FontSize="12" Foreground="#475467" LineHeight="20" TextWrapping="Wrap" Margin="0,4,0,0" />
               </StackPanel>
             </Border>

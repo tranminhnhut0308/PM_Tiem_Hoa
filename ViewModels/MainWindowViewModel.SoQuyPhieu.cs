@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
@@ -436,8 +437,6 @@ public sealed partial class MainWindowViewModel
 
             await TaiLaiSoQuyAsync();
 
-            await TaiLaiDsPhieuChiNeuDangMoAsync();
-
             _ = LamMoiTongQuanNeuDangMoAsync();
         }
         catch (Exception ex)
@@ -709,17 +708,28 @@ public sealed partial class MainWindowViewModel
     [RelayCommand]
     private Task LuuSoQuyPhieuChiAsync() => LuuSoQuyPhieuAsync(false);
 
-    /// <summary>Lưu &amp; In: hiện dùng chung luồng lưu, chờ phần in phiếu.</summary>
+    /// <summary>Lưu &amp; In: lưu phiếu xong thì mở bản in của phiếu vừa tạo.</summary>
     [RelayCommand]
-    private Task LuuVaInSoQuyPhieuThuAsync() => LuuSoQuyPhieuAsync(true);
+    private async Task LuuVaInSoQuyPhieuThuAsync()
+    {
+        var maPhieu = SoQuyPhieuMa;
+
+        if (await LuuSoQuyPhieuAsync(true))
+            await InPhieuQuyTheoMaAsync(maPhieu);
+    }
 
     [RelayCommand]
-    private Task LuuVaInSoQuyPhieuChiAsync() => LuuSoQuyPhieuAsync(false);
+    private async Task LuuVaInSoQuyPhieuChiAsync()
+    {
+        var maPhieu = SoQuyPhieuMa;
+
+        if (await LuuSoQuyPhieuAsync(false))
+            await InPhieuQuyTheoMaAsync(maPhieu);
+    }
 
     /// <summary>
     /// Lưu một phiếu từ form tạo. Trả về true khi phiếu đã được ghi vào database
-    /// thành công; màn hình Danh sách phiếu chi cần biết kết quả này để tự đóng
-    /// form của mình sau khi Lưu (xem <c>MainWindowViewModel.PhieuChi.cs</c>).
+    /// thành công.
     /// </summary>
     private async Task<bool> LuuSoQuyPhieuAsync(bool laPhieuThu)
     {
@@ -773,9 +783,6 @@ public sealed partial class MainWindowViewModel
             ResetSoQuyPhieuForm();
 
             await TaiLaiSoQuyAsync();
-
-            // Màn Danh sách phiếu chi đang mở (nếu có) phải thấy ngay phiếu mới.
-            await TaiLaiDsPhieuChiNeuDangMoAsync();
 
             // Nạp lại Tổng quan nếu đang mở để số liệu thu/chi cập nhật kịp.
             _ = LamMoiTongQuanNeuDangMoAsync();
@@ -860,6 +867,163 @@ public sealed partial class MainWindowViewModel
         SoQuyChiTietDangXem = null;
     }
 
+    // ================================================================
+    // THAO TÁC TRÊN DÒNG DANH SÁCH: SỬA / IN
+    //
+    // Trước đây hai thao tác này nằm ở trang "Phiếu chi" riêng. Sau khi gộp
+    // toàn bộ phiếu thu/chi về một chỗ, chúng chuyển lên dòng của bảng Sổ quỹ
+    // để không mất chức năng nào.
+    // ================================================================
+
+    /// <summary>Sửa một phiếu ngay từ dòng của bảng Sổ quỹ.</summary>
+    [RelayCommand]
+    private async Task SuaPhieuQuyAsync(SoQuyGiaoDich? gd)
+    {
+        if (gd is null)
+            return;
+
+        if (!await KiemTraQuyenAsync(PermissionKeys.CashBookEdit, "Bạn không có quyền sửa phiếu quỹ."))
+        {
+            return;
+        }
+
+        try
+        {
+            var chiTiet = await _db.GetSoQuyChiTietAsync(gd.MaPhieu);
+
+            if (chiTiet is null)
+            {
+                StatusMessage = $"Không tìm thấy phiếu {gd.MaPhieu} trong database.";
+
+                return;
+            }
+
+            if (chiTiet.DaHuy)
+            {
+                await ShowMessageAsync(
+                    "Phiếu đã hủy",
+                    $"Phiếu {gd.MaPhieu} đã bị hủy nên không thể sửa.\n\n"
+                    + "Bạn chỉ có thể xem lại phiếu này.");
+
+                return;
+            }
+
+            await MoFormSuaTuChiTietAsync(chiTiet);
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Lỗi mở form sửa phiếu quỹ", ex);
+            StatusMessage = "Không thể mở form sửa phiếu: " + ex.Message;
+        }
+    }
+
+    /// <summary>In phiếu (thu hoặc chi) theo dòng đã chọn trong bảng Sổ quỹ.</summary>
+    [RelayCommand]
+    private async Task InPhieuQuyAsync(SoQuyGiaoDich? gd)
+    {
+        if (gd is null)
+            return;
+
+        await InPhieuQuyTheoMaAsync(gd.MaPhieu);
+    }
+
+    /// <summary>Hủy (xoá mềm) phiếu ngay từ dòng của bảng Sổ quỹ.</summary>
+    [RelayCommand]
+    private async Task HuyPhieuQuyAsync(SoQuyGiaoDich? gd)
+    {
+        if (gd is null)
+            return;
+
+        if (!await KiemTraQuyenAsync(PermissionKeys.CashBookCancel, "Bạn không có quyền hủy phiếu quỹ."))
+        {
+            return;
+        }
+
+        if (gd.DaHuy)
+        {
+            StatusMessage = $"Phiếu {gd.MaPhieu} đã được hủy trước đó.";
+
+            return;
+        }
+
+        if (_soQuyDangHuyPhieu)
+            return;
+
+        var xacNhan = await XacNhanHuyPhieuAsync(
+            1,
+            $"Bạn có chắc muốn hủy phiếu {gd.MaPhieu}?\n\n"
+            + "Phiếu đã hủy sẽ không còn được tính vào tổng thu, tổng chi của sổ quỹ.\n"
+            + "Thao tác này không thể hoàn tác.");
+
+        if (!xacNhan)
+            return;
+
+        _soQuyDangHuyPhieu = true;
+
+        try
+        {
+            await _db.HuyPhieuQuyAsync(gd.MaPhieu);
+
+            StatusMessage = $"Đã hủy phiếu {gd.MaPhieu}.";
+
+            await TaiLaiSoQuyAsync();
+
+            _ = LamMoiTongQuanNeuDangMoAsync();
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Lỗi hủy phiếu quỹ", ex);
+            StatusMessage = "Không thể hủy phiếu: " + ex.Message;
+        }
+        finally
+        {
+            _soQuyDangHuyPhieu = false;
+        }
+    }
+
+    /// <summary>
+    /// In một phiếu quỹ theo mã; dùng chung cho nút "In" trên dòng và cho
+    /// luồng "Lưu &amp; In" trong form tạo phiếu.
+    /// </summary>
+    private async Task InPhieuQuyTheoMaAsync(string maPhieu)
+    {
+        if (string.IsNullOrWhiteSpace(maPhieu))
+            return;
+
+        if (!await KiemTraQuyenAsync(PermissionKeys.CashBookView, "Bạn không có quyền xem sổ quỹ."))
+        {
+            return;
+        }
+
+        try
+        {
+            var chiTiet = await _db.GetSoQuyChiTietAsync(maPhieu);
+
+            if (chiTiet is null)
+            {
+                StatusMessage = $"Không tìm thấy phiếu {maPhieu} trong database.";
+
+                return;
+            }
+
+            var tiem = await LayThongTinTiemChoHoaDonAsync();
+            var duongDan = PhieuChiPrintService.LuuFileTam(chiTiet, tiem);
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = duongDan,
+                UseShellExecute = true
+            });
+
+            StatusMessage = $"Đã mở bản in phiếu {maPhieu}.";
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Lỗi in phiếu quỹ", ex);
+            StatusMessage = $"Không in được phiếu {maPhieu}: {ex.Message}";
+        }
+    }
+
     [RelayCommand]
     private async Task HuyPhieuHienTaiAsync()
     {
@@ -895,9 +1059,6 @@ public sealed partial class MainWindowViewModel
             SoQuyChiTietDangXem = null;
 
             await TaiLaiSoQuyAsync();
-
-            // Màn Danh sách phiếu chi đang mở (nếu có) cũng phải thấy trạng thái mới.
-            await TaiLaiDsPhieuChiNeuDangMoAsync();
 
             // Mở lại chi tiết để người dùng thấy trạng thái vừa đổi.
             var gd = SoQuyGiaoDichs.FirstOrDefault(x => x.MaPhieu == maPhieu);
@@ -1129,8 +1290,6 @@ public sealed partial class MainWindowViewModel
             StatusMessage = $"Đã sửa phiếu {maPhieu} thành công.";
 
             await TaiLaiSoQuyAsync();
-
-            await TaiLaiDsPhieuChiNeuDangMoAsync();
 
             _ = LamMoiTongQuanNeuDangMoAsync();
 

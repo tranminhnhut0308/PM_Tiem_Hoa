@@ -112,16 +112,18 @@ public partial class MainWindowViewModel
     }
 
     /// <summary>
-    /// Mở màn hình "Nghiệp vụ → Xuất hàng trả lại → Danh sách phiếu xuất hàng trả lại".
+    /// Mở trung tâm "Xuất hàng" ở thẻ tạo phiếu với loại phiếu trả nhà cung cấp.
     /// </summary>
     [RelayCommand]
     public async Task MoGiaoDienXuatTraNccAsync()
     {
         IsSalesPanelVisible = false;
+        SelectedMenu = "Xuất hàng";
         IsThemPhieuXuatTraVisible = false;
-        SelectedMenu = "Xuất trả NCC";
-        DsPhieuXuatTraPage = 1;
-        await LoadDsPhieuXuatTraAsync();
+        IsPhieuXuatTabDanhSach = false;
+        PhieuXuatLoaiMa = PhieuHopLabels.XUAT_TRA_NCC;
+        PhieuXuatLoaiTen = PhieuHopLabels.DanhSachLoaiXuat.First(x => x.Ma == PhieuHopLabels.XUAT_TRA_NCC).Ten;
+        await ApDungLoaiPhieuXuatAsync();
     }
 
     /// <summary>
@@ -435,13 +437,14 @@ public partial class MainWindowViewModel
 
     /// <summary>
     /// Mở màn hình Thêm phiếu xuất hàng trả lại NCC.
+    /// Không tự đổi SelectedMenu vì màn này nay nằm trong trung tâm "Xuất hàng".
     /// </summary>
     [RelayCommand]
     public async Task MoFormThemPhieuXuatTraAsync()
     {
         IsSalesPanelVisible = false;
-        SelectedMenu = "Xuất trả NCC";
         IsThemPhieuXuatTraVisible = true;
+        IsPhieuXuatTabDanhSach = false;
         await LamMoiFormThemPhieuXuatTraAsync();
     }
 
@@ -452,6 +455,7 @@ public partial class MainWindowViewModel
     public void DongFormThemPhieuXuatTra()
     {
         IsThemPhieuXuatTraVisible = false;
+        IsPhieuXuatTabDanhSach = true;
     }
 
     /// <summary>

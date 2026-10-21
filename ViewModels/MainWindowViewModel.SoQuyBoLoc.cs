@@ -521,5 +521,9 @@ public sealed partial class MainWindowViewModel
     private async Task TaiLaiSoQuyAsync()
     {
         await Task.WhenAll(LoadSoQuyPhieuAsync(), LoadSoQuyTongHopAsync());
+
+        // Thông tin kỳ (nhãn kỳ + số dư đầu kỳ đã khai báo) phụ thuộc bộ lọc
+        // nên phải nạp sau cùng để khớp với dữ liệu đang hiển thị.
+        await CapNhatThongTinKyAsync();
     }
 }

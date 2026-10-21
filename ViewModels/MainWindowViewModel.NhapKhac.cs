@@ -143,16 +143,18 @@ public partial class MainWindowViewModel
     }
 
     /// <summary>
-    /// Mở màn hình "Nghiệp vụ → Nhập khác → Danh sách phiếu nhập khác".
+    /// Mở trung tâm "Nhập hàng" ở thẻ tạo phiếu với loại phiếu nhập khác.
     /// </summary>
     [RelayCommand]
     public async Task MoGiaoDienNhapKhacAsync()
     {
         IsSalesPanelVisible = false;
-        SelectedMenu = "Nhập khác";
+        SelectedMenu = "Nhập hàng";
         IsThemPhieuNhapKhacVisible = false;
-        DsPhieuNhapKhacPage = 1;
-        await LoadDsPhieuNhapKhacAsync();
+        IsPhieuNhapTabDanhSach = false;
+        PhieuNhapLoaiMa = PhieuHopLabels.NHAP_NOI_BO;
+        PhieuNhapLoaiTen = PhieuHopLabels.DanhSachLoaiNhap.First(x => x.Ma == PhieuHopLabels.NHAP_NOI_BO).Ten;
+        await ApDungLoaiPhieuNhapAsync();
     }
 
     /// <summary>
@@ -446,13 +448,14 @@ public partial class MainWindowViewModel
 
     /// <summary>
     /// Mở màn hình Thêm phiếu nhập khác mới.
+    /// Không tự đổi SelectedMenu vì màn này nay nằm trong trung tâm "Nhập hàng".
     /// </summary>
     [RelayCommand]
     public async Task MoFormThemPhieuNhapKhacAsync()
     {
         IsSalesPanelVisible = false;
-        SelectedMenu = "Nhập khác";
         IsThemPhieuNhapKhacVisible = true;
+        IsPhieuNhapTabDanhSach = false;
         await LamMoiFormThemPhieuNhapKhacAsync();
     }
 
@@ -469,6 +472,7 @@ public partial class MainWindowViewModel
     public void DongFormThemPhieuNhapKhac()
     {
         IsThemPhieuNhapKhacVisible = false;
+        IsPhieuNhapTabDanhSach = true;
     }
 
     /// <summary>
@@ -479,7 +483,15 @@ public partial class MainWindowViewModel
     {
         PhieuNhapKhacMa = await _db.TaoMaPhieuNhapKhacMoiAsync();
         PhieuNhapKhacNgayNhap = DateTime.Now;
-        PhieuNhapKhacLoai = "NHAP_NOI_BO";
+
+        // Giữ loại phiếu đang chọn ở trung tâm "Nhập hàng" nếu hợp lệ,
+        // nếu không thì mặc định "Nhập nội bộ".
+        if (!PhieuHopLabels.DanhSachLoaiNhap.Any(x => x.Ma == PhieuNhapKhacLoai)
+            || PhieuNhapKhacLoai == PhieuHopLabels.NHAP_TU_NCC)
+        {
+            PhieuNhapKhacLoai = PhieuHopLabels.NHAP_NOI_BO;
+        }
+
         OnPropertyChanged(nameof(SelectedPhieuNhapKhacLoaiFormHienThi));
         OnPropertyChanged(nameof(PhieuNhapKhacLoaiGiaiThich));
 

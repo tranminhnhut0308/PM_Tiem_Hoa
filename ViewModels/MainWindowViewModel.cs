@@ -38,6 +38,10 @@ public partial class MainWindowViewModel : ObservableObject
                 QuanLyCongNoTheoKy.OwnerWindow = value;
             if (QuanLyCongNoNccTheoKy != null)
                 QuanLyCongNoNccTheoKy.OwnerWindow = value;
+            if (DanhSachKhuyenMai != null)
+                DanhSachKhuyenMai.OwnerWindow = value;
+            if (QuanLyNhanVien != null)
+                QuanLyNhanVien.OwnerWindow = value;
         }
     }
     private bool _customersLoaded;
@@ -122,6 +126,12 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Màn "Thông tin tiệm". Giữ instance sống suốt phiên như các màn khác.</summary>
     public ThongTinTiemViewModel ThongTinTiem { get; }
 
+    /// <summary>Màn "Quản lý danh mục khuyến mãi" giữ một instance suốt phiên.</summary>
+    public DanhSachKhuyenMaiViewModel DanhSachKhuyenMai { get; }
+
+    /// <summary>Màn "Quản lý nhân viên" giữ một instance suốt phiên.</summary>
+    public QuanLyNhanVienViewModel QuanLyNhanVien { get; }
+
     /// <summary>Phân hệ Quản lý tồn kho theo kỳ kinh doanh.</summary>
     public QuanLyKhoTheoKyViewModel QuanLyKhoTheoKy { get; }
 
@@ -144,6 +154,8 @@ public partial class MainWindowViewModel : ObservableObject
         BaoCaoTongHopNhapXuat = new BaoCaoTongHopNhapXuatViewModel(_db);
         BaoCaoChiTietNhapXuat = new BaoCaoChiTietNhapXuatViewModel(_db);
         BaoCaoTongHopKhuyenMai = new BaoCaoTongHopKhuyenMaiViewModel(_db);
+        DanhSachKhuyenMai = new DanhSachKhuyenMaiViewModel(_db);
+        QuanLyNhanVien = new QuanLyNhanVienViewModel(_db);
         BaoCaoTinhHinhNhapXuat = new BaoCaoTinhHinhNhapXuatViewModel(_db);
         BaoCaoChiTietCongNoTheoPhieu = new BaoCaoChiTietCongNoTheoPhieuViewModel(_db)
         {
@@ -200,6 +212,11 @@ public partial class MainWindowViewModel : ObservableObject
         {
             OwnerWindow = OwnerWindow
         };
+
+        // Danh sách hợp nhất cho 2 trung tâm Nhập hàng / Xuất hàng.
+        PhieuNhapHop = new PhieuHopListViewModel(_db, "NHAP");
+        PhieuXuatHop = new PhieuHopListViewModel(_db, "XUAT");
+        KhoiTaoPhieuHop();
 
         if (!CanViewDashboard)
         {
@@ -301,10 +318,14 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsBanHangSubTabSelected))]
     [NotifyPropertyChangedFor(nameof(IsHoaDonSubTabSelected))]
+    [NotifyPropertyChangedFor(nameof(IsNhapTraLaiSubTabSelected))]
     private int selectedHoaDonSubTabIndex = 0;
 
     public bool IsBanHangSubTabSelected => SelectedHoaDonSubTabIndex == 0;
     public bool IsHoaDonSubTabSelected => SelectedHoaDonSubTabIndex == 1;
+
+    /// <summary>Phân hệ "Hoàn trả hàng" (nhập trả lại) nằm chung tab Bán hàng &amp; Hóa đơn.</summary>
+    public bool IsNhapTraLaiSubTabSelected => SelectedHoaDonSubTabIndex == 2;
 
     [RelayCommand]
     private async Task ChonHoaDonSubTabAsync(object? param)
@@ -328,6 +349,11 @@ public partial class MainWindowViewModel : ObservableObject
         else if (SelectedHoaDonSubTabIndex == 1)
         {
             await LoadInvoicesPagedAsync();
+        }
+        else if (SelectedHoaDonSubTabIndex == 2)
+        {
+            IsThemPhieuNhapTraLaiVisible = false;
+            await LoadDsPhieuTraAsync();
         }
     }
 
@@ -1755,7 +1781,7 @@ public partial class MainWindowViewModel : ObservableObject
                     break;
 
                 case "Nhập hàng":
-                    // Vào menu "Nhập hàng" mặc định hiển thị DANH SÁCH phiếu nhập.
+                    // Vào menu "Nhập hàng" mặc định hiển thị DANH SÁCH phiếu nhập hợp nhất.
                     // Riêng khi vào từ nút "＋ Nhập hàng" (Hàng hóa/Báo cáo) thì mở
                     // thẳng màn lập phiếu mới theo cờ _moFormNhapHangKhiVaoMenu.
                     if (_moFormNhapHangKhiVaoMenu)
@@ -1765,12 +1791,12 @@ public partial class MainWindowViewModel : ObservableObject
                     }
                     else
                     {
-                        await MoDanhSachPhieuNhapAsync();
+                        await MoDanhSachPhieuNhapHopAsync();
                     }
                     break;
 
                 case "Xuất hàng":
-                    await KhoiTaoPhieuXuatMoiAsync();
+                    await MoDanhSachPhieuXuatHopAsync();
                     break;
 
                 case "Nhập trả lại":
@@ -1794,8 +1820,8 @@ public partial class MainWindowViewModel : ObservableObject
                     await TaiLaiSoQuyAsync();
                     break;
 
-                case "Phiếu chi":
-                    await LoadDsPhieuChiAsync();
+                case "Khuyến mãi":
+                    await DanhSachKhuyenMai.TaiDanhSachAsync();
                     break;
 
                 case "Thông tin tiệm":
@@ -3097,6 +3123,10 @@ public partial class MainWindowViewModel : ObservableObject
                 StatusMessage = $"Đã lưu chương trình khuyến mãi: {window.KetQuaLuu.TenChuongTrinh}";
                 await NotificationWindow.ShowSuccessAsync($"Đã thêm chương trình khuyến mãi: {window.KetQuaLuu.TenChuongTrinh}", owner: OwnerWindow);
             }
+
+            // Nếu đang mở màn quản lý khuyến mãi thì làm mới danh sách cho khớp.
+            if (IsDanhSachKhuyenMaiSelected)
+                await DanhSachKhuyenMai.TaiDanhSachAsync();
         }
         catch (Exception ex)
         {
@@ -3106,36 +3136,34 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Mở cửa sổ "Danh mục → Khuyến mãi" hiển thị danh sách chương trình
+    /// Mở màn "Danh mục → Khuyến mãi" hiển thị danh sách chương trình
     /// khuyến mãi đã lưu, cho phép tìm kiếm, lọc, thêm, sửa và xóa.
+    /// Màn này nằm ngay trong vùng làm việc chính (không mở cửa sổ phụ).
     /// </summary>
     [RelayCommand]
     private async Task QuanLyKhuyenMaiAsync()
     {
-        if (OwnerWindow is null)
+        if (SelectedMenu == "Khuyến mãi")
+        {
+            // Đang đứng ở màn này thì chỉ tải lại dữ liệu.
+            await DanhSachKhuyenMai.TaiDanhSachAsync();
             return;
+        }
 
-        try
-        {
-            var window = new DanhSachKhuyenMaiWindow();
-            await window.ShowDialog<bool>(OwnerWindow);
-            StatusMessage = "Đã cập nhật danh mục chương trình khuyến mãi.";
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = "Lỗi khi mở danh mục khuyến mãi: " + ex.Message;
-            SafeLog.WriteError("Lỗi QuanLyKhuyenMaiAsync", ex);
-        }
+        // Chuyển sang màn "Khuyến mãi": OnSelectedMenuChanged sẽ tự tải dữ liệu.
+        SelectedMenu = "Khuyến mãi";
+        StatusMessage = "Đang mở danh mục chương trình khuyến mãi.";
     }
 
     /// <summary>
-    /// Mở giao diện "Danh mục → Đối tác → Nhân viên".
-    /// Hiển thị danh sách nhân viên, tìm kiếm, lọc theo trạng thái, chức vụ và phân trang.
+    /// Mở màn "Quản lý tài khoản" (mục Quản trị).
+    /// Màn này quản lý TÀI KHOẢN ĐĂNG NHẬP: tên đăng nhập, mật khẩu, vai trò, quyền.
+    /// Hồ sơ nhân sự nằm ở màn "Quản lý nhân viên".
     /// </summary>
     [RelayCommand]
-    private async Task MoDanhSachNhanVienAsync()
+    private async Task MoQuanLyTaiKhoanAsync()
     {
-        if (!await KiemTraQuyenAsync(PermissionKeys.UsersView, "Bạn không có quyền xem danh sách nhân viên."))
+        if (!await KiemTraQuyenAsync(PermissionKeys.UsersView, "Bạn không có quyền xem danh sách tài khoản."))
         {
             return;
         }
@@ -3147,22 +3175,39 @@ public partial class MainWindowViewModel : ObservableObject
         {
             var window = new DanhSachNhanVienWindow();
             await window.ShowDialog<bool>(OwnerWindow);
-            StatusMessage = "Đã xem danh sách nhân viên.";
+            StatusMessage = "Đã xem danh sách tài khoản.";
         }
         catch (Exception ex)
         {
-            StatusMessage = "Lỗi khi mở danh sách nhân viên: " + ex.Message;
-            SafeLog.WriteError("Lỗi MoDanhSachNhanVienAsync", ex);
+            StatusMessage = "Lỗi khi mở danh sách tài khoản: " + ex.Message;
+            SafeLog.WriteError("Lỗi MoQuanLyTaiKhoanAsync", ex);
         }
     }
 
     /// <summary>
-    /// Mở nhanh form "Thêm nhân viên" từ menu Danh mục → Đối tác → Nhân viên.
+    /// Mở màn "Quản lý nhân viên" (mục Quản trị).
+    /// Màn này nằm trong vùng làm việc chính nên chỉ chuyển sang tab tương ứng.
     /// </summary>
     [RelayCommand]
-    private async Task ThemNhanVienAsync()
+    private async Task QuanLyNhanVienAsync()
     {
-        if (!await KiemTraQuyenAsync(PermissionKeys.UsersCreate, "Bạn không có quyền thêm mới nhân viên."))
+        if (!await KiemTraQuyenAsync(PermissionKeys.EmployeesView, "Bạn không có quyền xem danh sách nhân viên."))
+        {
+            return;
+        }
+
+        await QuanLyNhanVien.TaiDanhSachAsync();
+        SelectedMenu = "Nhân viên";
+        StatusMessage = "Đang mở màn quản lý nhân viên.";
+    }
+
+    /// <summary>
+    /// Mở nhanh form thêm tài khoản đăng nhập từ mục Quản trị.
+    /// </summary>
+    [RelayCommand]
+    private async Task ThemTaiKhoanAsync()
+    {
+        if (!await KiemTraQuyenAsync(PermissionKeys.UsersCreate, "Bạn không có quyền thêm mới tài khoản."))
         {
             return;
         }
@@ -3175,12 +3220,12 @@ public partial class MainWindowViewModel : ObservableObject
             var vm = new UserEditViewModel(_db, isEdit: false, userId: 0);
             var win = new UserEditWindow(vm);
             await win.ShowDialog(OwnerWindow);
-            StatusMessage = "Đã hoàn thành thêm nhân viên.";
+            StatusMessage = "Đã hoàn thành thêm tài khoản.";
         }
         catch (Exception ex)
         {
-            StatusMessage = "Lỗi khi thêm nhân viên: " + ex.Message;
-            SafeLog.WriteError("Lỗi ThemNhanVienAsync", ex);
+            StatusMessage = "Lỗi khi thêm tài khoản: " + ex.Message;
+            SafeLog.WriteError("Lỗi ThemTaiKhoanAsync", ex);
         }
     }
 
@@ -5499,6 +5544,10 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
     {
         OnPropertyChanged(nameof(IsNhapHangListVisible));
         OnPropertyChanged(nameof(IsDsPhieuNhapSelected));
+
+        // Hủy phiếu nhập thì quay về tab "Danh sách phiếu nhập" của trung tâm Nhập hàng.
+        if (!value)
+            IsPhieuNhapTabDanhSach = true;
     }
 
     partial void OnPhieuNhapTongTienHangChanged(decimal value)
@@ -5627,6 +5676,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             return;
         }
         IsNhapHangFormVisible = true;
+        IsPhieuNhapTabDanhSach = false;
 
         _phieuNhapId = 0;
 
@@ -7287,9 +7337,13 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             "Nhà cung cấp" => 4,
             "Công nợ NCC" => 5,
             "Nhập hàng" => 6,
-            "Sổ quỹ" => 7,
+            "Xuất hàng" => 7,
+            "Sổ quỹ" => 8,
+            "Nhân viên" => 9,
+            "Nhập trả lại" => 3,
             _ => 0
         };
+
 
         // Rời khỏi màn lập phiếu nhập thì đóng lại lịch đang mở
         if (value != "Nhập hàng")
@@ -7329,7 +7383,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         OnPropertyChanged(nameof(IsXuatTraNccSelected));
         OnPropertyChanged(nameof(IsNhapKhacSelected));
         OnPropertyChanged(nameof(IsXuatNoiBoSelected));
-        OnPropertyChanged(nameof(IsPhieuChiSelected));
+        OnPropertyChanged(nameof(IsDanhSachKhuyenMaiSelected));
 
         CapNhatTrangThaiChonBaoCao();
 
@@ -7356,7 +7410,40 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             _ = QuanLyKhoTheoKy.TaiDanhSachKyAsync();
         }
 
+        if (value == "Nhân viên")
+        {
+            _ = QuanLyNhanVien.TaiDanhSachAsync();
+        }
+
         _ = LoadSelectedSectionAsync(value);
+    }
+
+    /// <summary>
+    /// Người dùng bấm trực tiếp vào tab trên thanh tab thì cũng cần đồng bộ menu
+    /// bên trái và nạp dữ liệu tương ứng.
+    /// </summary>
+    partial void OnSelectedDataTabIndexChanged(int value)
+    {
+        if (value == 9)
+        {
+            // Đồng bộ menu bên trái; phần nạp dữ liệu do OnSelectedMenuChanged đảm nhiệm.
+            SelectedMenu = "Nhân viên";
+            return;
+        }
+
+        // Bấm trực tiếp vào tab "Nhập hàng" / "Xuất hàng": đồng bộ lại menu bên trái,
+        // phần nạp dữ liệu do OnSelectedMenuChanged đảm nhiệm.
+        if (value == 6 && SelectedMenu != "Nhập hàng")
+        {
+            SelectedMenu = "Nhập hàng";
+            return;
+        }
+
+        if (value == 7 && SelectedMenu != "Xuất hàng")
+        {
+            SelectedMenu = "Xuất hàng";
+            return;
+        }
     }
 
     /// <summary>Thông báo lại toàn bộ cờ quyền chi tiết sau khi phiên đăng nhập thay đổi.</summary>
@@ -7368,7 +7455,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             nameof(CanViewInvoices), nameof(CanViewSales), nameof(CanViewSalesOrInvoices), nameof(CanViewCustomers),
             nameof(CanViewSuppliers), nameof(CanViewCashBook), nameof(CanViewReports),
             nameof(CanViewUsers), nameof(CanViewSettings), nameof(CanViewStoreInfo),
-            nameof(CanManageUsers),
+            nameof(CanManageUsers), nameof(CanViewEmployees),
             // Hàng hóa
             nameof(CanCreateProduct), nameof(CanEditProduct), nameof(CanDeleteProduct),
             nameof(CanImportProduct), nameof(CanExportProduct), nameof(CanUpdateProductPrice),
@@ -7416,6 +7503,9 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
     }
 
     CapNhatBaoCaoMenuVisibility();
+
+    // Màn "Khuyến mãi" tự quản lý nút thêm theo quyền ProductsCreate.
+    DanhSachKhuyenMai.CapNhatPhanQuyen();
 }
 
 public bool IsTongQuanSelected => SelectedMenu == "Tổng quan";
@@ -7427,19 +7517,19 @@ public bool IsNhaCungCapSelected => SelectedMenu == "Nhà cung cấp";
 public bool IsCongNoNccSelected => SelectedMenu == "Công nợ NCC";
 public bool IsSoQuySelected => SelectedMenu == "Sổ quỹ";
 
+/// <summary>Màn "Danh mục → Khuyến mãi" có vùng nội dung riêng, không nằm trong TabControl dữ liệu.</summary>
+public bool IsDanhSachKhuyenMaiSelected => SelectedMenu == "Khuyến mãi";
+
 // Báo cáo có vùng nội dung riêng nên không dùng chung TabControl dữ liệu
 // Màn nào có vùng nội dung riêng thì không được bật TabControl dữ liệu,
 // nếu không TabControl sẽ hiện chồng lên màn đó.
+// Nhập hàng / Xuất hàng / Nhập trả lại / Xuất trả NCC / Nhập khác / Xuất nội bộ
+// nay đều nằm bên trong TabControl dữ liệu nên không cần loại trừ nữa.
 public bool IsDataSectionSelected =>
     !IsTongQuanSelected
     && !IsBaoCaoSectionSelected
     && !IsThongTinTiemSelected
-    && !IsXuatHangSelected
-    && !IsNhapTraLaiSelected
-    && !IsXuatTraNccSelected
-    && !IsNhapKhacSelected
-    && !IsXuatNoiBoSelected
-    && !IsPhieuChiSelected;
+    && !IsDanhSachKhuyenMaiSelected;
 
 /// <summary>Màn "Thông tin tiệm" có vùng nội dung riêng, không nằm trong TabControl dữ liệu.</summary>
 public bool IsThongTinTiemSelected => SelectedMenu == "Thông tin tiệm";
@@ -7477,6 +7567,9 @@ public bool CanManageUsers
         return Session.HasPermission(PermissionKeys.UsersView) || Session.HasPermission(PermissionKeys.UsersAssignPermission) || Session.HasPermission(PermissionKeys.UsersCreate);
     }
 }
+
+/// <summary>Được hiển thị mục "Quản lý nhân viên" và tab "Nhân viên".</summary>
+public bool CanViewEmployees => Quyen.HasPermission(Session.CurrentUser, PermissionKeys.EmployeesView) || Quyen.IsAdmin(Session.CurrentUser);
 
 // ===== Quyền theo từng chức năng chi tiết (dùng cho IsVisible/IsEnabled của nút) =====
 
@@ -7619,6 +7712,24 @@ private async Task<bool> KiemTraQuyenAsync(string key, string message)
         if (OwnerWindow is null) return;
         var win = new DatabaseSettingsWindow(OwnerWindow);
         await win.ShowDialog(OwnerWindow);
+    }
+
+    /// <summary>Mở cửa sổ "Cài đặt danh mục" (Quản lý Nhóm hàng &amp; Đơn vị tính).</summary>
+    [RelayCommand]
+    public async Task MoCaiDatDanhMucAsync()
+    {
+        if (OwnerWindow is null) return;
+
+        try
+        {
+            var win = new CategorySettingsWindow();
+            await win.ShowDialog(OwnerWindow);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi khi mở cài đặt danh mục: " + ex.Message;
+            SafeLog.WriteError("Lỗi MoCaiDatDanhMucAsync", ex);
+        }
     }
 
 }

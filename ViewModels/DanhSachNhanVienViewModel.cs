@@ -49,8 +49,8 @@ public partial class DanhSachNhanVienViewModel : ObservableObject
     public bool HasRecords => !IsLoading && NhanVienList.Count > 0;
 
     public string PagingSummary => TotalRecords == 0
-        ? "0 nhân viên"
-        : $"Hiển thị {(CurrentPage - 1) * PageSize + 1} - {Math.Min(CurrentPage * PageSize, TotalRecords)} trong tổng số {TotalRecords} nhân viên";
+        ? "0 tài khoản"
+        : $"Hiển thị {(CurrentPage - 1) * PageSize + 1} - {Math.Min(CurrentPage * PageSize, TotalRecords)} trong tổng số {TotalRecords} tài khoản";
 
     public string PagingPagesText => $"Trang {CurrentPage} / {TotalPages}";
 
@@ -121,7 +121,9 @@ public partial class DanhSachNhanVienViewModel : ObservableObject
                 CurrentPage,
                 PageSize,
                 statusFilter,
-                roleFilter);
+                roleFilter,
+                null,
+                chiCoTaiKhoan: true);
 
             NhanVienList = new ObservableCollection<NhanVienItem>(items);
             TotalRecords = count;
@@ -129,7 +131,7 @@ public partial class DanhSachNhanVienViewModel : ObservableObject
         catch (Exception ex)
         {
             SafeLog.WriteError("DanhSachNhanVien.LoadDataAsync", ex);
-            await NotificationWindow.ShowErrorAsync($"Lỗi tải danh sách nhân viên: {ex.Message}", owner: GetActiveWindow());
+            await NotificationWindow.ShowErrorAsync($"Lỗi tải danh sách tài khoản: {ex.Message}", owner: GetActiveWindow());
         }
         finally
         {
@@ -213,7 +215,7 @@ public partial class DanhSachNhanVienViewModel : ObservableObject
     {
         if (!CanCreate)
         {
-            await NotificationWindow.ShowWarningAsync("Bạn không có quyền thêm mới nhân viên.", owner: GetActiveWindow());
+            await NotificationWindow.ShowWarningAsync("Bạn không có quyền thêm mới tài khoản.", owner: GetActiveWindow());
             return;
         }
 

@@ -93,10 +93,21 @@ public partial class MainWindowViewModel
     }
 
     /// <summary>
+    /// Điều hướng tới trung tâm "Xuất hàng" ở thẻ Tạo phiếu.
+    /// </summary>
+    [RelayCommand]
+    public async Task MoTaoPhieuXuatMoiAsync()
+    {
+        ChonMenu("Xuất hàng");
+        await KhoiTaoPhieuXuatMoiAsync();
+    }
+
+    /// <summary>
     /// Khởi tạo dữ liệu cho một phiếu xuất hàng mới.
     /// </summary>
     public async Task KhoiTaoPhieuXuatMoiAsync()
     {
+        IsPhieuXuatTabDanhSach = false;
         PhieuXuatItems.Clear();
         PhieuXuatProductSuggestions.Clear();
         PhieuXuatProductSearch = "";
@@ -294,7 +305,11 @@ public partial class MainWindowViewModel
         }
 
         PhieuXuatItems.Clear();
-        ChonMenu("Hàng hóa");
+        RecalculatePhieuXuatTotals();
+
+        // Hủy phiếu xuất thì quay về tab "Danh sách phiếu xuất" của trung tâm Xuất hàng.
+        IsPhieuXuatTabDanhSach = true;
+        StatusMessage = "Đã hủy thao tác thêm phiếu xuất.";
     }
 
     private string ChuyenDoiLoaiXuatSangMa(string tenHienThi)
