@@ -39,7 +39,7 @@ public partial class KetChuyenHangHoaWindow : Window
             _dangKhoiTao = true;
 
             // 1. Tải danh sách kỳ kế toán và danh sách kho song song
-            var kyTask = _db.GetDanhSachKyKeToanAsync();
+            var kyTask = _db.GetDanhSachKyKeToanItemAsync();
             var khoTask = _db.GetDanhSachKhoAsync();
 
             await Task.WhenAll(kyTask, khoTask);

@@ -37,7 +37,7 @@ public partial class KetChuyenCongNoWindow : Window
         {
             _dangKhoiTao = true;
 
-            var kyTask = await _db.GetDanhSachKyKeToanAsync();
+            var kyTask = await _db.GetDanhSachKyKeToanItemAsync();
 
             _danhSachKy.Clear();
             _danhSachKy.AddRange(kyTask);

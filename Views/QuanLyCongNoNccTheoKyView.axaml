@@ -249,45 +249,44 @@
                         <DataGridTextColumn Header="NHÓM NCC" Binding="{Binding NhomNhaCungCap}" Width="140" IsReadOnly="True"/>
 
                         <!-- Nợ đầu kỳ -->
-                        <DataGridTextColumn Header="NỢ ĐẦU KỲ" Binding="{Binding NoDauKyText}" Width="130" IsReadOnly="True">
-                            <DataGridTextColumn.CellStyle>
-                                <Style Selector="DataGridCell">
-                                    <Setter Property="HorizontalContentAlignment" Value="Right"/>
-                                    <Setter Property="Foreground" Value="#475467"/>
-                                </Style>
-                            </DataGridTextColumn.CellStyle>
-                        </DataGridTextColumn>
+                        <DataGridTemplateColumn Header="NỢ ĐẦU KỲ" Width="130" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:NhaCungCapKyCongNoItem">
+                                    <TextBlock Text="{Binding NoDauKyText}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                               Margin="8,0" Foreground="#475467"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
                         <!-- Phát sinh trong kỳ -->
-                        <DataGridTextColumn Header="NHẬP TRONG KỲ" Binding="{Binding PhatSinhText}" Width="130" IsReadOnly="True">
-                            <DataGridTextColumn.CellStyle>
-                                <Style Selector="DataGridCell">
-                                    <Setter Property="HorizontalContentAlignment" Value="Right"/>
-                                    <Setter Property="Foreground" Value="#1570EF"/>
-                                </Style>
-                            </DataGridTextColumn.CellStyle>
-                        </DataGridTextColumn>
+                        <DataGridTemplateColumn Header="NHẬP TRONG KỲ" Width="130" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:NhaCungCapKyCongNoItem">
+                                    <TextBlock Text="{Binding PhatSinhText}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                               Margin="8,0" Foreground="#1570EF"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
                         <!-- Đã trả trong kỳ -->
-                        <DataGridTextColumn Header="ĐÃ TRẢ" Binding="{Binding DaTraText}" Width="130" IsReadOnly="True">
-                            <DataGridTextColumn.CellStyle>
-                                <Style Selector="DataGridCell">
-                                    <Setter Property="HorizontalContentAlignment" Value="Right"/>
-                                    <Setter Property="Foreground" Value="#087F6E"/>
-                                </Style>
-                            </DataGridTextColumn.CellStyle>
-                        </DataGridTextColumn>
+                        <DataGridTemplateColumn Header="ĐÃ TRẢ" Width="130" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:NhaCungCapKyCongNoItem">
+                                    <TextBlock Text="{Binding DaTraText}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                               Margin="8,0" Foreground="#087F6E"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
                         <!-- Nợ hiện tại (cuối kỳ) -->
-                        <DataGridTextColumn Header="NỢ HIỆN TẠI" Binding="{Binding NoCuoiKyText}" Width="140" IsReadOnly="True">
-                            <DataGridTextColumn.CellStyle>
-                                <Style Selector="DataGridCell">
-                                    <Setter Property="HorizontalContentAlignment" Value="Right"/>
-                                    <Setter Property="FontWeight" Value="Bold"/>
-                                    <Setter Property="Foreground" Value="#D92D20"/>
-                                </Style>
-                            </DataGridTextColumn.CellStyle>
-                        </DataGridTextColumn>
+                        <DataGridTemplateColumn Header="NỢ HIỆN TẠI" Width="140" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:NhaCungCapKyCongNoItem">
+                                    <TextBlock Text="{Binding NoCuoiKyText}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                               Margin="8,0" FontWeight="Bold" Foreground="#D92D20"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
                         <!-- Số kỳ nợ -->
                         <DataGridTemplateColumn Header="SỐ KỲ NỢ" Width="100" IsReadOnly="True">

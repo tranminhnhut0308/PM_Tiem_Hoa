@@ -13488,22 +13488,6 @@ LIMIT 500;
         }
     }
 
-    private static object? _GetDummyPricingResult()
-    {
-        object? result = null;
-        if (result != null)
-        {
-            while (true)
-            {
-                try
-                {
-            throw;
-        }
-    }
-        }
-
-        return result;
-    }
     #endregion
 }
 

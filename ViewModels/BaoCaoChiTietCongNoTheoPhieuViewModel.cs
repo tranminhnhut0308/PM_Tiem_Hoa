@@ -261,6 +261,47 @@ public partial class BaoCaoChiTietCongNoTheoPhieuViewModel : ObservableObject
         _ = TaiLaiAsync();
     }
 
+    /// <summary>
+    /// Chọn nhanh khoảng thời gian (Hôm nay / 7 ngày qua / Tháng này / Tháng trước /
+    /// Năm nay / Toàn bộ / Tùy chỉnh). Việc tính ngày được xử lý trong
+    /// <see cref="OnKhoangThoiGianChanged"/>.
+    /// </summary>
+    [RelayCommand]
+    private void ChonKhoangThoiGian(string? khoang)
+    {
+        if (string.IsNullOrWhiteSpace(khoang))
+            return;
+
+        if (KhoangThoiGian == khoang)
+        {
+            // Đã chọn sẵn khoảng này: chỉ tải lại dữ liệu.
+            TrangHienTai = 1;
+            _ = TaiLaiAsync();
+            return;
+        }
+
+        KhoangThoiGian = khoang;
+    }
+
+    /// <summary>Áp dụng khoảng thời gian tùy chỉnh (từ ngày / đến ngày).</summary>
+    [RelayCommand]
+    private void ApDungTuyChinh()
+    {
+        if (TuNgayChon.HasValue)
+            TuNgay = TuNgayChon.Value.Date;
+        if (DenNgayChon.HasValue)
+            DenNgay = DenNgayChon.Value.Date;
+
+        if (TuNgay > DenNgay)
+        {
+            ThongBaoLoi = "Từ ngày không được lớn hơn Đến ngày.";
+            return;
+        }
+
+        TrangHienTai = 1;
+        _ = TaiLaiAsync();
+    }
+
     [RelayCommand]
     private void XoaBoLoc()
     {
@@ -276,7 +317,7 @@ public partial class BaoCaoChiTietCongNoTheoPhieuViewModel : ObservableObject
     // ============================================================
 
     [RelayCommand]
-    private Task DauTrangAsync()
+    private Task TrangDauAsync()
     {
         if (TrangHienTai != 1)
         {
@@ -309,7 +350,7 @@ public partial class BaoCaoChiTietCongNoTheoPhieuViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private Task CuoiTrangAsync()
+    private Task TrangCuoiAsync()
     {
         if (TrangHienTai != TongSoTrang && TongSoTrang > 0)
         {

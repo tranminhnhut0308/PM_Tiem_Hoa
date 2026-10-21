@@ -87,7 +87,7 @@ public sealed partial class DatabaseService
     /// Lấy danh sách tất cả các kỳ kế toán hiện có trong cơ sở dữ liệu.
     /// Nếu chưa có kỳ nào, tự động tạo kỳ tháng hiện tại và kỳ tháng tiếp theo để người dùng làm việc.
     /// </summary>
-    public async Task<IReadOnlyList<KyKeToanItem>> GetDanhSachKyKeToanAsync()
+    public async Task<IReadOnlyList<KyKeToanItem>> GetDanhSachKyKeToanItemAsync()
     {
         await using var connection = await OpenAsync();
         await EnsureBangKyKeToanVaKetChuyenAsync(connection);

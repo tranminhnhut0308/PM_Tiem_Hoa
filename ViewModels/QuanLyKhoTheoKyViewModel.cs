@@ -636,6 +636,7 @@ public sealed partial class QuanLyKhoTheoKyViewModel : ObservableObject
         if (OwnerWindow is null)
             return false;
 
-        return await ConfirmationWindow.ShowAsync(OwnerWindow, title, message);
+        var dialog = new ConfirmationWindow(title, message, "Đồng ý", "Hủy");
+        return await dialog.ShowDialog<bool>(OwnerWindow);
     }
 }

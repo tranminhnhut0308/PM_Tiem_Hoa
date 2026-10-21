@@ -3027,15 +3027,13 @@
                 Command="{Binding MoQuanLyCongNoTheoKyCommand}"
                 ToolTip.Tip="Xem và quản lý công nợ theo kỳ của khách hàng"
                 Margin="0,0,10,0" />
-              <!--
+              <!-- Nợ đầu kỳ đã được thay bằng chức năng Công nợ theo kỳ
+              <Button Grid.Column="5" Classes="toolbar-action" Content="💳 Nợ đầu kỳ"
                 Margin="0,0,10,0"
                 Command="{Binding ThemCongNoDauKyCommand}"
                 CommandParameter="KHACH_HANG"
-<!--
+                ToolTip.Tip="Khai báo số dư công nợ đầu kỳ của khách hàng" />
               -->
-              <!--
-=======
-                -->
               <Button Grid.Column="6" Classes="toolbar-action" Content="💵 Nợ thanh toán"
                 Margin="0,0,10,0"
                 Command="{Binding ThemNoThanhToanCommand}"
@@ -3047,7 +3045,6 @@
                 CommandParameter="KHACH_HANG"
                 ToolTip.Tip="Giao diện 48: Tìm kiếm và tra cứu công nợ" />
               <Button Grid.Column="8" Classes="toolbar-action" Content="🏷 Thiết lập giá"
->>>>>>> 521239ce4fe05229990644535db4e61b88de2bdb
                 Margin="0,0,10,0"
                 Command="{Binding ThietLapGiaKhachHangDangChonCommand}"
                 ToolTip.Tip="Thiết lập bảng giá bán riêng cho khách hàng đang chọn"

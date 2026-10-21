@@ -336,7 +336,7 @@
             <DataGridTemplateColumn Header="ĐỐI TÁC (TÊN / MÃ / SĐT)" Width="*">
               <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate x:DataType="models:BaoCaoChiTietCongNoPhieuItem">
-                  <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" Padding="10,0">
+                  <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" Margin="10,0">
                     <TextBlock Text="{Binding TenDoiTac}"
                       FontWeight="SemiBold"
                       Foreground="#163F38"

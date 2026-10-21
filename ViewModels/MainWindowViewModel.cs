@@ -154,7 +154,7 @@ public partial class MainWindowViewModel : ObservableObject
                 if (OwnerWindow is null) return;
                 try
                 {
-                    var invoices = await _db.GetInvoicesAsync();
+                    var invoices = await _db.GetHoaDonAsync();
                     var inv = invoices.FirstOrDefault(i => string.Equals(i.MaHoaDon, maHd, StringComparison.OrdinalIgnoreCase));
                     if (inv != null && XemHoaDonCommand.CanExecute(inv))
                     {
@@ -276,29 +276,6 @@ public partial class MainWindowViewModel : ObservableObject
             _ = QuanLyKhoTheoKy.KhoiTaoAsync();
         }
     }
-
-#if false /* DUPLICATE_TEMP */
-        {
-            _ = QuanLyKhoTheoKy.KhoiTaoAsync();
-    }
-
-    [RelayCommand]
-    private void MoQuanLyCongNoTheoKy()
-    {
-        SelectedMenu = "Công nợ";
-        _ = QuanLyCongNoTheoKy.KhoiTaoAsync();
-    }
-
-    [RelayCommand]
-    private void MoQuanLyCongNoNccTheoKy()
-    {
-        SelectedMenu = "Công nợ NCC";
-        _ = QuanLyCongNoNccTheoKy.KhoiTaoAsync();
-        }
-    }
-
-    [RelayCommand]
-#endif
 
     [RelayCommand]
     private void MoQuanLyTonKhoTheoKy()
@@ -2741,18 +2718,6 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Mở cửa sổ "Dữ liệu đầu kỳ → Công nợ đầu kỳ → Thêm công nợ đầu kỳ".
-    /// <summary>
-    /// Chuyển sang phân hệ Quản lý công nợ theo kỳ.
-    /// </summary>
-    [RelayCommand]
-    private void MoQuanLyCongNoTheoKy()
-    {
-        SelectedMenu = "Công nợ";
-        _ = QuanLyCongNoTheoKy.KhoiTaoAsync();
-    }
-
-    /// <summary>
     /// Thu nợ / Thanh toán cho khách hàng (mở hộp thoại ThuNoKhachHangWindow).
     /// </summary>
     [RelayCommand]
@@ -2795,14 +2760,37 @@ public partial class MainWindowViewModel : ObservableObject
             var dialog = new ThuNoKhachHangWindow(customerName, conNo);
             var ketQua = await dialog.ShowDialog<ThuNoHoaDonKetQua?>(OwnerWindow);
             if (ketQua is null)
+            {
+                StatusMessage = "Đã hủy thu công nợ.";
                 return;
+            }
 
             var res = await _db.ThuNoKhachHangAsync(customerId, ketQua.SoTien, ketQua.PhuongThuc, ketQua.GhiChu);
+
+            // Nạp lại danh sách để số nợ/tổng bán của dòng khớp database.
             await LoadCustomersAsync();
+
+            // Mở lại vùng chi tiết ở tab Công nợ để người dùng thấy số nợ mới.
+            var refreshedRow = CustomerRows.FirstOrDefault(r => r.CustomerId == customerId);
+            if (refreshedRow is not null)
+            {
+                await MoChiTietKhachHangAsync(refreshedRow);
+
+                if (refreshedRow.Detail is not null)
+                    refreshedRow.Detail.SelectedTab = "congno";
+            }
+
             if (IsSoQuySelected)
                 await TaiLaiSoQuyAsync();
 
-            StatusMessage = $"Đã thu nợ {ketQua.SoTien:N0} đ từ {customerName}. Còn nợ: {res.ConNoConLai:N0} đ.";
+            _ = LamMoiTongQuanNeuDangMoAsync();
+
+            var thongBaoPhieu = res.MaPhieuThus.Count == 0
+                ? ""
+                : $" Đã ghi {res.MaPhieuThus.Count:N0} phiếu thu "
+                  + $"({string.Join(", ", res.MaPhieuThus)}) vào sổ quỹ.";
+
+            StatusMessage = $"Đã thu nợ {ketQua.SoTien:N0} đ từ {customerName}. Còn nợ: {res.ConNoConLai:N0} đ.{thongBaoPhieu}";
             await NotificationWindow.ShowSuccessAsync(
                 $"Đã thu {ketQua.SoTien:N0} đ từ {customerName}.\nCòn nợ lại: {res.ConNoConLai:N0} đ.",
                 owner: OwnerWindow);
@@ -2845,10 +2833,6 @@ public partial class MainWindowViewModel : ObservableObject
                 else if (IsNhaCungCapSelected)
                 {
                     await LoadSuppliersAsync();
-                    break;
-
-                case "Công nợ NCC":
-                    await QuanLyCongNoNccTheoKy.KhoiTaoAsync();
                 }
 
                 StatusMessage = "Đã lưu công nợ đầu kỳ thành công!";

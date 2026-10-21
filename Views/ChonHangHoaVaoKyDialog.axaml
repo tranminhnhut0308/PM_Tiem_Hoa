@@ -47,7 +47,7 @@
             </Border>
 
             <!-- TOOLBAR: SEARCH & FILTER -->
-            <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Padding="16,10">
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Margin="16,10">
                 <TextBox Name="SearchTextBox" Classes="searchInput"
                          Watermark="⌕ Tìm theo tên hoa, mã hoa..."
                          TextChanged="SearchTextBox_OnTextChanged"/>
@@ -65,6 +65,7 @@
             <!-- LIST PRODUCTS TABLE -->
             <Border Grid.Row="2" Margin="16,0,16,10" BorderBrush="#E2ECE8" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
                 <DataGrid Name="SanPhamDataGrid"
+                          x:DataType="models:SanPham"
                           AutoGenerateColumns="False"
                           IsReadOnly="True"
                           GridLinesVisibility="Horizontal"
