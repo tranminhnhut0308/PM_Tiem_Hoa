@@ -159,7 +159,7 @@ public sealed class ReportController : ControllerBase
                 CASE WHEN pc.ma_phieu_chi LIKE 'PT%' THEN 'THU' ELSE 'CHI' END AS Loai,
                 pc.so_tien AS SoTien,
                 pc.phuong_thuc AS PhuongThuc,
-                pc.nguoi_nhan_nop AS NguoiNhanNop,
+                pc.nguoi_nop_nhan AS NguoiNhanNop,
                 pc.ghi_chu AS GhiChu
             FROM phieu_chi pc
             WHERE pc.trang_thai = 'HOAN_THANH'

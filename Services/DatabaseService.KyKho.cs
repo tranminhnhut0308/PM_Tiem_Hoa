@@ -574,7 +574,7 @@ public sealed partial class DatabaseService
             ct.hang_hoa_id AS HangHoaId,
             sp.ma_san_pham AS MaHangHoa,
             COALESCE(NULLIF(TRIM(sp.ten_san_pham), ''), sp.ma_san_pham) AS TenHangHoa,
-            COALESCE(dvt.ten_don_vi, sp.don_vi_tinh, 'Cành') AS DonViTinh,
+            COALESCE(dvt.ten_don_vi, 'Cành') AS DonViTinh,
             COALESCE(nsp.ten_nhom, sp.nhom_hang_3_cap_excel, 'Chưa phân nhóm') AS NhomHangHoa,
             sp.hinh_anh AS HinhAnh,
             ct.so_luong AS SoLuongDauKy,
@@ -631,8 +631,8 @@ public sealed partial class DatabaseService
                 const string nhapSql = """
                 SELECT ctp.san_pham_id AS SanPhamId, COALESCE(SUM(ctp.so_luong), 0) AS TongNhap
                 FROM chi_tiet_phieu_nhap_hang ctp
-                INNER JOIN phieu_nhap_hang pnh ON pnh.id = ctp.phieu_nhap_hang_id
-                WHERE pnh.ngay_nhap >= @TuNgay AND pnh.ngay_nhap <= @DenNgay
+                INNER JOIN phieu_nhap_hang pnh ON pnh.id = ctp.phieu_nhap_id
+                WHERE pnh.thoi_gian_nhap >= @TuNgay AND pnh.thoi_gian_nhap <= @DenNgay
                 GROUP BY ctp.san_pham_id;
                 """;
 

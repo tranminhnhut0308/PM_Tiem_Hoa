@@ -2,7 +2,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:models="clr-namespace:ShopHoa.Models"
     x:Class="ShopHoa.Views.CategorySettingsWindow"
-    Width="640" Height="520"
+    Width="680" Height="560"
     Title="Cài đặt danh mục"
     WindowStartupLocation="CenterOwner"
     CanResize="False"
@@ -27,6 +27,12 @@
             <Setter Property="CornerRadius" Value="6" />
             <Setter Property="Padding" Value="12,6" />
         </Style>
+        <Style Selector="Button.secondary">
+            <Setter Property="Background" Value="#E8F3F0" />
+            <Setter Property="Foreground" Value="#0B6153" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="12,6" />
+        </Style>
         <Style Selector="Button.danger">
             <Setter Property="Background" Value="#FDE8E8" />
             <Setter Property="Foreground" Value="#C0392B" />
@@ -42,15 +48,27 @@
         <TabControl Grid.Row="1">
             <!-- TAB NHÓM HÀNG -->
             <TabItem Header="Nhóm hàng" FontSize="14" FontWeight="SemiBold">
-                <Grid RowDefinitions="Auto,*" Margin="0,14,0,0">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="0,0,0,12">
+                <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="0,14,0,0">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="0,0,0,10">
                         <TextBox x:Name="NewGroupNameTextBox" Watermark="Nhập nhanh tên nhóm và nhấn Enter (hoặc bấm + Thêm nhóm)..."
                             KeyDown="NewGroupNameTextBox_OnKeyDown" />
-                        <Button Grid.Column="1" Classes="primary" Content="+ Thêm nhóm"
+                        <Button Grid.Column="1" x:Name="AddGroupButton" Classes="primary" Content="+ Thêm nhóm"
                             Click="AddGroup_OnClick" />
                     </Grid>
 
-                    <Border Grid.Row="1" Background="White" BorderBrush="#E0EBE7"
+                    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Margin="0,0,0,10">
+                        <TextBox x:Name="SearchGroupsTextBox" Watermark="Tìm nhóm hàng theo tên hoặc mã..."
+                            TextChanged="SearchGroupsTextBox_OnTextChanged" />
+                        <Button Grid.Column="1" x:Name="ReloadGroupsButton" Classes="secondary" Content="Tải lại"
+                            Click="ReloadGroupsButton_OnClick" />
+                        <TextBlock Grid.Column="2" x:Name="GroupsCountTextBlock" VerticalAlignment="Center"
+                            Foreground="#5A6F69" MinWidth="90" TextAlignment="Right" />
+                    </Grid>
+
+                    <TextBlock Grid.Row="2" x:Name="GroupsStatusTextBlock" Foreground="#C0392B"
+                        TextWrapping="Wrap" Margin="0,0,0,8" IsVisible="False" />
+
+                    <Border Grid.Row="3" Background="White" BorderBrush="#E0EBE7"
                         BorderThickness="1" CornerRadius="8" Padding="6">
                         <ListBox x:Name="GroupsListBox" Background="Transparent">
                             <ListBox.ItemTemplate>
@@ -70,16 +88,28 @@
 
             <!-- TAB ĐƠN VỊ TÍNH -->
             <TabItem Header="Đơn vị tính" FontSize="14" FontWeight="SemiBold">
-                <Grid RowDefinitions="Auto,*" Margin="0,14,0,0">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="0,0,0,12">
+                <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="0,14,0,0">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="0,0,0,10">
                         <TextBox x:Name="NewUnitNameTextBox"
                             Watermark="Nhập nhanh ĐVT và nhấn Enter (hoặc bấm + Thêm ĐVT)..."
                             KeyDown="NewUnitNameTextBox_OnKeyDown" />
-                        <Button Grid.Column="1" Classes="primary" Content="+ Thêm ĐVT"
+                        <Button Grid.Column="1" x:Name="AddUnitButton" Classes="primary" Content="+ Thêm ĐVT"
                             Click="AddUnit_OnClick" />
                     </Grid>
 
-                    <Border Grid.Row="1" Background="White" BorderBrush="#E0EBE7"
+                    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Margin="0,0,0,10">
+                        <TextBox x:Name="SearchUnitsTextBox" Watermark="Tìm đơn vị tính theo tên hoặc mã..."
+                            TextChanged="SearchUnitsTextBox_OnTextChanged" />
+                        <Button Grid.Column="1" x:Name="ReloadUnitsButton" Classes="secondary" Content="Tải lại"
+                            Click="ReloadUnitsButton_OnClick" />
+                        <TextBlock Grid.Column="2" x:Name="UnitsCountTextBlock" VerticalAlignment="Center"
+                            Foreground="#5A6F69" MinWidth="90" TextAlignment="Right" />
+                    </Grid>
+
+                    <TextBlock Grid.Row="2" x:Name="UnitsStatusTextBlock" Foreground="#C0392B"
+                        TextWrapping="Wrap" Margin="0,0,0,8" IsVisible="False" />
+
+                    <Border Grid.Row="3" Background="White" BorderBrush="#E0EBE7"
                         BorderThickness="1" CornerRadius="8" Padding="6">
                         <ListBox x:Name="UnitsListBox" Background="Transparent">
                             <ListBox.ItemTemplate>

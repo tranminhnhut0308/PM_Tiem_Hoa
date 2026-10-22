@@ -42,6 +42,26 @@ public sealed class HoaDonBanHangReceipt
     /// <summary>Tiền thối đã lưu xuống database (cột thu_khac).</summary>
     public decimal ThuKhac { get; set; }
 
+    /// <summary>Phương thức thanh toán đã dùng (TIEN_MAT, CHUYEN_KHOAN, THE, VI_DIEN_TU).</summary>
+    public string PhuongThucThanhToan { get; set; } = "";
+
+    /// <summary>Tên phương thức thanh toán hiển thị cho người dùng.</summary>
+    public string PhuongThucThanhToanHienThi =>
+        PhuongThucThanhToan switch
+        {
+            "CHUYEN_KHOAN" => "Chuyển khoản",
+            "THE" => "Thẻ",
+            "VI_DIEN_TU" => "Ví điện tử",
+            "TIEN_MAT" => "Tiền mặt",
+            _ => ""
+        };
+
+    /// <summary>Tổng số lượng hàng tặng kèm trên hóa đơn (để thống kê).</summary>
+    public int SoLuongHangTang => Items.Count(i => i.IsHangTang);
+
+    /// <summary>Hóa đơn có phát sinh hàng tặng kèm hay không.</summary>
+    public bool CoHangTang => SoLuongHangTang > 0;
+
     /// <summary>
     /// Các cảnh báo phát sinh khi lưu đơn (bán vượt tồn kho, sản phẩm chưa có
     /// số tồn...). Hóa đơn vẫn được lưu nhưng người dùng phải được báo rõ.
@@ -64,4 +84,13 @@ public sealed class HoaDonBanHangReceiptItem
     public decimal SoLuong { get; set; }
     public decimal DonGia { get; set; }
     public decimal ThanhTien { get; set; }
+
+    /// <summary>Dòng này là hàng tặng kèm theo khuyến mãi (đơn giá luôn bằng 0).</summary>
+    public bool IsHangTang { get; set; }
+
+    /// <summary>Tên chương trình khuyến mãi đã tặng dòng hàng này.</summary>
+    public string? ChuongTrinhKhuyenMaiTen { get; set; }
+
+    /// <summary>Nhãn hiển thị bên cạnh tên sản phẩm trên hóa đơn.</summary>
+    public string NhanHangTang => IsHangTang ? "TẶNG KÈM" : "";
 }

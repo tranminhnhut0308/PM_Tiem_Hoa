@@ -474,6 +474,11 @@ public partial class MainWindowViewModel : ObservableObject
     partial void OnSelectedSaleCustomerChanged(KhachHang? value)
     {
         OnPropertyChanged(nameof(LaKhachLe));
+
+        // Khách đổi nhóm thì khuyến mãi tặng kèm áp dụng cho nhóm khác
+        // cũng phải được đối chiếu lại.
+        CapNhatHangTangTrongGio();
+
         RecalculatePayment();
     }
 
@@ -2702,7 +2707,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Mở cửa sổ "Dữ liệu đầu kỳ → Hàng hóa đầu kỳ → Thêm hàng tồn đầu kỳ".
+    /// Mở màn hình "Hàng hóa → Quản lý tồn kho theo kỳ".
     /// Cho phép nhập số lượng tồn, giá vốn, tự động tính thành tiền và lưu vào hệ thống.
     /// </summary>
     [RelayCommand]
@@ -4430,7 +4435,10 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
     private void ResetDonHangVeMacDinh()
     {
         foreach (var item in SaleCart)
+        {
             item.QuantityChanged -= RecalculateSaleTotal;
+            item.QuantityChanged -= CapNhatHangTangTrongGio;
+        }
 
         SaleCart.Clear();
         SaleCustomerSuggestions.Clear();
@@ -4455,6 +4463,14 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         TienThoi = 0;
         TienCongNo = 0;
         TrangThaiThanhToan = "";
+
+        // Ô quét mã vạch và thông tin khuyến mãi tặng kèm
+        SaleBarcodeInput = "";
+        SaleBarcodeStatus = "";
+        SaleBarcodeCoLoi = false;
+        SaleSoDongHangTang = 0;
+        SaleThongTinKhuyenMai = "";
+        SaleCanhBaoKhuyenMai = "";
 
         SaleMaHoaDonHienThi = "";
         IsThanhToanDangXuLy = false;
@@ -4496,6 +4512,9 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         {
             StatusMessage = "Không thể tải danh sách sản phẩm: " + ex.Message;
         }
+
+        // Nạp quy tắc khuyến mãi tặng kèm đang hiệu lực.
+        await TaiQuyTacTangKemAsync();
 
         RecalculateSaleTotal();
     }
@@ -4609,6 +4628,16 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         if (product is null)
             return;
 
+        await ThemVaoGioHangCoreAsync(product);
+    }
+
+    /// <summary>
+    /// Thêm sản phẩm vào giỏ hàng. Trả về false nếu không thêm được
+    /// (hết hàng, quá tồn kho, chưa có giá bán...) để lệnh quét mã vạch
+    /// báo lỗi cho người bán.
+    /// </summary>
+    private async Task<bool> ThemVaoGioHangCoreAsync(SanPham product)
+    {
         // Reset thông báo cũ để UI luôn nhận biết có sự thay đổi mới
         StatusMessage = string.Empty;
 
@@ -4616,7 +4645,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         if (product.HetHang)
         {
             StatusMessage = $"⚠️ Sản phẩm '{product.TenSanPham}' đã hết hàng, không thể thêm vào giỏ.";
-            return;
+            return false;
         }
 
         // 2. Kiểm tra số lượng tồn kho với giỏ hàng
@@ -4626,7 +4655,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         if (currentQuantityInCart + 1 > product.TonKho)
         {
             StatusMessage = $"⚠️ Sản phẩm '{product.TenSanPham}' chỉ còn tồn kho {product.TonKho:N0}!";
-            return;
+            return false;
         }
 
         // 3. Sản phẩm chưa có giá bán
@@ -4635,7 +4664,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             if (OwnerWindow is null)
             {
                 StatusMessage = "Không xác định được cửa sổ bán hàng.";
-                return;
+                return false;
             }
 
             try
@@ -4646,7 +4675,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
                 if (!giaBan.HasValue || giaBan.Value <= 0)
                 {
                     StatusMessage = "Chưa nhập giá bán. Sản phẩm chưa được thêm vào giỏ.";
-                    return;
+                    return false;
                 }
 
                 var updated = await _db.CapNhatGiaBanSanPhamAsync(product.Id, giaBan.Value);
@@ -4654,7 +4683,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
                 if (!updated)
                 {
                     StatusMessage = "Sản phẩm không còn tồn tại trong hệ thống.";
-                    return;
+                    return false;
                 }
 
                 DongBoGiaBan(product.Id, giaBan.Value);
@@ -4662,7 +4691,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             catch (Exception ex)
             {
                 StatusMessage = "Không thể cập nhật giá bán: " + ex.Message;
-                return;
+                return false;
             }
         }
 
@@ -4697,8 +4726,12 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             };
 
             item.QuantityChanged += RecalculateSaleTotal;
+            item.QuantityChanged += CapNhatHangTangTrongGio;
             SaleCart.Add(item);
         }
+
+        // Đối chiếu khuyến mãi tặng kèm sau khi giỏ đã thay đổi.
+        CapNhatHangTangTrongGio();
 
         RecalculateSaleTotal();
 
@@ -4706,6 +4739,8 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         StatusMessage = giaRieng.HasValue
             ? $"Đã thêm '{product.TenSanPham}' vào giỏ (áp dụng giá riêng: {MoneyInput.Format(giaRieng.Value)} đ)."
             : $"Đã thêm '{product.TenSanPham}' vào giỏ hàng.";
+
+        return true;
     }
     [RelayCommand]
     private void CapNhatTongTienBanHang()
@@ -4718,6 +4753,10 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
     {
         if (item is null || item.SanPham is null) return;
 
+        // Dòng hàng tặng do chương trình khuyến mãi quyết định, không sửa tay được.
+        if (item.IsHangTang)
+            return;
+
         // Kiểm tra nếu tăng thêm 1 mà vượt quá tồn kho
         if (item.SoLuong + 1 > item.SanPham.TonKho)
         {
@@ -4727,6 +4766,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
 
         StatusMessage = string.Empty;
         item.SoLuong += 1;
+        CapNhatHangTangTrongGio();
         RecalculateSaleTotal();
     }
 
@@ -4736,7 +4776,12 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         if (item is null)
             return;
 
+        // Dòng hàng tặng do chương trình khuyến mãi quyết định, không sửa tay được.
+        if (item.IsHangTang)
+            return;
+
         item.SoLuong = Math.Max(1, item.SoLuong - 1);
+        CapNhatHangTangTrongGio();
         RecalculateSaleTotal();
     }
 
@@ -4746,8 +4791,17 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
         if (item is null)
             return;
 
+        // Dòng hàng tặng không được xoá riêng (muốn bỏ thì sửa dòng hàng mua).
+        if (item.IsHangTang)
+        {
+            StatusMessage = "Dòng hàng tặng kèm không xoá riêng được. Hãy giảm số lượng của dòng hàng mua.";
+            return;
+        }
+
         item.QuantityChanged -= RecalculateSaleTotal;
+        item.QuantityChanged -= CapNhatHangTangTrongGio;
         SaleCart.Remove(item);
+        CapNhatHangTangTrongGio();
         RecalculateSaleTotal();
     }
 
@@ -6656,6 +6710,17 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             return;
         }
 
+        // Thanh toán bằng thẻ / chuyển khoản / ví điện tử: không có tiền mặt
+        // trả ra nên không sinh tiền thối, số tiền thu đúng bằng số tiền phải trả.
+        if (!LaThanhToanTienMat)
+        {
+            TienKhachDua = canTra;
+            TienThoi = 0;
+            TienCongNo = 0;
+            TrangThaiThanhToan = $"Thanh toán qua {SalePhuongThucThanhToanHienThi}";
+            return;
+        }
+
         if (khachDua > canTra)
         {
             TienThoi = khachDua - canTra;
@@ -6835,7 +6900,8 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
             SaleTotal,
             TienKhachDua,
             TienThoi,
-            TienCongNo);
+            TienCongNo,
+            SalePhuongThucThanhToan?.Ma);
 
         if (!await confirmWindow.ShowDialog<bool>(owner))
         {
@@ -6856,6 +6922,7 @@ private async Task TimKiemHoaBanAsync(string? keyword = null)
                 customer,
                 discountSnapshot,
                 cashSnapshot,
+                phuongThucThanhToan: confirmWindow.PhuongThucThanhToan,
                 ghiChu: SaleGhiChu,
                 soDienThoai: SaleCustomerPhone,
                 diaChi: SaleCustomerAddress,

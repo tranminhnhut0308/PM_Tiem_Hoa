@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -30,6 +31,34 @@ public partial class ThanhToanConfirmWindow : Window
         TxtTienKhachDua.Text = $"{khachDua:N0} đ";
         TxtTienThoi.Text = $"{tienThoi:N0} đ";
         TxtCongNo.Text = $"{congNo:N0} đ";
+    }
+
+    /// <summary>
+    /// Mở hộp thoại xác nhận với phương thức thanh toán đã chọn sẵn ở màn bán hàng.
+    /// Người bán vẫn có thể đổi lại ở hộp thoại này.
+    /// </summary>
+    public ThanhToanConfirmWindow(
+        string tenKhach,
+        decimal tongTien,
+        decimal khachDua,
+        decimal tienThoi,
+        decimal congNo,
+        string? phuongThucThanhToan) : this(tenKhach, tongTien, khachDua, tienThoi, congNo)
+    {
+        var ma = string.IsNullOrWhiteSpace(phuongThucThanhToan) ? "TIEN_MAT" : phuongThucThanhToan.Trim();
+
+        var index = -1;
+
+        for (var i = 0; i < DanhSachPhuongThuc.Count; i++)
+        {
+            if (string.Equals(DanhSachPhuongThuc[i].Ma, ma, StringComparison.OrdinalIgnoreCase))
+            {
+                index = i;
+                break;
+            }
+        }
+
+        CboPhuongThuc.SelectedIndex = index >= 0 ? index : 0;
     }
 
     /// <summary>Mã phương thức thanh toán người dùng chọn (mặc định TIEN_MAT).</summary>

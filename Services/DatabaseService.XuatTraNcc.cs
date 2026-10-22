@@ -280,10 +280,11 @@ public sealed partial class DatabaseService
                 ct.ly_do_xuat_tra AS LyDoXuatTra,
                 sp.ma_san_pham AS MaSanPham,
                 sp.ten_san_pham AS TenSanPham,
-                COALESCE(sp.don_vi_tinh, '') AS DonViTinh,
+                COALESCE(dvt.ten_don_vi, '') AS DonViTinh,
                 COALESCE(sp.ton_kho_excel, 0) AS TonKho
             FROM chi_tiet_phieu_xuat_tra_ncc ct
             JOIN san_pham sp ON ct.san_pham_id = sp.id
+            LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
             WHERE ct.phieu_xuat_tra_id = @PhieuXuatTraId
             ORDER BY ct.id ASC;
         """;
@@ -359,13 +360,14 @@ public sealed partial class DatabaseService
                 ct.san_pham_id AS SanPhamId,
                 ct.ma_san_pham AS MaSanPham,
                 ct.ten_san_pham AS TenSanPham,
-                COALESCE(sp.don_vi_tinh, '') AS DonViTinh,
+                COALESCE(dvt.ten_don_vi, '') AS DonViTinh,
                 COALESCE(sp.ton_kho_excel, 0) AS TonKho,
                 ct.so_luong AS SoLuongMua,
                 ct.don_gia_nhap AS DonGia,
                 COALESCE(da_tra.TongDaTra, 0) AS DaXuatTra
             FROM chi_tiet_phieu_nhap_hang ct
             JOIN san_pham sp ON ct.san_pham_id = sp.id
+            LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
             LEFT JOIN (
                 SELECT cxt.san_pham_id, SUM(cxt.so_luong) AS TongDaTra
                 FROM chi_tiet_phieu_xuat_tra_ncc cxt

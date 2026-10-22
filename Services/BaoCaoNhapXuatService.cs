@@ -161,7 +161,7 @@ public sealed class BaoCaoNhapXuatService
                 sp.ma_san_pham                                           AS MaSanPham,
                 sp.ten_san_pham                                          AS TenSanPham,
                 COALESCE(nsp.ten_nhom, 'Chưa phân nhóm')                AS TenNhom,
-                COALESCE(dvt.ten_don_vi, sp.don_vi_tinh, 'Cái')          AS DonViTinh,
+                COALESCE(dvt.ten_don_vi, 'Cái')          AS DonViTinh,
                 COALESCE(sp.gia_von, 0)                                  AS GiaVon,
                 COALESCE(tk.so_luong_ton, sp.ton_kho_excel, 0)           AS TonHienTai
             FROM san_pham sp
@@ -202,7 +202,7 @@ public sealed class BaoCaoNhapXuatService
                 COALESCE(SUM(CASE WHEN pn.thoi_gian_nhap >= @TuNgay AND pn.thoi_gian_nhap < @DenKeTiep THEN ctpn.thanh_tien ELSE 0 END), 0) AS GiaTriNhapTrongKy,
                 COALESCE(SUM(CASE WHEN pn.thoi_gian_nhap >= @TuNgay THEN ctpn.so_luong ELSE 0 END), 0) AS NhapSauTuNgay
             FROM chi_tiet_phieu_nhap_hang ctpn
-            INNER JOIN phieu_nhap_hang pn ON pn.id = ctpn.phieu_nhap_hang_id
+            INNER JOIN phieu_nhap_hang pn ON pn.id = ctpn.phieu_nhap_id
             WHERE pn.trang_thai != 'HUY' AND pn.thoi_gian_nhap >= @TuNgay
             GROUP BY ctpn.san_pham_id;
         """;
@@ -253,7 +253,7 @@ public sealed class BaoCaoNhapXuatService
                         COALESCE(SUM(CASE WHEN pt.thoi_gian_tra >= @TuNgay AND pt.thoi_gian_tra < @DenKeTiep THEN ctpt.thanh_tien ELSE 0 END), 0) AS GiaTriTrongKy,
                         COALESCE(SUM(CASE WHEN pt.thoi_gian_tra >= @TuNgay THEN ctpt.so_luong ELSE 0 END), 0) AS NhapSauTuNgay
                     FROM chi_tiet_phieu_tra_hang ctpt
-                    INNER JOIN phieu_tra_hang pt ON pt.id = ctpt.phieu_tra_hang_id
+                    INNER JOIN phieu_tra_hang pt ON pt.id = ctpt.phieu_tra_id
                     WHERE pt.trang_thai = 'HOAN_THANH' AND pt.thoi_gian_tra >= @TuNgay
                     GROUP BY ctpt.san_pham_id;
                 """;
@@ -285,12 +285,12 @@ public sealed class BaoCaoNhapXuatService
                 const string sqlNhapKhac = """
                     SELECT
                         ct.san_pham_id AS SanPhamId,
-                        COALESCE(SUM(CASE WHEN p.thoi_gian >= @TuNgay AND p.thoi_gian < @DenKeTiep THEN ct.so_luong ELSE 0 END), 0) AS NhapTrongKy,
-                        COALESCE(SUM(CASE WHEN p.thoi_gian >= @TuNgay AND p.thoi_gian < @DenKeTiep THEN ct.so_luong * COALESCE(ct.don_gia, 0) ELSE 0 END), 0) AS GiaTriTrongKy,
-                        COALESCE(SUM(CASE WHEN p.thoi_gian >= @TuNgay THEN ct.so_luong ELSE 0 END), 0) AS NhapSauTuNgay
+                        COALESCE(SUM(CASE WHEN p.thoi_gian_nhap >= @TuNgay AND p.thoi_gian_nhap < @DenKeTiep THEN ct.so_luong ELSE 0 END), 0) AS NhapTrongKy,
+                        COALESCE(SUM(CASE WHEN p.thoi_gian_nhap >= @TuNgay AND p.thoi_gian_nhap < @DenKeTiep THEN ct.so_luong * COALESCE(ct.don_gia, 0) ELSE 0 END), 0) AS GiaTriTrongKy,
+                        COALESCE(SUM(CASE WHEN p.thoi_gian_nhap >= @TuNgay THEN ct.so_luong ELSE 0 END), 0) AS NhapSauTuNgay
                     FROM chi_tiet_phieu_nhap_khac ct
                     INNER JOIN phieu_nhap_khac p ON p.id = ct.phieu_nhap_khac_id
-                    WHERE p.thoi_gian >= @TuNgay
+                    WHERE p.thoi_gian_nhap >= @TuNgay
                     GROUP BY ct.san_pham_id;
                 """;
 
@@ -321,12 +321,12 @@ public sealed class BaoCaoNhapXuatService
                 const string sqlXuatTraNcc = """
                     SELECT
                         ct.san_pham_id AS SanPhamId,
-                        COALESCE(SUM(CASE WHEN p.thoi_gian >= @TuNgay AND p.thoi_gian < @DenKeTiep THEN ct.so_luong ELSE 0 END), 0) AS XuatTrongKy,
-                        COALESCE(SUM(CASE WHEN p.thoi_gian >= @TuNgay AND p.thoi_gian < @DenKeTiep THEN ct.so_luong * COALESCE(ct.don_gia, 0) ELSE 0 END), 0) AS GiaTriTrongKy,
-                        COALESCE(SUM(CASE WHEN p.thoi_gian >= @TuNgay THEN ct.so_luong ELSE 0 END), 0) AS XuatSauTuNgay
+                        COALESCE(SUM(CASE WHEN p.thoi_gian_xuat_tra >= @TuNgay AND p.thoi_gian_xuat_tra < @DenKeTiep THEN ct.so_luong ELSE 0 END), 0) AS XuatTrongKy,
+                        COALESCE(SUM(CASE WHEN p.thoi_gian_xuat_tra >= @TuNgay AND p.thoi_gian_xuat_tra < @DenKeTiep THEN ct.so_luong * COALESCE(ct.don_gia, 0) ELSE 0 END), 0) AS GiaTriTrongKy,
+                        COALESCE(SUM(CASE WHEN p.thoi_gian_xuat_tra >= @TuNgay THEN ct.so_luong ELSE 0 END), 0) AS XuatSauTuNgay
                     FROM chi_tiet_phieu_xuat_tra_ncc ct
-                    INNER JOIN phieu_xuat_tra_ncc p ON p.id = ct.phieu_xuat_tra_ncc_id
-                    WHERE p.thoi_gian >= @TuNgay
+                    INNER JOIN phieu_xuat_tra_ncc p ON p.id = ct.phieu_xuat_tra_id
+                    WHERE p.thoi_gian_xuat_tra >= @TuNgay
                     GROUP BY ct.san_pham_id;
                 """;
 
@@ -357,12 +357,12 @@ public sealed class BaoCaoNhapXuatService
                 const string sqlXuatNoiBo = """
                     SELECT
                         ct.san_pham_id AS SanPhamId,
-                        COALESCE(SUM(CASE WHEN p.thoi_gian >= @TuNgay AND p.thoi_gian < @DenKeTiep THEN ct.so_luong ELSE 0 END), 0) AS XuatTrongKy,
-                        COALESCE(SUM(CASE WHEN p.thoi_gian >= @TuNgay AND p.thoi_gian < @DenKeTiep THEN ct.so_luong * COALESCE(ct.don_gia, 0) ELSE 0 END), 0) AS GiaTriTrongKy,
-                        COALESCE(SUM(CASE WHEN p.thoi_gian >= @TuNgay THEN ct.so_luong ELSE 0 END), 0) AS XuatSauTuNgay
+                        COALESCE(SUM(CASE WHEN p.thoi_gian_xuat >= @TuNgay AND p.thoi_gian_xuat < @DenKeTiep THEN ct.so_luong ELSE 0 END), 0) AS XuatTrongKy,
+                        COALESCE(SUM(CASE WHEN p.thoi_gian_xuat >= @TuNgay AND p.thoi_gian_xuat < @DenKeTiep THEN ct.so_luong * COALESCE(ct.don_gia, 0) ELSE 0 END), 0) AS GiaTriTrongKy,
+                        COALESCE(SUM(CASE WHEN p.thoi_gian_xuat >= @TuNgay THEN ct.so_luong ELSE 0 END), 0) AS XuatSauTuNgay
                     FROM chi_tiet_phieu_xuat_noi_bo ct
                     INNER JOIN phieu_xuat_noi_bo p ON p.id = ct.phieu_xuat_noi_bo_id
-                    WHERE p.thoi_gian >= @TuNgay
+                    WHERE p.thoi_gian_xuat >= @TuNgay
                     GROUP BY ct.san_pham_id;
                 """;
 
@@ -549,10 +549,10 @@ public sealed class BaoCaoNhapXuatService
                     sp.id                                   AS SanPhamId,
                     sp.ma_san_pham                          AS MaSanPham,
                     sp.ten_san_pham                         AS TenSanPham,
-                    COALESCE(dvt.ten_don_vi, sp.don_vi_tinh, 'Cái') AS DonViTinh,
+                    COALESCE(dvt.ten_don_vi, 'Cái') AS DonViTinh,
                     COALESCE(ncc.ten_nha_cung_cap, 'Nhà cung cấp') AS DoiTac,
                     ctpn.so_luong                           AS SoLuongNhap,
-                    ctpn.don_gia                            AS DonGiaNhap,
+                    ctpn.don_gia_nhap                       AS DonGiaNhap,
                     ctpn.thanh_tien                         AS ThanhTienNhap,
                     NULL                                    AS SoLuongXuat,
                     NULL                                    AS DonGiaXuat,
@@ -560,7 +560,7 @@ public sealed class BaoCaoNhapXuatService
                     COALESCE(pn.ghi_chu, '')                AS GhiChu,
                     sp.nhom_san_pham_id                     AS NhomSanPhamId
                 FROM chi_tiet_phieu_nhap_hang ctpn
-                INNER JOIN phieu_nhap_hang pn ON pn.id = ctpn.phieu_nhap_hang_id
+                INNER JOIN phieu_nhap_hang pn ON pn.id = ctpn.phieu_nhap_id
                 INNER JOIN san_pham sp ON sp.id = ctpn.san_pham_id
                 LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
                 LEFT JOIN nha_cung_cap ncc ON ncc.id = pn.nha_cung_cap_id
@@ -585,13 +585,13 @@ public sealed class BaoCaoNhapXuatService
                     sp.id                                   AS SanPhamId,
                     sp.ma_san_pham                          AS MaSanPham,
                     sp.ten_san_pham                         AS TenSanPham,
-                    COALESCE(dvt.ten_don_vi, sp.don_vi_tinh, 'Cái') AS DonViTinh,
-                    COALESCE(hd.ten_khach_hang, 'Khách lẻ') AS DoiTac,
+                    COALESCE(dvt.ten_don_vi, 'Cái') AS DonViTinh,
+                    COALESCE(kh.ten_khach_hang, 'Khách lẻ') AS DoiTac,
                     NULL                                    AS SoLuongNhap,
                     NULL                                    AS DonGiaNhap,
                     NULL                                    AS ThanhTienNhap,
                     cthd.so_luong                           AS SoLuongXuat,
-                    cthd.gia_ban                            AS DonGiaXuat,
+                    cthd.don_gia                            AS DonGiaXuat,
                     cthd.thanh_tien                         AS ThanhTienXuat,
                     COALESCE(hd.ghi_chu, '')                AS GhiChu,
                     sp.nhom_san_pham_id                     AS NhomSanPhamId
@@ -599,6 +599,7 @@ public sealed class BaoCaoNhapXuatService
                 INNER JOIN hoa_don_ban_hang hd ON hd.id = cthd.hoa_don_id
                 INNER JOIN san_pham sp ON sp.id = cthd.san_pham_id
                 LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
+                LEFT JOIN khach_hang kh ON kh.id = hd.khach_hang_id
                 WHERE hd.trang_thai_hoa_don = 'HOAN_THANH'
                   AND hd.thoi_gian_ban >= @TuNgay
                   AND hd.thoi_gian_ban < @DenKeTiep
@@ -620,10 +621,10 @@ public sealed class BaoCaoNhapXuatService
                     sp.id                                   AS SanPhamId,
                     sp.ma_san_pham                          AS MaSanPham,
                     sp.ten_san_pham                         AS TenSanPham,
-                    COALESCE(dvt.ten_don_vi, sp.don_vi_tinh, 'Cái') AS DonViTinh,
+                    COALESCE(dvt.ten_don_vi, 'Cái') AS DonViTinh,
                     COALESCE(kh.ten_khach_hang, 'Khách hàng') AS DoiTac,
                     ctpt.so_luong                           AS SoLuongNhap,
-                    ctpt.don_gia_tra                        AS DonGiaNhap,
+                    ctpt.don_gia                            AS DonGiaNhap,
                     ctpt.thanh_tien                         AS ThanhTienNhap,
                     NULL                                    AS SoLuongXuat,
                     NULL                                    AS DonGiaXuat,
@@ -631,7 +632,7 @@ public sealed class BaoCaoNhapXuatService
                     COALESCE(pt.ghi_chu, '')                AS GhiChu,
                     sp.nhom_san_pham_id                     AS NhomSanPhamId
                 FROM chi_tiet_phieu_tra_hang ctpt
-                INNER JOIN phieu_tra_hang pt ON pt.id = ctpt.phieu_tra_hang_id
+                INNER JOIN phieu_tra_hang pt ON pt.id = ctpt.phieu_tra_id
                 INNER JOIN san_pham sp ON sp.id = ctpt.san_pham_id
                 LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
                 LEFT JOIN khach_hang kh ON kh.id = pt.khach_hang_id
@@ -646,8 +647,8 @@ public sealed class BaoCaoNhapXuatService
         {
             queries.Add("""
                 SELECT
-                    pnk.thoi_gian                           AS ThoiGian,
-                    pnk.ma_phieu                            AS MaChungTu,
+                    pnk.thoi_gian_nhap                      AS ThoiGian,
+                    pnk.ma_phieu_nhap_khac                  AS MaChungTu,
                     'NHAP'                                  AS LoaiGiaoDich,
                     'NHAP_KHAC'                             AS LoaiChungTu,
                     '📥 Nhập khác'                          AS LoaiChungTuHienThi,
@@ -656,7 +657,7 @@ public sealed class BaoCaoNhapXuatService
                     sp.id                                   AS SanPhamId,
                     sp.ma_san_pham                          AS MaSanPham,
                     sp.ten_san_pham                         AS TenSanPham,
-                    COALESCE(dvt.ten_don_vi, sp.don_vi_tinh, 'Cái') AS DonViTinh,
+                    COALESCE(dvt.ten_don_vi, 'Cái') AS DonViTinh,
                     'Nhập kho khác'                         AS DoiTac,
                     ctnk.so_luong                           AS SoLuongNhap,
                     COALESCE(ctnk.don_gia, 0)               AS DonGiaNhap,
@@ -670,8 +671,8 @@ public sealed class BaoCaoNhapXuatService
                 INNER JOIN phieu_nhap_khac pnk ON pnk.id = ctnk.phieu_nhap_khac_id
                 INNER JOIN san_pham sp ON sp.id = ctnk.san_pham_id
                 LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
-                WHERE pnk.thoi_gian >= @TuNgay
-                  AND pnk.thoi_gian < @DenKeTiep
+                WHERE pnk.thoi_gian_nhap >= @TuNgay
+                  AND pnk.thoi_gian_nhap < @DenKeTiep
             """);
         }
 
@@ -680,8 +681,8 @@ public sealed class BaoCaoNhapXuatService
         {
             queries.Add("""
                 SELECT
-                    pxt.thoi_gian                           AS ThoiGian,
-                    pxt.ma_phieu                            AS MaChungTu,
+                    pxt.thoi_gian_xuat_tra                  AS ThoiGian,
+                    pxt.ma_phieu_xuat_tra                   AS MaChungTu,
                     'XUAT'                                  AS LoaiGiaoDich,
                     'TRA_NCC'                               AS LoaiChungTu,
                     '🔄 Xuất trả NCC'                       AS LoaiChungTuHienThi,
@@ -690,7 +691,7 @@ public sealed class BaoCaoNhapXuatService
                     sp.id                                   AS SanPhamId,
                     sp.ma_san_pham                          AS MaSanPham,
                     sp.ten_san_pham                         AS TenSanPham,
-                    COALESCE(dvt.ten_don_vi, sp.don_vi_tinh, 'Cái') AS DonViTinh,
+                    COALESCE(dvt.ten_don_vi, 'Cái') AS DonViTinh,
                     'Nhà cung cấp'                          AS DoiTac,
                     NULL                                    AS SoLuongNhap,
                     NULL                                    AS DonGiaNhap,
@@ -701,11 +702,11 @@ public sealed class BaoCaoNhapXuatService
                     COALESCE(pxt.ghi_chu, '')               AS GhiChu,
                     sp.nhom_san_pham_id                     AS NhomSanPhamId
                 FROM chi_tiet_phieu_xuat_tra_ncc ctxt
-                INNER JOIN phieu_xuat_tra_ncc pxt ON pxt.id = ctxt.phieu_xuat_tra_ncc_id
+                INNER JOIN phieu_xuat_tra_ncc pxt ON pxt.id = ctxt.phieu_xuat_tra_id
                 INNER JOIN san_pham sp ON sp.id = ctxt.san_pham_id
                 LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
-                WHERE pxt.thoi_gian >= @TuNgay
-                  AND pxt.thoi_gian < @DenKeTiep
+                WHERE pxt.thoi_gian_xuat_tra >= @TuNgay
+                  AND pxt.thoi_gian_xuat_tra < @DenKeTiep
             """);
         }
 
@@ -714,8 +715,8 @@ public sealed class BaoCaoNhapXuatService
         {
             queries.Add("""
                 SELECT
-                    pxnb.thoi_gian                          AS ThoiGian,
-                    pxnb.ma_phieu                           AS MaChungTu,
+                    pxnb.thoi_gian_xuat                     AS ThoiGian,
+                    pxnb.ma_phieu_xuat_noi_bo               AS MaChungTu,
                     'XUAT'                                  AS LoaiGiaoDich,
                     'XUAT_NOI_BO'                           AS LoaiChungTu,
                     '📦 Xuất nội bộ'                        AS LoaiChungTuHienThi,
@@ -724,7 +725,7 @@ public sealed class BaoCaoNhapXuatService
                     sp.id                                   AS SanPhamId,
                     sp.ma_san_pham                          AS MaSanPham,
                     sp.ten_san_pham                         AS TenSanPham,
-                    COALESCE(dvt.ten_don_vi, sp.don_vi_tinh, 'Cái') AS DonViTinh,
+                    COALESCE(dvt.ten_don_vi, 'Cái') AS DonViTinh,
                     'Nội bộ / Hủy'                          AS DoiTac,
                     NULL                                    AS SoLuongNhap,
                     NULL                                    AS DonGiaNhap,
@@ -738,8 +739,8 @@ public sealed class BaoCaoNhapXuatService
                 INNER JOIN phieu_xuat_noi_bo pxnb ON pxnb.id = ctxnb.phieu_xuat_noi_bo_id
                 INNER JOIN san_pham sp ON sp.id = ctxnb.san_pham_id
                 LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
-                WHERE pxnb.thoi_gian >= @TuNgay
-                  AND pxnb.thoi_gian < @DenKeTiep
+                WHERE pxnb.thoi_gian_xuat >= @TuNgay
+                  AND pxnb.thoi_gian_xuat < @DenKeTiep
             """);
         }
 

@@ -131,7 +131,7 @@ public sealed class BaoCaoKhuyenMaiService
             ct.hoa_don_id AS HoaDonId,
             ct.san_pham_id AS SanPhamId,
             ct.so_luong AS SoLuong,
-            ct.don_gia_ban AS DonGiaBan,
+                ct.don_gia AS DonGiaBan,
             ct.thanh_tien AS ThanhTien
         FROM chi_tiet_hoa_don_ban_hang ct
         JOIN hoa_don_ban_hang hd ON hd.id = ct.hoa_don_id

@@ -142,7 +142,7 @@
                 <!-- Title & Breadcrumb -->
                 <StackPanel Spacing="4" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Spacing="6">
-                        <TextBlock Text="Dữ liệu đầu kỳ" Foreground="#64748B" FontSize="12" />
+                        <TextBlock Text="Sổ quỹ" Foreground="#64748B" FontSize="12" />
                         <TextBlock Text="›" Foreground="#94A3B8" FontSize="12" />
                         <TextBlock Text="Sổ quỹ đầu kỳ" Foreground="#0B4B82" FontWeight="SemiBold" FontSize="12" />
                     </StackPanel>

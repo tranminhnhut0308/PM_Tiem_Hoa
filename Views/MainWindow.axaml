@@ -1430,40 +1430,6 @@
               </Grid>
             </Button>
 
-            <!-- DỮ LIỆU ĐẦU KỲ -->
-            <Button Classes="menu">
-              <Button.Flyout>
-                <MenuFlyout Placement="RightEdgeAlignedTop">
-                  <MenuItem Header="📦 Hàng hóa đầu kỳ">
-                    <MenuItem Header="➕ Thêm hàng tồn đầu kỳ..."
-                              Command="{Binding ThemHangTonDauKyCommand}" />
-                    <MenuItem Header="🔄 Kết chuyển hàng hóa..."
-                              Command="{Binding KetChuyenHangHoaCommand}" />
-                  </MenuItem>
-                  <MenuItem Header="💳 Công nợ đầu kỳ">
-                    <MenuItem Header="📊 Quản lý công nợ khách hàng..."
-                              Command="{Binding MoQuanLyCongNoTheoKyCommand}" />
-                    <MenuItem Header="🚚 Quản lý công nợ NCC theo kỳ..."
-                              Command="{Binding MoQuanLyCongNoNccTheoKyCommand}" /> <!--
-                              Command="{Binding MoQuanLyCongNoTheoKyCommand}" />
-                    --> <MenuItem Header="➕ Thêm công nợ đầu kỳ..."
-                              Command="{Binding ThemCongNoDauKyCommand}" />
-                    <MenuItem Header="🔄 Kết chuyển công nợ..."
-                              Command="{Binding KetChuyenCongNoCommand}" />
-                  </MenuItem>
-                  <MenuItem Header="💰 Sổ quỹ đầu kỳ">
-                    <MenuItem Header="➕ Khai báo số dư quỹ đầu kỳ..."
-                              Command="{Binding QuanLySoQuyDauKyCommand}" />
-                  </MenuItem>
-                </MenuFlyout>
-              </Button.Flyout>
-              <Grid ColumnDefinitions="24,*,Auto">
-                <TextBlock Text="📁" FontSize="14" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Text="Dữ liệu đầu kỳ" VerticalAlignment="Center" Margin="6,0,0,0" />
-                <TextBlock Grid.Column="2" Text="▸" FontSize="11" Foreground="#85C7B7" VerticalAlignment="Center" Margin="0,0,4,0" />
-              </Grid>
-            </Button>
-
             <!-- KHUYẾN MÃI -->
             <Button Classes="menu" Classes.active="{Binding IsDanhSachKhuyenMaiSelected}">
               <Button.Flyout>
@@ -1688,7 +1654,7 @@
                       </StackPanel>
                     </Button>
 
-                    <!-- Mục Dữ liệu đầu kỳ: Thêm hàng tồn đầu kỳ -->
+                    <!-- Mục Hàng hóa: Quản lý tồn kho theo kỳ -->
                     <Button Background="Transparent"
                       BorderThickness="0"
                       HorizontalAlignment="Stretch"
@@ -2460,7 +2426,7 @@
                 Classes="toolbar-primary"
                 Content="📦  Tồn đầu kỳ"
                 Command="{Binding ThemHangTonDauKyCommand}"
-                ToolTip.Tip="Dữ liệu đầu kỳ → Hàng hóa đầu kỳ → Thêm hàng tồn đầu kỳ"
+                ToolTip.Tip="Hàng hóa → Quản lý tồn kho theo kỳ"
                 Margin="0"
                 Height="38" />
 

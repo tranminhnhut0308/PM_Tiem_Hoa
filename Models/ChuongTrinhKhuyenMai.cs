@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -187,6 +188,25 @@ public sealed partial class ChiTietKhuyenMai : ObservableObject
 
     [ObservableProperty]
     private string? tenSanPhamTang;
+
+    /// <summary>
+    /// Sản phẩm tặng kèm đang được chọn trên giao diện (không lưu xuống DB,
+    /// DB chỉ lưu <see cref="SanPhamTangId"/> và <see cref="TenSanPhamTang"/>).
+    /// </summary>
+    [ObservableProperty]
+    private SanPham? sanPhamTang;
+
+    /// <summary>
+    /// Danh sách sản phẩm dùng làm nguồn cho ô chọn "hàng tặng" trên bảng chi tiết.
+    /// </summary>
+    [ObservableProperty]
+    private List<SanPham>? danhSachSanPham;
+
+    partial void OnSanPhamTangChanged(SanPham? value)
+    {
+        SanPhamTangId = value?.Id;
+        TenSanPhamTang = value?.TenSanPham;
+    }
 
     [ObservableProperty]
     private string? ghiChu;

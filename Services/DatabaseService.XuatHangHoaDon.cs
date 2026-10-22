@@ -164,6 +164,7 @@ public sealed partial class DatabaseService
 
         await using var connection = await OpenAsync();
         await EnsureBangPhieuXuatHangAsync(connection);
+        await EnsureBangLichSuNhapXuatKhoAsync();
         await using var transaction = await connection.BeginTransactionAsync();
 
         try
@@ -571,6 +572,7 @@ public sealed partial class DatabaseService
         Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SalesCancel, "Bạn không có quyền hủy hóa đơn.");
 
         await using var connection = await OpenAsync();
+        await EnsureBangLichSuNhapXuatKhoAsync();
         await using var transaction = await connection.BeginTransactionAsync();
 
         try

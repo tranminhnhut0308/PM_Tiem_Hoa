@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using ShopHoa.ViewModels;
 
@@ -14,6 +15,30 @@ public partial class ThemPhieuBanLeView : UserControl
     public ThemPhieuBanLeView()
     {
         InitializeComponent();
+
+        // Luôn đưa con trỏ về ô quét mã khi mở màn bán hàng để người bán
+        // có thể quét ngay mà không phải bấm chuột.
+        Loaded += (_, _) => BarcodeTextBox.Focus();
+    }
+
+    /// <summary>
+    /// Máy quét mã vạch USB gõ mã rồi nhấn Enter — nhận Enter để thêm
+    /// sản phẩm vào giỏ và giữ con trỏ ở ô quét cho mã tiếp theo.
+    /// </summary>
+    private void OnBarcodeKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter)
+            return;
+
+        e.Handled = true;
+
+        if (DataContext is not MainWindowViewModel viewModel)
+            return;
+
+        if (viewModel.QuetBarcodeCommand.CanExecute(null))
+            _ = viewModel.QuetBarcodeCommand.ExecuteAsync(null);
+
+        BarcodeTextBox.Focus();
     }
 
     private void OnSaleSearchTextChanged(object? sender, TextChangedEventArgs e)

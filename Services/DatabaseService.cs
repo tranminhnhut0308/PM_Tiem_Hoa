@@ -24,6 +24,8 @@ public sealed partial class DatabaseService
     private bool? _hasHoaDonContactColumns;
     private bool? _coCotSoDienThoaiNguoiDung;
     private bool? _coCotEmailNguoiDung;
+    private bool? _coCotHangTangHoaDon;
+    private bool? _hasBangLichSuNhapXuatKho;
     private bool _daBackfillNhomSoQuy;
 
     public DatabaseService()
@@ -520,6 +522,297 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
+    /// Tra cứu sản phẩm theo mã vạch (hoặc mã hàng khi mã vạch trùng rỗng).
+    /// <para>
+    /// Chỉ khớp CHÍNH XÁC (sau khi cắt khoảng trắng) chứ không dùng LIKE, vì
+    /// mã vạch là chuỗi ký tự người bán quét vào: "12" không được khớp mã
+    /// "1234567890". Trả về danh sách vì một mã vạch có thể dính nhiều quy cách
+    /// (đơn vị tính khác nhau) — khi đó màn bán hàng sẽ yêu cầu người bán chọn.
+    /// </para>
+    /// </summary>
+    public async Task<IReadOnlyList<SanPham>> GetSanPhamTheoBarcodeAsync(string barcode)
+    {
+        var code = (barcode ?? "").Trim();
+
+        if (code.Length == 0)
+            return Array.Empty<SanPham>();
+
+        await using var connection = await OpenAsync();
+
+        const string sql = """
+            SELECT
+                sp.id AS Id,
+                sp.ma_san_pham AS MaSanPham,
+                sp.ma_vach AS MaVach,
+                COALESCE(NULLIF(TRIM(sp.ten_san_pham), ''), sp.ma_san_pham) AS TenSanPham,
+                sp.nhom_san_pham_id AS NhomSanPhamId,
+                sp.don_vi_tinh_id AS DonViTinhId,
+                sp.thuong_hieu_id AS ThuongHieuId,
+                sp.gia_ban AS GiaBan,
+                sp.gia_von AS GiaVon,
+                COALESCE(tk.so_luong_ton, 0) AS TonKho,
+                COALESCE(sp.ton_kho_excel, COALESCE(tk.so_luong_ton, 0)) AS TonKhoExcel,
+                sp.ton_toi_thieu AS TonToiThieu,
+                sp.ton_toi_da AS TonToiDa,
+                COALESCE(sp.khach_dat, 0) AS KhachDat,
+                sp.ngay_tao AS NgayTao,
+                sp.du_kien_het_hang AS DuKienHetHang,
+                dvt.ten_don_vi AS DonViTinh,
+                COALESCE(nsp.ten_nhom, NULLIF(TRIM(sp.nhom_hang_3_cap_excel), '')) AS NhomSanPham,
+                COALESCE(NULLIF(TRIM(sp.loai_hang_excel), ''), 'Hàng hóa') AS LoaiHang,
+                COALESCE(NULLIF(TRIM(sp.nhom_hang_3_cap_excel), ''), nsp.ten_nhom) AS NhomHangBaCap,
+                sp.vi_tri_kho AS ViTriKho,
+                sp.dang_kinh_doanh AS DuocBanTrucTiep,
+                sp.trang_thai AS DangKinhDoanh,
+                sp.mo_ta AS MoTa,
+                sp.ghi_chu AS GhiChu,
+                sp.hinh_anh AS HinhAnh
+            FROM san_pham sp
+            LEFT JOIN ton_kho tk ON tk.san_pham_id = sp.id
+            LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
+            LEFT JOIN nhom_san_pham nsp ON nsp.id = sp.nhom_san_pham_id
+            WHERE TRIM(COALESCE(sp.ma_vach, '')) = @Code
+               OR TRIM(sp.ma_san_pham) = @Code
+            ORDER BY sp.id;
+            """;
+
+        return (await connection.QueryAsync<SanPham>(sql, new { Code = code })).AsList();
+    }
+
+    /// <summary>
+    /// Nạp nhiều sản phẩm theo danh sách id trong MỘT lần truy vấn (dùng để
+    /// lấy sẵn sản phẩm tặng của các chương trình khuyến mãi).
+    /// </summary>
+    public async Task<IReadOnlyList<SanPham>> GetSanPhamTheoDanhSachIdAsync(IEnumerable<uint> ids)
+    {
+        var danhSachId = ids.Where(x => x > 0).Distinct().ToList();
+
+        if (danhSachId.Count == 0)
+            return Array.Empty<SanPham>();
+
+        await using var connection = await OpenAsync();
+
+        const string sql = """
+            SELECT
+                sp.id AS Id,
+                sp.ma_san_pham AS MaSanPham,
+                sp.ma_vach AS MaVach,
+                COALESCE(NULLIF(TRIM(sp.ten_san_pham), ''), sp.ma_san_pham) AS TenSanPham,
+                sp.nhom_san_pham_id AS NhomSanPhamId,
+                sp.don_vi_tinh_id AS DonViTinhId,
+                sp.thuong_hieu_id AS ThuongHieuId,
+                sp.gia_ban AS GiaBan,
+                sp.gia_von AS GiaVon,
+                COALESCE(tk.so_luong_ton, 0) AS TonKho,
+                COALESCE(sp.ton_kho_excel, COALESCE(tk.so_luong_ton, 0)) AS TonKhoExcel,
+                sp.ton_toi_thieu AS TonToiThieu,
+                sp.ton_toi_da AS TonToiDa,
+                COALESCE(sp.khach_dat, 0) AS KhachDat,
+                sp.ngay_tao AS NgayTao,
+                sp.du_kien_het_hang AS DuKienHetHang,
+                dvt.ten_don_vi AS DonViTinh,
+                COALESCE(nsp.ten_nhom, NULLIF(TRIM(sp.nhom_hang_3_cap_excel), '')) AS NhomSanPham,
+                COALESCE(NULLIF(TRIM(sp.loai_hang_excel), ''), 'Hàng hóa') AS LoaiHang,
+                COALESCE(NULLIF(TRIM(sp.nhom_hang_3_cap_excel), ''), nsp.ten_nhom) AS NhomHangBaCap,
+                sp.vi_tri_kho AS ViTriKho,
+                sp.dang_kinh_doanh AS DuocBanTrucTiep,
+                sp.trang_thai AS DangKinhDoanh,
+                sp.mo_ta AS MoTa,
+                sp.ghi_chu AS GhiChu,
+                sp.hinh_anh AS HinhAnh
+            FROM san_pham sp
+            LEFT JOIN ton_kho tk ON tk.san_pham_id = sp.id
+            LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
+            LEFT JOIN nhom_san_pham nsp ON nsp.id = sp.nhom_san_pham_id
+            WHERE sp.id IN @Ids;
+            """;
+
+        return (await connection.QueryAsync<SanPham>(sql, new { Ids = danhSachId })).AsList();
+    }
+
+    /// <summary>
+    /// Lấy các quy tắc "tặng kèm" đang có hiệu lực để màn bán hàng áp dụng tự động.
+    /// <para>
+    /// Chỉ lấy chương trình đang hoạt động, còn trong thời gian hiệu lực, và chi
+    /// tiết có đủ thông tin tặng (có sản phẩm tặng + số lượng tặng > 0).
+    /// Sản phẩm tặng được nạp sẵn kèm tồn kho / giá vốn để áp dụng không cần
+    /// truy vấn thêm.
+    /// </para>
+    /// </summary>
+    public async Task<IReadOnlyList<KhuyenMaiTangKem>> GetQuyTacTangKemAsync()
+    {
+        await using var connection = await OpenAsync();
+        await EnsureBangKhuyenMaiAsync(connection);
+
+        const string sql = """
+            SELECT
+                km.id                    AS ChuongTrinhId,
+                km.ma_chuong_trinh       AS MaChuongTrinh,
+                km.ten_chuong_trinh      AS TenChuongTrinh,
+                km.nhom_khach_hang_id    AS NhomKhachHangId,
+                ct.san_pham_id           AS SanPhamId,
+                COALESCE(NULLIF(TRIM(ct.ten_san_pham), ''), ct.ma_san_pham, '') AS TenSanPhamMua,
+                ct.don_vi_tinh           AS DonViTinh,
+                ct.so_luong_mua          AS SoLuongMua,
+                ct.san_pham_tang_id      AS SanPhamTangId,
+                COALESCE(NULLIF(TRIM(ct.ten_san_pham_tang), ''), '')  AS TenSanPhamTang,
+                ct.so_luong_tang         AS SoLuongTang
+            FROM chuong_trinh_khuyen_mai km
+            JOIN chi_tiet_khuyen_mai ct ON ct.chuong_trinh_id = km.id
+            WHERE km.trang_thai = 'DANG_HOAT_DONG'
+              AND km.ngay_bat_dau <= NOW()
+              AND km.ngay_ket_thuc >= CURDATE()
+              AND ct.san_pham_tang_id IS NOT NULL
+              AND ct.san_pham_tang_id > 0
+              AND ct.so_luong_tang > 0
+              AND ct.so_luong_mua > 0
+            ORDER BY km.id, ct.id;
+            """;
+
+        var quyTac = (await connection.QueryAsync<KhuyenMaiTangKem>(sql)).AsList();
+
+        if (quyTac.Count == 0)
+            return quyTac;
+
+        var sanPhamTang = await GetSanPhamTheoDanhSachIdAsync(quyTac.Select(q => q.SanPhamTangId));
+        var dicSanPham = sanPhamTang.ToDictionary(p => p.Id);
+
+        foreach (var quyTacItem in quyTac)
+        {
+            if (dicSanPham.TryGetValue(quyTacItem.SanPhamTangId, out var sanPham))
+                quyTacItem.SanPhamTang = sanPham;
+        }
+
+        return quyTac;
+    }
+
+    /// <summary>
+    /// Bảo đảm bảng <c>chi_tiet_hoa_don_ban_hang</c> có các cột ghi nhận hàng
+    /// tặng kèm. Nếu database chưa có thì tự động ALTER TABLE (chạy ngoài
+    /// transaction vì MySQL không cho ALTER trong transaction).
+    /// </summary>
+    private async Task<bool> EnsureChiTietHoaDonHangTangColumnsAsync()
+    {
+        if (_coCotHangTangHoaDon.HasValue)
+            return _coCotHangTangHoaDon.Value;
+
+        await using var connection = await OpenAsync();
+
+        try
+        {
+            var coCot = (await connection.QueryAsync<string>(
+                """
+                SELECT COLUMN_NAME FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'chi_tiet_hoa_don_ban_hang'
+                  AND COLUMN_NAME IN (
+                      'is_hang_tang', 'khuyen_mai_id', 'khuyen_mai_ten',
+                      'san_pham_id_mua', 'so_luong_mua');
+                """)).AsList();
+
+            var daCo = coCot.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            if (!daCo.Contains("is_hang_tang"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_hoa_don_ban_hang ADD COLUMN is_hang_tang tinyint(1) NOT NULL DEFAULT 0 AFTER thanh_tien;");
+            }
+
+            if (!daCo.Contains("khuyen_mai_id"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_hoa_don_ban_hang ADD COLUMN khuyen_mai_id int unsigned DEFAULT NULL AFTER is_hang_tang;");
+            }
+
+            if (!daCo.Contains("khuyen_mai_ten"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_hoa_don_ban_hang ADD COLUMN khuyen_mai_ten varchar(150) DEFAULT NULL AFTER khuyen_mai_id;");
+            }
+
+            if (!daCo.Contains("san_pham_id_mua"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_hoa_don_ban_hang ADD COLUMN san_pham_id_mua int unsigned DEFAULT NULL AFTER khuyen_mai_ten;");
+            }
+
+            if (!daCo.Contains("so_luong_mua"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_hoa_don_ban_hang ADD COLUMN so_luong_mua decimal(15,3) DEFAULT NULL AFTER san_pham_id_mua;");
+            }
+
+            _coCotHangTangHoaDon = true;
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Khong them duoc cot hang tang vao chi tiet hoa don ban hang", ex);
+            _coCotHangTangHoaDon = false;
+        }
+
+        return _coCotHangTangHoaDon.Value;
+    }
+
+    /// <summary>
+    /// Bảng lịch sử nhập xuất kho là bảng bắt buộc cho luồng bán hàng: mỗi
+    /// lần xuất hàng đều ghi 1 dòng vết xuất. Nhiều database ERP cũ chưa có
+    /// bảng này nên lệnh INSERT sẽ ném lỗi "Table doesn't exist" và hủy
+    /// cả giao dịch tạo hóa đơn. Hàm này tự tạo bảng nếu thiếu (idempotent,
+    /// chạy ngoài transaction vì DDL tự commit trong MySQL/MariaDB).
+    /// </summary>
+    private async Task<bool> EnsureBangLichSuNhapXuatKhoAsync()
+    {
+        if (_hasBangLichSuNhapXuatKho.HasValue)
+            return _hasBangLichSuNhapXuatKho.Value;
+
+        await using var connection = await OpenAsync();
+
+        try
+        {
+            var coBang = await connection.ExecuteScalarAsync<int>(
+                """
+                SELECT COUNT(*) FROM information_schema.TABLES
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'lich_su_nhap_xuat_kho';
+                """) > 0;
+
+            if (!coBang)
+            {
+                await connection.ExecuteAsync(
+                    """
+                    CREATE TABLE IF NOT EXISTS lich_su_nhap_xuat_kho (
+                        id int unsigned NOT NULL AUTO_INCREMENT,
+                        chi_nhanh_id int unsigned NOT NULL DEFAULT 1,
+                        san_pham_id int unsigned NOT NULL,
+                        loai_giao_dich varchar(30) NOT NULL,
+                        loai_chung_tu varchar(30) DEFAULT NULL,
+                        ma_chung_tu varchar(50) DEFAULT NULL,
+                        so_luong decimal(15,3) NOT NULL DEFAULT 0.000,
+                        ton_truoc decimal(15,3) NOT NULL DEFAULT 0.000,
+                        ton_sau decimal(15,3) NOT NULL DEFAULT 0.000,
+                        gia_von decimal(15,2) NOT NULL DEFAULT 0.00,
+                        nguoi_thuc_hien_id int unsigned DEFAULT NULL,
+                        thoi_gian datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        ghi_chu text,
+                        PRIMARY KEY (id),
+                        KEY ix_lsnxk_sp (san_pham_id),
+                        KEY ix_lsnxk_thoi_gian (thoi_gian)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+                    """);
+            }
+
+            _hasBangLichSuNhapXuatKho = true;
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Khong tao duoc bang lich su nhap xuat kho", ex);
+            _hasBangLichSuNhapXuatKho = false;
+        }
+
+        return _hasBangLichSuNhapXuatKho.Value;
+    }
+
+    /// <summary>
     /// Các cặp ký tự tiếng Việt cần bỏ dấu khi so sánh tìm kiếm.
     /// Đặt "đ"/"Đ" lên đầu vì đây là ký tự duy nhất mà chính collation
     /// utf8mb4_unicode_ci của MySQL/MariaDB KHÔNG coi là bằng "d"/"D"
@@ -795,129 +1088,8 @@ public sealed partial class DatabaseService
         }
     }
 
-    public async Task<IReadOnlyList<ProductOption>> GetNhomSanPhamAsync()
-    {
-        await using var connection = await OpenAsync();
-        return (await connection.QueryAsync<ProductOption>(
-            "SELECT id AS Id, ten_nhom AS Name FROM nhom_san_pham WHERE trang_thai = 1 ORDER BY ten_nhom;"
-        )).AsList();
-    }
-
-    public async Task<IReadOnlyList<ProductOption>> GetDonViTinhAsync()
-    {
-        await using var connection = await OpenAsync();
-        return (await connection.QueryAsync<ProductOption>(
-            "SELECT id AS Id, ten_don_vi AS Name FROM don_vi_tinh WHERE trang_thai = 1 ORDER BY ten_don_vi;"
-        )).AsList();
-    }
-
-    public async Task<ProductOption> ThemNhomSanPhamAsync(string tenNhom)
-    {
-        var ten = tenNhom.Trim();
-        if (string.IsNullOrWhiteSpace(ten))
-            throw new ArgumentException("Tên nhóm hàng không được để trống.", nameof(tenNhom));
-
-        await using var connection = await OpenAsync();
-
-        var existing = await connection.QueryFirstOrDefaultAsync<ProductOption>(
-            "SELECT id AS Id, ten_nhom AS Name FROM nhom_san_pham WHERE LOWER(TRIM(ten_nhom)) = LOWER(@Ten) LIMIT 1;",
-            new { Ten = ten });
-
-        if (existing != null)
-        {
-            await connection.ExecuteAsync(
-                "UPDATE nhom_san_pham SET trang_thai = 1 WHERE id = @Id;",
-                new { Id = existing.Id });
-            return new ProductOption { Id = existing.Id, Name = existing.Name };
-        }
-
-        bool hasMaNhom = false;
-        try
-        {
-            hasMaNhom = await connection.ExecuteScalarAsync<int>(
-                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND LOWER(TABLE_NAME) = 'nhom_san_pham' AND LOWER(COLUMN_NAME) = 'ma_nhom';") > 0;
-        }
-        catch { }
-
-        uint newId;
-        if (hasMaNhom)
-        {
-            var maNhom = "N" + DateTime.Now.ToString("yyMMddHHmmss");
-            await connection.ExecuteAsync(
-                "INSERT INTO nhom_san_pham (ma_nhom, ten_nhom, trang_thai) VALUES (@Ma, @Ten, 1);",
-                new { Ma = maNhom, Ten = ten });
-        }
-        else
-        {
-            await connection.ExecuteAsync(
-                "INSERT INTO nhom_san_pham (ten_nhom, trang_thai) VALUES (@Ten, 1);",
-                new { Ten = ten });
-        }
-
-        newId = await connection.ExecuteScalarAsync<uint>("SELECT LAST_INSERT_ID();");
-        if (newId == 0)
-        {
-            newId = await connection.ExecuteScalarAsync<uint>(
-                "SELECT id FROM nhom_san_pham WHERE LOWER(TRIM(ten_nhom)) = LOWER(@Ten) ORDER BY id DESC LIMIT 1;",
-                new { Ten = ten });
-        }
-
-        return new ProductOption { Id = newId, Name = ten };
-    }
-
-    public async Task<ProductOption> ThemDonViTinhAsync(string tenDonVi, string? maDonVi = null)
-    {
-        var ten = tenDonVi.Trim();
-        if (string.IsNullOrWhiteSpace(ten))
-            throw new ArgumentException("Tên đơn vị tính không được để trống.", nameof(tenDonVi));
-
-        await using var connection = await OpenAsync();
-
-        var existing = await connection.QueryFirstOrDefaultAsync<ProductOption>(
-            "SELECT id AS Id, ten_don_vi AS Name FROM don_vi_tinh WHERE LOWER(TRIM(ten_don_vi)) = LOWER(@Ten) LIMIT 1;",
-            new { Ten = ten });
-
-        if (existing != null)
-        {
-            await connection.ExecuteAsync(
-                "UPDATE don_vi_tinh SET trang_thai = 1 WHERE id = @Id;",
-                new { Id = existing.Id });
-            return new ProductOption { Id = existing.Id, Name = existing.Name };
-        }
-
-        bool hasMaDvt = false;
-        try
-        {
-            hasMaDvt = await connection.ExecuteScalarAsync<int>(
-                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND LOWER(TABLE_NAME) = 'don_vi_tinh' AND LOWER(COLUMN_NAME) = 'ma_don_vi';") > 0;
-        }
-        catch { }
-
-        uint newId;
-        if (hasMaDvt)
-        {
-            var ma = !string.IsNullOrWhiteSpace(maDonVi) ? maDonVi.Trim() : ("DVT" + DateTime.Now.ToString("yyMMddHHmmss"));
-            await connection.ExecuteAsync(
-                "INSERT INTO don_vi_tinh (ma_don_vi, ten_don_vi, trang_thai) VALUES (@Ma, @Ten, 1);",
-                new { Ma = ma, Ten = ten });
-        }
-        else
-        {
-            await connection.ExecuteAsync(
-                "INSERT INTO don_vi_tinh (ten_don_vi, trang_thai) VALUES (@Ten, 1);",
-                new { Ten = ten });
-        }
-
-        newId = await connection.ExecuteScalarAsync<uint>("SELECT LAST_INSERT_ID();");
-        if (newId == 0)
-        {
-            newId = await connection.ExecuteScalarAsync<uint>(
-                "SELECT id FROM don_vi_tinh WHERE LOWER(TRIM(ten_don_vi)) = LOWER(@Ten) ORDER BY id DESC LIMIT 1;",
-                new { Ten = ten });
-        }
-
-        return new ProductOption { Id = newId, Name = ten };
-    }
+    // Lưu ý: các hàm đọc/thêm/xóa Nhóm hàng & Đơn vị tính nằm ở file
+    // Services/DatabaseService.DanhMuc.cs (partial class DatabaseService).
 
     public async Task CapNhatHinhAnhSanPhamAsync(uint productId, string imagePath)
     {
@@ -4585,6 +4757,8 @@ LIMIT 500;
         var maCanTim = maHoaDon.Trim();
 
         var coCotContact = await EnsureHoaDonContactColumnsAsync();
+        var coCotHangTang = await EnsureChiTietHoaDonHangTangColumnsAsync();
+        var coCotLienKet = await EnsurePhieuQuyHoaDonColumnsAsync();
 
         await using var connection = await OpenAsync();
 
@@ -4600,6 +4774,17 @@ LIMIT 500;
               0                                                AS InKemThongTin
               """;
 
+        // Phương thức thanh toán nằm ở phiếu thu sổ quỹ, liên kết ngược về hóa đơn.
+        var phuongThucCols = coCotLienKet
+            ? """
+              (SELECT pc.phuong_thuc
+                 FROM phieu_chi pc
+                WHERE pc.hoa_don_ban_hang_id = hd.id
+                ORDER BY pc.id DESC
+                LIMIT 1) AS PhuongThucThanhToan
+              """
+            : "'' AS PhuongThucThanhToan";
+
         var headerSql = $"""
         SELECT
             hd.id                       AS HoaDonId,
@@ -4614,7 +4799,8 @@ LIMIT 500;
             hd.khach_da_thanh_toan      AS KhachDaThanhToan,
             hd.con_no                   AS ConNo,
             hd.ghi_chu                  AS GhiChu,
-            {contactCols}
+            {contactCols},
+            {phuongThucCols}
         FROM hoa_don_ban_hang hd
         LEFT JOIN khach_hang kh ON kh.id = hd.khach_hang_id
         LEFT JOIN nguoi_dung  nd ON nd.id = hd.nguoi_ban_id
@@ -4640,8 +4826,23 @@ LIMIT 500;
         ORDER BY id;
         """;
 
+        // Có cột ghi nhận hàng tặng kèm thì đọc thêm để hóa đơn hiển thị
+        // đúng nhãn "TẶNG KÈM" và tên chương trình khuyến mãi.
+        const string detailSqlCoHangTang = """
+        SELECT
+            ten_san_pham    AS TenSanPham,
+            so_luong        AS SoLuong,
+            don_gia         AS DonGia,
+            thanh_tien      AS ThanhTien,
+            is_hang_tang    AS IsHangTang,
+            khuyen_mai_ten  AS ChuongTrinhKhuyenMaiTen
+        FROM chi_tiet_hoa_don_ban_hang
+        WHERE hoa_don_id = @HoaDonId
+        ORDER BY id;
+        """;
+
         var items = (await connection.QueryAsync<HoaDonBanHangReceiptItem>(
-            detailSql,
+            coCotHangTang ? detailSqlCoHangTang : detailSql,
             new { HoaDonId = (uint)header.HoaDonId })).AsList();
 
         var thuKhac = ToDecimal(header.ThuKhac);
@@ -4677,6 +4878,8 @@ LIMIT 500;
             TienThoi = thuKhac,
 
             TrangThaiThanhToan = TrangThaiThanhToanHienThi(conNo > 0, thuKhac > 0),
+
+            PhuongThucThanhToan = (header.PhuongThucThanhToan as string) ?? "",
 
             GhiChu = header.GhiChu as string,
 
@@ -4769,8 +4972,14 @@ LIMIT 500;
                 "hoặc chọn khách hàng có thông tin để ghi nhận công nợ.");
         }
 
-        // Tiền thối
-        var changeAmount = Math.Max(0, cashReceived - amountDue);
+        // Tiền thối: chỉ có khi thanh toán bằng tiền mặt. Thanh toán bằng
+        // chuyển khoản / thẻ / ví điện tử thì không có tiền mặt đổi lại.
+        var phuongThucHienThi = ChuanHoaPhuongThuc(phuongThucThanhToan);
+        var laThanhToanTienMat = string.Equals(phuongThucHienThi, "TIEN_MAT", StringComparison.Ordinal);
+
+        var changeAmount = laThanhToanTienMat
+            ? Math.Max(0, cashReceived - amountDue)
+            : 0m;
 
         // Trạng thái thanh toán
         var paymentStatus = debtAmount > 0 ? "CONG_NO" : "DA_THANH_TOAN";
@@ -4783,6 +4992,8 @@ LIMIT 500;
         // "Table definition has changed" và huỷ cả giao dịch.
         var coCotPhieuThuLienKet = await EnsurePhieuQuyHoaDonColumnsAsync();
         var coCotContactHoaDon = await EnsureHoaDonContactColumnsAsync();
+        var coCotHangTang = await EnsureChiTietHoaDonHangTangColumnsAsync();
+        await EnsureBangLichSuNhapXuatKhoAsync();
 
         await using var connection = await OpenAsync();
         await using var transaction = await connection.BeginTransactionAsync();
@@ -4985,10 +5196,48 @@ LIMIT 500;
             );
             """;
 
+            // Bản chi tiết có thêm cột ghi nhận hàng tặng kèm (is_hang_tang...).
+            const string detailSqlCoHangTang = """
+            INSERT INTO chi_tiet_hoa_don_ban_hang
+            (
+                hoa_don_id,
+                san_pham_id,
+                ma_san_pham,
+                ten_san_pham,
+                don_vi_tinh,
+                so_luong,
+                don_gia,
+                thanh_tien,
+                gia_von,
+                is_hang_tang,
+                khuyen_mai_id,
+                khuyen_mai_ten,
+                san_pham_id_mua,
+                so_luong_mua
+            )
+            VALUES
+            (
+                @HoaDonId,
+                @SanPhamId,
+                @MaSanPham,
+                @TenSanPham,
+                @DonViTinh,
+                @SoLuong,
+                @DonGia,
+                @ThanhTien,
+                @GiaVon,
+                @IsHangTang,
+                @KhuyenMaiId,
+                @KhuyenMaiTen,
+                @SanPhamIdMua,
+                @SoLuongMua
+            );
+            """;
+
             foreach (var item in cart)
             {
                 var affectedRows = await connection.ExecuteAsync(
-                    detailSql,
+                    coCotHangTang ? detailSqlCoHangTang : detailSql,
                     new
                     {
                         HoaDonId = invoiceId,
@@ -4999,7 +5248,12 @@ LIMIT 500;
                         item.SoLuong,
                         DonGia = item.DonGia,
                         item.ThanhTien,
-                        GiaVon = item.SanPham.GiaVon
+                        GiaVon = item.SanPham.GiaVon,
+                        IsHangTang = item.IsHangTang ? 1 : 0,
+                        KhuyenMaiId = item.ChuongTrinhKhuyenMaiId,
+                        KhuyenMaiTen = BlankToNull(item.ChuongTrinhKhuyenMaiTen),
+                        SanPhamIdMua = item.SanPhamIdMua,
+                        SoLuongMua = item.IsHangTang ? item.SoLuongMua : (decimal?)null
                     },
                     transaction);
 
@@ -7745,25 +7999,11 @@ LIMIT 500;
     {
         return $"NCC{DateTime.Now:yyyyMMddHHmmssfff}";
     }
+
     // ==========================================
     // QUẢN LÝ NHÓM SẢN PHẨM & ĐƠN VỊ TÍNH
+    // Xem Services/DatabaseService.DanhMuc.cs
     // ==========================================
-
-    public async Task XoaNhomSanPhamAsync(uint id)
-    {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SettingsEdit, "Bạn không có quyền xóa nhóm hàng hóa.");
-        await using var connection = await OpenAsync();
-        const string sql = "UPDATE nhom_san_pham SET trang_thai = 0 WHERE id = @Id;";
-        await connection.ExecuteAsync(sql, new { Id = id });
-    }
-
-    public async Task XoaDonViTinhAsync(uint id)
-    {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SettingsEdit, "Bạn không có quyền xóa đơn vị tính.");
-        await using var connection = await OpenAsync();
-        const string sql = "UPDATE don_vi_tinh SET trang_thai = 0 WHERE id = @Id;";
-        await connection.ExecuteAsync(sql, new { Id = id });
-    }
 
     // ==========================================
     // PHIẾU NHẬP HÀNG
@@ -12421,11 +12661,314 @@ LIMIT 500;
             """;
 
             await connection.ExecuteAsync(createTableSql, transaction: transaction);
+
+            // Bảng đã tồn tại ở phiên bản cũ (tên cột khác) thì CREATE TABLE IF
+            // NOT EXISTS không làm gì, nên phải tự kiểm tra và bổ sung còn thiếu.
+            if (transaction is null)
+            {
+                await EnsureCotBangKhuyenMaiAsync(connection);
+            }
         }
         catch (Exception ex)
         {
             SafeLog.WriteError("Không tạo được bảng khuyến mãi", ex);
         }
+    }
+
+    /// <summary>
+    /// Tự kiểm tra và BỔ SUNG các cột còn thiếu cho hai bảng khuyến mãi.
+    /// <para>
+    /// Database cũ dùng tên cột khác (chuong_trinh_khuyen_mai: thoi_gian_bat_dau /
+    /// thoi_gian_ket_thuc / doi_tac_id / trang_thai dạng tinyint; chi_tiet_khuyen_mai:
+    /// hang_hoa_id / hang_hoa_tang_id / so_luong_hang_tang / phan_tram_giam_gia /
+    /// so_tien_giam). Thay vì bắt người dùng chạy lại script xoá bảng (mất dữ
+    /// liệu), hàm này thêm cột mới rồi chuyển dữ liệu sang — không xoá gì.
+    /// </para>
+    /// </summary>
+    private async Task EnsureCotBangKhuyenMaiAsync(MySqlConnection connection)
+    {
+        try
+        {
+            var cotChuongTrinh = await DocCotBangAsync(connection, "chuong_trinh_khuyen_mai");
+            var cotChiTiet = await DocCotBangAsync(connection, "chi_tiet_khuyen_mai");
+
+            if (cotChuongTrinh.Count == 0 || cotChiTiet.Count == 0)
+                return;
+
+            // ---------------- chuong_trinh_khuyen_mai ----------------
+            if (!cotChuongTrinh.ContainsKey("ngay_bat_dau"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chuong_trinh_khuyen_mai ADD COLUMN ngay_bat_dau DATETIME NULL AFTER ten_chuong_trinh;");
+            }
+
+            if (!cotChuongTrinh.ContainsKey("ngay_ket_thuc"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chuong_trinh_khuyen_mai ADD COLUMN ngay_ket_thuc DATETIME NULL AFTER ngay_bat_dau;");
+            }
+
+            if (cotChuongTrinh.ContainsKey("thoi_gian_bat_dau"))
+            {
+                await connection.ExecuteAsync(
+                    "UPDATE chuong_trinh_khuyen_mai SET ngay_bat_dau = thoi_gian_bat_dau WHERE ngay_bat_dau IS NULL;");
+            }
+
+            if (cotChuongTrinh.ContainsKey("thoi_gian_ket_thuc"))
+            {
+                await connection.ExecuteAsync(
+                    "UPDATE chuong_trinh_khuyen_mai SET ngay_ket_thuc = thoi_gian_ket_thuc WHERE ngay_ket_thuc IS NULL;");
+            }
+
+            // Hai cột ngày không được để trống: gán ngày mặc định rồi siết lại.
+            await connection.ExecuteAsync(
+                "UPDATE chuong_trinh_khuyen_mai SET ngay_bat_dau = '2000-01-01 00:00:00' WHERE ngay_bat_dau IS NULL;");
+            await connection.ExecuteAsync(
+                "UPDATE chuong_trinh_khuyen_mai SET ngay_ket_thuc = '2099-12-31 23:59:59' WHERE ngay_ket_thuc IS NULL;");
+            await connection.ExecuteAsync(
+                "ALTER TABLE chuong_trinh_khuyen_mai MODIFY COLUMN ngay_bat_dau DATETIME NOT NULL;");
+            await connection.ExecuteAsync(
+                "ALTER TABLE chuong_trinh_khuyen_mai MODIFY COLUMN ngay_ket_thuc DATETIME NOT NULL;");
+
+            if (!cotChuongTrinh.ContainsKey("nhom_khach_hang_id"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chuong_trinh_khuyen_mai ADD COLUMN nhom_khach_hang_id INT UNSIGNED NULL AFTER ngay_ket_thuc;");
+            }
+
+            if (cotChuongTrinh.ContainsKey("doi_tac_id"))
+            {
+                await connection.ExecuteAsync(
+                    "UPDATE chuong_trinh_khuyen_mai SET nhom_khach_hang_id = doi_tac_id WHERE nhom_khach_hang_id IS NULL;");
+            }
+
+            // trang_thai: bản cũ dùng tinyint, bản mới dùng chuỗi trạng thái.
+            if (!cotChuongTrinh.ContainsKey("trang_thai"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chuong_trinh_khuyen_mai ADD COLUMN trang_thai VARCHAR(50) NOT NULL DEFAULT 'DANG_HOAT_DONG' AFTER nhom_khach_hang_id;");
+            }
+            else if (!cotChuongTrinh["trang_thai"].StartsWith("varchar", StringComparison.OrdinalIgnoreCase)
+                     && !cotChuongTrinh["trang_thai"].StartsWith("char", StringComparison.OrdinalIgnoreCase)
+                     && !cotChuongTrinh["trang_thai"].StartsWith("text", StringComparison.OrdinalIgnoreCase))
+            {
+                await connection.ExecuteAsync(
+                    "UPDATE chuong_trinh_khuyen_mai SET trang_thai = 1;");
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chuong_trinh_khuyen_mai MODIFY COLUMN trang_thai VARCHAR(50) NOT NULL DEFAULT 'DANG_HOAT_DONG';");
+                await connection.ExecuteAsync(
+                    "UPDATE chuong_trinh_khuyen_mai SET trang_thai = 'DANG_HOAT_DONG' WHERE trang_thai = '1';");
+            }
+
+            if (!cotChuongTrinh.ContainsKey("loai_khuyen_mai"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chuong_trinh_khuyen_mai ADD COLUMN loai_khuyen_mai VARCHAR(50) NOT NULL DEFAULT 'THEO_HANG_HOA' AFTER trang_thai;");
+            }
+
+            if (!cotChuongTrinh.ContainsKey("ghi_chu"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chuong_trinh_khuyen_mai ADD COLUMN ghi_chu TEXT NULL AFTER loai_khuyen_mai;");
+            }
+
+            if (cotChuongTrinh.ContainsKey("mo_ta"))
+            {
+                await connection.ExecuteAsync(
+                    "UPDATE chuong_trinh_khuyen_mai SET ghi_chu = mo_ta WHERE (ghi_chu IS NULL OR ghi_chu = '') AND mo_ta IS NOT NULL;");
+            }
+
+            if (!cotChuongTrinh.ContainsKey("chi_nhanh_id"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chuong_trinh_khuyen_mai ADD COLUMN chi_nhanh_id INT UNSIGNED NOT NULL DEFAULT 1 AFTER ghi_chu;");
+            }
+
+            if (!cotChuongTrinh.ContainsKey("nguoi_tao_id"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chuong_trinh_khuyen_mai ADD COLUMN nguoi_tao_id INT UNSIGNED NULL AFTER chi_nhanh_id;");
+            }
+
+            if (!cotChuongTrinh.ContainsKey("ngay_tao"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chuong_trinh_khuyen_mai ADD COLUMN ngay_tao DATETIME DEFAULT CURRENT_TIMESTAMP AFTER nguoi_tao_id;");
+            }
+
+            if (!cotChuongTrinh.ContainsKey("ngay_cap_nhat"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chuong_trinh_khuyen_mai ADD COLUMN ngay_cap_nhat DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER ngay_tao;");
+            }
+
+            // ---------------- chi_tiet_khuyen_mai ----------------
+            if (!cotChiTiet.ContainsKey("san_pham_id"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_khuyen_mai ADD COLUMN san_pham_id INT UNSIGNED NOT NULL DEFAULT 0 AFTER chuong_trinh_id;");
+            }
+
+            if (cotChiTiet.ContainsKey("hang_hoa_id"))
+            {
+                await connection.ExecuteAsync(
+                    "UPDATE chi_tiet_khuyen_mai SET san_pham_id = hang_hoa_id WHERE san_pham_id = 0;");
+            }
+
+            if (!cotChiTiet.ContainsKey("ma_san_pham"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_khuyen_mai ADD COLUMN ma_san_pham VARCHAR(50) NULL AFTER san_pham_id;");
+            }
+
+            if (!cotChiTiet.ContainsKey("ten_san_pham"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_khuyen_mai ADD COLUMN ten_san_pham VARCHAR(255) NULL AFTER ma_san_pham;");
+            }
+
+            if (!cotChiTiet.ContainsKey("don_vi_tinh"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_khuyen_mai ADD COLUMN don_vi_tinh VARCHAR(50) NULL AFTER ten_san_pham;");
+            }
+
+            if (!cotChiTiet.ContainsKey("so_luong_mua"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_khuyen_mai ADD COLUMN so_luong_mua DECIMAL(15,2) NOT NULL DEFAULT 1 AFTER don_vi_tinh;");
+            }
+
+            if (!cotChiTiet.ContainsKey("loai_giam_gia"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_khuyen_mai ADD COLUMN loai_giam_gia VARCHAR(20) NOT NULL DEFAULT 'PHAN_TRAM' AFTER so_luong_mua;");
+            }
+
+            if (!cotChiTiet.ContainsKey("gia_tri_giam"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_khuyen_mai ADD COLUMN gia_tri_giam DECIMAL(15,2) NOT NULL DEFAULT 0 AFTER loai_giam_gia;");
+            }
+
+            if (cotChiTiet.ContainsKey("phan_tram_giam_gia"))
+            {
+                await connection.ExecuteAsync(
+                    "UPDATE chi_tiet_khuyen_mai SET gia_tri_giam = phan_tram_giam_gia WHERE gia_tri_giam = 0 AND phan_tram_giam_gia > 0;");
+            }
+
+            if (cotChiTiet.ContainsKey("so_tien_giam"))
+            {
+                await connection.ExecuteAsync(
+                    "UPDATE chi_tiet_khuyen_mai SET gia_tri_giam = so_tien_giam WHERE gia_tri_giam = 0 AND so_tien_giam > 0;");
+                await connection.ExecuteAsync(
+                    "UPDATE chi_tiet_khuyen_mai SET loai_giam_gia = 'SO_TIEN' WHERE loai_giam_gia = 'PHAN_TRAM' AND so_tien_giam > 0 AND phan_tram_giam_gia = 0;");
+            }
+
+            if (!cotChiTiet.ContainsKey("so_luong_tang"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_khuyen_mai ADD COLUMN so_luong_tang DECIMAL(15,2) NOT NULL DEFAULT 0 AFTER gia_tri_giam;");
+            }
+
+            if (cotChiTiet.ContainsKey("so_luong_hang_tang"))
+            {
+                await connection.ExecuteAsync(
+                    "UPDATE chi_tiet_khuyen_mai SET so_luong_tang = so_luong_hang_tang WHERE so_luong_tang = 0 AND so_luong_hang_tang > 0;");
+            }
+
+            if (!cotChiTiet.ContainsKey("san_pham_tang_id"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_khuyen_mai ADD COLUMN san_pham_tang_id INT UNSIGNED NULL AFTER so_luong_tang;");
+            }
+
+            if (cotChiTiet.ContainsKey("hang_hoa_tang_id"))
+            {
+                await connection.ExecuteAsync(
+                    "UPDATE chi_tiet_khuyen_mai SET san_pham_tang_id = hang_hoa_tang_id WHERE san_pham_tang_id IS NULL;");
+            }
+
+            if (!cotChiTiet.ContainsKey("ten_san_pham_tang"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_khuyen_mai ADD COLUMN ten_san_pham_tang VARCHAR(255) NULL AFTER san_pham_tang_id;");
+            }
+
+            if (!cotChiTiet.ContainsKey("ghi_chu"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chi_tiet_khuyen_mai ADD COLUMN ghi_chu VARCHAR(255) NULL AFTER ten_san_pham_tang;");
+            }
+
+            // Bảng cũ khai báo hang_hoa_id / don_vi_tinh_id là NOT NULL (kèm khoá
+            // ngoại sang bảng hàng hóa cũ). Ứng dụng chỉ ghi bộ cột mới
+            // san_pham_* nên hai cột cũ phải cho phép NULL, nếu không lưu
+            // khuyến mãi sẽ lỗi "doesn't have a default value" / khoá ngoại.
+            await NoptCotCuKhuyenMaiAsync(connection, cotChiTiet, "hang_hoa_id");
+            await NoptCotCuKhuyenMaiAsync(connection, cotChiTiet, "don_vi_tinh_id");
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Khong bo sung duoc cot cho bang khuyen mai", ex);
+        }
+    }
+
+    /// <summary>
+    /// Cho phép một cột cũ của bảng chi tiết khuyến mãi (đang khai báo NOT NULL
+    /// và có khoá ngoại sang bảng hàng hóa cũ) nhận giá trị NULL, để ứng dụng mới
+    /// chỉ cần ghi bộ cột "san_pham_*" mà vẫn lưu được khuyến mãi.
+    /// </summary>
+    private static async Task NoptCotCuKhuyenMaiAsync(
+        MySqlConnection connection,
+        Dictionary<string, string> cotBang,
+        string tenCot)
+    {
+        if (!cotBang.ContainsKey(tenCot))
+            return;
+
+        var thongTin = await connection.QueryAsync<(string Nullable, string Kieu)>(
+            """
+            SELECT IS_NULLABLE, COLUMN_TYPE
+            FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'chi_tiet_khuyen_mai'
+              AND COLUMN_NAME = @TenCot;
+            """,
+            new { TenCot = tenCot });
+
+        var cot = thongTin.FirstOrDefault();
+
+        if (cot.Nullable is null ||
+            cot.Nullable.Equals("YES", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var kieu = cot.Kieu?.Contains("unsigned", StringComparison.OrdinalIgnoreCase) == true
+            ? "INT(10) UNSIGNED"
+            : "INT";
+
+        await connection.ExecuteAsync(
+            $"ALTER TABLE chi_tiet_khuyen_mai MODIFY COLUMN {tenCot} {kieu} NULL DEFAULT NULL;");
+    }
+
+    /// <summary>
+    /// Đọc danh sách cột (tên -> kiểu dữ liệu) của một bảng trong database hiện tại.
+    /// </summary>
+    private static async Task<Dictionary<string, string>> DocCotBangAsync(
+        MySqlConnection connection,
+        string tenBang)
+    {
+        var cot = await connection.QueryAsync<(string Ten, string Kieu)>(
+            """
+            SELECT COLUMN_NAME, DATA_TYPE
+            FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = @TenBang;
+            """,
+            new { TenBang = tenBang });
+
+        return cot.ToDictionary(x => x.Ten, x => x.Kieu, StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -13246,7 +13789,7 @@ LIMIT 500;
             gb.san_pham_id AS SanPhamId,
             sp.ma_san_pham AS MaSanPham,
             sp.ten_san_pham AS TenSanPham,
-            COALESCE(dvt.ten_don_vi, sp.don_vi_tinh, 'Cái') AS DonViTinh,
+            COALESCE(dvt.ten_don_vi, 'Cái') AS DonViTinh,
             sp.don_vi_tinh_id AS DonViTinhId,
             COALESCE(nsp.ten_nhom, sp.nhom_hang_3_cap_excel, 'Chưa phân nhóm') AS NhomSanPham,
             sp.nhom_san_pham_id AS NhomSanPhamId,

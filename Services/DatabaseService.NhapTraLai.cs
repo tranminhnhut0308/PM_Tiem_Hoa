@@ -280,9 +280,10 @@ public sealed partial class DatabaseService
                 ct.ly_do_tra AS LyDoTra,
                 sp.ma_san_pham AS MaSanPham,
                 sp.ten_san_pham AS TenSanPham,
-                COALESCE(sp.don_vi_tinh, '') AS DonViTinh
+                COALESCE(dvt.ten_don_vi, '') AS DonViTinh
             FROM chi_tiet_phieu_tra_hang ct
             JOIN san_pham sp ON ct.san_pham_id = sp.id
+            LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
             WHERE ct.phieu_tra_id = @PhieuTraId
             ORDER BY ct.id ASC;
         """;

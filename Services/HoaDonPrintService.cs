@@ -104,7 +104,25 @@ public static class HoaDonPrintService
         foreach (var item in receipt.Items)
         {
             sb.Append("<tr>");
-            sb.Append("<td>").Append(Enc(item.TenSanPham)).Append("</td>");
+
+            // Dòng hàng tặng kèm: ghi rõ nhãn TẶNG KÈM và tên chương trình
+            // để khách hiểu vì sao dòng này có đơn giá 0.
+            if (item.IsHangTang)
+            {
+                sb.Append("<td>");
+                sb.Append(Enc(item.TenSanPham));
+                sb.Append("<div style=\"font-size:10px;color:#B45309;font-weight:bold;\">TẶNG KÈM");
+
+                if (!string.IsNullOrWhiteSpace(item.ChuongTrinhKhuyenMaiTen))
+                    sb.Append(" - ").Append(Enc(item.ChuongTrinhKhuyenMaiTen));
+
+                sb.Append("</div></td>");
+            }
+            else
+            {
+                sb.Append("<td>").Append(Enc(item.TenSanPham)).Append("</td>");
+            }
+
             sb.Append("<td class=\"r\">").Append(item.SoLuong.ToString("N0", CultureInfo.InvariantCulture)).Append("</td>");
             sb.Append("<td class=\"r\">").Append(item.DonGia.ToString("N0", CultureInfo.InvariantCulture)).Append("</td>");
             sb.Append("<td class=\"r\">").Append(item.ThanhTien.ToString("N0", CultureInfo.InvariantCulture)).Append("</td>");
@@ -112,6 +130,13 @@ public static class HoaDonPrintService
         }
 
         sb.Append("</table>");
+
+        if (receipt.CoHangTang)
+        {
+            sb.Append("<div class=\"muted\" style=\"margin-top:4px;font-size:11px;color:#8A5A00;\">Trong đó có ")
+              .Append(receipt.SoLuongHangTang)
+              .Append(" mặt hàng tặng kèm theo chương trình khuyến mãi (không tính doanh thu).</div>");
+        }
 
         // Tổng kết.
         sb.Append("<div class=\"sum\">");

@@ -83,8 +83,7 @@ public partial class ThemChuongTrinhKhuyenMaiWindow : Window
             _danhSachSanPham.Clear();
             _danhSachSanPham.AddRange(await spTask);
 
-            SanPhamAutoCompleteBox.ItemsSource = _danhSachSanPham;
-            SanPhamAutoCompleteBox.ItemFilter = (search, item) =>
+            SanPhamAutoCompleteBox.ItemsSource = _danhSachSanPham;            SanPhamAutoCompleteBox.ItemFilter = (search, item) =>
             {
                 if (string.IsNullOrWhiteSpace(search))
                     return true;
@@ -116,6 +115,7 @@ public partial class ThemChuongTrinhKhuyenMaiWindow : Window
                 }
 
                 ChonTrangThai(_chuongTrinhEdit.TrangThai);
+                ChonLoaiKhuyenMai(_chuongTrinhEdit.LoaiKhuyenMai);
 
                 var chiTiets = await _db.GetChiTietKhuyenMaiAsync(_chuongTrinhEdit.Id);
                 _chiTietList.Clear();
@@ -123,11 +123,20 @@ public partial class ThemChuongTrinhKhuyenMaiWindow : Window
                 foreach (var d in chiTiets)
                 {
                     d.Stt = stt++;
+                    d.DanhSachSanPham = _danhSachSanPham;
+
+                    // Khôi phục sản phẩm tặng đã lưu để ComboBox hiển thị đúng
+                    if (d.SanPhamTangId is uint idTang)
+                    {
+                        d.SanPhamTang = _danhSachSanPham.FirstOrDefault(s => s.Id == idTang);
+                    }
+
                     _chiTietList.Add(d);
                 }
             }
 
             CapNhatTrangThaiBang();
+            CapNhatGoiYLoaiKhuyenMai();
         }
         catch (Exception ex)
         {
@@ -149,6 +158,65 @@ public partial class ThemChuongTrinhKhuyenMaiWindow : Window
                 return;
             }
         }
+    }
+
+    /// <summary>
+    /// Chọn loại khuyến mãi khi mở chương trình đang có sẵn.
+    /// </summary>
+    private void ChonLoaiKhuyenMai(string? loaiKhuyenMai)
+    {
+        if (string.IsNullOrWhiteSpace(loaiKhuyenMai))
+            return;
+
+        foreach (var item in LoaiKhuyenMaiComboBox.Items)
+        {
+            if (item is ComboBoxItem cbi &&
+                string.Equals(cbi.Tag?.ToString(), loaiKhuyenMai, StringComparison.OrdinalIgnoreCase))
+            {
+                LoaiKhuyenMaiComboBox.SelectedItem = cbi;
+                return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Lấy mã loại khuyến mãi đang chọn trên giao diện.
+    /// </summary>
+    private string GetLoaiKhuyenMaiHienTai()
+    {
+        if (LoaiKhuyenMaiComboBox.SelectedItem is ComboBoxItem cbi && cbi.Tag != null)
+            return cbi.Tag.ToString() ?? "THEO_HANG_HOA";
+
+        return "THEO_HANG_HOA";
+    }
+
+    /// <summary>
+    /// Cập nhật dòng gợi ý nhỏ bên cạnh bảng chi tiết theo loại khuyến mãi.
+    /// </summary>
+    private void CapNhatGoiYLoaiKhuyenMai()
+    {
+        switch (GetLoaiKhuyenMaiHienTai())
+        {
+            case "TANG_KEM":
+                LoaiKhuyenMaiGoiYText.Text =
+                    "🎁 Chương trình tặng kèm: mỗi dòng ghi hàng tặng + số lượng tặng. Mua đủ SL MUA sẽ được tặng tương ứng.";
+                break;
+
+            case "THEO_HOA_DON":
+                LoaiKhuyenMaiGoiYText.Text =
+                    "🧾 Chiết khấu theo hóa đơn: ưu đãi tính trên tổng giá trị hóa đơn của khách.";
+                break;
+
+            default:
+                LoaiKhuyenMaiGoiYText.Text =
+                    "Mỗi dòng áp dụng cho 1 sản phẩm: giảm giá, tặng kèm hoặc cả hai.";
+                break;
+        }
+    }
+
+    private void LoaiKhuyenMaiComboBox_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        CapNhatGoiYLoaiKhuyenMai();
     }
 
     private void SanPhamAutoCompleteBox_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -193,6 +261,8 @@ public partial class ThemChuongTrinhKhuyenMaiWindow : Window
         }
 
         // 3. Thêm vào danh sách chi tiết
+        var laTangKem = GetLoaiKhuyenMaiHienTai() == "TANG_KEM";
+
         var dongMoi = new ChiTietKhuyenMai
         {
             Stt = _chiTietList.Count + 1,
@@ -203,7 +273,9 @@ public partial class ThemChuongTrinhKhuyenMaiWindow : Window
             GiaBanHienTai = sp.GiaBan,
             SoLuongMua = 1,
             LoaiGiamGia = "PHAN_TRAM",
-            GiaTriGiam = 10 // Mặc định gợi ý giảm 10%
+            // Chương trình tặng kèm không kèm mức giảm giá mặc định.
+            GiaTriGiam = laTangKem ? 0 : 10,
+            DanhSachSanPham = _danhSachSanPham
         };
 
         _chiTietList.Add(dongMoi);
@@ -256,7 +328,8 @@ public partial class ThemChuongTrinhKhuyenMaiWindow : Window
 
     private void OnChiTietNumberLostFocus(object? sender, RoutedEventArgs e)
     {
-        // Khi người dùng nhập xong số lượng mua hoặc mức giảm, đảm bảo dữ liệu không âm
+        // Khi người dùng nhập xong số lượng mua, mức giảm hoặc số lượng tặng,
+        // đảm bảo dữ liệu không âm và giới hạn hợp lý
         foreach (var item in _chiTietList)
         {
             if (item.SoLuongMua <= 0)
@@ -267,6 +340,13 @@ public partial class ThemChuongTrinhKhuyenMaiWindow : Window
 
             if (item.LoaiGiamGia == "PHAN_TRAM" && item.GiaTriGiam > 100)
                 item.GiaTriGiam = 100;
+
+            if (item.SoLuongTang < 0)
+                item.SoLuongTang = 0;
+
+            // Không có hàng tặng thì không được để lại số lượng tặng
+            if (item.SanPhamTangId is null or 0)
+                item.SoLuongTang = 0;
         }
     }
 
@@ -335,18 +415,41 @@ public partial class ThemChuongTrinhKhuyenMaiWindow : Window
             return;
         }
 
-        // 5. Kiểm tra mức giảm giá
+        // 5. Kiểm tra mức giảm giá / hàng tặng kèm
+        var loaiKhuyenMai = GetLoaiKhuyenMaiHienTai();
+
         foreach (var item in _chiTietList)
         {
-            if (item.GiaTriGiam <= 0 && item.SoLuongTang <= 0)
-            {
-                HienThongBao($"Sản phẩm [{item.MaSanPham}] chưa có mức giảm giá hoặc hàng tặng hợp lệ.", isError: true);
-                return;
-            }
-
             if (item.LoaiGiamGia == "PHAN_TRAM" && item.GiaTriGiam > 100)
             {
                 HienThongBao($"Mức giảm % của sản phẩm [{item.MaSanPham}] không được vượt quá 100%.", isError: true);
+                return;
+            }
+
+            // Hàng tặng phải khác sản phẩm được mua
+            if (item.SanPhamTangId is uint idTang && idTang > 0)
+            {
+                if (idTang == item.SanPhamId)
+                {
+                    HienThongBao($"Sản phẩm [{item.MaSanPham}] không thể tặng kèm chính nó.", isError: true);
+                    return;
+                }
+
+                if (item.SoLuongTang <= 0)
+                {
+                    HienThongBao($"Sản phẩm [{item.MaSanPham}] đã chọn hàng tặng nhưng chưa nhập số lượng tặng.", isError: true);
+                    return;
+                }
+            }
+            else if (loaiKhuyenMai == "TANG_KEM")
+            {
+                HienThongBao($"Chương trình tặng kèm: sản phẩm [{item.MaSanPham}] chưa chọn hàng tặng.", isError: true);
+                return;
+            }
+
+            if (item.GiaTriGiam <= 0 && item.SoLuongTang <= 0)
+            {
+                HienThongBao($"Sản phẩm [{item.MaSanPham}] chưa có mức giảm giá hoặc hàng tặng hợp lệ.", isError: true);
                 return;
             }
         }
@@ -386,7 +489,7 @@ public partial class ThemChuongTrinhKhuyenMaiWindow : Window
             NhomKhachHangId = selectedNhom?.Id,
             TenNhomKhachHang = selectedNhom?.TenNhom,
             TrangThai = trangThai,
-            LoaiKhuyenMai = "THEO_HANG_HOA",
+            LoaiKhuyenMai = loaiKhuyenMai,
             GhiChu = (GhiChuTextBox.Text ?? "").Trim()
         };
 

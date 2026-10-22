@@ -91,7 +91,7 @@ public sealed class BaoCaoTinhHinhNhapXuatService
                 sp.ma_san_pham                                           AS MaSanPham,
                 sp.ten_san_pham                                          AS TenSanPham,
                 COALESCE(nsp.ten_nhom, 'Chưa phân nhóm')                AS TenNhom,
-                COALESCE(dvt.ten_don_vi, sp.don_vi_tinh, 'Cái')          AS DonViTinh,
+                COALESCE(dvt.ten_don_vi, 'Cái')          AS DonViTinh,
                 COALESCE(sp.gia_von, 0)                                  AS GiaVon,
                 COALESCE(tk.so_luong_ton, sp.ton_kho_excel, 0)           AS TonHienTai
             FROM san_pham sp
@@ -131,7 +131,7 @@ public sealed class BaoCaoTinhHinhNhapXuatService
                 COALESCE(SUM(ctpn.so_luong), 0) AS SoLuongNhap,
                 COALESCE(SUM(ctpn.thanh_tien), 0) AS GiaTriNhap
             FROM chi_tiet_phieu_nhap_hang ctpn
-            INNER JOIN phieu_nhap_hang pn ON pn.id = ctpn.phieu_nhap_hang_id
+            INNER JOIN phieu_nhap_hang pn ON pn.id = ctpn.phieu_nhap_id
             WHERE pn.trang_thai != 'HUY' AND pn.thoi_gian_nhap >= @TuNgay AND pn.thoi_gian_nhap < @DenKeTiep
             GROUP BY ctpn.san_pham_id;
         """;
@@ -159,7 +159,7 @@ public sealed class BaoCaoTinhHinhNhapXuatService
                         COALESCE(SUM(ctpt.so_luong), 0) AS SoLuongNhap,
                         COALESCE(SUM(ctpt.thanh_tien), 0) AS GiaTriNhap
                     FROM chi_tiet_phieu_tra_hang ctpt
-                    INNER JOIN phieu_tra_hang pt ON pt.id = ctpt.phieu_tra_hang_id
+                    INNER JOIN phieu_tra_hang pt ON pt.id = ctpt.phieu_tra_id
                     WHERE pt.trang_thai = 'HOAN_THANH' AND pt.thoi_gian_tra >= @TuNgay AND pt.thoi_gian_tra < @DenKeTiep
                     GROUP BY ctpt.san_pham_id;
                 """;
@@ -196,7 +196,7 @@ public sealed class BaoCaoTinhHinhNhapXuatService
                         COALESCE(SUM(ct.so_luong * COALESCE(ct.don_gia, 0)), 0) AS GiaTriNhap
                     FROM chi_tiet_phieu_nhap_khac ct
                     INNER JOIN phieu_nhap_khac p ON p.id = ct.phieu_nhap_khac_id
-                    WHERE p.thoi_gian >= @TuNgay AND p.thoi_gian < @DenKeTiep
+                    WHERE p.thoi_gian_nhap >= @TuNgay AND p.thoi_gian_nhap < @DenKeTiep
                     GROUP BY ct.san_pham_id;
                 """;
 
@@ -256,8 +256,8 @@ public sealed class BaoCaoTinhHinhNhapXuatService
                         COALESCE(SUM(ct.so_luong), 0) AS SoLuongXuat,
                         COALESCE(SUM(ct.so_luong * COALESCE(ct.don_gia, 0)), 0) AS GiaTriXuatVon
                     FROM chi_tiet_phieu_xuat_tra_ncc ct
-                    INNER JOIN phieu_xuat_tra_ncc p ON p.id = ct.phieu_xuat_tra_ncc_id
-                    WHERE p.thoi_gian >= @TuNgay AND p.thoi_gian < @DenKeTiep
+                    INNER JOIN phieu_xuat_tra_ncc p ON p.id = ct.phieu_xuat_tra_id
+                    WHERE p.thoi_gian_xuat_tra >= @TuNgay AND p.thoi_gian_xuat_tra < @DenKeTiep
                     GROUP BY ct.san_pham_id;
                 """;
 
@@ -292,8 +292,8 @@ public sealed class BaoCaoTinhHinhNhapXuatService
                         COALESCE(SUM(ct.so_luong), 0) AS SoLuongXuat,
                         COALESCE(SUM(ct.so_luong * COALESCE(ct.don_gia, 0)), 0) AS GiaTriXuatVon
                     FROM chi_tiet_phieu_xuat_noi_bo ct
-                    INNER JOIN phieu_xuat_noi_bo p ON p.id = ct.phieu_xuat_id
-                    WHERE p.thoi_gian >= @TuNgay AND p.thoi_gian < @DenKeTiep
+                    INNER JOIN phieu_xuat_noi_bo p ON p.id = ct.phieu_xuat_noi_bo_id
+                    WHERE p.thoi_gian_xuat >= @TuNgay AND p.thoi_gian_xuat < @DenKeTiep
                     GROUP BY ct.san_pham_id;
                 """;
 
@@ -485,7 +485,7 @@ public sealed class BaoCaoTinhHinhNhapXuatService
                 COALESCE(SUM(ct.so_luong), 0) AS SoLuong,
                 COALESCE(SUM(ct.thanh_tien), 0) AS GiaTri
             FROM phieu_nhap_hang pn
-            JOIN chi_tiet_phieu_nhap_hang ct ON ct.phieu_nhap_hang_id = pn.id
+            JOIN chi_tiet_phieu_nhap_hang ct ON ct.phieu_nhap_id = pn.id
             WHERE pn.trang_thai != 'HUY' AND pn.thoi_gian_nhap >= @TuNgay AND pn.thoi_gian_nhap < @DenKeTiep
             GROUP BY DATE(pn.thoi_gian_nhap);
         """;

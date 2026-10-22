@@ -137,7 +137,18 @@
         <ItemsControl.ItemTemplate>
           <DataTemplate x:DataType="models:HoaDonBanHangReceiptItem">
             <Grid ColumnDefinitions="*,70,110,130" Margin="0,6">
-              <TextBlock Text="{Binding TenSanPham}" TextWrapping="Wrap" Foreground="#263B35" />
+              <StackPanel Grid.Column="0" Spacing="2">
+                <TextBlock Text="{Binding TenSanPham}" TextWrapping="Wrap" Foreground="#263B35" />
+                <StackPanel Orientation="Horizontal" Spacing="5"
+                            IsVisible="{Binding IsHangTang}">
+                  <Border Background="#FEF3C7" CornerRadius="3" Padding="4,1">
+                    <TextBlock Text="{Binding NhanHangTang}" FontSize="10" FontWeight="Bold"
+                               Foreground="#B45309" />
+                  </Border>
+                  <TextBlock Text="{Binding ChuongTrinhKhuyenMaiTen}" FontSize="10"
+                             Foreground="#8A5A00" TextWrapping="Wrap" />
+                </StackPanel>
+              </StackPanel>
               <TextBlock Grid.Column="1" Text="{Binding SoLuong, StringFormat={}{0:N0}}"
                 HorizontalAlignment="Right" Foreground="#263B35" />
               <TextBlock Grid.Column="2" Text="{Binding DonGia, StringFormat={}{0:N0}}"
@@ -148,6 +159,15 @@
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
+
+      <!-- Tổng hàng tặng kèm (để thống kê, không tính doanh thu) -->
+      <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0"
+            IsVisible="{Binding CoHangTang}">
+        <TextBlock Text="Trong đó hàng tặng kèm" Foreground="#8A5A00" FontSize="11" />
+        <TextBlock Grid.Column="1"
+          Text="{Binding SoLuongHangTang, StringFormat={}{0} mặt hàng}"
+          Foreground="#8A5A00" FontSize="11" FontWeight="Bold" />
+      </Grid>
 
       <Border BorderBrush="#D8E5E0"
         BorderThickness="0,1,0,0"

@@ -95,8 +95,7 @@ public sealed class BaoCaoTaiChinhService
           AND pc.trang_thai = 'HOAN_THANH'
           AND pc.thoi_gian_chi >= @TuNgay
           AND pc.thoi_gian_chi < @DenKeTiep
-          AND (pc.nhom_nguoi_nhan_nop IS NULL OR UPPER(TRIM(pc.nhom_nguoi_nhan_nop)) NOT IN ('NHÀ CUNG CẤP', 'NHA_CUNG_CAP'))
-          AND (pc.hach_toan = 1 OR pc.hach_toan IS NULL)
+          AND (pc.nhom_chi_phi_id IS NULL OR COALESCE(ncp.ma_nhom, '') NOT IN ('CHI_NHA_CUNG_CAP', 'NHA_CUNG_CAP'))
         GROUP BY COALESCE(ncp.ten_nhom, 'Chi phí vận hành khác'), COALESCE(ncp.ma_nhom, 'CPK')
         ORDER BY SoTien DESC;
         """;
@@ -136,13 +135,13 @@ public sealed class BaoCaoTaiChinhService
         const string sqlThuKhac = """
         SELECT COALESCE(SUM(pc.so_tien), 0)
         FROM phieu_chi pc
+        LEFT JOIN nhom_chi_phi ncp ON ncp.id = pc.nhom_chi_phi_id
         WHERE pc.ma_phieu_chi LIKE 'PT%'
           AND pc.trang_thai = 'HOAN_THANH'
           AND pc.thoi_gian_chi >= @TuNgay
           AND pc.thoi_gian_chi < @DenKeTiep
           AND pc.hoa_don_ban_hang_id IS NULL
-          AND (pc.nhom_nguoi_nhan_nop IS NULL OR UPPER(TRIM(pc.nhom_nguoi_nhan_nop)) NOT IN ('KHÁCH HÀNG', 'KHACH_HANG'))
-          AND (pc.hach_toan = 1 OR pc.hach_toan IS NULL);
+          AND (pc.nhom_chi_phi_id IS NULL OR COALESCE(ncp.ma_nhom, '') NOT IN ('THU_KHACH_HANG', 'KHACH_HANG'));
         """;
 
         decimal thuNhapKhac = await conn.ExecuteScalarAsync<decimal>(
@@ -201,12 +200,12 @@ public sealed class BaoCaoTaiChinhService
             DATE(pc.thoi_gian_chi) AS Ngay,
             COALESCE(SUM(pc.so_tien), 0) AS ChiPhi
         FROM phieu_chi pc
+        LEFT JOIN nhom_chi_phi ncp ON ncp.id = pc.nhom_chi_phi_id
         WHERE pc.ma_phieu_chi LIKE 'PC%'
           AND pc.trang_thai = 'HOAN_THANH'
           AND pc.thoi_gian_chi >= @TuNgay
           AND pc.thoi_gian_chi < @DenKeTiep
-          AND (pc.nhom_nguoi_nhan_nop IS NULL OR UPPER(TRIM(pc.nhom_nguoi_nhan_nop)) NOT IN ('NHÀ CUNG CẤP', 'NHA_CUNG_CAP'))
-          AND (pc.hach_toan = 1 OR pc.hach_toan IS NULL)
+          AND (pc.nhom_chi_phi_id IS NULL OR COALESCE(ncp.ma_nhom, '') NOT IN ('CHI_NHA_CUNG_CAP', 'NHA_CUNG_CAP'))
         GROUP BY DATE(pc.thoi_gian_chi);
         """;
 
