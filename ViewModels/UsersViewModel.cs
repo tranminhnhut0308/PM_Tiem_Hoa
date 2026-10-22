@@ -188,7 +188,15 @@ public partial class UsersViewModel : ObservableObject
 
         var vm = new UserPermissionsViewModel(_db, item.Id);
         var win = new Views.UserPermissionsWindow(vm);
-        await win.ShowDialog(App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime lt ? lt.MainWindow : null);
+        var owner = (App.Current?.ApplicationLifetime as Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+        if (owner != null && owner.IsVisible)
+        {
+            await win.ShowDialog(owner);
+        }
+        else
+        {
+            win.Show();
+        }
         await LoadAsync();
     }
 

@@ -324,7 +324,7 @@ public partial class ThemHangTonDauKyWindow : Window
 
             await _db.LuuHangTonDauKyAsync(
                 selectedKho.Id,
-                _sanPhamDaChon.Id,
+                _sanPhamDaChon!.Id,
                 soLuong,
                 giaVon,
                 ngayDauKy,

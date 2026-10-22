@@ -1,12 +1,20 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
+using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ShopHoa.Helpers;
 using ShopHoa.Models;
 using ShopHoa.Services;
+using ShopHoa.Views;
 
 namespace ShopHoa.ViewModels;
 
@@ -315,97 +323,6 @@ public sealed partial class BaoCaoCuoiNgayViewModel : ObservableObject
     [RelayCommand]
     private async Task ChonNgayAsync()
     {
-        var cuaSo = LayCuaSoChinh();
-
-        if (cuaSo is null)
-        {
-            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-                cuaSo = desktop.MainWindow;
-        }
-
-        if (cuaSo is null)
-            return;
-
-        var ngayHienTai = (NgayChon?.DateTime ?? DateTime.Today).Date;
-        var datePicker = new DatePicker
-        {
-            SelectedDate = new DateTimeOffset(ngayHienTai),
-            MaxYear = new DateTimeOffset(new DateTime(DateTime.Now.Year + 5, 12, 31)),
-            MinYear = new DateTimeOffset(new DateTime(2020, 1, 1))
-        };
-
-        var btnHomNay = new Button { Content = "Hôm nay" };
-        var okBtn = new Button { Content = "OK", IsDefault = true };
-        var cancelBtn = new Button { Content = "Hủy", IsCancel = true };
-
-        var bottomPanel = new StackPanel
-        {
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
-            Spacing = 8,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-            Margin = new Thickness(0, 16, 0, 0),
-            Children = { btnHomNay, okBtn, cancelBtn }
-        };
-
-        var mainPanel = new StackPanel
-        {
-            Spacing = 12,
-            Children =
-            {
-                new TextBlock { Text = "Chọn ngày để xem báo cáo cuối ngày", FontWeight = Avalonia.Media.FontWeight.SemiBold },
-                datePicker,
-                bottomPanel
-            }
-        };
-
-        var dialog = new Window
-        {
-            Title = "Chọn ngày báo cáo",
-            Width = 320,
-            Height = 320,
-            CanResize = false,
-            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            Content = new Grid { Margin = new Thickness(16), Children = { mainPanel } }
-        };
-
-        var ok = new Button { Content = "OK", IsDefault = true };
-        var cancel = new Button { Content = "Hủy", IsCancel = true };
-
-        var stackBottom = new StackPanel
-        {
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
-            Spacing = 8,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-            Margin = new Thickness(0, 16, 0, 0),
-            Children = { ok, cancel }
-        };
-
-        var stackMain = new StackPanel
-        {
-            Spacing = 12,
-            Children =
-            {
-                new TextBlock { Text = "Chọn ngày để xem báo cáo cuối ngày", FontWeight = Avalonia.Media.FontWeight.SemiBold },
-                datePicker,
-                stackBottom
-            }
-        };
-
-        dialog.Content = new Grid { Margin = new Thickness(16), Children = { stackMain } };
-
-        btnHomNay.Click += (s, e) => datePicker.SelectedDate = new DateTimeOffset(DateTime.Today);
-
-        okBtn.Click += async (s, e) =>
-        {
-            dialog.Close(true);
-            var ngayChonMoi = datePicker.SelectedDate?.DateTime ?? ngayHienTai;
-            DatNgay(ngayChonMoi);
-            await TaiDuLieuAsync();
-        };
-
-        cancelBtn.Click += (s, e) => dialog.Close(false);
-
-        // Bỏ dialog để tránh lỗi - dùng Flyout thay thế
         await Task.CompletedTask;
     }
 }

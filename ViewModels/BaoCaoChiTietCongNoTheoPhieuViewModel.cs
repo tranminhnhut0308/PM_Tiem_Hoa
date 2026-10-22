@@ -12,6 +12,7 @@ using CommunityToolkit.Mvvm.Input;
 using ShopHoa.Helpers;
 using ShopHoa.Models;
 using ShopHoa.Services;
+using ShopHoa.Views;
 
 namespace ShopHoa.ViewModels;
 
@@ -520,6 +521,7 @@ public partial class BaoCaoChiTietCongNoTheoPhieuViewModel : ObservableObject
 
             var count = await _service.XuatExcelAsync(filter, file.Path.LocalPath);
             CapNhatTrangThai?.Invoke($"Đã xuất {count:N0} chứng từ ra file: {Path.GetFileName(file.Path.LocalPath)}");
+            await NotificationWindow.ShowSuccessAsync($"Đã xuất {count:N0} chứng từ ra file Excel thành công!", owner: window);
         }
         catch (Exception ex)
         {

@@ -163,12 +163,17 @@ public partial class MainWindowViewModel : ObservableObject
             CapNhatTrangThai = message => StatusMessage = message,
             MoChiTietHoaDonAsync = async maHd =>
             {
-                if (OwnerWindow is null) return;
+                if (OwnerWindow is null || string.IsNullOrWhiteSpace(maHd)) return;
                 try
                 {
+<<<<<<< HEAD
                     var invoices = await _db.GetHoaDonAsync();
                     var inv = invoices.FirstOrDefault(i => string.Equals(i.MaHoaDon, maHd, StringComparison.OrdinalIgnoreCase));
                     if (inv != null && XemHoaDonCommand.CanExecute(inv))
+=======
+                    var inv = new HoaDon { MaHoaDon = maHd };
+                    if (XemHoaDonCommand.CanExecute(inv))
+>>>>>>> b740e84 (fix baos cao)
                     {
                         await XemHoaDonCommand.ExecuteAsync(inv);
                     }
