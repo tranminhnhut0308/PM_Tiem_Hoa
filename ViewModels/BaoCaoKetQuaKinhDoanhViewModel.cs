@@ -11,6 +11,7 @@ using CommunityToolkit.Mvvm.Input;
 using ShopHoa.Helpers;
 using ShopHoa.Models;
 using ShopHoa.Services;
+using ShopHoa.Views;
 
 namespace ShopHoa.ViewModels;
 
@@ -267,6 +268,8 @@ public partial class BaoCaoKetQuaKinhDoanhViewModel : ObservableObject
             {
                 await using var stream = await file.OpenWriteAsync();
                 wb.SaveAs(stream);
+
+                await NotificationWindow.ShowSuccessAsync("Đã xuất file Excel báo cáo kết quả kinh doanh thành công!", owner: cuaSo);
             }
         }
         catch (Exception ex)

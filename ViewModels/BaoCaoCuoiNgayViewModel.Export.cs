@@ -74,10 +74,13 @@ public sealed partial class BaoCaoCuoiNgayViewModel
 
             if (CoLoi)
             {
-                await HienThiHopNhat?.Invoke(
-                    "Xuất file thất bại",
-                    "Không tải được dữ liệu nên không thể xuất file.\n\n" +
-                    "Chi tiết:\n" + ThongBaoLoi);
+                if (HienThiHopNhat is not null)
+                {
+                    await HienThiHopNhat(
+                        "Xuất file thất bại",
+                        "Không tải được dữ liệu nên không thể xuất file.\n\n" +
+                        "Chi tiết:\n" + ThongBaoLoi);
+                }
 
                 CapNhatTrangThai?.Invoke("Không thể xuất file do lỗi tải dữ liệu.");
                 return;
@@ -112,10 +115,13 @@ public sealed partial class BaoCaoCuoiNgayViewModel
 
             CapNhatTrangThai?.Invoke($"✅ Đã xuất báo cáo ngày {duLieu.NgayHienThi} ra file {tenFileMacDinh}.");
 
-            await HienThiHopNhat?.Invoke(
-                "Xuất file thành công",
-                $"Đã xuất báo cáo cuối ngày {duLieu.NgayHienThi}.\n\n" +
-                $"File:\n{file.Name}");
+            if (HienThiHopNhat is not null)
+            {
+                await HienThiHopNhat(
+                    "Xuất file thành công",
+                    $"Đã xuất báo cáo cuối ngày {duLieu.NgayHienThi}.\n\n" +
+                    $"File:\n{file.Name}");
+            }
         }
         catch (Exception ex)
         {
@@ -123,10 +129,13 @@ public sealed partial class BaoCaoCuoiNgayViewModel
 
             CapNhatTrangThai?.Invoke("Xuất file thất bại: " + ex.Message);
 
-            await HienThiHopNhat?.Invoke(
-                "Xuất file thất bại",
-                "Không thể xuất báo cáo cuối ngày.\n\n" +
-                $"Chi tiết lỗi:\n{ex.Message}");
+            if (HienThiHopNhat is not null)
+            {
+                await HienThiHopNhat(
+                    "Xuất file thất bại",
+                    "Không thể xuất báo cáo cuối ngày.\n\n" +
+                    $"Chi tiết lỗi:\n{ex.Message}");
+            }
         }
     }
 }

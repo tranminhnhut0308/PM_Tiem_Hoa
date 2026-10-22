@@ -12,6 +12,7 @@ using CommunityToolkit.Mvvm.Input;
 using ShopHoa.Helpers;
 using ShopHoa.Models;
 using ShopHoa.Services;
+using ShopHoa.Views;
 
 namespace ShopHoa.ViewModels;
 
@@ -288,7 +289,7 @@ public partial class BaoCaoTongHopNhapXuatViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public async Task XoaLocAsync()
+    public void XoaLoc()
     {
         TimKiem = string.Empty;
         SelectedNhomHang = NhomHangOptions.FirstOrDefault();
@@ -335,6 +336,8 @@ public partial class BaoCaoTongHopNhapXuatViewModel : ObservableObject
                 using var wb = BaoCaoNhapXuatService.TaoWorkbookTongHopNhapXuat(DuLieu);
                 await using var stream = await file.OpenWriteAsync();
                 wb.SaveAs(stream);
+
+                await NotificationWindow.ShowSuccessAsync("Đã xuất file Excel báo cáo tổng hợp nhập xuất thành công!", owner: window);
             }
         }
         catch (Exception ex)

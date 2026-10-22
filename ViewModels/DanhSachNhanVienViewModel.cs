@@ -195,18 +195,10 @@ public partial class DanhSachNhanVienViewModel : ObservableObject
     [RelayCommand]
     public void XoaBoLoc()
     {
-        searchKeyword = string.Empty;
-        OnPropertyChanged(nameof(SearchKeyword));
-
-        selectedTrangThai = "Tất cả trạng thái";
-        OnPropertyChanged(nameof(SelectedTrangThai));
-
-        selectedRole = RoleOptions.FirstOrDefault();
-        OnPropertyChanged(nameof(SelectedRole));
-
-        currentPage = 1;
-        OnPropertyChanged(nameof(CurrentPage));
-
+        SearchKeyword = string.Empty;
+        SelectedTrangThai = "Tất cả trạng thái";
+        SelectedRole = RoleOptions.FirstOrDefault();
+        CurrentPage = 1;
         _ = LoadDataAsync();
     }
 

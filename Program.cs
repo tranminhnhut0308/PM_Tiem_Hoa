@@ -1,5 +1,6 @@
 using Avalonia;
 using System;
+using System.IO;
 using Velopack;
 
 namespace ShopHoa;
