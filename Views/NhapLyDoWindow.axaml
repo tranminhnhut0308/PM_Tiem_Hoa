@@ -1,0 +1,33 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="ShopHoa.Views.NhapLyDoWindow"
+        Title="Nhập lý do"
+        Width="460" Height="300"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="#F4F7F6">
+    <Border Background="#FFFFFF" CornerRadius="14" BorderBrush="#D8E5E0"
+            BorderThickness="1" Margin="12" Padding="20">
+        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+            <StackPanel Spacing="3">
+                <TextBlock x:Name="TxtTieuDe" Text="Nhập lý do" FontSize="16"
+                           FontWeight="Bold" Foreground="#163F38" />
+                <TextBlock x:Name="TxtMoTa" Text="Lý do được lưu để phục vụ kiểm toán."
+                           FontSize="12" Foreground="#61736E" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Spacing="6">
+                <TextBox x:Name="TxtLyDo" AcceptsReturn="True" TextWrapping="Wrap"
+                         MinHeight="90" Watermark="Nhập lý do..." />
+                <TextBlock x:Name="TxtLoi" Foreground="#D92D20" FontWeight="SemiBold"
+                           FontSize="12" IsVisible="False" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                <Button Content="Hủy" Width="90" Height="36" Click="OnCancelClick" />
+                <Button Content="Đồng ý" Width="110" Height="36" Background="#087F6E"
+                        Foreground="White" Click="OnConfirmClick" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

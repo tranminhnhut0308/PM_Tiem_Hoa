@@ -18,6 +18,9 @@ public sealed partial class PhieuXuatHang : ObservableObject
 
     public uint ChiNhanhId { get; set; } = 1;
 
+    /// <summary>Chi nhánh nhận hàng khi loại xuất là XUAT_CHUYEN_KHO.</summary>
+    public uint? ChiNhanhNhanId { get; set; }
+
     public string KhoXuat { get; set; } = "Kho Tổng (Kho mặc định)";
 
     /// <summary>

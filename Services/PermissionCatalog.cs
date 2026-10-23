@@ -68,7 +68,8 @@ public static class PermissionCatalog
             PermissionKeys.CustomersImport,
             PermissionKeys.CustomersExport,
             PermissionKeys.CustomersDebtView,
-            PermissionKeys.CustomersDebtPay
+            PermissionKeys.CustomersDebtPay,
+            PermissionKeys.CustomersDebtClose
         }),
         new GroupDefinition("Suppliers", "Nhà cung cấp", new[]
         {
@@ -214,6 +215,7 @@ public static class PermissionCatalog
         [PermissionKeys.CustomersExport] = "Export khách hàng",
         [PermissionKeys.CustomersDebtView] = "Xem công nợ",
         [PermissionKeys.CustomersDebtPay] = "Thu tiền khách hàng",
+        [PermissionKeys.CustomersDebtClose] = "Kết kỳ / mở lại kỳ công nợ",
 
         // Nhà cung cấp
         [PermissionKeys.SuppliersView] = "Xem nhà cung cấp",
@@ -337,6 +339,7 @@ public static class PermissionCatalog
                 PermissionKeys.CustomersCreate, PermissionKeys.CustomersEdit, PermissionKeys.CustomersDelete,
                 PermissionKeys.CustomersImport, PermissionKeys.CustomersExport,
                 PermissionKeys.CustomersDebtView, PermissionKeys.CustomersDebtPay,
+                PermissionKeys.CustomersDebtClose,
                 PermissionKeys.SuppliersView, PermissionKeys.SuppliersDetail,
                 PermissionKeys.SuppliersCreate, PermissionKeys.SuppliersEdit, PermissionKeys.SuppliersDelete,
                 PermissionKeys.SuppliersImport, PermissionKeys.SuppliersExport,

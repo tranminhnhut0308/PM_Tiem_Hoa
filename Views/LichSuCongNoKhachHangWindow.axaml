@@ -1,0 +1,51 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="using:ShopHoa.Models"
+        x:Class="ShopHoa.Views.LichSuCongNoKhachHangWindow"
+        Title="Lịch sử công nợ khách hàng"
+        Width="980" Height="640"
+        MinWidth="760" MinHeight="480"
+        WindowStartupLocation="CenterOwner"
+        Background="#F4F7F6">
+    <Grid RowDefinitions="Auto,*,Auto" Margin="14" RowSpacing="10">
+        <Border Background="White" BorderBrush="#D8E5E0" BorderThickness="1"
+                CornerRadius="12" Padding="16,12">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="2">
+                    <TextBlock x:Name="TxtTieuDe" Text="Lịch sử công nợ" FontSize="17"
+                               FontWeight="Bold" Foreground="#163F38" />
+                    <TextBlock Text="Sổ cái phát sinh nợ, thu nợ và điều chỉnh (mới nhất trước)"
+                               FontSize="12" Foreground="#61736E" />
+                </StackPanel>
+                <TextBlock x:Name="TxtSoDu" Grid.Column="1" FontSize="16" FontWeight="Bold"
+                           Foreground="#D92D20" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Background="White" BorderBrush="#D8E5E0" BorderThickness="1"
+                CornerRadius="12" ClipToBounds="True">
+            <DataGrid x:Name="GridLichSu" x:DataType="models:LichSuCongNoKhachHang"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      CanUserReorderColumns="False" CanUserResizeColumns="True"
+                      GridLinesVisibility="Horizontal" RowHeight="38"
+                      Background="White" BorderThickness="0"
+                      HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="THỜI GIAN" Binding="{Binding ThoiGianText}" Width="145" />
+                    <DataGridTextColumn Header="LOẠI GIAO DỊCH" Binding="{Binding LoaiGiaoDichHienThi}" Width="170" />
+                    <DataGridTextColumn Header="CHỨNG TỪ" Binding="{Binding MaChungTuHienThi}" Width="170" />
+                    <DataGridTextColumn Header="GHI NỢ" Binding="{Binding PhatSinhNoText}" Width="120" />
+                    <DataGridTextColumn Header="GHI CÓ" Binding="{Binding GhiCoText}" Width="120" />
+                    <DataGridTextColumn Header="SỐ DƯ" Binding="{Binding SoDuText}" Width="120" />
+                    <DataGridTextColumn Header="GHI CHÚ" Binding="{Binding GhiChuHienThi}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+            <TextBlock x:Name="TxtTrangThai" Foreground="#61736E" FontSize="12"
+                       VerticalAlignment="Center" />
+            <Button Content="Đóng" Width="100" Height="36" Click="OnCloseClick" />
+        </StackPanel>
+    </Grid>
+</Window>

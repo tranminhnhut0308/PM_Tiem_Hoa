@@ -61,6 +61,7 @@ public static class PermissionKeys
     public const string CustomersExport = "khachhang.export";
     public const string CustomersDebtView = "khachhang.xem_cong_no";
     public const string CustomersDebtPay = "khachhang.thu_tien";
+    public const string CustomersDebtClose = "khachhang.ket_ky_cong_no";
 
     // ===== Nhà cung cấp =====
     public const string SuppliersView = "nhacungcap.xem";

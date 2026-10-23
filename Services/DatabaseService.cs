@@ -115,6 +115,19 @@ public sealed partial class DatabaseService
     public async Task WarmUpAsync()
     {
         await using var connection = await OpenAsync();
+
+        // Bảo đảm schema danh mục (nhóm hàng / đơn vị tính) sẵn sàng ngay khi
+        // kiểm tra kết nối. Lỗi ở bước này không được làm hỏng việc đăng nhập;
+        // các màn hình danh mục sẽ báo lỗi cụ thể nếu vẫn chưa bổ sung được.
+        try
+        {
+            await EnsureBangDanhMucAsync(connection);
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Không chuẩn bị được schema danh mục nhóm hàng / đơn vị tính", ex);
+        }
+
         _ = EnsureAuditTableAsync();
     }
 
@@ -423,7 +436,7 @@ public sealed partial class DatabaseService
                 sp.gia_ban AS GiaBan,
                 sp.gia_von AS GiaVon,
                 COALESCE(tk.so_luong_ton, 0) AS TonKho,
-                COALESCE(sp.ton_kho_excel, COALESCE(tk.so_luong_ton, 0)) AS TonKhoExcel,
+                COALESCE(tk.so_luong_ton, sp.ton_kho_excel, 0) AS TonKhoExcel,
                 sp.ton_toi_thieu AS TonToiThieu,
                 sp.ton_toi_da AS TonToiDa,
                 COALESCE(sp.khach_dat, 0) AS KhachDat,
@@ -440,7 +453,7 @@ public sealed partial class DatabaseService
                 sp.ghi_chu AS GhiChu,
                 sp.hinh_anh AS HinhAnh
             FROM san_pham sp
-            LEFT JOIN ton_kho tk ON tk.san_pham_id = sp.id
+            LEFT JOIN ton_kho tk ON tk.san_pham_id = sp.id AND tk.chi_nhanh_id = @ChiNhanhId
             LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
             LEFT JOIN nhom_san_pham nsp ON nsp.id = sp.nhom_san_pham_id
             {whereSql}
@@ -494,7 +507,7 @@ public sealed partial class DatabaseService
                 sp.gia_ban AS GiaBan,
                 sp.gia_von AS GiaVon,
                 COALESCE(tk.so_luong_ton, 0) AS TonKho,
-                COALESCE(sp.ton_kho_excel, COALESCE(tk.so_luong_ton, 0)) AS TonKhoExcel,
+                COALESCE(tk.so_luong_ton, sp.ton_kho_excel, 0) AS TonKhoExcel,
                 sp.ton_toi_thieu AS TonToiThieu,
                 sp.ton_toi_da AS TonToiDa,
                 COALESCE(sp.khach_dat, 0) AS KhachDat,
@@ -511,7 +524,7 @@ public sealed partial class DatabaseService
                 sp.ghi_chu AS GhiChu,
                 sp.hinh_anh AS HinhAnh
             FROM san_pham sp
-            LEFT JOIN ton_kho tk ON tk.san_pham_id = sp.id
+            LEFT JOIN ton_kho tk ON tk.san_pham_id = sp.id AND tk.chi_nhanh_id = @ChiNhanhId
             LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
             LEFT JOIN nhom_san_pham nsp ON nsp.id = sp.nhom_san_pham_id
             WHERE sp.id = @Id
@@ -551,7 +564,7 @@ public sealed partial class DatabaseService
                 sp.gia_ban AS GiaBan,
                 sp.gia_von AS GiaVon,
                 COALESCE(tk.so_luong_ton, 0) AS TonKho,
-                COALESCE(sp.ton_kho_excel, COALESCE(tk.so_luong_ton, 0)) AS TonKhoExcel,
+                COALESCE(tk.so_luong_ton, sp.ton_kho_excel, 0) AS TonKhoExcel,
                 sp.ton_toi_thieu AS TonToiThieu,
                 sp.ton_toi_da AS TonToiDa,
                 COALESCE(sp.khach_dat, 0) AS KhachDat,
@@ -568,7 +581,7 @@ public sealed partial class DatabaseService
                 sp.ghi_chu AS GhiChu,
                 sp.hinh_anh AS HinhAnh
             FROM san_pham sp
-            LEFT JOIN ton_kho tk ON tk.san_pham_id = sp.id
+            LEFT JOIN ton_kho tk ON tk.san_pham_id = sp.id AND tk.chi_nhanh_id = @ChiNhanhId
             LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
             LEFT JOIN nhom_san_pham nsp ON nsp.id = sp.nhom_san_pham_id
             WHERE TRIM(COALESCE(sp.ma_vach, '')) = @Code
@@ -604,7 +617,7 @@ public sealed partial class DatabaseService
                 sp.gia_ban AS GiaBan,
                 sp.gia_von AS GiaVon,
                 COALESCE(tk.so_luong_ton, 0) AS TonKho,
-                COALESCE(sp.ton_kho_excel, COALESCE(tk.so_luong_ton, 0)) AS TonKhoExcel,
+                COALESCE(tk.so_luong_ton, sp.ton_kho_excel, 0) AS TonKhoExcel,
                 sp.ton_toi_thieu AS TonToiThieu,
                 sp.ton_toi_da AS TonToiDa,
                 COALESCE(sp.khach_dat, 0) AS KhachDat,
@@ -621,7 +634,7 @@ public sealed partial class DatabaseService
                 sp.ghi_chu AS GhiChu,
                 sp.hinh_anh AS HinhAnh
             FROM san_pham sp
-            LEFT JOIN ton_kho tk ON tk.san_pham_id = sp.id
+            LEFT JOIN ton_kho tk ON tk.san_pham_id = sp.id AND tk.chi_nhanh_id = @ChiNhanhId
             LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
             LEFT JOIN nhom_san_pham nsp ON nsp.id = sp.nhom_san_pham_id
             WHERE sp.id IN @Ids;
@@ -5779,6 +5792,7 @@ LIMIT 500;
         var userId = Session.CurrentUser?.Id;
 
         var coCotLienKet = await EnsurePhieuQuyHoaDonColumnsAsync();
+        var coCotKiotViet = await DamBaoCotDuLieuKiotVietAsync();
 
         await using var connection = await OpenAsync();
         await using var transaction = await connection.BeginTransactionAsync();
@@ -5812,6 +5826,26 @@ LIMIT 500;
                 : khach.TenKhachHang.Trim();
 
             uint chiNhanhCuaKhach = khach.ChiNhanhId ?? (Session.CurrentUser?.ChiNhanhId ?? 1);
+
+            // Chặn thu vượt quá dư nợ thực tế theo cùng công thức hiển thị ở
+            // danh sách khách hàng (sổ cái + số dư KiotViet nếu có).
+            var bieuThucNo = TaoBieuThucTienKhachHang(false, "kh.id", coCotKiotViet).NoHienTai;
+            var noHienTai = await connection.ExecuteScalarAsync<decimal>(
+                $"SELECT {bieuThucNo} FROM khach_hang kh WHERE kh.id = @Id;",
+                new { Id = khachHangId },
+                transaction);
+
+            if (noHienTai <= 0)
+            {
+                throw new InvalidOperationException(
+                    $"Khách hàng {(tenKhach ?? khachHangId.ToString())} hiện không còn nợ để thu.");
+            }
+
+            if (soTien - noHienTai > 0.009m)
+            {
+                throw new InvalidOperationException(
+                    $"Số tiền thu ({soTien:N0} đ) vượt quá dư nợ hiện tại ({noHienTai:N0} đ).");
+            }
 
             // Các hóa đơn còn nợ của khách, cũ nhất trước, khoá để tránh thu trùng.
             const string hoaDonSql = """
@@ -7397,7 +7431,7 @@ LIMIT 500;
                 @ChiNhanhId, @TrangThai,
                 COALESCE(@NgayTao, NOW()), NOW(),
                 @CoDuLieuKiotViet, @NguoiTaoTen, @NgayNhapExcel,
-                @NoCanTraHienTaiExcel, @TongMuaExcel, @TongMuaTruTraHangExcel,
+                COALESCE(@NoCanTraHienTaiExcel, 0), COALESCE(@TongMuaExcel, 0), COALESCE(@TongMuaTruTraHangExcel, 0),
                 @KhuVuc, @SoCccd, @NhomNhaCungCapTen, @TenCongTy
             );
             SELECT LAST_INSERT_ID();
@@ -8949,6 +8983,20 @@ LIMIT 500;
                     SanPhamId = item.SanPham.Id,
                     SoLuongTon = tonSau,
                     GiaVonBinhQuan = Math.Round(giaVonBinhQuan, 2)
+                },
+                transaction);
+
+            await connection.ExecuteAsync(
+                """
+                UPDATE san_pham
+                SET ton_kho_excel = GREATEST(0, COALESCE(ton_kho_excel, 0) + @Delta),
+                    ngay_cap_nhat = NOW()
+                WHERE id = @SanPhamId;
+                """,
+                new
+                {
+                    Delta = item.SoLuong,
+                    SanPhamId = item.SanPham.Id
                 },
                 transaction);
 
@@ -12592,6 +12640,17 @@ LIMIT 500;
                     NguoiTaoId = userId
                 },
                 transaction: transaction);
+
+            if (loaiDoiTac == "NHA_CUNG_CAP")
+            {
+                await EnsureBangCongNoNccKyAsync(connection, transaction);
+                await CapNhatNoDauKyNccVaoSnapshotAsync(
+                    connection,
+                    transaction,
+                    item.DoiTacId,
+                    ngayDauKy,
+                    item.SoTien);
+            }
 
             await transaction.CommitAsync();
 

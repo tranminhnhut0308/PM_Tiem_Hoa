@@ -402,8 +402,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Lưu phiếu nhập trả lại hàng: Ghi phiếu trả, chi tiết trả, cập nhật tồn kho (+),
-    /// hoàn tiền (ghi sổ quỹ hoặc trừ nợ khách hàng) trong MỘT giao dịch duy nhất.
+    /// Lưu phiếu nhập trả lại hàng: Ghi phiếu trả, chi tiết trả, cập nhật tồn kho (+) của chi nhánh,
+    /// ghi lịch sử nhập/xuất kho và hoàn tiền (ghi sổ quỹ hoặc trừ nợ khách hàng) trong MỘT giao dịch.
     /// </summary>
     public async Task<string> LuuPhieuTraHangAsync(
         PhieuTraHang phieu,
@@ -501,13 +501,6 @@ public sealed partial class DatabaseService
                 (@PhieuTraId, @SanPhamId, @SoLuong, @DonGia, @ThanhTien, @LyDoTra);
             """;
 
-            const string updateTonKhoSql = """
-                UPDATE san_pham 
-                SET ton_kho_excel = ton_kho_excel + @SoLuong,
-                    ngay_cap_nhat = NOW()
-                WHERE id = @SanPhamId;
-            """;
-
             foreach (var item in chiTiets)
             {
                 await connection.ExecuteAsync(insertChiTietSql, new
@@ -520,12 +513,20 @@ public sealed partial class DatabaseService
                     item.LyDoTra
                 }, transaction);
 
-                // Cập nhật tăng tồn kho
-                await connection.ExecuteAsync(updateTonKhoSql, new
-                {
+                await CapNhatTonKhoGiaoDichAsync(
+                    connection,
+                    transaction,
+                    branchId,
+                    item.SanPhamId,
+                    item.TenSanPham,
                     item.SoLuong,
-                    item.SanPhamId
-                }, transaction);
+                    item.DonGia,
+                    "NHAP",
+                    "PHIEU_TRA_HANG",
+                    phieu.MaPhieuTra,
+                    userId,
+                    now,
+                    $"Nhập trả lại hàng khách theo phiếu {phieu.MaPhieuTra}");
             }
 
             // 4. Xử lý hoàn tiền / trừ công nợ

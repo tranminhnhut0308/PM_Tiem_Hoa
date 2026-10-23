@@ -462,18 +462,6 @@ public partial class MainWindow : Window
     /// Menu bộ lọc do Flyout của Avalonia mở/đóng. Hai hàm này chỉ cập nhật
     /// biến trong ViewModel để mũi tên trên nút đổi đúng chiều.
     /// </summary>
-    private void OnSupplierFilterFlyoutOpened(object? sender, EventArgs e)
-    {
-        if (DataContext is MainWindowViewModel viewModel)
-            viewModel.IsSupplierFilterPanelOpen = true;
-    }
-
-    private void OnSupplierFilterFlyoutClosed(object? sender, EventArgs e)
-    {
-        if (DataContext is MainWindowViewModel viewModel)
-            viewModel.IsSupplierFilterPanelOpen = false;
-    }
-
     private void OnCustomerFilterFlyoutOpened(object? sender, EventArgs e)
     {
         if (DataContext is MainWindowViewModel viewModel)
@@ -490,13 +478,6 @@ public partial class MainWindow : Window
     /// Bấm "Áp dụng" thì đóng menu bộ lọc. Áp dụng xong danh sách và thống kê
     /// đã cập nhật, giữ menu mở chỉ che mất bảng dữ liệu.
     /// </summary>
-    private void OnSupplierFilterApplyClicked(object? sender, RoutedEventArgs e)
-        => DongMenuBoLocSauKhiThucThiCommand();
-
-    /// <summary>Bấm "Xóa" thì đóng menu bộ lọc sau khi đã reset về "Tất cả".</summary>
-    private void OnSupplierFilterClearClicked(object? sender, RoutedEventArgs e)
-        => DongMenuBoLocSauKhiThucThiCommand();
-
     private void OnCustomerFilterApplyClicked(object? sender, RoutedEventArgs e)
         => DongMenuBoLocSauKhiThucThiCommand();
 
@@ -515,17 +496,14 @@ public partial class MainWindow : Window
         => Dispatcher.UIThread.Post(DongMenuBoLoc, DispatcherPriority.Background);
 
     /// <summary>
-    /// Đóng menu bộ lọc (của khách hàng hoặc nhà cung cấp). Nội dung menu nằm
-    /// trong Popup nên không sinh field, phải lấy qua chính nút đã gắn Flyout.
+    /// Đóng menu bộ lọc của khách hàng. Nội dung menu nằm trong Popup nên
+    /// không sinh field, phải lấy qua chính nút đã gắn Flyout.
     /// </summary>
     private void DongMenuBoLoc()
     {
         // FlyoutBase.IsOpen không có setter công khai, dùng Hide() của FlyoutBase.
         if (CustomerFilterButton.Flyout is FlyoutBase flyoutCustomer)
             flyoutCustomer.Hide();
-
-        if (SupplierFilterButton.Flyout is FlyoutBase flyoutSupplier)
-            flyoutSupplier.Hide();
     }
 
     private void OnSupplierPageSizeChanged(object? sender, SelectionChangedEventArgs e)

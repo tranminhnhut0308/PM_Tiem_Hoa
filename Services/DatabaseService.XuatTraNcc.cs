@@ -281,15 +281,20 @@ public sealed partial class DatabaseService
                 sp.ma_san_pham AS MaSanPham,
                 sp.ten_san_pham AS TenSanPham,
                 COALESCE(dvt.ten_don_vi, '') AS DonViTinh,
-                COALESCE(sp.ton_kho_excel, 0) AS TonKho
+                COALESCE(tk.so_luong_ton, sp.ton_kho_excel, 0) AS TonKho
             FROM chi_tiet_phieu_xuat_tra_ncc ct
             JOIN san_pham sp ON ct.san_pham_id = sp.id
             LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
+            LEFT JOIN ton_kho tk ON tk.san_pham_id = sp.id AND tk.chi_nhanh_id = @ChiNhanhId
             WHERE ct.phieu_xuat_tra_id = @PhieuXuatTraId
             ORDER BY ct.id ASC;
         """;
 
-        var items = (await connection.QueryAsync<ChiTietPhieuXuatTraHang>(sql, new { PhieuXuatTraId = phieuXuatTraId })).ToList();
+        var items = (await connection.QueryAsync<ChiTietPhieuXuatTraHang>(sql, new
+        {
+            PhieuXuatTraId = phieuXuatTraId,
+            ChiNhanhId = Session.CurrentUser?.ChiNhanhId ?? 1
+        })).ToList();
         for (var i = 0; i < items.Count; i++)
         {
             items[i].SoThuTu = i + 1;
@@ -361,13 +366,14 @@ public sealed partial class DatabaseService
                 ct.ma_san_pham AS MaSanPham,
                 ct.ten_san_pham AS TenSanPham,
                 COALESCE(dvt.ten_don_vi, '') AS DonViTinh,
-                COALESCE(sp.ton_kho_excel, 0) AS TonKho,
+                COALESCE(tk.so_luong_ton, sp.ton_kho_excel, 0) AS TonKho,
                 ct.so_luong AS SoLuongMua,
                 ct.don_gia_nhap AS DonGia,
                 COALESCE(da_tra.TongDaTra, 0) AS DaXuatTra
             FROM chi_tiet_phieu_nhap_hang ct
             JOIN san_pham sp ON ct.san_pham_id = sp.id
             LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
+            LEFT JOIN ton_kho tk ON tk.san_pham_id = sp.id AND tk.chi_nhanh_id = @ChiNhanhId
             LEFT JOIN (
                 SELECT cxt.san_pham_id, SUM(cxt.so_luong) AS TongDaTra
                 FROM chi_tiet_phieu_xuat_tra_ncc cxt
@@ -380,7 +386,11 @@ public sealed partial class DatabaseService
             ORDER BY ct.id ASC;
         """;
 
-        var rows = await connection.QueryAsync(sql, new { PhieuNhapId = phieuNhapId });
+        var rows = await connection.QueryAsync(sql, new
+        {
+            PhieuNhapId = phieuNhapId,
+            ChiNhanhId = Session.CurrentUser?.ChiNhanhId ?? 1
+        });
         var result = new List<ChiTietPhieuXuatTraHang>();
         var index = 1;
 
@@ -415,7 +425,7 @@ public sealed partial class DatabaseService
     /// Lưu phiếu xuất hàng trả lại Nhà cung cấp trong MỘT giao dịch ACID nguyên tử:
     /// 1. Ghi phiếu xuất trả (phieu_xuat_tra_ncc).
     /// 2. Ghi chi tiết xuất trả (chi_tiet_phieu_xuat_tra_ncc).
-    /// 3. Giảm tồn kho sản phẩm (ton_kho_excel).
+    /// 3. Giảm tồn kho sản phẩm của chi nhánh (ton_kho) và ghi lịch sử nhập/xuất kho.
     /// 4. Nếu phương thức "Trừ công nợ": ghi Có sổ cái công nợ NCC (giảm nợ phải trả).
     /// 5. Nếu phương thức "Tiền mặt" / "Chuyển khoản": tạo phiếu Thu trong sổ quỹ (NCC hoàn tiền về quỹ).
     /// </summary>
@@ -518,13 +528,6 @@ public sealed partial class DatabaseService
                 (@PhieuXuatTraId, @SanPhamId, @SoLuong, @DonGia, @ThanhTien, @LyDoXuatTra);
             """;
 
-            const string updateTonKhoSql = """
-                UPDATE san_pham 
-                SET ton_kho_excel = GREATEST(0, COALESCE(ton_kho_excel, 0) - @SoLuong),
-                    ngay_cap_nhat = NOW()
-                WHERE id = @SanPhamId;
-            """;
-
             foreach (var item in chiTiets)
             {
                 await connection.ExecuteAsync(insertChiTietSql, new
@@ -537,12 +540,20 @@ public sealed partial class DatabaseService
                     item.LyDoXuatTra
                 }, transaction);
 
-                // Giảm tồn kho sản phẩm
-                await connection.ExecuteAsync(updateTonKhoSql, new
-                {
-                    item.SoLuong,
-                    item.SanPhamId
-                }, transaction);
+                await CapNhatTonKhoGiaoDichAsync(
+                    connection,
+                    transaction,
+                    branchId,
+                    item.SanPhamId,
+                    item.TenSanPham,
+                    -item.SoLuong,
+                    item.DonGia,
+                    "XUAT",
+                    "PHIEU_XUAT_TRA_NCC",
+                    phieu.MaPhieuXuatTra,
+                    userId,
+                    now,
+                    $"Xuất trả nhà cung cấp theo phiếu {phieu.MaPhieuXuatTra}");
             }
 
             // 4. Xử lý công nợ hoặc hoàn tiền

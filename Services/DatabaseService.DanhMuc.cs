@@ -28,10 +28,10 @@ namespace ShopHoa.Services;
 public sealed partial class DatabaseService
 {
     /// <summary>
-    /// Tên database đã được bảo đảm trong phiên làm việc của service này.
-    /// Lưu theo tên database (không phải bool) để khi người dùng đổi sang
-    /// database khác trong "Cài đặt kết nối Database" thì bảng danh mục của
-    /// database mới cũng được bảo đảm.
+    /// Khóa của kết nối đã được bảo đảm có đủ bảng danh mục. Khóa gồm
+    /// server + port + database + user (không phải chỉ tên database) để khi
+    /// người dùng đổi sang server khác trùng tên database trong "Cài đặt kết
+    /// nối Database" thì bảng danh mục của server mới vẫn được bảo đảm.
     /// </summary>
     private string? _daDamBaoBangDanhMuc;
 
@@ -73,15 +73,23 @@ public sealed partial class DatabaseService
     /// </summary>
     private async Task EnsureBangDanhMucAsync(MySqlConnection connection)
     {
-        if (string.Equals(_daDamBaoBangDanhMuc, connection.Database, StringComparison.OrdinalIgnoreCase))
+        var khoa = TaoKhoaBangDanhMuc(connection);
+
+        // Cache theo đúng server/port/database/user. Vẫn kiểm tra lại sự tồn tại
+        // của cả hai bảng để trường hợp bảng bị xóa/đổi database trong lúc ứng
+        // dụng đang chạy thì lần truy vấn kế tiếp tự tạo lại thay vì trả lỗi 1146.
+        if (string.Equals(_daDamBaoBangDanhMuc, khoa, StringComparison.OrdinalIgnoreCase)
+            && await HaiBangDanhMucTonTaiAsync(connection))
+        {
             return;
+        }
 
         try
         {
             if (!await BangDanhMucTonTaiAsync(connection, "nhom_san_pham"))
             {
                 await connection.ExecuteAsync(TaoBangNhomSanPhamSql);
-                await SaoChepNhomSanPhamAsync(connection);
+                await SaoChepNhomSanPhamAnToanAsync(connection);
             }
             else
             {
@@ -100,7 +108,7 @@ public sealed partial class DatabaseService
             if (!await BangDanhMucTonTaiAsync(connection, "don_vi_tinh"))
             {
                 await connection.ExecuteAsync(TaoBangDonViTinhSql);
-                await SaoChepDonViTinhAsync(connection);
+                await SaoChepDonViTinhAnToanAsync(connection);
             }
             else
             {
@@ -114,8 +122,6 @@ public sealed partial class DatabaseService
 
                 await BackfillMaDanhMucAsync(connection, "don_vi_tinh", "ma_don_vi", "DVT");
             }
-
-            _daDamBaoBangDanhMuc = connection.Database;
         }
         catch (MySqlException ex) when (ex.Number is 1044 or 1045 or 1142)
         {
@@ -130,7 +136,75 @@ public sealed partial class DatabaseService
         }
         catch (Exception ex)
         {
+            // Không nuốt lỗi nữa: nếu không tạo/bổ sung được schema thì phải báo
+            // đúng nguyên nhân thay vì để câu SELECT kế tiếp ném lỗi 1146 khó hiểu.
             SafeLog.WriteError("Lỗi bảo đảm bảng danh mục", ex);
+
+            throw new InvalidOperationException(
+                "Không thể khởi tạo/bổ sung bảng danh mục trên database đang dùng: " +
+                SafeLog.Redact(ex.Message),
+                ex);
+        }
+
+        _daDamBaoBangDanhMuc = khoa;
+    }
+
+    /// <summary>
+    /// Khóa nhận diện kết nối đang dùng (server + port + database + user).
+    /// Không chứa mật khẩu.
+    /// </summary>
+    private static string TaoKhoaBangDanhMuc(MySqlConnection connection)
+    {
+        var builder = new MySqlConnectionStringBuilder(connection.ConnectionString);
+
+        return $"{builder.Server}|{builder.Port}|{builder.Database}|{builder.UserID}";
+    }
+
+    /// <summary>
+    /// Kiểm tra nhanh cả hai bảng danh mục còn tồn tại trong database hiện tại.
+    /// </summary>
+    private static async Task<bool> HaiBangDanhMucTonTaiAsync(MySqlConnection connection)
+    {
+        var soBang = await connection.ExecuteScalarAsync<int>(
+            """
+            SELECT COUNT(DISTINCT TABLE_NAME)
+            FROM information_schema.TABLES
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME IN ('nhom_san_pham', 'don_vi_tinh');
+            """);
+
+        return soBang == 2;
+    }
+
+    /// <summary>
+    /// Sao chép dữ liệu cũ nhưng không làm hỏng chức năng thêm mới nếu bảng ERP
+    /// nguồn có cấu trúc lạ: lỗi sao chép chỉ được ghi log.
+    /// </summary>
+    private static async Task SaoChepNhomSanPhamAnToanAsync(MySqlConnection connection)
+    {
+        try
+        {
+            await SaoChepNhomSanPhamAsync(connection);
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Không sao chép được nhóm hàng cũ từ nhom_hang_hoa", ex);
+        }
+    }
+
+    /// <summary>
+    /// Sao chép đơn vị tính cũ nhưng không làm hỏng chức năng thêm mới nếu bảng
+    /// ERP nguồn có cấu trúc lạ: lỗi sao chép chỉ được ghi log.
+    /// </summary>
+    private static async Task SaoChepDonViTinhAnToanAsync(MySqlConnection connection)
+    {
+        try
+        {
+            await SaoChepDonViTinhAsync(connection);
+        }
+        catch (Exception ex)
+        {
+            SafeLog.WriteError("Không sao chép được đơn vị tính cũ từ don_vi_tinh_hang_hoa", ex);
         }
     }
 
@@ -163,8 +237,15 @@ public sealed partial class DatabaseService
             if (cotHienCo.Contains(tenCot))
                 continue;
 
-            await connection.ExecuteAsync(
-                $"ALTER TABLE `{tenBang}` ADD COLUMN `{tenCot}` {dinhNghia};");
+            try
+            {
+                await connection.ExecuteAsync(
+                    $"ALTER TABLE `{tenBang}` ADD COLUMN `{tenCot}` {dinhNghia};");
+            }
+            catch (MySqlException ex) when (ex.Number == 1060)
+            {
+                // Một tiến trình khác vừa thêm cùng cột -> không còn thiếu nữa.
+            }
         }
     }
 

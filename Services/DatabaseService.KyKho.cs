@@ -204,34 +204,73 @@ public sealed partial class DatabaseService
         if (existing != null)
             return existing;
 
-        const string insertSql = """
-        INSERT INTO ky_ke_toan
-        (ma_ky, ten_ky, ngay_bat_dau_ky, ngay_ket_thuc_ky, trang_thai_khoa_so, chi_nhanh_id)
-        VALUES
-        (@MaKy, @TenKy, @NgayBatDau, @NgayKetThuc, 0, 1);
-        SELECT LAST_INSERT_ID();
-        """;
+        await using var transaction = await connection.BeginTransactionAsync();
 
-        var newId = await connection.ExecuteScalarAsync<uint>(insertSql, new
+        try
         {
-            MaKy = maKy,
-            TenKy = tenKy,
-            NgayBatDau = dauThang,
-            NgayKetThuc = cuoiThang
-        });
+            const string insertSql = """
+            INSERT INTO ky_ke_toan
+            (ma_ky, ten_ky, ngay_bat_dau_ky, ngay_ket_thuc_ky, trang_thai_khoa_so, chi_nhanh_id)
+            VALUES
+            (@MaKy, @TenKy, @NgayBatDau, @NgayKetThuc, 0, 1);
+            SELECT LAST_INSERT_ID();
+            """;
 
-        // Khởi tạo sẵn danh sách hàng hóa ban đầu vào kỳ mới này
-        await KhoiTaoHangHoaChoKyMoiAsync(connection, newId, null);
+            var newId = await connection.ExecuteScalarAsync<uint>(insertSql, new
+            {
+                MaKy = maKy,
+                TenKy = tenKy,
+                NgayBatDau = dauThang,
+                NgayKetThuc = cuoiThang
+            }, transaction);
 
-        return new KyKeToan
+            // Khởi tạo sẵn danh sách hàng hóa ban đầu vào kỳ mới này
+            await KhoiTaoHangHoaChoKyMoiAsync(connection, newId, transaction);
+
+            // Kỳ tự động cũng phải kế thừa công nợ NCC còn lại từ kỳ trước.
+            var kyNguon = await connection.QueryFirstOrDefaultAsync<KyKeToan>(
+                """
+                SELECT id AS Id, ma_ky AS MaKy, ten_ky AS TenKy,
+                       ngay_bat_dau_ky AS NgayBatDauKy, ngay_ket_thuc_ky AS NgayKetThucKy,
+                       trang_thai_khoa_so AS TrangThaiKhoaSo, chi_nhanh_id AS ChiNhanhId
+                FROM ky_ke_toan
+                WHERE id <> @KyId AND ngay_bat_dau_ky < @NgayBatDau
+                ORDER BY ngay_bat_dau_ky DESC
+                LIMIT 1
+                FOR UPDATE;
+                """,
+                new { KyId = newId, NgayBatDau = dauThang },
+                transaction);
+
+            if (kyNguon is not null)
+            {
+                await EnsureBangCongNoNccKyAsync(connection, transaction);
+                var congNoNguon = await LayNguonChuyenKyAsync(connection, transaction, kyNguon);
+                await ChuyenCongNoNccSangKyMoiAsync(
+                    connection,
+                    transaction,
+                    kyNguon,
+                    newId,
+                    congNoNguon);
+            }
+
+            await transaction.CommitAsync();
+
+            return new KyKeToan
+            {
+                Id = newId,
+                MaKy = maKy,
+                TenKy = tenKy,
+                NgayBatDauKy = dauThang,
+                NgayKetThucKy = cuoiThang,
+                TrangThaiKhoaSo = false
+            };
+        }
+        catch
         {
-            Id = newId,
-            MaKy = maKy,
-            TenKy = tenKy,
-            NgayBatDauKy = dauThang,
-            NgayKetThucKy = cuoiThang,
-            TrangThaiKhoaSo = false
-        };
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     /// <summary>
@@ -297,6 +336,54 @@ public sealed partial class DatabaseService
             else
             {
                 await KhoiTaoHangHoaChoKyMoiAsync(connection, newKyId, transaction);
+            }
+
+            // Kế thừa công nợ nhà cung cấp từ kỳ trước (nếu có) để không mất số dư
+            // khi người dùng tạo kỳ mới từ màn hình quản lý kỳ.
+            KyKeToan? kyNguon = null;
+            if (kyTruocId.HasValue && kyTruocId.Value > 0 && kyTruocId.Value != newKyId)
+            {
+                kyNguon = await connection.QueryFirstOrDefaultAsync<KyKeToan>(
+                    """
+                    SELECT id AS Id, ma_ky AS MaKy, ten_ky AS TenKy,
+                           ngay_bat_dau_ky AS NgayBatDauKy, ngay_ket_thuc_ky AS NgayKetThucKy,
+                           trang_thai_khoa_so AS TrangThaiKhoaSo, chi_nhanh_id AS ChiNhanhId
+                    FROM ky_ke_toan
+                    WHERE id = @Id
+                    LIMIT 1
+                    FOR UPDATE;
+                    """,
+                    new { Id = kyTruocId.Value },
+                    transaction);
+            }
+
+            if (kyNguon is null)
+            {
+                kyNguon = await connection.QueryFirstOrDefaultAsync<KyKeToan>(
+                    """
+                    SELECT id AS Id, ma_ky AS MaKy, ten_ky AS TenKy,
+                           ngay_bat_dau_ky AS NgayBatDauKy, ngay_ket_thuc_ky AS NgayKetThucKy,
+                           trang_thai_khoa_so AS TrangThaiKhoaSo, chi_nhanh_id AS ChiNhanhId
+                    FROM ky_ke_toan
+                    WHERE id <> @KyId AND ngay_bat_dau_ky < @NgayBatDau
+                    ORDER BY ngay_bat_dau_ky DESC
+                    LIMIT 1
+                    FOR UPDATE;
+                    """,
+                    new { KyId = newKyId, NgayBatDau = ngayBatDau.Date },
+                    transaction);
+            }
+
+            if (kyNguon is not null && kyNguon.NgayBatDauKy < ngayBatDau.Date)
+            {
+                await EnsureBangCongNoNccKyAsync(connection, transaction);
+                var congNoNguon = await LayNguonChuyenKyAsync(connection, transaction, kyNguon);
+                await ChuyenCongNoNccSangKyMoiAsync(
+                    connection,
+                    transaction,
+                    kyNguon,
+                    newKyId,
+                    congNoNguon);
             }
 
             await transaction.CommitAsync();

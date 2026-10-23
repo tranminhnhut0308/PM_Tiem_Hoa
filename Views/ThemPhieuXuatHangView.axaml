@@ -765,6 +765,16 @@
                     FontSize="12.5" />
                 </StackPanel>
 
+                <!-- CHI NHÁNH NHẬN (CHUYỂN KHO) -->
+                <StackPanel Spacing="4" IsVisible="{Binding IsPhieuXuatChuyenKho}">
+                  <TextBlock Text="Chi nhánh nhận *" FontSize="11.5" Foreground="#1E293B" FontWeight="Bold" />
+                  <ComboBox ItemsSource="{Binding PhieuXuatChiNhanhNhanOptions}"
+                    SelectedItem="{Binding SelectedPhieuXuatChiNhanhNhanOption, Mode=TwoWay}"
+                    HorizontalAlignment="Stretch"
+                    FontSize="12.5"
+                    DisplayMemberBinding="{Binding Name}" />
+                </StackPanel>
+
                 <!-- ĐỐI TƯỢNG NHẬN HÀNG / KHÁCH HÀNG -->
                 <StackPanel Spacing="4">
                   <TextBlock Text="Đối tượng nhận / Khách hàng" FontSize="11.5" Foreground="#64748B" FontWeight="Medium" />

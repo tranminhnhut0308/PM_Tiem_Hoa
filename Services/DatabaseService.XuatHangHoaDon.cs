@@ -10,6 +10,7 @@ namespace ShopHoa.Services;
 public sealed partial class DatabaseService
 {
     private bool _hasBangPhieuXuatHang;
+    private bool? _hasCotChiNhanhNhanPhieuXuat;
 
     /// <summary>
     /// Đảm bảo bảng phieu_xuat_hang và chi_tiet_phieu_xuat_hang tồn tại trong cơ sở dữ liệu.
@@ -26,6 +27,7 @@ public sealed partial class DatabaseService
                 id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                 ma_phieu_xuat VARCHAR(50) NOT NULL UNIQUE,
                 chi_nhanh_id INT UNSIGNED NOT NULL DEFAULT 1,
+                chi_nhanh_nhan_id INT UNSIGNED NULL,
                 kho_xuat VARCHAR(100) DEFAULT 'Kho Tổng (Kho mặc định)',
                 loai_xuat VARCHAR(50) NOT NULL DEFAULT 'XUAT_HUY',
                 doi_tuong_nhan VARCHAR(150) NULL,
@@ -162,6 +164,13 @@ public sealed partial class DatabaseService
         phieu.TongTien = dongHopLe.Sum(x => x.ThanhTien);
         phieu.TrangThai = "DA_XUAT_KHO";
 
+        var laChuyenKho = string.Equals(phieu.LoaiXuat, "XUAT_CHUYEN_KHO", StringComparison.OrdinalIgnoreCase);
+        if (laChuyenKho)
+        {
+            if (!phieu.ChiNhanhNhanId.HasValue || phieu.ChiNhanhNhanId.Value == 0 || phieu.ChiNhanhNhanId.Value == branchId)
+                throw new InvalidOperationException("Vui lòng chọn chi nhánh nhận khác với chi nhánh xuất khi chuyển kho.");
+        }
+
         await using var connection = await OpenAsync();
         await EnsureBangPhieuXuatHangAsync(connection);
         await EnsureBangLichSuNhapXuatKhoAsync();
@@ -169,7 +178,7 @@ public sealed partial class DatabaseService
 
         try
         {
-            // 0. Kiểm tra trùng mã phiếu xuất
+            // 0. Kiểm tra trạng mã phiếu xuất
             var exists = await connection.ExecuteScalarAsync<int?>(
                 "SELECT id FROM phieu_xuat_hang WHERE ma_phieu_xuat = @Ma LIMIT 1 FOR UPDATE;",
                 new { Ma = phieu.MaPhieuXuat },
@@ -223,6 +232,7 @@ public sealed partial class DatabaseService
             (
                 ma_phieu_xuat,
                 chi_nhanh_id,
+                chi_nhanh_nhan_id,
                 kho_xuat,
                 loai_xuat,
                 doi_tuong_nhan,
@@ -241,6 +251,7 @@ public sealed partial class DatabaseService
             (
                 @MaPhieuXuat,
                 @ChiNhanhId,
+                @ChiNhanhNhanId,
                 @KhoXuat,
                 @LoaiXuat,
                 @DoiTuongNhan,
@@ -264,6 +275,7 @@ public sealed partial class DatabaseService
                 {
                     phieu.MaPhieuXuat,
                     phieu.ChiNhanhId,
+                    ChiNhanhNhanId = phieu.ChiNhanhNhanId,
                     phieu.KhoXuat,
                     phieu.LoaiXuat,
                     DoiTuongNhan = BlankToNull(phieu.DoiTuongNhan),
@@ -316,6 +328,28 @@ public sealed partial class DatabaseService
               AND san_pham_id = @SanPhamId;
             """;
 
+            const string upsertTonNhanSql = """
+            INSERT INTO ton_kho
+            (
+                chi_nhanh_id,
+                san_pham_id,
+                so_luong_ton,
+                gia_von_binh_quan,
+                ngay_cap_nhat
+            )
+            VALUES
+            (
+                @ChiNhanhId,
+                @SanPhamId,
+                @SoLuongTon,
+                @GiaVonBinhQuan,
+                NOW()
+            )
+            ON DUPLICATE KEY UPDATE
+                so_luong_ton = @SoLuongTon,
+                ngay_cap_nhat = NOW();
+            """;
+
             const string insertLichSuSql = """
             INSERT INTO lich_su_nhap_xuat_kho
             (
@@ -336,7 +370,7 @@ public sealed partial class DatabaseService
             (
                 @ChiNhanhId,
                 @SanPhamId,
-                'XUAT',
+                @LoaiGiaoDich,
                 'PHIEU_XUAT_HANG',
                 @MaChungTu,
                 @SoLuong,
@@ -379,6 +413,20 @@ public sealed partial class DatabaseService
                     },
                     transaction);
 
+                await connection.ExecuteAsync(
+                    """
+                    UPDATE san_pham
+                    SET ton_kho_excel = GREATEST(0, COALESCE(ton_kho_excel, 0) - @SoLuong),
+                        ngay_cap_nhat = NOW()
+                    WHERE id = @SanPhamId;
+                    """,
+                    new
+                    {
+                        item.SoLuong,
+                        SanPhamId = item.SanPham.Id
+                    },
+                    transaction);
+
                 // Ghi nhận lịch sử biến động kho
                 await connection.ExecuteAsync(
                     insertLichSuSql,
@@ -386,8 +434,9 @@ public sealed partial class DatabaseService
                     {
                         ChiNhanhId = branchId,
                         SanPhamId = item.SanPham.Id,
+                        LoaiGiaoDich = "XUAT",
                         MaChungTu = phieu.MaPhieuXuat,
-                        item.SoLuong,
+                        SoLuong = item.SoLuong,
                         TonTruoc = tonTruoc,
                         TonSau = tonSau,
                         GiaVon = giaVon,
@@ -396,6 +445,59 @@ public sealed partial class DatabaseService
                         GhiChu = $"Xuất kho ({phieu.LoaiXuatHienThi}) - Phiếu {phieu.MaPhieuXuat}"
                     },
                     transaction);
+
+                if (laChuyenKho && phieu.ChiNhanhNhanId.HasValue)
+                {
+                    var tonNhanTruoc = await connection.ExecuteScalarAsync<decimal?>(
+                        "SELECT so_luong_ton FROM ton_kho WHERE chi_nhanh_id = @ChiNhanhId AND san_pham_id = @SanPhamId FOR UPDATE;",
+                        new { ChiNhanhId = phieu.ChiNhanhNhanId.Value, SanPhamId = item.SanPham.Id },
+                        transaction) ?? 0m;
+
+                    var tonNhanSau = tonNhanTruoc + item.SoLuong;
+
+                    await connection.ExecuteAsync(
+                        upsertTonNhanSql,
+                        new
+                        {
+                            ChiNhanhId = phieu.ChiNhanhNhanId.Value,
+                            SanPhamId = item.SanPham.Id,
+                            SoLuongTon = tonNhanSau,
+                            GiaVonBinhQuan = giaVon
+                        },
+                        transaction);
+
+                    await connection.ExecuteAsync(
+                        """
+                        UPDATE san_pham
+                        SET ton_kho_excel = GREATEST(0, COALESCE(ton_kho_excel, 0) + @SoLuong),
+                            ngay_cap_nhat = NOW()
+                        WHERE id = @SanPhamId;
+                        """,
+                        new
+                        {
+                            item.SoLuong,
+                            SanPhamId = item.SanPham.Id
+                        },
+                        transaction);
+
+                    await connection.ExecuteAsync(
+                        insertLichSuSql,
+                        new
+                        {
+                            ChiNhanhId = phieu.ChiNhanhNhanId.Value,
+                            SanPhamId = item.SanPham.Id,
+                            LoaiGiaoDich = "NHAP",
+                            MaChungTu = phieu.MaPhieuXuat,
+                            SoLuong = item.SoLuong,
+                            TonTruoc = tonNhanTruoc,
+                            TonSau = tonNhanSau,
+                            GiaVon = giaVon,
+                            NguoiThucHienId = phieu.NguoiXuatId,
+                            ThoiGian = phieu.ThoiGianXuat,
+                            GhiChu = $"Nhập chuyển kho từ phiếu {phieu.MaPhieuXuat}"
+                        },
+                        transaction);
+                }
             }
 
             await transaction.CommitAsync();

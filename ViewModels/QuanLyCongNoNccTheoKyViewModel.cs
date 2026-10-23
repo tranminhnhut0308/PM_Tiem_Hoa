@@ -440,6 +440,12 @@ public sealed partial class QuanLyCongNoNccTheoKyViewModel : ObservableObject
             return;
         }
 
+        if (SelectedKy is null || SelectedKy.TrangThaiKhoaSo)
+        {
+            await NotificationWindow.ShowWarningAsync("Kỳ này đã kết kỳ, không thể thanh toán công nợ.", owner: OwnerWindow);
+            return;
+        }
+
         if (item.NoCuoiKy <= 0)
         {
             await NotificationWindow.ShowWarningAsync($"Nhà cung cấp \"{item.TenNhaCungCap}\" hiện không còn nợ.", owner: OwnerWindow);
@@ -462,7 +468,8 @@ public sealed partial class QuanLyCongNoNccTheoKyViewModel : ObservableObject
                 item.NhaCungCapId,
                 ketQua.SoTien,
                 ketQua.PhuongThuc,
-                ketQua.GhiChu);
+                ketQua.GhiChu,
+                SelectedKy.Id);
 
             await TaiCongNoTheoKyAsync();
 

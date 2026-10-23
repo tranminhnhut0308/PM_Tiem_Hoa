@@ -288,15 +288,20 @@ public sealed partial class DatabaseService
                 sp.ma_san_pham AS MaSanPham,
                 sp.ten_san_pham AS TenSanPham,
                 COALESCE(dvt.ten_don_vi, '') AS DonViTinh,
-                COALESCE(sp.ton_kho_excel, 0) AS TonKho
+                COALESCE(tk.so_luong_ton, sp.ton_kho_excel, 0) AS TonKho
             FROM chi_tiet_phieu_nhap_khac ct
             JOIN san_pham sp ON ct.san_pham_id = sp.id
             LEFT JOIN don_vi_tinh dvt ON dvt.id = sp.don_vi_tinh_id
+            LEFT JOIN ton_kho tk ON tk.san_pham_id = sp.id AND tk.chi_nhanh_id = @ChiNhanhId
             WHERE ct.phieu_nhap_khac_id = @PhieuNhapKhacId
             ORDER BY ct.id ASC;
         """;
 
-        var items = (await connection.QueryAsync<ChiTietPhieuNhapKhac>(sql, new { PhieuNhapKhacId = phieuNhapKhacId })).ToList();
+        var items = (await connection.QueryAsync<ChiTietPhieuNhapKhac>(sql, new
+        {
+            PhieuNhapKhacId = phieuNhapKhacId,
+            ChiNhanhId = Session.CurrentUser?.ChiNhanhId ?? 1
+        })).ToList();
         for (var i = 0; i < items.Count; i++)
         {
             items[i].SoThuTu = i + 1;
@@ -307,7 +312,7 @@ public sealed partial class DatabaseService
 
     /// <summary>
     /// Lưu phiếu nhập khác mới cùng các dòng chi tiết theo giao dịch ACID.
-    /// Tự động cập nhật tăng số lượng tồn kho (ton_kho_excel) trong bảng san_pham.
+    /// Tự động cập nhật tăng tồn kho của chi nhánh (ton_kho) và ghi lịch sử nhập/xuất kho.
     /// Không tạo công nợ và không ghi sổ quỹ (vì là nghiệp vụ nội bộ/kiểm kê/khuyến mãi/thu hồi).
     /// </summary>
     public async Task<(bool Success, string Message, string MaPhieu, uint PhieuId)> LuuPhieuNhapKhacAsync(
@@ -408,13 +413,6 @@ public sealed partial class DatabaseService
                 (@PhieuNhapKhacId, @SanPhamId, @SoLuong, @DonGia, @ThanhTien, @GhiChu);
             """;
 
-            const string updateTonKhoSql = """
-                UPDATE san_pham 
-                SET ton_kho_excel = COALESCE(ton_kho_excel, 0) + @SoLuong,
-                    ngay_cap_nhat = NOW()
-                WHERE id = @SanPhamId;
-            """;
-
             foreach (var ct in chiTiets)
             {
                 await connection.ExecuteAsync(insertChiTietSql, new
@@ -427,11 +425,20 @@ public sealed partial class DatabaseService
                     ct.GhiChu
                 }, transaction);
 
-                await connection.ExecuteAsync(updateTonKhoSql, new
-                {
+                await CapNhatTonKhoGiaoDichAsync(
+                    connection,
+                    transaction,
+                    branchId,
                     ct.SanPhamId,
-                    ct.SoLuong
-                }, transaction);
+                    ct.TenSanPham,
+                    ct.SoLuong,
+                    ct.DonGia,
+                    "NHAP",
+                    "PHIEU_NHAP_KHAC",
+                    phieu.MaPhieuNhapKhac,
+                    userId,
+                    now,
+                    $"Nhập khác ({phieu.LoaiNhapKhac}) theo phiếu {phieu.MaPhieuNhapKhac}");
             }
 
             await transaction.CommitAsync();

@@ -44,6 +44,12 @@ public sealed partial class QuanLyCongNoTheoKyViewModel : ObservableObject
     private int selectedMucNoFilterIndex; // 0: Tất cả, 1: < 2 triệu, 2: 2-5 triệu, 3: > 5 triệu
 
     [ObservableProperty]
+    private bool onlyDebt = true;
+
+    [ObservableProperty]
+    private int selectedSortIndex; // 0: Ưu tiên, 1: Nợ giảm, 2: Nợ tăng, 3: Số kỳ, 4: Tên
+
+    [ObservableProperty]
     private bool isLoading;
 
     [ObservableProperty]
@@ -53,12 +59,14 @@ public sealed partial class QuanLyCongNoTheoKyViewModel : ObservableObject
     [ObservableProperty] private int tongSoKhachNo;
     [ObservableProperty] private decimal tongNoDauKy;
     [ObservableProperty] private decimal tongPhatSinhTrongKy;
+    [ObservableProperty] private decimal tongDieuChinhTrongKy;
     [ObservableProperty] private decimal tongDaThuTrongKy;
     [ObservableProperty] private decimal tongNoHienTai;
     [ObservableProperty] private int soKhachNoUuTienCao;
 
     public string TongNoDauKyText => MoneyInput.Format(TongNoDauKy) + " đ";
     public string TongPhatSinhText => MoneyInput.Format(TongPhatSinhTrongKy) + " đ";
+    public string TongDieuChinhText => MoneyInput.Format(TongDieuChinhTrongKy) + " đ";
     public string TongDaThuText => MoneyInput.Format(TongDaThuTrongKy) + " đ";
     public string TongNoHienTaiText => MoneyInput.Format(TongNoHienTai) + " đ";
 
@@ -147,6 +155,16 @@ public sealed partial class QuanLyCongNoTheoKyViewModel : ObservableObject
         _ = TaiCongNoTheoKyAsync();
     }
 
+    partial void OnOnlyDebtChanged(bool value)
+    {
+        _ = TaiCongNoTheoKyAsync();
+    }
+
+    partial void OnSelectedSortIndexChanged(int value)
+    {
+        _ = TaiCongNoTheoKyAsync();
+    }
+
     [RelayCommand]
     public async Task TaiCongNoTheoKyAsync()
     {
@@ -197,7 +215,16 @@ public sealed partial class QuanLyCongNoTheoKyViewModel : ObservableObject
                 soKyParam,
                 uuTienParam,
                 minNoParam,
-                maxNoParam);
+                maxNoParam,
+                OnlyDebt,
+                SelectedSortIndex switch
+                {
+                    1 => "no_giam",
+                    2 => "no_tang",
+                    3 => "so_ky",
+                    4 => "ten",
+                    _ => "uu_tien"
+                });
 
             KhachNos.Clear();
             foreach (var item in items)
@@ -205,7 +232,26 @@ public sealed partial class QuanLyCongNoTheoKyViewModel : ObservableObject
                 KhachNos.Add(item);
             }
 
-            CapNhatThongKe();
+            if (OnlyDebt)
+            {
+                // Thẻ thống kê vẫn phản ánh cả khách đã trả hết trong kỳ,
+                // trong khi bảng chỉ hiển thị khách còn nợ.
+                var allItems = await _db.GetCongNoTheoKyAsync(
+                    SelectedKy.Id,
+                    SearchText,
+                    soKyParam,
+                    uuTienParam,
+                    minNoParam,
+                    maxNoParam,
+                    false,
+                    "uu_tien");
+                CapNhatThongKe(allItems);
+            }
+            else
+            {
+                CapNhatThongKe();
+            }
+
             StatusMessage = $"Đã tải {KhachNos.Count} khách hàng còn nợ trong kỳ {SelectedKy.TenKy}.";
         }
         catch (Exception ex)
@@ -219,17 +265,20 @@ public sealed partial class QuanLyCongNoTheoKyViewModel : ObservableObject
         }
     }
 
-    private void CapNhatThongKe()
+    private void CapNhatThongKe(IReadOnlyList<KhachHangKyCongNoItem>? nguon = null)
     {
-        TongSoKhachNo = KhachNos.Count;
-        TongNoDauKy = KhachNos.Sum(x => x.NoDauKy);
-        TongPhatSinhTrongKy = KhachNos.Sum(x => x.PhatSinhTrongKy);
-        TongDaThuTrongKy = KhachNos.Sum(x => x.DaThuTrongKy);
-        TongNoHienTai = KhachNos.Sum(x => x.NoCuoiKy);
-        SoKhachNoUuTienCao = KhachNos.Count(x => x.MucDoUuTien == "CAO");
+        var items = nguon ?? KhachNos;
+        TongSoKhachNo = items.Count(x => x.NoCuoiKy > 0);
+        TongNoDauKy = items.Sum(x => x.NoDauKy);
+        TongPhatSinhTrongKy = items.Sum(x => x.PhatSinhTrongKy);
+        TongDieuChinhTrongKy = items.Sum(x => x.DieuChinhTrongKy);
+        TongDaThuTrongKy = items.Sum(x => x.DaThuTrongKy);
+        TongNoHienTai = items.Sum(x => x.NoCuoiKy);
+        SoKhachNoUuTienCao = items.Count(x => x.NoCuoiKy > 0 && x.MucDoUuTien == "CAO");
 
         OnPropertyChanged(nameof(TongNoDauKyText));
         OnPropertyChanged(nameof(TongPhatSinhText));
+        OnPropertyChanged(nameof(TongDieuChinhText));
         OnPropertyChanged(nameof(TongDaThuText));
         OnPropertyChanged(nameof(TongNoHienTaiText));
     }
@@ -364,7 +413,7 @@ public sealed partial class QuanLyCongNoTheoKyViewModel : ObservableObject
                 "Xác nhận Kết kỳ công nợ",
                 $"Bạn có chắc chắn muốn KẾT KỲ công nợ cho \"{SelectedKy.TenKy}\" không?\n\n" +
                 "⚠️ Khi kết kỳ:\n" +
-                "• Số liệu Công nợ cuối kỳ sẽ được chốt tự động = Nợ đầu kỳ + Phát sinh trong kỳ - Đã thu.\n" +
+                "• Số liệu Công nợ cuối kỳ sẽ được chốt tự động = Nợ đầu kỳ + Phát sinh + Điều chỉnh - Đã thu.\n" +
                 "• Kỳ sẽ được chuyển sang trạng thái [Khóa sổ] để bảo toàn số liệu kế toán.\n" +
                 "• Số dư nợ cuối này sẽ tự động kết chuyển sang làm nợ đầu kỳ kế tiếp, tăng số kỳ nợ và cập nhật mức độ ưu tiên thu nợ.");
 
@@ -396,7 +445,7 @@ public sealed partial class QuanLyCongNoTheoKyViewModel : ObservableObject
     [RelayCommand]
     private async Task MoLaiKyAsync()
     {
-        if (SelectedKy is null || !SelectedKy.TrangThaiKhoaSo)
+        if (SelectedKy is null || !SelectedKy.TrangThaiKhoaSo || OwnerWindow is null)
             return;
 
         try
@@ -408,8 +457,15 @@ public sealed partial class QuanLyCongNoTheoKyViewModel : ObservableObject
             if (!confirmed)
                 return;
 
+            var lyDoWindow = new NhapLyDoWindow(
+                "Lý do mở lại kỳ công nợ",
+                $"Kỳ \"{SelectedKy.TenKy}\" sẽ được mở khóa để điều chỉnh. Lý do được lưu lại để kiểm toán.");
+            var lyDo = await lyDoWindow.ShowDialog<string?>(OwnerWindow);
+            if (string.IsNullOrWhiteSpace(lyDo))
+                return;
+
             IsLoading = true;
-            await _db.MoLaiKyCongNoAsync(SelectedKy.Id);
+            await _db.MoLaiKyCongNoAsync(SelectedKy.Id, lyDo);
             await TaiDanhSachKyAsync(SelectedKy.Id);
 
             StatusMessage = $"Đã mở lại kỳ {SelectedKy.TenKy}.";
@@ -476,6 +532,83 @@ public sealed partial class QuanLyCongNoTheoKyViewModel : ObservableObject
             StatusMessage = "Lỗi thu nợ khách hàng: " + ex.Message;
             SafeLog.WriteError("Lỗi ThuNoKhachHangAsync", ex);
             await NotificationWindow.ShowErrorAsync("Không thu được nợ: " + ex.Message, owner: OwnerWindow);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// Xem sổ cái lịch sử phát sinh/thu nợ/điều chỉnh của khách hàng.
+    /// </summary>
+    [RelayCommand]
+    private async Task XemLichSuCongNoAsync(KhachHangKyCongNoItem? item)
+    {
+        item ??= SelectedKhachNo;
+        if (item is null || OwnerWindow is null)
+        {
+            await NotificationWindow.ShowWarningAsync("Vui lòng chọn một khách hàng để xem lịch sử.", owner: OwnerWindow);
+            return;
+        }
+
+        try
+        {
+            var window = new LichSuCongNoKhachHangWindow(_db, item.KhachHangId, item.TenKhachHang);
+            await window.ShowDialog(OwnerWindow);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi mở lịch sử công nợ: " + ex.Message;
+            SafeLog.WriteError("Lỗi XemLichSuCongNoAsync", ex);
+        }
+    }
+
+    /// <summary>
+    /// Điều chỉnh tăng/giảm công nợ có kiểm soát và ghi nhận lý do.
+    /// </summary>
+    [RelayCommand]
+    private async Task DieuChinhCongNoAsync(KhachHangKyCongNoItem? item)
+    {
+        item ??= SelectedKhachNo;
+        if (item is null || OwnerWindow is null)
+        {
+            await NotificationWindow.ShowWarningAsync("Vui lòng chọn một khách hàng để điều chỉnh công nợ.", owner: OwnerWindow);
+            return;
+        }
+
+        if (SelectedKy?.TrangThaiKhoaSo == true)
+        {
+            await NotificationWindow.ShowWarningAsync(
+                "Kỳ đã khóa sổ. Vui lòng mở lại kỳ trước khi điều chỉnh công nợ.",
+                owner: OwnerWindow);
+            return;
+        }
+
+        try
+        {
+            var dialog = new DieuChinhCongNoWindow(item.TenKhachHang, item.NoCuoiKy);
+            var input = await dialog.ShowDialog<DieuChinhCongNoInput?>(OwnerWindow);
+            if (input is null)
+                return;
+
+            IsLoading = true;
+            await _db.LuuDieuChinhCongNoAsync(
+                item.KhachHangId,
+                input.SoTien,
+                input.TangNo,
+                input.LyDo);
+
+            await TaiCongNoTheoKyAsync();
+
+            StatusMessage = $"Đã {(input.TangNo ? "tăng" : "giảm")} công nợ {input.SoTien:N0} đ cho {item.TenKhachHang}.";
+            await NotificationWindow.ShowSuccessAsync(StatusMessage, owner: OwnerWindow);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Lỗi điều chỉnh công nợ: " + ex.Message;
+            SafeLog.WriteError("Lỗi DieuChinhCongNoAsync", ex);
+            await NotificationWindow.ShowErrorAsync("Không điều chỉnh được công nợ: " + ex.Message, owner: OwnerWindow);
         }
         finally
         {

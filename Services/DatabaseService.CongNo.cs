@@ -609,4 +609,185 @@ public sealed partial class DatabaseService
 
         return (rows, totalCount, thongKe);
     }
+
+    /// <summary>
+    /// Lấy sổ cái công nợ của một khách hàng, mới nhất trước.
+    /// </summary>
+    public async Task<IReadOnlyList<LichSuCongNoKhachHang>> GetLichSuCongNoKhachHangAsync(
+        uint khachHangId,
+        int limit = 300)
+    {
+        var safeLimit = limit < 1 ? 300 : Math.Min(limit, 2000);
+
+        const string sql = """
+        SELECT
+            ls.id AS Id,
+            ls.loai_giao_dich AS LoaiGiaoDich,
+            ls.loai_chung_tu AS LoaiChungTu,
+            ls.ma_chung_tu AS MaChungTu,
+            ls.ghi_no AS GhiNo,
+            ls.ghi_co AS GhiCo,
+            ls.so_du AS SoDu,
+            ls.thoi_gian AS ThoiGian,
+            ls.ghi_chu AS GhiChu
+        FROM lich_su_cong_no_khach_hang ls
+        WHERE ls.khach_hang_id = @KhachHangId
+        ORDER BY ls.thoi_gian DESC, ls.id DESC
+        LIMIT @Limit;
+        """;
+
+        await using var connection = await OpenAsync();
+        return (await connection.QueryAsync<LichSuCongNoKhachHang>(
+            sql, new { KhachHangId = khachHangId, Limit = safeLimit })).AsList();
+    }
+
+    /// <summary>
+    /// Ghi nhận điều chỉnh công nợ khách hàng (tăng hoặc giảm) vào bảng điều chỉnh
+    /// và sổ cái công nợ trong cùng một giao dịch.
+    /// </summary>
+    public async Task<bool> LuuDieuChinhCongNoAsync(
+        uint khachHangId,
+        decimal soTien,
+        bool tangNo,
+        string lyDo)
+    {
+        Quyen.RequirePermission(
+            Session.CurrentUser,
+            PermissionKeys.CustomersDebtPay,
+            "Bạn không có quyền điều chỉnh công nợ khách hàng.");
+
+        if (khachHangId == 0)
+            throw new InvalidOperationException("Thiếu khách hàng cần điều chỉnh công nợ.");
+
+        if (soTien <= 0)
+            throw new InvalidOperationException("Số tiền điều chỉnh phải lớn hơn 0.");
+
+        if (string.IsNullOrWhiteSpace(lyDo))
+            throw new InvalidOperationException("Vui lòng nhập lý do điều chỉnh công nợ.");
+
+        var now = DateTime.Now;
+        var userId = Session.CurrentUser?.Id;
+        var coCotKiotViet = await DamBaoCotDuLieuKiotVietAsync();
+        var maDieuChinh = $"DC_{now:yyyyMMddHHmmssfff}_{khachHangId}";
+        var loaiDieuChinh = tangNo ? "DIEU_CHINH_TANG" : "DIEU_CHINH_GIAM";
+        var ghiNo = tangNo ? soTien : 0m;
+        var ghiCo = tangNo ? 0m : soTien;
+
+        await using var connection = await OpenAsync();
+        await using var transaction = await connection.BeginTransactionAsync();
+
+        try
+        {
+            const string khachSql = """
+            SELECT id, chi_nhanh_id
+            FROM khach_hang
+            WHERE id = @Id
+            LIMIT 1
+            FOR UPDATE;
+            """;
+            var khach = await connection.QueryFirstOrDefaultAsync<dynamic>(
+                khachSql, new { Id = khachHangId }, transaction);
+
+            if (khach is null)
+                throw new InvalidOperationException("Không tìm thấy khách hàng cần điều chỉnh công nợ.");
+
+            uint chiNhanhId = (uint?)khach.chi_nhanh_id
+                ?? Session.CurrentUser?.ChiNhanhId
+                ?? 1;
+
+            if (!tangNo)
+            {
+                var bieuThucNo = TaoBieuThucTienKhachHang(false, "kh.id", coCotKiotViet).NoHienTai;
+                var noHienTai = await connection.ExecuteScalarAsync<decimal>(
+                    $"SELECT {bieuThucNo} FROM khach_hang kh WHERE kh.id = @Id;",
+                    new { Id = khachHangId },
+                    transaction);
+
+                if (soTien - noHienTai > 0.009m)
+                {
+                    throw new InvalidOperationException(
+                        $"Số tiền giảm ({soTien:N0} đ) vượt quá dư nợ hiện tại ({noHienTai:N0} đ).");
+                }
+            }
+
+            await connection.ExecuteAsync("""
+            INSERT INTO dieu_chinh_cong_no
+            (
+                ma_dieu_chinh, khach_hang_id, chi_nhanh_id, so_tien,
+                loai_dieu_chinh, ly_do, nguoi_thuc_hien_id, thoi_gian
+            )
+            VALUES
+            (
+                @MaDieuChinh, @KhachHangId, @ChiNhanhId, @SoTien,
+                @LoaiDieuChinh, @LyDo, @NguoiThucHienId, @ThoiGian
+            );
+            """,
+            new
+            {
+                MaDieuChinh = maDieuChinh,
+                KhachHangId = khachHangId,
+                ChiNhanhId = chiNhanhId,
+                SoTien = soTien,
+                LoaiDieuChinh = loaiDieuChinh,
+                LyDo = lyDo.Trim(),
+                NguoiThucHienId = userId,
+                ThoiGian = now
+            }, transaction);
+
+            const string soDuSql = """
+            SELECT COALESCE(SUM(ghi_no - ghi_co), 0)
+            FROM lich_su_cong_no_khach_hang
+            WHERE khach_hang_id = @KhachHangId
+            FOR UPDATE;
+            """;
+            var soDuCu = await connection.ExecuteScalarAsync<decimal>(
+                soDuSql, new { KhachHangId = khachHangId }, transaction);
+
+            await connection.ExecuteAsync("""
+            INSERT INTO lich_su_cong_no_khach_hang
+            (
+                khach_hang_id, chi_nhanh_id, loai_giao_dich, loai_chung_tu,
+                ma_chung_tu, ghi_no, ghi_co, so_du,
+                thoi_gian, nguoi_thuc_hien_id, ghi_chu
+            )
+            VALUES
+            (
+                @KhachHangId, @ChiNhanhId, @LoaiGiaoDich, 'DIEU_CHINH',
+                @MaChungTu, @GhiNo, @GhiCo, @SoDu,
+                @ThoiGian, @NguoiThucHienId, @GhiChu
+            );
+            """,
+            new
+            {
+                KhachHangId = khachHangId,
+                ChiNhanhId = chiNhanhId,
+                LoaiGiaoDich = loaiDieuChinh,
+                MaChungTu = maDieuChinh,
+                GhiNo = ghiNo,
+                GhiCo = ghiCo,
+                SoDu = soDuCu + ghiNo - ghiCo,
+                ThoiGian = now,
+                NguoiThucHienId = userId,
+                GhiChu = lyDo.Trim()
+            }, transaction);
+
+            await transaction.CommitAsync();
+
+            _ = LogSubAccountActivityAsync(
+                "Điều chỉnh công nợ",
+                "KHACH_HANG",
+                khachHangId,
+                maDieuChinh,
+                $"{(tangNo ? "Tăng" : "Giảm")} công nợ {soTien:N0} đ. Lý do: {lyDo.Trim()}",
+                soTien);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            SafeLog.WriteError("Lỗi LuuDieuChinhCongNoAsync", ex);
+            throw;
+        }
+    }
 }

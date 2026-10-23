@@ -24,8 +24,13 @@ public partial class MainWindowViewModel
     [
         "Kho Tổng (Kho mặc định)",
         "Kho Trưng Bày Tiệm",
-        "Kho Hàng Hỏng / Chờ Xử Lý"
+        "Kho Hàng Hướng / Chờ Xử Lý"
     ];
+
+    public ObservableCollection<ProductOption> PhieuXuatChiNhanhNhanOptions { get; } = new();
+
+    [ObservableProperty]
+    private ProductOption? _selectedPhieuXuatChiNhanhNhanOption;
 
     public IReadOnlyList<string> PhieuXuatLoaiOptions { get; } =
     [
@@ -118,6 +123,8 @@ public partial class MainWindowViewModel
         PhieuXuatGhiChu = "";
         PhieuXuatNhanVien = Session.CurrentUser?.HoTen ?? "Quản trị viên";
         IsSavingPhieuXuat = false;
+        SelectedPhieuXuatChiNhanhNhanOption = null;
+        IsPhieuXuatChuyenKho = false;
 
         try
         {
@@ -127,6 +134,18 @@ public partial class MainWindowViewModel
         {
             PhieuXuatMa = $"PX{DateTime.Now:yyMMdd}-001";
         }
+
+        try
+        {
+            var chiNhanh = await _db.GetChiNhanhOptionsAsync(true);
+            PhieuXuatChiNhanhNhanOptions.Clear();
+            var currentBranch = Session.CurrentUser?.ChiNhanhId ?? 1;
+            foreach (var cn in chiNhanh.Where(c => c.Id != currentBranch))
+            {
+                PhieuXuatChiNhanhNhanOptions.Add(cn);
+            }
+        }
+        catch { }
 
         RecalculatePhieuXuatTotals();
         StatusMessage = "Sẵn sàng lập phiếu xuất hàng mới.";
@@ -374,12 +393,31 @@ public partial class MainWindowViewModel
 
         try
         {
+            var maLoaiXuat = ChuyenDoiLoaiXuatSangMa(PhieuXuatLoaiXuat);
+            if (string.Equals(maLoaiXuat, "XUAT_CHUYEN_KHO", StringComparison.OrdinalIgnoreCase))
+            {
+                if (SelectedPhieuXuatChiNhanhNhanOption == null || SelectedPhieuXuatChiNhanhNhanOption.Id == 0)
+                {
+                    await ShowMessageAsync("Thiếu thông tin", "Vui lòng chọn chi nhánh nhận khi lập phiếu xuất chuyển kho.");
+                    return;
+                }
+
+                if (SelectedPhieuXuatChiNhanhNhanOption.Id == (Session.CurrentUser?.ChiNhanhId ?? 1))
+                {
+                    await ShowMessageAsync("Không hợp lệ", "Chi nhánh nhận phải khác chi nhánh xuất.");
+                    return;
+                }
+            }
+
             var phieu = new PhieuXuatHang
             {
                 MaPhieuXuat = PhieuXuatMa,
                 ChiNhanhId = Session.CurrentUser?.ChiNhanhId ?? 1,
+                ChiNhanhNhanId = string.Equals(maLoaiXuat, "XUAT_CHUYEN_KHO", StringComparison.OrdinalIgnoreCase)
+                    ? SelectedPhieuXuatChiNhanhNhanOption?.Id
+                    : null,
                 KhoXuat = PhieuXuatKhoXuat,
-                LoaiXuat = ChuyenDoiLoaiXuatSangMa(PhieuXuatLoaiXuat),
+                LoaiXuat = maLoaiXuat,
                 DoiTuongNhan = PhieuXuatDoiTuongNhan,
                 TenNhanVien = PhieuXuatNhanVien,
                 ThoiGianXuat = PhieuXuatNgayXuat ?? DateTime.Now,
@@ -539,6 +577,15 @@ public partial class MainWindowViewModel
     [ObservableProperty] private decimal invoiceTongDaThu;
     [ObservableProperty] private decimal invoiceTongCongNo;
     [ObservableProperty] private bool isLoadingInvoices;
+
+    [ObservableProperty]
+    private bool _isPhieuXuatChuyenKho;
+
+    partial void OnPhieuXuatLoaiXuatChanged(string value)
+    {
+        var ma = ChuyenDoiLoaiXuatSangMa(value);
+        IsPhieuXuatChuyenKho = string.Equals(ma, "XUAT_CHUYEN_KHO", StringComparison.OrdinalIgnoreCase);
+    }
 
     public int InvoiceTotalPages => InvoicePageSize <= 0 ? 0 : (int)Math.Ceiling(InvoiceTotalCount / (double)InvoicePageSize);
 

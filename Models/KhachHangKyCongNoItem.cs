@@ -47,8 +47,14 @@ public sealed partial class KhachHangKyCongNoItem : ObservableObject
     [NotifyPropertyChangedFor(nameof(NoCuoiKyText))]
     private decimal daThuTrongKy;
 
-    /// <summary>Nợ cuối kỳ = Nợ đầu kỳ + Phát sinh - Đã thu</summary>
-    public decimal NoCuoiKy => Math.Max(0m, NoDauKy + PhatSinhTrongKy - DaThuTrongKy);
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NoCuoiKy))]
+    [NotifyPropertyChangedFor(nameof(DieuChinhText))]
+    [NotifyPropertyChangedFor(nameof(NoCuoiKyText))]
+    private decimal dieuChinhTrongKy;
+
+    /// <summary>Nợ cuối kỳ = Nợ đầu kỳ + Phát sinh + Điều chỉnh - Đã thu</summary>
+    public decimal NoCuoiKy => Math.Max(0m, NoDauKy + PhatSinhTrongKy + DieuChinhTrongKy - DaThuTrongKy);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SoKyNoText))]
@@ -69,6 +75,7 @@ public sealed partial class KhachHangKyCongNoItem : ObservableObject
     // Formatting Helpers
     public string NoDauKyText => FormatTien(NoDauKy);
     public string PhatSinhText => FormatTien(PhatSinhTrongKy);
+    public string DieuChinhText => FormatTien(DieuChinhTrongKy);
     public string DaThuText => FormatTien(DaThuTrongKy);
     public string NoCuoiKyText => FormatTien(NoCuoiKy);
 
@@ -105,25 +112,16 @@ public sealed partial class KhachHangKyCongNoItem : ObservableObject
     }
 
     /// <summary>
-    /// Đánh giá tự động mức độ ưu tiên:
-    /// - Nợ từ 3 kỳ trở lên HOẶC số nợ >= 5 triệu: Ưu tiên cao
-    /// - Nợ 2 kỳ HOẶC số nợ >= 2 triệu: Ưu tiên trung bình
-    /// - Nợ 1 kỳ và số nợ < 2 triệu: Ưu tiên thấp
+    /// Đánh giá tự động mức độ ưu tiên theo ngưỡng cấu hình:
+    /// - Nợ từ N kỳ trở lên HOẶC số nợ >= X: Ưu tiên cao
+    /// - Nợ từ M kỳ HOẶC số nợ >= Y: Ưu tiên trung bình
+    /// - Còn lại: Ưu tiên thấp
     /// </summary>
-    public void DanhGiaLaiMucDoUuTien()
+    public void DanhGiaLaiMucDoUuTien(CongNoCauHinh? cauHinh = null)
     {
-        if (SoKyNo >= 3 || NoCuoiKy >= 5_000_000m)
-        {
-            MucDoUuTien = "CAO";
-        }
-        else if (SoKyNo == 2 || NoCuoiKy >= 2_000_000m)
-        {
-            MucDoUuTien = "TRUNG_BINH";
-        }
-        else
-        {
-            MucDoUuTien = "THAP";
-        }
+        var cfg = cauHinh ?? CongNoCauHinh.MacDinh;
+
+        MucDoUuTien = cfg.DanhGiaMucDo(SoKyNo, NoCuoiKy);
     }
 
     private static string FormatTien(decimal value) => MoneyInput.Format(value) + " đ";
