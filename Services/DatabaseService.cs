@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.Globalization;
 using System.Text;
 using ClosedXML.Excel;
@@ -34,9 +34,9 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Mở kết nối mới tới database. Công khai để các service khác (ví dụ
-    /// <see cref="DashboardService"/>) dùng chung đúng một cách cấu hình kết nối
-    /// thay vì tự dựng connection string riêng.
+    /// Má»Ÿ káº¿t ná»‘i má»›i tá»›i database. CÃ´ng khai Ä‘á»ƒ cÃ¡c service khÃ¡c (vÃ­ dá»¥
+    /// <see cref="DashboardService"/>) dÃ¹ng chung Ä‘Ãºng má»™t cÃ¡ch cáº¥u hÃ¬nh káº¿t ná»‘i
+    /// thay vÃ¬ tá»± dá»±ng connection string riÃªng.
     /// </summary>
     public async Task<MySqlConnection> TaoKetNoiAsync()
     {
@@ -54,9 +54,9 @@ public sealed partial class DatabaseService
 
     private static string GetConnectionString(DatabaseConfig config)
     {
-        // SslMode được chuẩn hóa lại một lần nữa ở đây để mọi đường vào (cấu hình
-        // đã lưu, cấu hình nhập trên form) đều không thể đẩy giá trị không hợp lệ
-        // xuống MySqlConnector.
+        // SslMode Ä‘Æ°á»£c chuáº©n hÃ³a láº¡i má»™t láº§n ná»¯a á»Ÿ Ä‘Ã¢y Ä‘á»ƒ má»i Ä‘Æ°á»ng vÃ o (cáº¥u hÃ¬nh
+        // Ä‘Ã£ lÆ°u, cáº¥u hÃ¬nh nháº­p trÃªn form) Ä‘á»u khÃ´ng thá»ƒ Ä‘áº©y giÃ¡ trá»‹ khÃ´ng há»£p lá»‡
+        // xuá»‘ng MySqlConnector.
         var sslMode = DatabaseConfigService.ChuanHoaSslMode(config.SslMode);
 
         return
@@ -84,9 +84,9 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Kiểm tra kết nối bằng đúng cấu hình đang nhập trên form (chưa lưu), nhờ đó
-    /// màn "Cài đặt kết nối Database" không phải ghi cấu hình xuống đĩa trước khi
-    /// biết kết nối có thành công hay không.
+    /// Kiá»ƒm tra káº¿t ná»‘i báº±ng Ä‘Ãºng cáº¥u hÃ¬nh Ä‘ang nháº­p trÃªn form (chÆ°a lÆ°u), nhá» Ä‘Ã³
+    /// mÃ n "CÃ i Ä‘áº·t káº¿t ná»‘i Database" khÃ´ng pháº£i ghi cáº¥u hÃ¬nh xuá»‘ng Ä‘Ä©a trÆ°á»›c khi
+    /// biáº¿t káº¿t ná»‘i cÃ³ thÃ nh cÃ´ng hay khÃ´ng.
     /// </summary>
     public async Task<bool> TestConnectionAsync(DatabaseConfig config)
     {
@@ -110,22 +110,22 @@ public sealed partial class DatabaseService
         }
     }
 
-    // Mở sẵn một kết nối để MySqlConnector đưa vào connection pool.
-    // Lần đăng nhập sau đó có thể dùng lại kết nối này thay vì bắt tay lại với server.
+    // Má»Ÿ sáºµn má»™t káº¿t ná»‘i Ä‘á»ƒ MySqlConnector Ä‘Æ°a vÃ o connection pool.
+    // Láº§n Ä‘Äƒng nháº­p sau Ä‘Ã³ cÃ³ thá»ƒ dÃ¹ng láº¡i káº¿t ná»‘i nÃ y thay vÃ¬ báº¯t tay láº¡i vá»›i server.
     public async Task WarmUpAsync()
     {
         await using var connection = await OpenAsync();
 
-        // Bảo đảm schema danh mục (nhóm hàng / đơn vị tính) sẵn sàng ngay khi
-        // kiểm tra kết nối. Lỗi ở bước này không được làm hỏng việc đăng nhập;
-        // các màn hình danh mục sẽ báo lỗi cụ thể nếu vẫn chưa bổ sung được.
+        // Báº£o Ä‘áº£m schema danh má»¥c (nhÃ³m hÃ ng / Ä‘Æ¡n vá»‹ tÃ­nh) sáºµn sÃ ng ngay khi
+        // kiá»ƒm tra káº¿t ná»‘i. Lá»—i á»Ÿ bÆ°á»›c nÃ y khÃ´ng Ä‘Æ°á»£c lÃ m há»ng viá»‡c Ä‘Äƒng nháº­p;
+        // cÃ¡c mÃ n hÃ¬nh danh má»¥c sáº½ bÃ¡o lá»—i cá»¥ thá»ƒ náº¿u váº«n chÆ°a bá»• sung Ä‘Æ°á»£c.
         try
         {
             await EnsureBangDanhMucAsync(connection);
         }
         catch (Exception ex)
         {
-            SafeLog.WriteError("Không chuẩn bị được schema danh mục nhóm hàng / đơn vị tính", ex);
+            SafeLog.WriteError("KhÃ´ng chuáº©n bá»‹ Ä‘Æ°á»£c schema danh má»¥c nhÃ³m hÃ ng / Ä‘Æ¡n vá»‹ tÃ­nh", ex);
         }
 
         _ = EnsureAuditTableAsync();
@@ -197,7 +197,7 @@ public sealed partial class DatabaseService
         }
         catch
         {
-            // Fallback khi chạy trên schema shophoa_Huy_tiemhoatest (nguoi_dung có cột vai_tro trực tiếp, không có bảng vai_tro)
+            // Fallback khi cháº¡y trÃªn schema shophoa_Huy_tiemhoatest (nguoi_dung cÃ³ cá»™t vai_tro trá»±c tiáº¿p, khÃ´ng cÃ³ báº£ng vai_tro)
             const string fallbackSql = """
             SELECT
                 nd.id AS Id,
@@ -225,7 +225,7 @@ public sealed partial class DatabaseService
             catch { }
         }
 
-        // Tự động khởi tạo tài khoản admin mặc định nếu bảng nguoi_dung hoàn toàn trống
+        // Tá»± Ä‘á»™ng khá»Ÿi táº¡o tÃ i khoáº£n admin máº·c Ä‘á»‹nh náº¿u báº£ng nguoi_dung hoÃ n toÃ n trá»‘ng
         if (row is null)
         {
             try
@@ -239,13 +239,13 @@ public sealed partial class DatabaseService
                     if (hasVaiTroCol)
                     {
                         await connection.ExecuteAsync(
-                            "INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, ho_ten, vai_tro, trang_thai) VALUES ('admin', @Pwd, 'Quản trị viên', 'ADMIN', 1);",
+                            "INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, ho_ten, vai_tro, trang_thai) VALUES ('admin', @Pwd, 'Quáº£n trá»‹ viÃªn', 'ADMIN', 1);",
                             new { Pwd = defaultHash });
                     }
                     else
                     {
                         await connection.ExecuteAsync(
-                            "INSERT INTO nguoi_dung (ma_nguoi_dung, ten_dang_nhap, mat_khau, ho_ten, trang_thai) VALUES ('ND0001', 'admin', @Pwd, 'Quản trị viên', 1);",
+                            "INSERT INTO nguoi_dung (ma_nguoi_dung, ten_dang_nhap, mat_khau, ho_ten, trang_thai) VALUES ('ND0001', 'admin', @Pwd, 'Quáº£n trá»‹ viÃªn', 1);",
                             new { Pwd = defaultHash });
                     }
 
@@ -290,7 +290,7 @@ public sealed partial class DatabaseService
         }
         if (!trangThai)
         {
-            return new LoginResultExtended { IsValid = false, IsLocked = true, ErrorMessage = "Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên." };
+            return new LoginResultExtended { IsValid = false, IsLocked = true, ErrorMessage = "TÃ i khoáº£n Ä‘Ã£ bá»‹ khÃ³a. Vui lÃ²ng liÃªn há»‡ quáº£n trá»‹ viÃªn." };
         }
 
         bool validPassword;
@@ -337,7 +337,7 @@ public sealed partial class DatabaseService
                 });
             }
 
-            // Ghi nhật ký vào nhat_ky_he_thong nếu có (schema shophoa_Huy_tiemhoatest)
+            // Ghi nháº­t kÃ½ vÃ o nhat_ky_he_thong náº¿u cÃ³ (schema shophoa_Huy_tiemhoatest)
             try
             {
                 bool hasNhatKyHeThong = await connection.ExecuteScalarAsync<int>(
@@ -345,7 +345,7 @@ public sealed partial class DatabaseService
                 if (hasNhatKyHeThong)
                 {
                     await connection.ExecuteAsync(
-                        "INSERT INTO nhat_ky_he_thong (nguoi_dung_id, hanh_dong, thoi_gian) VALUES (@Id, 'Đăng nhập hệ thống', NOW());",
+                        "INSERT INTO nhat_ky_he_thong (nguoi_dung_id, hanh_dong, thoi_gian) VALUES (@Id, 'ÄÄƒng nháº­p há»‡ thá»‘ng', NOW());",
                         new { Id = userId });
                 }
             }
@@ -353,29 +353,29 @@ public sealed partial class DatabaseService
         }
         catch (Exception ex)
         {
-            // Không để lỗi ghi nhật ký làm ảnh hưởng đến phiên đăng nhập hợp lệ.
-            Console.WriteLine($"Không thể cập nhật lần đăng nhập cuối: {ex.Message}");
+            // KhÃ´ng Ä‘á»ƒ lá»—i ghi nháº­t kÃ½ lÃ m áº£nh hÆ°á»Ÿng Ä‘áº¿n phiÃªn Ä‘Äƒng nháº­p há»£p lá»‡.
+            Console.WriteLine($"KhÃ´ng thá»ƒ cáº­p nháº­t láº§n Ä‘Äƒng nháº­p cuá»‘i: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// Số hàng hóa tối đa được đọc trong một lần tải danh sách.
-    /// Màn hình "Hàng hóa" hiện chưa có phân trang nên lấy đủ danh sách để người dùng xem.
+    /// Sá»‘ hÃ ng hÃ³a tá»‘i Ä‘a Ä‘Æ°á»£c Ä‘á»c trong má»™t láº§n táº£i danh sÃ¡ch.
+    /// MÃ n hÃ¬nh "HÃ ng hÃ³a" hiá»‡n chÆ°a cÃ³ phÃ¢n trang nÃªn láº¥y Ä‘á»§ danh sÃ¡ch Ä‘á»ƒ ngÆ°á»i dÃ¹ng xem.
     /// </summary>
     public const int SoDongSanPhamToiDa = 1000;
 
     /// <summary>
-    /// Lấy danh sách hàng hóa. Từ khóa được MySQL đối chiếu trực tiếp trên TOÀN BỘ bảng
-    /// <c>san_pham</c>, chỉ sau đó mới áp dụng LIMIT, nên sản phẩm nằm ngoài phần đang
-    /// hiển thị vẫn tìm ra được (không lấy sẵn một phần rồi mới lọc).
+    /// Láº¥y danh sÃ¡ch hÃ ng hÃ³a. Tá»« khÃ³a Ä‘Æ°á»£c MySQL Ä‘á»‘i chiáº¿u trá»±c tiáº¿p trÃªn TOÃ€N Bá»˜ báº£ng
+    /// <c>san_pham</c>, chá»‰ sau Ä‘Ã³ má»›i Ã¡p dá»¥ng LIMIT, nÃªn sáº£n pháº©m náº±m ngoÃ i pháº§n Ä‘ang
+    /// hiá»ƒn thá»‹ váº«n tÃ¬m ra Ä‘Æ°á»£c (khÃ´ng láº¥y sáºµn má»™t pháº§n rá»“i má»›i lá»c).
     /// </summary>
     public async Task<IReadOnlyList<SanPham>> GetSanPhamAsync(string? search = null)
         => (await GetSanPhamPagedAsync(search, 1, SoDongSanPhamToiDa)).Items;
 
     /// <summary>
-    /// Lấy một trang hàng hóa kèm tổng số bản ghi khớp từ khóa.
-    /// Tổng số bản ghi được đếm trên toàn database nên không phụ thuộc số dòng của trang,
-    /// dùng cho phân trang và cho thông điệp "Tìm thấy N sản phẩm".
+    /// Láº¥y má»™t trang hÃ ng hÃ³a kÃ¨m tá»•ng sá»‘ báº£n ghi khá»›p tá»« khÃ³a.
+    /// Tá»•ng sá»‘ báº£n ghi Ä‘Æ°á»£c Ä‘áº¿m trÃªn toÃ n database nÃªn khÃ´ng phá»¥ thuá»™c sá»‘ dÃ²ng cá»§a trang,
+    /// dÃ¹ng cho phÃ¢n trang vÃ  cho thÃ´ng Ä‘iá»‡p "TÃ¬m tháº¥y N sáº£n pháº©m".
     /// </summary>
     public async Task<(IReadOnlyList<SanPham> Items, int TongSoBanGhi)> GetSanPhamPagedAsync(
         string? search,
@@ -389,10 +389,10 @@ public sealed partial class DatabaseService
 
         await using var connection = await OpenAsync();
 
-        // Từ khóa được tách thành từng từ, mỗi từ phải xuất hiện trong một trong các
-        // cột tìm kiếm (AND giữa các từ). Nhờ vậy gõ "Hồng mua bên" vẫn ra sản phẩm
-        // "hồng ( mua bên VL )" dù hai từ không nối liền nhau.
-        // Không có từ khóa thì không thêm điều kiện nào để MySQL đọc bảng như bình thường.
+        // Tá»« khÃ³a Ä‘Æ°á»£c tÃ¡ch thÃ nh tá»«ng tá»«, má»—i tá»« pháº£i xuáº¥t hiá»‡n trong má»™t trong cÃ¡c
+        // cá»™t tÃ¬m kiáº¿m (AND giá»¯a cÃ¡c tá»«). Nhá» váº­y gÃµ "Há»“ng mua bÃªn" váº«n ra sáº£n pháº©m
+        // "há»“ng ( mua bÃªn VL )" dÃ¹ hai tá»« khÃ´ng ná»‘i liá»n nhau.
+        // KhÃ´ng cÃ³ tá»« khÃ³a thÃ¬ khÃ´ng thÃªm Ä‘iá»u kiá»‡n nÃ o Ä‘á»ƒ MySQL Ä‘á»c báº£ng nhÆ° bÃ¬nh thÆ°á»ng.
         var parameters = new DynamicParameters();
 
         var dieuKien = TaoDieuKienTimKiemSanPham(
@@ -404,9 +404,9 @@ public sealed partial class DatabaseService
 
         var whereSql = dieuKien.Length == 0 ? "" : "WHERE " + dieuKien;
 
-        // Khớp chính xác mã hàng / mã vạch thì đưa lên đầu, tên hàng bắt đầu bằng
-        // từ khóa thì kế sau, còn lại sắp theo tên hàng. Điều kiện này so sánh trên
-        // biểu thức đã chuẩn hóa y hệt điều kiện lọc ở trên.
+        // Khá»›p chÃ­nh xÃ¡c mÃ£ hÃ ng / mÃ£ váº¡ch thÃ¬ Ä‘Æ°a lÃªn Ä‘áº§u, tÃªn hÃ ng báº¯t Ä‘áº§u báº±ng
+        // tá»« khÃ³a thÃ¬ káº¿ sau, cÃ²n láº¡i sáº¯p theo tÃªn hÃ ng. Äiá»u kiá»‡n nÃ y so sÃ¡nh trÃªn
+        // biá»ƒu thá»©c Ä‘Ã£ chuáº©n hÃ³a y há»‡t Ä‘iá»u kiá»‡n lá»c á»Ÿ trÃªn.
         var orderSql = dieuKien.Length == 0
             ? "ORDER BY sp.ten_san_pham, sp.id"
             : TaoDieuKienSapXepTimKiemSanPham(
@@ -444,7 +444,7 @@ public sealed partial class DatabaseService
                 sp.du_kien_het_hang AS DuKienHetHang,
                 dvt.ten_don_vi AS DonViTinh,
                 COALESCE(nsp.ten_nhom, NULLIF(TRIM(sp.nhom_hang_3_cap_excel), '')) AS NhomSanPham,
-                COALESCE(NULLIF(TRIM(sp.loai_hang_excel), ''), 'Hàng hóa') AS LoaiHang,
+                COALESCE(NULLIF(TRIM(sp.loai_hang_excel), ''), 'HÃ ng hÃ³a') AS LoaiHang,
                 COALESCE(NULLIF(TRIM(sp.nhom_hang_3_cap_excel), ''), nsp.ten_nhom) AS NhomHangBaCap,
                 sp.vi_tri_kho AS ViTriKho,
                 sp.dang_kinh_doanh AS DuocBanTrucTiep,
@@ -471,7 +471,7 @@ public sealed partial class DatabaseService
         if (products.Count > 0 || tongSoBanGhi > 0)
             return (products, tongSoBanGhi);
 
-        // Chỉ dùng bảng import cũ khi bảng san_pham không có dữ liệu.
+        // Chá»‰ dÃ¹ng báº£ng import cÅ© khi báº£ng san_pham khÃ´ng cÃ³ dá»¯ liá»‡u.
         var fromImport = await GetSanPhamTuBangImportAsync(
             connection,
             keyword,
@@ -484,9 +484,9 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Đọc lại MỘT hàng hóa kèm tên ĐVT / nhóm hàng (qua JOIN) sau khi sửa, để
-    /// màn hình chỉ cập nhật đúng dòng vừa sửa mà không phải nạp lại cả danh sách.
-    /// Trả về null nếu không còn tìm thấy sản phẩm.
+    /// Äá»c láº¡i Má»˜T hÃ ng hÃ³a kÃ¨m tÃªn ÄVT / nhÃ³m hÃ ng (qua JOIN) sau khi sá»­a, Ä‘á»ƒ
+    /// mÃ n hÃ¬nh chá»‰ cáº­p nháº­t Ä‘Ãºng dÃ²ng vá»«a sá»­a mÃ  khÃ´ng pháº£i náº¡p láº¡i cáº£ danh sÃ¡ch.
+    /// Tráº£ vá» null náº¿u khÃ´ng cÃ²n tÃ¬m tháº¥y sáº£n pháº©m.
     /// </summary>
     public async Task<SanPham?> GetSanPhamByIdAsync(uint id)
     {
@@ -515,7 +515,7 @@ public sealed partial class DatabaseService
                 sp.du_kien_het_hang AS DuKienHetHang,
                 dvt.ten_don_vi AS DonViTinh,
                 COALESCE(nsp.ten_nhom, NULLIF(TRIM(sp.nhom_hang_3_cap_excel), '')) AS NhomSanPham,
-                COALESCE(NULLIF(TRIM(sp.loai_hang_excel), ''), 'Hàng hóa') AS LoaiHang,
+                COALESCE(NULLIF(TRIM(sp.loai_hang_excel), ''), 'HÃ ng hÃ³a') AS LoaiHang,
                 COALESCE(NULLIF(TRIM(sp.nhom_hang_3_cap_excel), ''), nsp.ten_nhom) AS NhomHangBaCap,
                 sp.vi_tri_kho AS ViTriKho,
                 sp.dang_kinh_doanh AS DuocBanTrucTiep,
@@ -535,12 +535,12 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Tra cứu sản phẩm theo mã vạch (hoặc mã hàng khi mã vạch trùng rỗng).
+    /// Tra cá»©u sáº£n pháº©m theo mÃ£ váº¡ch (hoáº·c mÃ£ hÃ ng khi mÃ£ váº¡ch trÃ¹ng rá»—ng).
     /// <para>
-    /// Chỉ khớp CHÍNH XÁC (sau khi cắt khoảng trắng) chứ không dùng LIKE, vì
-    /// mã vạch là chuỗi ký tự người bán quét vào: "12" không được khớp mã
-    /// "1234567890". Trả về danh sách vì một mã vạch có thể dính nhiều quy cách
-    /// (đơn vị tính khác nhau) — khi đó màn bán hàng sẽ yêu cầu người bán chọn.
+    /// Chá»‰ khá»›p CHÃNH XÃC (sau khi cáº¯t khoáº£ng tráº¯ng) chá»© khÃ´ng dÃ¹ng LIKE, vÃ¬
+    /// mÃ£ váº¡ch lÃ  chuá»—i kÃ½ tá»± ngÆ°á»i bÃ¡n quÃ©t vÃ o: "12" khÃ´ng Ä‘Æ°á»£c khá»›p mÃ£
+    /// "1234567890". Tráº£ vá» danh sÃ¡ch vÃ¬ má»™t mÃ£ váº¡ch cÃ³ thá»ƒ dÃ­nh nhiá»u quy cÃ¡ch
+    /// (Ä‘Æ¡n vá»‹ tÃ­nh khÃ¡c nhau) â€” khi Ä‘Ã³ mÃ n bÃ¡n hÃ ng sáº½ yÃªu cáº§u ngÆ°á»i bÃ¡n chá»n.
     /// </para>
     /// </summary>
     public async Task<IReadOnlyList<SanPham>> GetSanPhamTheoBarcodeAsync(string barcode)
@@ -572,7 +572,7 @@ public sealed partial class DatabaseService
                 sp.du_kien_het_hang AS DuKienHetHang,
                 dvt.ten_don_vi AS DonViTinh,
                 COALESCE(nsp.ten_nhom, NULLIF(TRIM(sp.nhom_hang_3_cap_excel), '')) AS NhomSanPham,
-                COALESCE(NULLIF(TRIM(sp.loai_hang_excel), ''), 'Hàng hóa') AS LoaiHang,
+                COALESCE(NULLIF(TRIM(sp.loai_hang_excel), ''), 'HÃ ng hÃ³a') AS LoaiHang,
                 COALESCE(NULLIF(TRIM(sp.nhom_hang_3_cap_excel), ''), nsp.ten_nhom) AS NhomHangBaCap,
                 sp.vi_tri_kho AS ViTriKho,
                 sp.dang_kinh_doanh AS DuocBanTrucTiep,
@@ -593,8 +593,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Nạp nhiều sản phẩm theo danh sách id trong MỘT lần truy vấn (dùng để
-    /// lấy sẵn sản phẩm tặng của các chương trình khuyến mãi).
+    /// Náº¡p nhiá»u sáº£n pháº©m theo danh sÃ¡ch id trong Má»˜T láº§n truy váº¥n (dÃ¹ng Ä‘á»ƒ
+    /// láº¥y sáºµn sáº£n pháº©m táº·ng cá»§a cÃ¡c chÆ°Æ¡ng trÃ¬nh khuyáº¿n mÃ£i).
     /// </summary>
     public async Task<IReadOnlyList<SanPham>> GetSanPhamTheoDanhSachIdAsync(IEnumerable<uint> ids)
     {
@@ -625,7 +625,7 @@ public sealed partial class DatabaseService
                 sp.du_kien_het_hang AS DuKienHetHang,
                 dvt.ten_don_vi AS DonViTinh,
                 COALESCE(nsp.ten_nhom, NULLIF(TRIM(sp.nhom_hang_3_cap_excel), '')) AS NhomSanPham,
-                COALESCE(NULLIF(TRIM(sp.loai_hang_excel), ''), 'Hàng hóa') AS LoaiHang,
+                COALESCE(NULLIF(TRIM(sp.loai_hang_excel), ''), 'HÃ ng hÃ³a') AS LoaiHang,
                 COALESCE(NULLIF(TRIM(sp.nhom_hang_3_cap_excel), ''), nsp.ten_nhom) AS NhomHangBaCap,
                 sp.vi_tri_kho AS ViTriKho,
                 sp.dang_kinh_doanh AS DuocBanTrucTiep,
@@ -644,13 +644,41 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
+    /// Lấy tất cả chương trình khuyến mãi đang có hiệu lực để màn bán hàng áp dụng.
+    /// </summary>
+    public async Task<IReadOnlyList<ChuongTrinhKhuyenMai>> GetChuongTrinhKhuyenMaiHieuLucAsync()
+    {
+        await using var connection = await OpenAsync();
+        await EnsureBangKhuyenMaiAsync(connection);
+
+        const string sql = """
+        SELECT 
+            km.id AS Id,
+            km.ma_chuong_trinh AS MaChuongTrinh,
+            km.ten_chuong_trinh AS TenChuongTrinh,
+            km.ngay_bat_dau AS NgayBatDau,
+            km.ngay_ket_thuc AS NgayKetThuc,
+            km.trang_thai AS TrangThai,
+            km.loai_khuyen_mai AS LoaiKhuyenMai,
+            COALESCE(km.gia_tri_don_toi_thieu, 0) AS GiaTriDonToiThieu,
+            COALESCE(km.loai_giam_gia, 'PHAN_TRAM') AS LoaiGiamGia,
+            COALESCE(km.gia_tri_giam, 0) AS GiaTriGiam,
+            km.ghi_chu AS GhiChu
+        FROM chuong_trinh_khuyen_mai km
+        WHERE km.trang_thai = 'DANG_HOAT_DONG'
+          AND km.ngay_bat_dau <= NOW()
+          AND km.ngay_ket_thuc >= CURDATE()
+        ORDER BY km.id ASC;
+        """;
+
+        var list = (await connection.QueryAsync<ChuongTrinhKhuyenMai>(sql)).AsList();
+        foreach (var item in list)
+            item.LoaiKhuyenMai = ShopHoa.Models.KhuyenMaiLoai.ChuanHoa(item.LoaiKhuyenMai);
+        return list;
+    }
+
+    /// <summary>
     /// Lấy các quy tắc "tặng kèm" đang có hiệu lực để màn bán hàng áp dụng tự động.
-    /// <para>
-    /// Chỉ lấy chương trình đang hoạt động, còn trong thời gian hiệu lực, và chi
-    /// tiết có đủ thông tin tặng (có sản phẩm tặng + số lượng tặng > 0).
-    /// Sản phẩm tặng được nạp sẵn kèm tồn kho / giá vốn để áp dụng không cần
-    /// truy vấn thêm.
-    /// </para>
     /// </summary>
     public async Task<IReadOnlyList<KhuyenMaiTangKem>> GetQuyTacTangKemAsync()
     {
@@ -662,7 +690,7 @@ public sealed partial class DatabaseService
                 km.id                    AS ChuongTrinhId,
                 km.ma_chuong_trinh       AS MaChuongTrinh,
                 km.ten_chuong_trinh      AS TenChuongTrinh,
-                km.nhom_khach_hang_id    AS NhomKhachHangId,
+                NULL                     AS NhomKhachHangId,
                 ct.san_pham_id           AS SanPhamId,
                 COALESCE(NULLIF(TRIM(ct.ten_san_pham), ''), ct.ma_san_pham, '') AS TenSanPhamMua,
                 ct.don_vi_tinh           AS DonViTinh,
@@ -675,6 +703,7 @@ public sealed partial class DatabaseService
             WHERE km.trang_thai = 'DANG_HOAT_DONG'
               AND km.ngay_bat_dau <= NOW()
               AND km.ngay_ket_thuc >= CURDATE()
+              AND (km.loai_khuyen_mai IN ('BUY_X_GET_Y','TANG_KEM') OR ct.so_luong_tang > 0)
               AND ct.san_pham_tang_id IS NOT NULL
               AND ct.san_pham_tang_id > 0
               AND ct.so_luong_tang > 0
@@ -700,9 +729,9 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Bảo đảm bảng <c>chi_tiet_hoa_don_ban_hang</c> có các cột ghi nhận hàng
-    /// tặng kèm. Nếu database chưa có thì tự động ALTER TABLE (chạy ngoài
-    /// transaction vì MySQL không cho ALTER trong transaction).
+    /// Báº£o Ä‘áº£m báº£ng <c>chi_tiet_hoa_don_ban_hang</c> cÃ³ cÃ¡c cá»™t ghi nháº­n hÃ ng
+    /// táº·ng kÃ¨m. Náº¿u database chÆ°a cÃ³ thÃ¬ tá»± Ä‘á»™ng ALTER TABLE (cháº¡y ngoÃ i
+    /// transaction vÃ¬ MySQL khÃ´ng cho ALTER trong transaction).
     /// </summary>
     private async Task<bool> EnsureChiTietHoaDonHangTangColumnsAsync()
     {
@@ -767,11 +796,11 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Bảng lịch sử nhập xuất kho là bảng bắt buộc cho luồng bán hàng: mỗi
-    /// lần xuất hàng đều ghi 1 dòng vết xuất. Nhiều database ERP cũ chưa có
-    /// bảng này nên lệnh INSERT sẽ ném lỗi "Table doesn't exist" và hủy
-    /// cả giao dịch tạo hóa đơn. Hàm này tự tạo bảng nếu thiếu (idempotent,
-    /// chạy ngoài transaction vì DDL tự commit trong MySQL/MariaDB).
+    /// Báº£ng lá»‹ch sá»­ nháº­p xuáº¥t kho lÃ  báº£ng báº¯t buá»™c cho luá»“ng bÃ¡n hÃ ng: má»—i
+    /// láº§n xuáº¥t hÃ ng Ä‘á»u ghi 1 dÃ²ng váº¿t xuáº¥t. Nhiá»u database ERP cÅ© chÆ°a cÃ³
+    /// báº£ng nÃ y nÃªn lá»‡nh INSERT sáº½ nÃ©m lá»—i "Table doesn't exist" vÃ  há»§y
+    /// cáº£ giao dá»‹ch táº¡o hÃ³a Ä‘Æ¡n. HÃ m nÃ y tá»± táº¡o báº£ng náº¿u thiáº¿u (idempotent,
+    /// cháº¡y ngoÃ i transaction vÃ¬ DDL tá»± commit trong MySQL/MariaDB).
     /// </summary>
     private async Task<bool> EnsureBangLichSuNhapXuatKhoAsync()
     {
@@ -826,45 +855,45 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Các cặp ký tự tiếng Việt cần bỏ dấu khi so sánh tìm kiếm.
-    /// Đặt "đ"/"Đ" lên đầu vì đây là ký tự duy nhất mà chính collation
-    /// utf8mb4_unicode_ci của MySQL/MariaDB KHÔNG coi là bằng "d"/"D"
-    /// (đã kiểm tra trên MariaDB 10.1: <c>'đ' = 'd'</c> trả về FALSE).
+    /// CÃ¡c cáº·p kÃ½ tá»± tiáº¿ng Viá»‡t cáº§n bá» dáº¥u khi so sÃ¡nh tÃ¬m kiáº¿m.
+    /// Äáº·t "Ä‘"/"Ä" lÃªn Ä‘áº§u vÃ¬ Ä‘Ã¢y lÃ  kÃ½ tá»± duy nháº¥t mÃ  chÃ­nh collation
+    /// utf8mb4_unicode_ci cá»§a MySQL/MariaDB KHÃ”NG coi lÃ  báº±ng "d"/"D"
+    /// (Ä‘Ã£ kiá»ƒm tra trÃªn MariaDB 10.1: <c>'Ä‘' = 'd'</c> tráº£ vá» FALSE).
     /// </summary>
     private static readonly (string CoDau, string KhongDau)[] BangChuanHoaTiengViet =
     [
-        ("đ", "d"), ("Đ", "D"),
-        ("á", "a"), ("à", "a"), ("ả", "a"), ("ã", "a"), ("ạ", "a"),
-        ("â", "a"), ("ấ", "a"), ("ầ", "a"), ("ẩ", "a"), ("ẫ", "a"), ("ậ", "a"),
-        ("ă", "a"), ("ắ", "a"), ("ằ", "a"), ("ẳ", "a"), ("ẵ", "a"), ("ặ", "a"),
-        ("é", "e"), ("è", "e"), ("ẻ", "e"), ("ẽ", "e"), ("ẹ", "e"),
-        ("ê", "e"), ("ế", "e"), ("ề", "e"), ("ể", "e"), ("ễ", "e"), ("ệ", "e"),
-        ("í", "i"), ("ì", "i"), ("ỉ", "i"), ("ĩ", "i"), ("ị", "i"),
-        ("ó", "o"), ("ò", "o"), ("ỏ", "o"), ("õ", "o"), ("ọ", "o"),
-        ("ô", "o"), ("ố", "o"), ("ồ", "o"), ("ổ", "o"), ("ỗ", "o"), ("ộ", "o"),
-        ("ơ", "o"), ("ớ", "o"), ("ờ", "o"), ("ở", "o"), ("ỡ", "o"), ("ợ", "o"),
-        ("ú", "u"), ("ù", "u"), ("ủ", "u"), ("ũ", "u"), ("ụ", "u"),
-        ("ư", "u"), ("ứ", "u"), ("ừ", "u"), ("ử", "u"), ("ữ", "u"), ("ự", "u"),
-        ("ý", "y"), ("ỳ", "y"), ("ỷ", "y"), ("ỹ", "y"), ("ỵ", "y")
+        ("Ä‘", "d"), ("Ä", "D"),
+        ("Ã¡", "a"), ("Ã ", "a"), ("áº£", "a"), ("Ã£", "a"), ("áº¡", "a"),
+        ("Ã¢", "a"), ("áº¥", "a"), ("áº§", "a"), ("áº©", "a"), ("áº«", "a"), ("áº­", "a"),
+        ("Äƒ", "a"), ("áº¯", "a"), ("áº±", "a"), ("áº³", "a"), ("áºµ", "a"), ("áº·", "a"),
+        ("Ã©", "e"), ("Ã¨", "e"), ("áº»", "e"), ("áº½", "e"), ("áº¹", "e"),
+        ("Ãª", "e"), ("áº¿", "e"), ("á»", "e"), ("á»ƒ", "e"), ("á»…", "e"), ("á»‡", "e"),
+        ("Ã­", "i"), ("Ã¬", "i"), ("á»‰", "i"), ("Ä©", "i"), ("á»‹", "i"),
+        ("Ã³", "o"), ("Ã²", "o"), ("á»", "o"), ("Ãµ", "o"), ("á»", "o"),
+        ("Ã´", "o"), ("á»‘", "o"), ("á»“", "o"), ("á»•", "o"), ("á»—", "o"), ("á»™", "o"),
+        ("Æ¡", "o"), ("á»›", "o"), ("á»", "o"), ("á»Ÿ", "o"), ("á»¡", "o"), ("á»£", "o"),
+        ("Ãº", "u"), ("Ã¹", "u"), ("á»§", "u"), ("Å©", "u"), ("á»¥", "u"),
+        ("Æ°", "u"), ("á»©", "u"), ("á»«", "u"), ("á»­", "u"), ("á»¯", "u"), ("á»±", "u"),
+        ("Ã½", "y"), ("á»³", "y"), ("á»·", "y"), ("á»¹", "y"), ("á»µ", "y")
     ];
 
     /// <summary>
-    /// Biểu thức SQL chuẩn hóa một cột về dạng "chữ thường không dấu" để so sánh.
+    /// Biá»ƒu thá»©c SQL chuáº©n hÃ³a má»™t cá»™t vá» dáº¡ng "chá»¯ thÆ°á»ng khÃ´ng dáº¥u" Ä‘á»ƒ so sÃ¡nh.
     /// <para>
-    /// MySQL/MariaDB không có hàm bỏ dấu sẵn có, và collation utf8mb4_unicode_ci dù
-    /// bỏ được hầu hết dấu thì vẫn KHÔNG bỏ được "đ" — nên gõ "cuc mau don trang"
-    /// sẽ không tìm ra "Cúc mẫu đơn trắng". Chuỗi REPLACE ở đây bỏ dấu cả "đ"
-    /// lẫn các dấu còn lại, để việc tìm kiếm không phụ thuộc collation của server.
+    /// MySQL/MariaDB khÃ´ng cÃ³ hÃ m bá» dáº¥u sáºµn cÃ³, vÃ  collation utf8mb4_unicode_ci dÃ¹
+    /// bá» Ä‘Æ°á»£c háº§u háº¿t dáº¥u thÃ¬ váº«n KHÃ”NG bá» Ä‘Æ°á»£c "Ä‘" â€” nÃªn gÃµ "cuc mau don trang"
+    /// sáº½ khÃ´ng tÃ¬m ra "CÃºc máº«u Ä‘Æ¡n tráº¯ng". Chuá»—i REPLACE á»Ÿ Ä‘Ã¢y bá» dáº¥u cáº£ "Ä‘"
+    /// láº«n cÃ¡c dáº¥u cÃ²n láº¡i, Ä‘á»ƒ viá»‡c tÃ¬m kiáº¿m khÃ´ng phá»¥ thuá»™c collation cá»§a server.
     /// </para>
     /// <para>
-    /// Cột rỗng/NULL trả về chuỗi rỗng nên không bao giờ loại mất sản phẩm.
-    /// Biểu thức được dựng sẵn một lần cho mỗi tên cột vì nó là hằng số.
+    /// Cá»™t rá»—ng/NULL tráº£ vá» chuá»—i rá»—ng nÃªn khÃ´ng bao giá» loáº¡i máº¥t sáº£n pháº©m.
+    /// Biá»ƒu thá»©c Ä‘Æ°á»£c dá»±ng sáºµn má»™t láº§n cho má»—i tÃªn cá»™t vÃ¬ nÃ³ lÃ  háº±ng sá»‘.
     /// </para>
     /// </summary>
     private static string BieuThucChuanHoaSql(string cot)
         => "COALESCE(" + ChuoiReplaceBoDau($"LOWER({cot})") + ", '')";
 
-    /// <summary>Quy đổi ký tự có dấu thành ký tự gốc, bọc trong COALESCE để NULL thành chuỗi rỗng.</summary>
+    /// <summary>Quy Ä‘á»•i kÃ½ tá»± cÃ³ dáº¥u thÃ nh kÃ½ tá»± gá»‘c, bá»c trong COALESCE Ä‘á»ƒ NULL thÃ nh chuá»—i rá»—ng.</summary>
     private static string ChuoiReplaceBoDau(string bieuThuc)
     {
         foreach (var (coDau, khongDau) in BangChuanHoaTiengViet)
@@ -874,14 +903,14 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Chuẩn hóa từ khóa ở C# theo ĐÚNG quy tắc mà biểu thức SQL áp dụng cho cột:
-    /// hạ chữ thường, bỏ dấu tiếng Việt (kể cả đ/Đ), gộp mọi kiểu khoảng trắng
-    /// (space, tab, xuống dòng, khoảng trắng không ngắt dòng NBSP, ...) thành một
-    /// dấu cách rồi cắt bỏ khoảng trắng đầu/cuối.
+    /// Chuáº©n hÃ³a tá»« khÃ³a á»Ÿ C# theo ÄÃšNG quy táº¯c mÃ  biá»ƒu thá»©c SQL Ã¡p dá»¥ng cho cá»™t:
+    /// háº¡ chá»¯ thÆ°á»ng, bá» dáº¥u tiáº¿ng Viá»‡t (ká»ƒ cáº£ Ä‘/Ä), gá»™p má»i kiá»ƒu khoáº£ng tráº¯ng
+    /// (space, tab, xuá»‘ng dÃ²ng, khoáº£ng tráº¯ng khÃ´ng ngáº¯t dÃ²ng NBSP, ...) thÃ nh má»™t
+    /// dáº¥u cÃ¡ch rá»“i cáº¯t bá» khoáº£ng tráº¯ng Ä‘áº§u/cuá»‘i.
     /// <para>
-    /// Hai vế dùng chung một quy tắc nên kết quả không còn phụ thuộc collation,
-    /// người dùng gõ "Cúc mẫu đơn trắng hàng A" hay "cuc mau don trang hang a"
-    /// đều ra cùng một danh sách.
+    /// Hai váº¿ dÃ¹ng chung má»™t quy táº¯c nÃªn káº¿t quáº£ khÃ´ng cÃ²n phá»¥ thuá»™c collation,
+    /// ngÆ°á»i dÃ¹ng gÃµ "CÃºc máº«u Ä‘Æ¡n tráº¯ng hÃ ng A" hay "cuc mau don trang hang a"
+    /// Ä‘á»u ra cÃ¹ng má»™t danh sÃ¡ch.
     /// </para>
     /// </summary>
     private static string ChuauHoaTuKhoa(string? keyword)
@@ -889,7 +918,7 @@ public sealed partial class DatabaseService
         if (string.IsNullOrWhiteSpace(keyword))
             return string.Empty;
 
-        // FormD tách chữ có dấu thành chữ gốc + dấu phụ, bỏ dấu phụ đi là xong.
+        // FormD tÃ¡ch chá»¯ cÃ³ dáº¥u thÃ nh chá»¯ gá»‘c + dáº¥u phá»¥, bá» dáº¥u phá»¥ Ä‘i lÃ  xong.
         var khongDau = keyword.Trim().Normalize(NormalizationForm.FormD);
 
         var builder = new StringBuilder(khongDau.Length);
@@ -901,10 +930,7 @@ public sealed partial class DatabaseService
 
             if (char.IsWhiteSpace(character))
                 builder.Append(' ');
-            else if (character == 'đ')
-                builder.Append('d');
-            else if (character == 'Đ')
-                builder.Append('D');
+            else if (character == (char)273) builder.Append('d'); else if (character == (char)272) builder.Append('D');
             else
                 builder.Append(char.ToLowerInvariant(character));
         }
@@ -915,9 +941,9 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Tách từ khóa đã chuẩn hóa thành các từ cần có trong sản phẩm.
-    /// Mọi ký tự không phải chữ/số (dấu phẩy, gạch nối, ngoặc, dấu chấm câu)
-    /// đều bị coi là ranh giới để "Cúc mẫu, đơn trắng" vẫn ra kết quả đúng.
+    /// TÃ¡ch tá»« khÃ³a Ä‘Ã£ chuáº©n hÃ³a thÃ nh cÃ¡c tá»« cáº§n cÃ³ trong sáº£n pháº©m.
+    /// Má»i kÃ½ tá»± khÃ´ng pháº£i chá»¯/sá»‘ (dáº¥u pháº©y, gáº¡ch ná»‘i, ngoáº·c, dáº¥u cháº¥m cÃ¢u)
+    /// Ä‘á»u bá»‹ coi lÃ  ranh giá»›i Ä‘á»ƒ "CÃºc máº«u, Ä‘Æ¡n tráº¯ng" váº«n ra káº¿t quáº£ Ä‘Ãºng.
     /// </summary>
     private static string[] TachTuKhoa(string? keyword)
     {
@@ -951,21 +977,21 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Dựng điều kiện tìm kiếm hàng hóa và gắn các tham số vào
+    /// Dá»±ng Ä‘iá»u kiá»‡n tÃ¬m kiáº¿m hÃ ng hÃ³a vÃ  gáº¯n cÃ¡c tham sá»‘ vÃ o
     /// <paramref name="parameters"/>.
-    /// Từ khóa được tách thành từng từ, mỗi từ phải xuất hiện trong một trong các
-    /// cột được tìm, các từ nối với nhau bằng AND (giữ được ý cũ: gõ "Hồng mua bên"
-    /// vẫn ra sản phẩm "hồng ( mua bên VL )" dù hai từ không nối liền nhau).
+    /// Tá»« khÃ³a Ä‘Æ°á»£c tÃ¡ch thÃ nh tá»«ng tá»«, má»—i tá»« pháº£i xuáº¥t hiá»‡n trong má»™t trong cÃ¡c
+    /// cá»™t Ä‘Æ°á»£c tÃ¬m, cÃ¡c tá»« ná»‘i vá»›i nhau báº±ng AND (giá»¯ Ä‘Æ°á»£c Ã½ cÅ©: gÃµ "Há»“ng mua bÃªn"
+    /// váº«n ra sáº£n pháº©m "há»“ng ( mua bÃªn VL )" dÃ¹ hai tá»« khÃ´ng ná»‘i liá»n nhau).
     /// <para>
-    /// Cả từ khóa lẫn cột đều được chuẩn hóa về chữ thường không dấu trước khi
-    /// so sánh, nên không phân biệt hoa/thường, không phân biệt dấu tiếng Việt
-    /// (kể cả đ/Đ) và không phụ thuộc collation của server.
+    /// Cáº£ tá»« khÃ³a láº«n cá»™t Ä‘á»u Ä‘Æ°á»£c chuáº©n hÃ³a vá» chá»¯ thÆ°á»ng khÃ´ng dáº¥u trÆ°á»›c khi
+    /// so sÃ¡nh, nÃªn khÃ´ng phÃ¢n biá»‡t hoa/thÆ°á»ng, khÃ´ng phÃ¢n biá»‡t dáº¥u tiáº¿ng Viá»‡t
+    /// (ká»ƒ cáº£ Ä‘/Ä) vÃ  khÃ´ng phá»¥ thuá»™c collation cá»§a server.
     /// </para>
     /// <para>
-    /// Mã vạch và các cột khác có thể NULL vẫn được giữ lại: COALESCE đưa NULL
-    /// thành chuỗi rỗng nên sản phẩm thiếu mã vạch không bị loại vì lý do đó.
+    /// MÃ£ váº¡ch vÃ  cÃ¡c cá»™t khÃ¡c cÃ³ thá»ƒ NULL váº«n Ä‘Æ°á»£c giá»¯ láº¡i: COALESCE Ä‘Æ°a NULL
+    /// thÃ nh chuá»—i rá»—ng nÃªn sáº£n pháº©m thiáº¿u mÃ£ váº¡ch khÃ´ng bá»‹ loáº¡i vÃ¬ lÃ½ do Ä‘Ã³.
     /// </para>
-    /// Trả về chuỗi rỗng khi không có từ khóa để người gọi tự ghép vào WHERE.
+    /// Tráº£ vá» chuá»—i rá»—ng khi khÃ´ng cÃ³ tá»« khÃ³a Ä‘á»ƒ ngÆ°á»i gá»i tá»± ghÃ©p vÃ o WHERE.
     /// </summary>
     private static string TaoDieuKienTimKiemSanPham(
         DynamicParameters parameters,
@@ -1000,9 +1026,9 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Điều kiện sắp xếp khi đang tìm kiếm: mã hàng/mã vạch khớp chính xác đưa lên
-    /// đầu, tên hàng bắt đầu bằng từ khóa kế sau, còn lại sắp theo tên hàng.
-    /// So sánh cũng dùng biểu thức chuẩn hóa để không lệch với điều kiện lọc.
+    /// Äiá»u kiá»‡n sáº¯p xáº¿p khi Ä‘ang tÃ¬m kiáº¿m: mÃ£ hÃ ng/mÃ£ váº¡ch khá»›p chÃ­nh xÃ¡c Ä‘Æ°a lÃªn
+    /// Ä‘áº§u, tÃªn hÃ ng báº¯t Ä‘áº§u báº±ng tá»« khÃ³a káº¿ sau, cÃ²n láº¡i sáº¯p theo tÃªn hÃ ng.
+    /// So sÃ¡nh cÅ©ng dÃ¹ng biá»ƒu thá»©c chuáº©n hÃ³a Ä‘á»ƒ khÃ´ng lá»‡ch vá»›i Ä‘iá»u kiá»‡n lá»c.
     /// </summary>
     private static string TaoDieuKienSapXepTimKiemSanPham(
         string keyword,
@@ -1026,8 +1052,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Bảng import Excel cũ: chỉ đọc khi bảng san_pham chưa có dữ liệu.
-    /// Dùng chung cách tìm kiếm với bảng san_pham để hành vi nhất quán.
+    /// Báº£ng import Excel cÅ©: chá»‰ Ä‘á»c khi báº£ng san_pham chÆ°a cÃ³ dá»¯ liá»‡u.
+    /// DÃ¹ng chung cÃ¡ch tÃ¬m kiáº¿m vá»›i báº£ng san_pham Ä‘á»ƒ hÃ nh vi nháº¥t quÃ¡n.
     /// </summary>
     private static async Task<(IReadOnlyList<SanPham> Items, int TongSoBanGhi)> GetSanPhamTuBangImportAsync(
         MySqlConnection connection,
@@ -1040,11 +1066,11 @@ public sealed partial class DatabaseService
         var dieuKien = TaoDieuKienTimKiemSanPham(
             parameters,
             keyword,
-            "`Mã hàng`",
-            "`Mã vạch`",
-            "`Tên hàng`");
+            "`MÃ£ hÃ ng`",
+            "`MÃ£ váº¡ch`",
+            "`TÃªn hÃ ng`");
 
-        var whereSql = "WHERE COALESCE(`Đang kinh doanh`, 1) = 1"
+        var whereSql = "WHERE COALESCE(`Äang kinh doanh`, 1) = 1"
                        + (dieuKien.Length == 0 ? "" : " AND " + dieuKien);
 
         parameters.Add("PageSize", pageSize);
@@ -1058,28 +1084,28 @@ public sealed partial class DatabaseService
 
         var pageSql = $"""
             SELECT
-                `Mã hàng` AS MaSanPham,
-                `Mã vạch` AS MaVach,
-                COALESCE(`Tên hàng`, `Mã hàng`) AS TenSanPham,
-                COALESCE(`Giá bán`, 0) AS GiaBan,
-                COALESCE(`Giá vốn`, 0) AS GiaVon,
-                COALESCE(`Tồn kho`, 0) AS TonKho,
-                COALESCE(`Tồn kho`, 0) AS TonKhoExcel,
-                COALESCE(`Tồn nhỏ nhất`, 0) AS TonToiThieu,
-                COALESCE(`Tồn lớn nhất`, 0) AS TonToiDa,
-                COALESCE(`KH đặt`, 0) AS KhachDat,
-                `Thời gian tạo` AS NgayTao,
-                `Dự kiến hết hàng` AS DuKienHetHang,
-                `ĐVT` AS DonViTinh,
-                `Nhóm hàng(3 Cấp)` AS NhomSanPham,
-                `Loại hàng` AS LoaiHang,
-                `Nhóm hàng(3 Cấp)` AS NhomHangBaCap,
-                `Vị trí` AS ViTriKho,
-                COALESCE(`Đang kinh doanh`, 1) AS DangKinhDoanh,
-                COALESCE(`Được bán trực tiếp`, 1) AS DuocBanTrucTiep
+                `MÃ£ hÃ ng` AS MaSanPham,
+                `MÃ£ váº¡ch` AS MaVach,
+                COALESCE(`TÃªn hÃ ng`, `MÃ£ hÃ ng`) AS TenSanPham,
+                COALESCE(`GiÃ¡ bÃ¡n`, 0) AS GiaBan,
+                COALESCE(`GiÃ¡ vá»‘n`, 0) AS GiaVon,
+                COALESCE(`Tá»“n kho`, 0) AS TonKho,
+                COALESCE(`Tá»“n kho`, 0) AS TonKhoExcel,
+                COALESCE(`Tá»“n nhá» nháº¥t`, 0) AS TonToiThieu,
+                COALESCE(`Tá»“n lá»›n nháº¥t`, 0) AS TonToiDa,
+                COALESCE(`KH Ä‘áº·t`, 0) AS KhachDat,
+                `Thá»i gian táº¡o` AS NgayTao,
+                `Dá»± kiáº¿n háº¿t hÃ ng` AS DuKienHetHang,
+                `ÄVT` AS DonViTinh,
+                `NhÃ³m hÃ ng(3 Cáº¥p)` AS NhomSanPham,
+                `Loáº¡i hÃ ng` AS LoaiHang,
+                `NhÃ³m hÃ ng(3 Cáº¥p)` AS NhomHangBaCap,
+                `Vá»‹ trÃ­` AS ViTriKho,
+                COALESCE(`Äang kinh doanh`, 1) AS DangKinhDoanh,
+                COALESCE(`ÄÆ°á»£c bÃ¡n trá»±c tiáº¿p`, 1) AS DuocBanTrucTiep
             FROM import_san_pham_excel
             {whereSql}
-            ORDER BY `Tên hàng`
+            ORDER BY `TÃªn hÃ ng`
             LIMIT @PageSize OFFSET @Offset
             """;
 
@@ -1096,17 +1122,17 @@ public sealed partial class DatabaseService
         }
         catch (MySqlException ex) when (ex.Number == 1146)
         {
-            // Bảng import cũ không tồn tại -> coi như không có dữ liệu.
+            // Báº£ng import cÅ© khÃ´ng tá»“n táº¡i -> coi nhÆ° khÃ´ng cÃ³ dá»¯ liá»‡u.
             return (Array.Empty<SanPham>(), 0);
         }
     }
 
-    // Lưu ý: các hàm đọc/thêm/xóa Nhóm hàng & Đơn vị tính nằm ở file
+    // LÆ°u Ã½: cÃ¡c hÃ m Ä‘á»c/thÃªm/xÃ³a NhÃ³m hÃ ng & ÄÆ¡n vá»‹ tÃ­nh náº±m á»Ÿ file
     // Services/DatabaseService.DanhMuc.cs (partial class DatabaseService).
 
     public async Task CapNhatHinhAnhSanPhamAsync(uint productId, string imagePath)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.ProductsEdit, "Bạn không có quyền cập nhật hàng hóa.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.ProductsEdit, "Báº¡n khÃ´ng cÃ³ quyá»n cáº­p nháº­t hÃ ng hÃ³a.");
         await using var connection = await OpenAsync();
 
         await connection.ExecuteAsync(
@@ -1125,12 +1151,12 @@ public sealed partial class DatabaseService
 
     public async Task<uint> ThemSanPhamAsync(SanPham product)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.ProductsCreate, "Bạn không có quyền thêm hàng hóa.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.ProductsCreate, "Báº¡n khÃ´ng cÃ³ quyá»n thÃªm hÃ ng hÃ³a.");
         await using var connection = await OpenAsync();
 
         if (string.IsNullOrWhiteSpace(product.LoaiHang))
         {
-            product.LoaiHang = "Hàng hóa";
+            product.LoaiHang = "HÃ ng hÃ³a";
         }
 
         if (string.IsNullOrWhiteSpace(product.NhomHangBaCap))
@@ -1203,18 +1229,18 @@ public sealed partial class DatabaseService
             """;
 
         var newId = await connection.ExecuteScalarAsync<uint>(sql, product);
-        _ = LogSubAccountActivityAsync("Thêm hàng hóa", "SAN_PHAM", newId, product.MaSanPham, $"Thêm sản phẩm mới: {product.TenSanPham} ({product.MaSanPham})", product.GiaBan);
+        _ = LogSubAccountActivityAsync("ThÃªm hÃ ng hÃ³a", "SAN_PHAM", newId, product.MaSanPham, $"ThÃªm sáº£n pháº©m má»›i: {product.TenSanPham} ({product.MaSanPham})", product.GiaBan);
         return newId;
     }
 
     public async Task CapNhatSanPhamAsync(SanPham product)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.ProductsEdit, "Bạn không có quyền sửa hàng hóa.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.ProductsEdit, "Báº¡n khÃ´ng cÃ³ quyá»n sá»­a hÃ ng hÃ³a.");
         await using var connection = await OpenAsync();
 
         if (string.IsNullOrWhiteSpace(product.LoaiHang))
         {
-            product.LoaiHang = "Hàng hóa";
+            product.LoaiHang = "HÃ ng hÃ³a";
         }
 
         if (string.IsNullOrWhiteSpace(product.NhomHangBaCap))
@@ -1236,10 +1262,10 @@ public sealed partial class DatabaseService
             }
         }
 
-        // Trường nào người dùng thiếu quyền chi tiết tương ứng thì bỏ hẳn khỏi
-        // câu UPDATE (giá bán -> sua_gia_ban, giá vốn -> sua_gia_von, tồn kho ->
-        // dieu_chinh_ton_kho). Nhờ vậy giá trị đang có trong database được giữ
-        // nguyên, kể cả khi hàm này bị gọi thẳng thay vì qua giao diện đã khóa ô.
+        // TrÆ°á»ng nÃ o ngÆ°á»i dÃ¹ng thiáº¿u quyá»n chi tiáº¿t tÆ°Æ¡ng á»©ng thÃ¬ bá» háº³n khá»i
+        // cÃ¢u UPDATE (giÃ¡ bÃ¡n -> sua_gia_ban, giÃ¡ vá»‘n -> sua_gia_von, tá»“n kho ->
+        // dieu_chinh_ton_kho). Nhá» váº­y giÃ¡ trá»‹ Ä‘ang cÃ³ trong database Ä‘Æ°á»£c giá»¯
+        // nguyÃªn, ká»ƒ cáº£ khi hÃ m nÃ y bá»‹ gá»i tháº³ng thay vÃ¬ qua giao diá»‡n Ä‘Ã£ khÃ³a Ã´.
         var danhSachCot = new List<string>
         {
             "ma_san_pham = @MaSanPham",
@@ -1275,40 +1301,40 @@ public sealed partial class DatabaseService
 
         await connection.ExecuteAsync(sql, product);
 
-        _ = LogSubAccountActivityAsync("Cập nhật hàng hóa", "SAN_PHAM", product.Id, product.MaSanPham, $"Cập nhật sản phẩm: {product.TenSanPham} ({product.MaSanPham})", product.GiaBan);
+        _ = LogSubAccountActivityAsync("Cáº­p nháº­t hÃ ng hÃ³a", "SAN_PHAM", product.Id, product.MaSanPham, $"Cáº­p nháº­t sáº£n pháº©m: {product.TenSanPham} ({product.MaSanPham})", product.GiaBan);
     }
     /// <summary>
-    /// Chỉ cập nhật đúng cột <c>san_pham.gia_ban</c> của một sản phẩm.
-    /// Không đụng tới mã hàng, tồn kho, giá vốn hay các cột khác.
-    /// Giá bán bằng 0 vẫn hợp lệ (sản phẩm chưa định giá).
+    /// Chá»‰ cáº­p nháº­t Ä‘Ãºng cá»™t <c>san_pham.gia_ban</c> cá»§a má»™t sáº£n pháº©m.
+    /// KhÃ´ng Ä‘á»¥ng tá»›i mÃ£ hÃ ng, tá»“n kho, giÃ¡ vá»‘n hay cÃ¡c cá»™t khÃ¡c.
+    /// GiÃ¡ bÃ¡n báº±ng 0 váº«n há»£p lá»‡ (sáº£n pháº©m chÆ°a Ä‘á»‹nh giÃ¡).
     /// <para>
-    /// Trả về false khi sản phẩm không còn tồn tại (bị người khác xóa)
-    /// để lớp giao diện báo lỗi và tải lại danh sách thay vì crash.
+    /// Tráº£ vá» false khi sáº£n pháº©m khÃ´ng cÃ²n tá»“n táº¡i (bá»‹ ngÆ°á»i khÃ¡c xÃ³a)
+    /// Ä‘á»ƒ lá»›p giao diá»‡n bÃ¡o lá»—i vÃ  táº£i láº¡i danh sÃ¡ch thay vÃ¬ crash.
     /// </para>
     /// </summary>
     public async Task<bool> CapNhatGiaBanSanPhamAsync(
         uint productId,
         decimal giaBan)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.ProductsUpdatePrice, "Bạn không có quyền cập nhật giá bán hàng hóa.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.ProductsUpdatePrice, "Báº¡n khÃ´ng cÃ³ quyá»n cáº­p nháº­t giÃ¡ bÃ¡n hÃ ng hÃ³a.");
         if (productId == 0)
             throw new ArgumentException(
-                "Sản phẩm chưa có mã dữ liệu để cập nhật giá bán.",
+                "Sáº£n pháº©m chÆ°a cÃ³ mÃ£ dá»¯ liá»‡u Ä‘á»ƒ cáº­p nháº­t giÃ¡ bÃ¡n.",
                 nameof(productId));
 
         if (giaBan < 0)
             throw new ArgumentException(
-                "Giá bán không được âm.",
+                "GiÃ¡ bÃ¡n khÃ´ng Ä‘Æ°á»£c Ã¢m.",
                 nameof(giaBan));
 
         if (giaBan > Helpers.MoneyInput.GiaTienToiDa)
             throw new ArgumentOutOfRangeException(
                 nameof(giaBan),
-                "Giá bán vượt quá giới hạn của cột DECIMAL(15,2).");
+                "GiÃ¡ bÃ¡n vÆ°á»£t quÃ¡ giá»›i háº¡n cá»§a cá»™t DECIMAL(15,2).");
 
         await using var connection = await OpenAsync();
 
-        // Parameterized query: giá bán do người dùng nhập không bao giờ nối vào SQL.
+        // Parameterized query: giÃ¡ bÃ¡n do ngÆ°á»i dÃ¹ng nháº­p khÃ´ng bao giá» ná»‘i vÃ o SQL.
         const string sql = """
         UPDATE san_pham
         SET gia_ban = @GiaBan,
@@ -1324,14 +1350,14 @@ public sealed partial class DatabaseService
                 GiaBan = Math.Round(giaBan, 2, MidpointRounding.AwayFromZero)
             });
 
-        // MySQL trả 0 dòng bị ảnh hưởng khi sản phẩm không tồn tại.
+        // MySQL tráº£ 0 dÃ²ng bá»‹ áº£nh hÆ°á»Ÿng khi sáº£n pháº©m khÃ´ng tá»“n táº¡i.
         return affectedRows > 0;
     }
 
     /// <summary>
-    /// Cập nhật nhanh số lượng tồn kho của một sản phẩm (dùng trong màn hình bán hàng
-    /// khi sản phẩm hết hàng và người dùng muốn bổ sung tồn để bán ngay).
-    /// Cập nhật bảng ton_kho, san_pham.ton_kho_excel và ghi nhật ký lịch sử kho.
+    /// Cáº­p nháº­t nhanh sá»‘ lÆ°á»£ng tá»“n kho cá»§a má»™t sáº£n pháº©m (dÃ¹ng trong mÃ n hÃ¬nh bÃ¡n hÃ ng
+    /// khi sáº£n pháº©m háº¿t hÃ ng vÃ  ngÆ°á»i dÃ¹ng muá»‘n bá»• sung tá»“n Ä‘á»ƒ bÃ¡n ngay).
+    /// Cáº­p nháº­t báº£ng ton_kho, san_pham.ton_kho_excel vÃ  ghi nháº­t kÃ½ lá»‹ch sá»­ kho.
     /// </summary>
     public async Task<bool> CapNhatTonKhoSanPhamAsync(
         uint productId,
@@ -1340,12 +1366,12 @@ public sealed partial class DatabaseService
     {
         if (productId == 0)
             throw new ArgumentException(
-                "Sản phẩm chưa có mã dữ liệu để cập nhật tồn kho.",
+                "Sáº£n pháº©m chÆ°a cÃ³ mÃ£ dá»¯ liá»‡u Ä‘á»ƒ cáº­p nháº­t tá»“n kho.",
                 nameof(productId));
 
         if (soLuongTonMoi < 0)
             throw new ArgumentException(
-                "Số lượng tồn kho không được âm.",
+                "Sá»‘ lÆ°á»£ng tá»“n kho khÃ´ng Ä‘Æ°á»£c Ã¢m.",
                 nameof(soLuongTonMoi));
 
         var branchId = chiNhanhId ?? Session.CurrentUser?.ChiNhanhId ?? 1;
@@ -1483,7 +1509,7 @@ public sealed partial class DatabaseService
                         TonSau = soLuongTonMoi,
                         GiaVon = giaVon,
                         NguoiThucHienId = userId,
-                        GhiChu = "Chỉnh sửa tồn kho nhanh tại giao diện bán hàng"
+                        GhiChu = "Chá»‰nh sá»­a tá»“n kho nhanh táº¡i giao diá»‡n bÃ¡n hÃ ng"
                     },
                     transaction);
             }
@@ -1495,11 +1521,11 @@ public sealed partial class DatabaseService
             await transaction.CommitAsync();
 
             _ = LogSubAccountActivityAsync(
-                "Chỉnh tồn kho nhanh",
+                "Chá»‰nh tá»“n kho nhanh",
                 "SAN_PHAM",
                 productId,
                 null,
-                $"Cập nhật tồn kho sản phẩm ID {productId} từ {tonTruoc:N0} thành {soLuongTonMoi:N0}",
+                $"Cáº­p nháº­t tá»“n kho sáº£n pháº©m ID {productId} tá»« {tonTruoc:N0} thÃ nh {soLuongTonMoi:N0}",
                 soLuongTonMoi);
 
             return true;
@@ -1514,7 +1540,7 @@ public sealed partial class DatabaseService
 
     public async Task XoaSanPhamAsync(uint productId)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.ProductsDelete, "Bạn không có quyền xóa hàng hóa.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.ProductsDelete, "Báº¡n khÃ´ng cÃ³ quyá»n xÃ³a hÃ ng hÃ³a.");
         await using var connection = await OpenAsync();
 
         await connection.ExecuteAsync(
@@ -1523,12 +1549,12 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Đưa ký tự xuống dòng trong SQL về dạng LF.
+    /// ÄÆ°a kÃ½ tá»± xuá»‘ng dÃ²ng trong SQL vá» dáº¡ng LF.
     /// <para>
-    /// Cần thiết vì các hằng SQL viết dạng raw string literal giữ nguyên CRLF của file
-    /// nguồn. MariaDB chấp nhận CR trong danh sách cột của INSERT (nằm trong ngoặc
-    /// tròn) nhưng lại báo lỗi cú pháp khi CR xuất hiện trong mệnh đề SET — mỗi lần
-    /// thay thế sản phẩm trùng đều hỏng vì lý do này.
+    /// Cáº§n thiáº¿t vÃ¬ cÃ¡c háº±ng SQL viáº¿t dáº¡ng raw string literal giá»¯ nguyÃªn CRLF cá»§a file
+    /// nguá»“n. MariaDB cháº¥p nháº­n CR trong danh sÃ¡ch cá»™t cá»§a INSERT (náº±m trong ngoáº·c
+    /// trÃ²n) nhÆ°ng láº¡i bÃ¡o lá»—i cÃº phÃ¡p khi CR xuáº¥t hiá»‡n trong má»‡nh Ä‘á» SET â€” má»—i láº§n
+    /// thay tháº¿ sáº£n pháº©m trÃ¹ng Ä‘á»u há»ng vÃ¬ lÃ½ do nÃ y.
     /// </para>
     /// </summary>
     private static string ChuanHoaDongMoiSql(string sql)
@@ -1536,7 +1562,7 @@ public sealed partial class DatabaseService
         return sql.Replace("\r\n", "\n").Replace('\r', '\n');
     }
 
-    /// <summary>Cột của bảng san_pham được ghi khi nhập từ file, dùng chung cho INSERT và UPDATE.</summary>
+    /// <summary>Cá»™t cá»§a báº£ng san_pham Ä‘Æ°á»£c ghi khi nháº­p tá»« file, dÃ¹ng chung cho INSERT vÃ  UPDATE.</summary>
     private const string CotNhapSanPham = """
         ma_san_pham,
         ma_vach,
@@ -1602,13 +1628,13 @@ public sealed partial class DatabaseService
         """;
 
     /// <summary>
-    /// Cặp "cột = tham số" cho mệnh đề SET của UPDATE, sinh ra từ chính
-    /// <see cref="CotNhapSanPham"/> và <see cref="GiaTriNhapSanPham"/>.
+    /// Cáº·p "cá»™t = tham sá»‘" cho má»‡nh Ä‘á» SET cá»§a UPDATE, sinh ra tá»« chÃ­nh
+    /// <see cref="CotNhapSanPham"/> vÃ  <see cref="GiaTriNhapSanPham"/>.
     /// <para>
-    /// UPDATE không dùng lại được danh sách cột trần của INSERT: "SET ma_san_pham,
-    /// ma_vach, ..." là cú pháp sai, phải là "SET ma_san_pham = @MaSanPham,
-    /// ma_vach = @MaVach, ...". Sinh tự động từ hai danh sách trên để hai bên
-    /// không thể lệch nhau — lệch chỗ này là mọi lần thay thế sản phẩm trùng đều hỏng.
+    /// UPDATE khÃ´ng dÃ¹ng láº¡i Ä‘Æ°á»£c danh sÃ¡ch cá»™t tráº§n cá»§a INSERT: "SET ma_san_pham,
+    /// ma_vach, ..." lÃ  cÃº phÃ¡p sai, pháº£i lÃ  "SET ma_san_pham = @MaSanPham,
+    /// ma_vach = @MaVach, ...". Sinh tá»± Ä‘á»™ng tá»« hai danh sÃ¡ch trÃªn Ä‘á»ƒ hai bÃªn
+    /// khÃ´ng thá»ƒ lá»‡ch nhau â€” lá»‡ch chá»— nÃ y lÃ  má»i láº§n thay tháº¿ sáº£n pháº©m trÃ¹ng Ä‘á»u há»ng.
     /// </para>
     /// </summary>
     private static readonly string CapNhatNhapSanPham = TaoCapNhatNhapSanPham();
@@ -1623,14 +1649,14 @@ public sealed partial class DatabaseService
 
         if (cot.Length != giaTri.Length)
             throw new InvalidOperationException(
-                $"Danh sách cột ({cot.Length}) và danh sách giá trị ({giaTri.Length}) "
-                + "của phép nhập sản phẩm không khớp nhau.");
+                $"Danh sÃ¡ch cá»™t ({cot.Length}) vÃ  danh sÃ¡ch giÃ¡ trá»‹ ({giaTri.Length}) "
+                + "cá»§a phÃ©p nháº­p sáº£n pháº©m khÃ´ng khá»›p nhau.");
 
         return ChuanHoaDongMoiSql(
             string.Join(",\n", cot.Zip(giaTri, (c, v) => $"{c} = {v}")));
     }
 
-    /// <summary>Độ dài tối đa của các cột varchar trong bảng san_pham (được xác nhận từ schema).</summary>
+    /// <summary>Äá»™ dÃ i tá»‘i Ä‘a cá»§a cÃ¡c cá»™t varchar trong báº£ng san_pham (Ä‘Æ°á»£c xÃ¡c nháº­n tá»« schema).</summary>
     private const int DoDaiToiDaTenSanPham = 255;
     private const int DoDaiToiDaMaSanPham = 50;
     private const int DoDaiToiDaMaVach = 100;
@@ -1642,14 +1668,14 @@ public sealed partial class DatabaseService
     private const int DoDaiToiDaNhomHangBaCap = 255;
 
     /// <summary>
-    /// Tra cứu sản phẩm trùng trong database theo MÃ HÀNG (khóa chính) và MÃ VẠCH.
+    /// Tra cá»©u sáº£n pháº©m trÃ¹ng trong database theo MÃƒ HÃ€NG (khÃ³a chÃ­nh) vÃ  MÃƒ Váº CH.
     /// <para>
-    /// Cố tình KHÔNG so tên hàng: hai món hàng khác nhau rất dễ trùng tên, coi tên là
-    /// khóa trùng sẽ âm thầm bỏ sót sản phẩm hợp lệ.
+    /// Cá»‘ tÃ¬nh KHÃ”NG so tÃªn hÃ ng: hai mÃ³n hÃ ng khÃ¡c nhau ráº¥t dá»… trÃ¹ng tÃªn, coi tÃªn lÃ 
+    /// khÃ³a trÃ¹ng sáº½ Ã¢m tháº§m bá» sÃ³t sáº£n pháº©m há»£p lá»‡.
     /// </para>
     /// <para>
-    /// Truy vấn chạy trên database với danh sách mã cần tra cứu, không tải toàn bộ
-    /// bảng về bộ nhớ, nên vẫn nhanh khi file có hàng nghìn dòng.
+    /// Truy váº¥n cháº¡y trÃªn database vá»›i danh sÃ¡ch mÃ£ cáº§n tra cá»©u, khÃ´ng táº£i toÃ n bá»™
+    /// báº£ng vá» bá»™ nhá»›, nÃªn váº«n nhanh khi file cÃ³ hÃ ng nghÃ¬n dÃ²ng.
     /// </para>
     /// </summary>
     public async Task<IReadOnlyList<SanPham>> TimSanPhamTrungAsync(
@@ -1672,9 +1698,9 @@ public sealed partial class DatabaseService
         if (maSanPhamList.Length == 0 && maVachList.Length == 0)
             return [];
 
-        // Tự dựng danh sách tham số cho mệnh đề IN thay vì đưa cả mảng vào một tham số.
-        // (Dapper coi mảng là một giá trị duy nhất nên SQL sẽ thành IN (('a','b'))
-        // và MariaDB báo "Operand should contain 1 column".)
+        // Tá»± dá»±ng danh sÃ¡ch tham sá»‘ cho má»‡nh Ä‘á» IN thay vÃ¬ Ä‘Æ°a cáº£ máº£ng vÃ o má»™t tham sá»‘.
+        // (Dapper coi máº£ng lÃ  má»™t giÃ¡ trá»‹ duy nháº¥t nÃªn SQL sáº½ thÃ nh IN (('a','b'))
+        // vÃ  MariaDB bÃ¡o "Operand should contain 1 column".)
         var parameters = new DynamicParameters();
         var dieuKien = new List<string>();
 
@@ -1729,25 +1755,25 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Ghi danh sách sản phẩm xuống database trong MỘT transaction.
+    /// Ghi danh sÃ¡ch sáº£n pháº©m xuá»‘ng database trong Má»˜T transaction.
     /// <list type="bullet">
-    /// <item>Chưa có trong database -> INSERT bản ghi mới.</item>
-    /// <item>Đã có và người dùng chọn thay thế -> UPDATE đúng bản ghi cũ, không tạo bản ghi mới.</item>
-    /// <item>Đã có và người dùng chọn giữ -> không ghi gì.</item>
-    /// <item>Dòng lỗi -> ghi nhận lỗi và tiếp tục dòng sau, không làm hỏng cả lượt nhập.</item>
+    /// <item>ChÆ°a cÃ³ trong database -> INSERT báº£n ghi má»›i.</item>
+    /// <item>ÄÃ£ cÃ³ vÃ  ngÆ°á»i dÃ¹ng chá»n thay tháº¿ -> UPDATE Ä‘Ãºng báº£n ghi cÅ©, khÃ´ng táº¡o báº£n ghi má»›i.</item>
+    /// <item>ÄÃ£ cÃ³ vÃ  ngÆ°á»i dÃ¹ng chá»n giá»¯ -> khÃ´ng ghi gÃ¬.</item>
+    /// <item>DÃ²ng lá»—i -> ghi nháº­n lá»—i vÃ  tiáº¿p tá»¥c dÃ²ng sau, khÃ´ng lÃ m há»ng cáº£ lÆ°á»£t nháº­p.</item>
     /// </list>
-    /// Nếu xảy ra lỗi nghiêm trọng (mất kết nối, bảng không tồn tại...) thì rollback
-    /// toàn bộ để database không bị để lại trạng thái nhập dở dang.
+    /// Náº¿u xáº£y ra lá»—i nghiÃªm trá»ng (máº¥t káº¿t ná»‘i, báº£ng khÃ´ng tá»“n táº¡i...) thÃ¬ rollback
+    /// toÃ n bá»™ Ä‘á»ƒ database khÃ´ng bá»‹ Ä‘á»ƒ láº¡i tráº¡ng thÃ¡i nháº­p dá»Ÿ dang.
     /// </summary>
     /// <summary>
-    /// Ghi danh sách sản phẩm xuống database trong một transaction.
+    /// Ghi danh sÃ¡ch sáº£n pháº©m xuá»‘ng database trong má»™t transaction.
     /// </summary>
-    /// <param name="tenFile">Tên file, chỉ để hiển thị trong báo cáo.</param>
-    /// <param name="danhSachHang">Danh sách thao tác đã được quyết định cho từng dòng.</param>
-    /// <param name="tongSoDongExcel">Tổng số dòng dữ liệu có trong file.</param>
+    /// <param name="tenFile">TÃªn file, chá»‰ Ä‘á»ƒ hiá»ƒn thá»‹ trong bÃ¡o cÃ¡o.</param>
+    /// <param name="danhSachHang">Danh sÃ¡ch thao tÃ¡c Ä‘Ã£ Ä‘Æ°á»£c quyáº¿t Ä‘á»‹nh cho tá»«ng dÃ²ng.</param>
+    /// <param name="tongSoDongExcel">Tá»•ng sá»‘ dÃ²ng dá»¯ liá»‡u cÃ³ trong file.</param>
     /// <param name="loiDocFile">
-    /// Các dòng đã lỗi ngay khi đọc file (không đọc được ô, thiếu cả mã lẫn tên).
-    /// Được gộp vào báo cáo để không có dòng nào của file biến mất im lặng.
+    /// CÃ¡c dÃ²ng Ä‘Ã£ lá»—i ngay khi Ä‘á»c file (khÃ´ng Ä‘á»c Ä‘Æ°á»£c Ã´, thiáº¿u cáº£ mÃ£ láº«n tÃªn).
+    /// ÄÆ°á»£c gá»™p vÃ o bÃ¡o cÃ¡o Ä‘á»ƒ khÃ´ng cÃ³ dÃ²ng nÃ o cá»§a file biáº¿n máº¥t im láº·ng.
     /// </param>
     public async Task<KetQuaImportSanPham> ImportSanPhamAsync(
         string tenFile,
@@ -1755,7 +1781,7 @@ public sealed partial class DatabaseService
         int tongSoDongExcel,
         IReadOnlyCollection<LoiDongNhap>? loiDocFile = null)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.ProductsImport, "Bạn không có quyền import hàng hóa.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.ProductsImport, "Báº¡n khÃ´ng cÃ³ quyá»n import hÃ ng hÃ³a.");
         var ketQua = new KetQuaImportSanPham
         {
             TenFile = tenFile,
@@ -1772,21 +1798,21 @@ public sealed partial class DatabaseService
             .Where(h => h.hanDong is HanDong.ThemMoi or HanDong.ThayThe)
             .ToList();
 
-        // Người dùng chọn giữ hết sản phẩm trùng thì không mở transaction.
+        // NgÆ°á»i dÃ¹ng chá»n giá»¯ háº¿t sáº£n pháº©m trÃ¹ng thÃ¬ khÃ´ng má»Ÿ transaction.
         if (canGhi.Count == 0)
             return ketQua;
 
-        // san_pham.ngay_tao mặc định là NOT NULL DEFAULT CURRENT_TIMESTAMP, nên nếu
-        // không gửi cột này thì MySQL tự điền ngày LÚC NHẬP, làm sai lịch sử.
-        // Cho phép cột nhận NULL để ghi đúng NULL khi ô "Thời gian tạo" trong
-        // Excel trống (không có dữ liệu cũ thì không bịa ra ngày giả).
+        // san_pham.ngay_tao máº·c Ä‘á»‹nh lÃ  NOT NULL DEFAULT CURRENT_TIMESTAMP, nÃªn náº¿u
+        // khÃ´ng gá»­i cá»™t nÃ y thÃ¬ MySQL tá»± Ä‘iá»n ngÃ y LÃšC NHáº¬P, lÃ m sai lá»‹ch sá»­.
+        // Cho phÃ©p cá»™t nháº­n NULL Ä‘á»ƒ ghi Ä‘Ãºng NULL khi Ã´ "Thá»i gian táº¡o" trong
+        // Excel trá»‘ng (khÃ´ng cÃ³ dá»¯ liá»‡u cÅ© thÃ¬ khÃ´ng bá»‹a ra ngÃ y giáº£).
         var ghiDuLieuNgayTao = await DamBaoCotNgayTaoSanPhamAsync();
 
         if (!ghiDuLieuNgayTao)
             ketQua.CanhBao.Add(
-                "Không sửa được cột ngay_tao để cho phép NULL: những dòng không có "
-                + "'Thời gian tạo' trong file sẽ nhận ngày lúc nhập. Cần cấp quyền ALTER "
-                + "trên bảng san_pham để sửa.");
+                "KhÃ´ng sá»­a Ä‘Æ°á»£c cá»™t ngay_tao Ä‘á»ƒ cho phÃ©p NULL: nhá»¯ng dÃ²ng khÃ´ng cÃ³ "
+                + "'Thá»i gian táº¡o' trong file sáº½ nháº­n ngÃ y lÃºc nháº­p. Cáº§n cáº¥p quyá»n ALTER "
+                + "trÃªn báº£ng san_pham Ä‘á»ƒ sá»­a.");
 
         var insertSql = ChuanHoaDongMoiSql($"""
             INSERT INTO san_pham
@@ -1799,8 +1825,8 @@ public sealed partial class DatabaseService
             );
             """);
 
-        // Khi thay thế: ngày tạo lấy từ Excel nếu file có, còn không thì GIỮ NGUYÊN
-        // ngày đang có trong database — tuyệt đối không dùng DateTime.Now.
+        // Khi thay tháº¿: ngÃ y táº¡o láº¥y tá»« Excel náº¿u file cÃ³, cÃ²n khÃ´ng thÃ¬ GIá»® NGUYÃŠN
+        // ngÃ y Ä‘ang cÃ³ trong database â€” tuyá»‡t Ä‘á»‘i khÃ´ng dÃ¹ng DateTime.Now.
         var updateSql = ChuanHoaDongMoiSql($"""
             UPDATE san_pham
             SET {CapNhatNhapSanPham},
@@ -1823,8 +1849,8 @@ public sealed partial class DatabaseService
             {
                 var hang = canGhi[index];
 
-                // SAVEPOINT cho từng dòng: một dòng hỏng (ví dụ trùng mã vạch) chỉ
-                // bị loại riêng, không mất các dòng đã ghi trước đó và không phá vỡ
+                // SAVEPOINT cho tá»«ng dÃ²ng: má»™t dÃ²ng há»ng (vÃ­ dá»¥ trÃ¹ng mÃ£ váº¡ch) chá»‰
+                // bá»‹ loáº¡i riÃªng, khÃ´ng máº¥t cÃ¡c dÃ²ng Ä‘Ã£ ghi trÆ°á»›c Ä‘Ã³ vÃ  khÃ´ng phÃ¡ vá»¡
                 // transaction chung.
                 var savepoint = $"sp_nhap_{index}";
                 await connection.ExecuteAsync($"SAVEPOINT {savepoint};", transaction: transaction);
@@ -1852,7 +1878,7 @@ public sealed partial class DatabaseService
                     if (hang.hanDong == HanDong.ThayThe)
                     {
                         if (hang.IdTrongDatabase is null)
-                            throw new InvalidOperationException("Thiếu id sản phẩm đã tồn tại để thay thế.");
+                            throw new InvalidOperationException("Thiáº¿u id sáº£n pháº©m Ä‘Ã£ tá»“n táº¡i Ä‘á»ƒ thay tháº¿.");
 
                         parameters.Add("Id", hang.IdTrongDatabase.Value);
                     }
@@ -1885,24 +1911,24 @@ public sealed partial class DatabaseService
             ketQua.SoThemMoi = 0;
             ketQua.SoThayThe = 0;
             ketQua.LoiDong.Add(new LoiDongNhap(0, null, null,
-                "Lỗi nghiêm trọng, đã rollback toàn bộ lượt nhập: " + MoTaLoiNhap(ex)));
+                "Lá»—i nghiÃªm trá»ng, Ä‘Ã£ rollback toÃ n bá»™ lÆ°á»£t nháº­p: " + MoTaLoiNhap(ex)));
         }
 
         return ketQua;
     }
 
-    /// <summary>Chuyển lỗi MySQL thành thông báo dễ hiểu cho người dùng.</summary>
+    /// <summary>Chuyá»ƒn lá»—i MySQL thÃ nh thÃ´ng bÃ¡o dá»… hiá»ƒu cho ngÆ°á»i dÃ¹ng.</summary>
     internal static string MoTaLoiNhap(Exception ex)
     {
         if (ex is MySqlException mySql)
         {
             return mySql.Number switch
             {
-                1062 => $"trùng khóa duy nhất ({mySql.Message}). Kiểm tra lại mã hàng/mã vạch.",
-                1406 => $"giá trị quá dài so với độ dài cột ({mySql.Message}).",
-                1048 => $"thiếu giá trị bắt buộc ({mySql.Message}).",
-                1452 => $"không tìm thấy bản ghi tham chiếu ({mySql.Message}).",
-                _ => $"lỗi cơ sở dữ liệu {mySql.Number}: {mySql.Message}"
+                1062 => $"trÃ¹ng khÃ³a duy nháº¥t ({mySql.Message}). Kiá»ƒm tra láº¡i mÃ£ hÃ ng/mÃ£ váº¡ch.",
+                1406 => $"giÃ¡ trá»‹ quÃ¡ dÃ i so vá»›i Ä‘á»™ dÃ i cá»™t ({mySql.Message}).",
+                1048 => $"thiáº¿u giÃ¡ trá»‹ báº¯t buá»™c ({mySql.Message}).",
+                1452 => $"khÃ´ng tÃ¬m tháº¥y báº£n ghi tham chiáº¿u ({mySql.Message}).",
+                _ => $"lá»—i cÆ¡ sá»Ÿ dá»¯ liá»‡u {mySql.Number}: {mySql.Message}"
             };
         }
 
@@ -1910,9 +1936,9 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Nạp bảng danh mục (thương hiệu / đơn vị tính / nhóm hàng) để tra id theo tên.
-    /// Bảng rỗng hoặc không tồn tại thì trả về từ điển rỗng, lúc đó cột id tương ứng
-    /// được để NULL — dòng vẫn nhập bình thường.
+    /// Náº¡p báº£ng danh má»¥c (thÆ°Æ¡ng hiá»‡u / Ä‘Æ¡n vá»‹ tÃ­nh / nhÃ³m hÃ ng) Ä‘á»ƒ tra id theo tÃªn.
+    /// Báº£ng rá»—ng hoáº·c khÃ´ng tá»“n táº¡i thÃ¬ tráº£ vá» tá»« Ä‘iá»ƒn rá»—ng, lÃºc Ä‘Ã³ cá»™t id tÆ°Æ¡ng á»©ng
+    /// Ä‘Æ°á»£c Ä‘á»ƒ NULL â€” dÃ²ng váº«n nháº­p bÃ¬nh thÆ°á»ng.
     /// </summary>
     private static async Task<Dictionary<string, uint>> LoadDanhMucThamChieuAsync(
         MySqlConnection connection,
@@ -1938,16 +1964,16 @@ public sealed partial class DatabaseService
         }
         catch (MySqlException)
         {
-            // Không có bảng danh mục: bỏ qua, không làm hỏng lượt nhập.
+            // KhÃ´ng cÃ³ báº£ng danh má»¥c: bá» qua, khÃ´ng lÃ m há»ng lÆ°á»£t nháº­p.
         }
 
         return result;
     }
 
     /// <summary>
-    /// Gom tham số cho INSERT/UPDATE. Các cột không bắt buộc được để NULL/rỗng bình
-    /// thường, và giá trị vượt độ dài cột varchar được cắt lại kèm cảnh báo thay vì
-    /// làm hỏng cả dòng.
+    /// Gom tham sá»‘ cho INSERT/UPDATE. CÃ¡c cá»™t khÃ´ng báº¯t buá»™c Ä‘Æ°á»£c Ä‘á»ƒ NULL/rá»—ng bÃ¬nh
+    /// thÆ°á»ng, vÃ  giÃ¡ trá»‹ vÆ°á»£t Ä‘á»™ dÃ i cá»™t varchar Ä‘Æ°á»£c cáº¯t láº¡i kÃ¨m cáº£nh bÃ¡o thay vÃ¬
+    /// lÃ m há»ng cáº£ dÃ²ng.
     /// </summary>
     private static DynamicParameters BuildParametersNhapSanPham(
         SanPham product,
@@ -1979,21 +2005,21 @@ public sealed partial class DatabaseService
                 return trimmed;
 
             canhBao.Add(
-                $"Cột \"{tenCot}\" dài {trimmed.Length} ký tự, đã cắt còn {doDaiToiDa} ký tự cho vừa độ dài cột.");
+                $"Cá»™t \"{tenCot}\" dÃ i {trimmed.Length} kÃ½ tá»±, Ä‘Ã£ cáº¯t cÃ²n {doDaiToiDa} kÃ½ tá»± cho vá»«a Ä‘á»™ dÃ i cá»™t.");
 
             return trimmed[..doDaiToiDa];
         }
 
-        var maSanPham = Cat(product.MaSanPham, DoDaiToiDaMaSanPham, "Mã hàng") ?? string.Empty;
-        var maVach = Cat(product.MaVach, DoDaiToiDaMaVach, "Mã vạch");
+        var maSanPham = Cat(product.MaSanPham, DoDaiToiDaMaSanPham, "MÃ£ hÃ ng") ?? string.Empty;
+        var maVach = Cat(product.MaVach, DoDaiToiDaMaVach, "MÃ£ váº¡ch");
 
-        // ma_vach có UNIQUE index. Nhiều dòng không có mã vạch thì ghi NULL (MySQL cho
-        // phép nhiều NULL trong UNIQUE); để chuỗi rỗng sẽ khiến chỉ một dòng được nhập
-        // rồi các dòng sau báo trùng.
+        // ma_vach cÃ³ UNIQUE index. Nhiá»u dÃ²ng khÃ´ng cÃ³ mÃ£ váº¡ch thÃ¬ ghi NULL (MySQL cho
+        // phÃ©p nhiá»u NULL trong UNIQUE); Ä‘á»ƒ chuá»—i rá»—ng sáº½ khiáº¿n chá»‰ má»™t dÃ²ng Ä‘Æ°á»£c nháº­p
+        // rá»“i cÃ¡c dÃ²ng sau bÃ¡o trÃ¹ng.
         var parameters = new DynamicParameters();
         parameters.Add("MaSanPham", maSanPham, DbType.String);
         parameters.Add("MaVach", maVach, DbType.String);
-        parameters.Add("TenSanPham", Cat(product.TenSanPham, DoDaiToiDaTenSanPham, "Tên hàng") ?? maSanPham, DbType.String);
+        parameters.Add("TenSanPham", Cat(product.TenSanPham, DoDaiToiDaTenSanPham, "TÃªn hÃ ng") ?? maSanPham, DbType.String);
         parameters.Add("NhomSanPhamId", TraTheoTen(nhomSanPhamTheoTen, product.NhomHangBaCap), DbType.Int32);
         parameters.Add("DonViTinhId",
             TraTheoTen(donViTinhTheoMa, product.MaDvtCoBan)
@@ -2004,21 +2030,21 @@ public sealed partial class DatabaseService
         parameters.Add("GiaVon", product.GiaVon);
         parameters.Add("TonToiThieu", product.TonToiThieu);
         parameters.Add("TonToiDa", product.TonToiDa);
-        parameters.Add("ViTriKho", Cat(product.ViTriKho, DoDaiToiDaViTriKho, "Vị trí"), DbType.String);
+        parameters.Add("ViTriKho", Cat(product.ViTriKho, DoDaiToiDaViTriKho, "Vá»‹ trÃ­"), DbType.String);
         parameters.Add("MoTa", BlankToNull(product.MoTa), DbType.String);
         parameters.Add("GhiChu", BlankToNull(product.GhiChu), DbType.String);
         parameters.Add("HinhAnh", BlankToNull(product.HinhAnh), DbType.String);
         parameters.Add("DuocBanTrucTiep", product.DuocBanTrucTiep);
         parameters.Add("DangKinhDoanh", product.DangKinhDoanh);
-        parameters.Add("LoaiHang", Cat(product.LoaiHang, DoDaiToiDaLoaiHang, "Loại hàng"), DbType.String);
-        parameters.Add("NhomHangBaCap", Cat(product.NhomHangBaCap, DoDaiToiDaNhomHangBaCap, "Nhóm hàng(3 Cấp)"), DbType.String);
+        parameters.Add("LoaiHang", Cat(product.LoaiHang, DoDaiToiDaLoaiHang, "Loáº¡i hÃ ng"), DbType.String);
+        parameters.Add("NhomHangBaCap", Cat(product.NhomHangBaCap, DoDaiToiDaNhomHangBaCap, "NhÃ³m hÃ ng(3 Cáº¥p)"), DbType.String);
         parameters.Add("TonKhoExcel", product.TonKhoExcel);
         parameters.Add("KhachDat", product.KhachDat);
-        parameters.Add("DuKienHetHang", Cat(product.DuKienHetHang, DoDaiToiDaDuKienHetHang, "Dự kiến hết hàng"), DbType.String);
-        parameters.Add("MaDvtCoBan", Cat(product.MaDvtCoBan, DoDaiToiDaMaDvtCoBan, "Mã ĐVT Cơ bản"), DbType.String);
+        parameters.Add("DuKienHetHang", Cat(product.DuKienHetHang, DoDaiToiDaDuKienHetHang, "Dá»± kiáº¿n háº¿t hÃ ng"), DbType.String);
+        parameters.Add("MaDvtCoBan", Cat(product.MaDvtCoBan, DoDaiToiDaMaDvtCoBan, "MÃ£ ÄVT CÆ¡ báº£n"), DbType.String);
         parameters.Add("QuyDoi", product.QuyDoi <= 0 ? 1m : product.QuyDoi);
         parameters.Add("ThuocTinh", BlankToNull(product.ThuocTinh), DbType.String);
-        parameters.Add("MaHhLienQuan", Cat(product.MaHhLienQuan, DoDaiToiDaMaHhLienQuan, "Mã HH Liên quan"), DbType.String);
+        parameters.Add("MaHhLienQuan", Cat(product.MaHhLienQuan, DoDaiToiDaMaHhLienQuan, "MÃ£ HH LiÃªn quan"), DbType.String);
         parameters.Add("TrongLuong", product.TrongLuong, DbType.Decimal);
         parameters.Add("DangKinhDoanhExcel", product.DangKinhDoanh);
         parameters.Add("HangThanhPhan", BlankToNull(product.HangThanhPhan), DbType.String);
@@ -2035,19 +2061,19 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Bảo đảm <c>san_pham.ngay_tao</c> cho phép giá trị NULL.
+    /// Báº£o Ä‘áº£m <c>san_pham.ngay_tao</c> cho phÃ©p giÃ¡ trá»‹ NULL.
     /// <para>
-    /// Cột này được khai báo <c>NOT NULL DEFAULT CURRENT_TIMESTAMP</c>, nên khi
-    /// nhập hàng từ file mà ô "Thời gian tạo" bị trống, MySQL sẽ tự điền ngày
-    /// lúc nhập — đúng cái lỗi làm sai dữ liệu lịch sử. Sửa thành
+    /// Cá»™t nÃ y Ä‘Æ°á»£c khai bÃ¡o <c>NOT NULL DEFAULT CURRENT_TIMESTAMP</c>, nÃªn khi
+    /// nháº­p hÃ ng tá»« file mÃ  Ã´ "Thá»i gian táº¡o" bá»‹ trá»‘ng, MySQL sáº½ tá»± Ä‘iá»n ngÃ y
+    /// lÃºc nháº­p â€” Ä‘Ãºng cÃ¡i lá»—i lÃ m sai dá»¯ liá»‡u lá»‹ch sá»­. Sá»­a thÃ nh
     /// <c>DATETIME NULL DEFAULT CURRENT_TIMESTAMP</c>:
-    /// nhập tay sản phẩm mới (bỏ trống cột) vẫn nhận ngày tạo = thời điểm thêm,
-    /// còn nhập từ file thì ghi đúng giá trị trong file hoặc NULL.
+    /// nháº­p tay sáº£n pháº©m má»›i (bá» trá»‘ng cá»™t) váº«n nháº­n ngÃ y táº¡o = thá»i Ä‘iá»ƒm thÃªm,
+    /// cÃ²n nháº­p tá»« file thÃ¬ ghi Ä‘Ãºng giÃ¡ trá»‹ trong file hoáº·c NULL.
     /// </para>
     /// <para>
-    /// Chạy một lần duy nhất rồi ghi nhớ kết quả, không đụng tới dữ liệu sẵn có.
-    /// Nếu database không cho sửa (thiếu quyền) thì phần mềm vẫn chạy, chỉ không
-    /// ghi cột ngay_tao khi nhập từ file.
+    /// Cháº¡y má»™t láº§n duy nháº¥t rá»“i ghi nhá»› káº¿t quáº£, khÃ´ng Ä‘á»¥ng tá»›i dá»¯ liá»‡u sáºµn cÃ³.
+    /// Náº¿u database khÃ´ng cho sá»­a (thiáº¿u quyá»n) thÃ¬ pháº§n má»m váº«n cháº¡y, chá»‰ khÃ´ng
+    /// ghi cá»™t ngay_tao khi nháº­p tá»« file.
     /// </para>
     /// </summary>
     private async Task<bool> DamBaoCotNgayTaoSanPhamAsync()
@@ -2071,8 +2097,8 @@ public sealed partial class DatabaseService
 
             if (string.IsNullOrWhiteSpace(isNullable))
             {
-                // Không đọc được cột (bảng thiếu / không đủ quyền): giữ nguyên
-                // định nghĩa cũ thay vì đoán.
+                // KhÃ´ng Ä‘á»c Ä‘Æ°á»£c cá»™t (báº£ng thiáº¿u / khÃ´ng Ä‘á»§ quyá»n): giá»¯ nguyÃªn
+                // Ä‘á»‹nh nghÄ©a cÅ© thay vÃ¬ Ä‘oÃ¡n.
                 _cotNgayTaoSanPhamChoPhepNull = false;
             }
             else if (!isNullable.Equals("YES", StringComparison.OrdinalIgnoreCase))
@@ -2101,12 +2127,12 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Đọc danh sách hàng hóa từ file và trả về kèm các dòng không đọc được.
+    /// Äá»c danh sÃ¡ch hÃ ng hÃ³a tá»« file vÃ  tráº£ vá» kÃ¨m cÃ¡c dÃ²ng khÃ´ng Ä‘á»c Ä‘Æ°á»£c.
     /// <para>
-    /// Dòng thiếu mã hàng/tên không được âm thầm loại bỏ — nếu không, người dùng
-    /// thấy báo cáo "736 dòng" trong khi file có 740 dòng mà không biết 4 dòng đó
-    /// đã mất ở đâu. Dòng không đọc được được trả về qua <paramref name="loiDocFile"/>
-    /// để đưa vào báo cáo lỗi của lượt nhập.
+    /// DÃ²ng thiáº¿u mÃ£ hÃ ng/tÃªn khÃ´ng Ä‘Æ°á»£c Ã¢m tháº§m loáº¡i bá» â€” náº¿u khÃ´ng, ngÆ°á»i dÃ¹ng
+    /// tháº¥y bÃ¡o cÃ¡o "736 dÃ²ng" trong khi file cÃ³ 740 dÃ²ng mÃ  khÃ´ng biáº¿t 4 dÃ²ng Ä‘Ã³
+    /// Ä‘Ã£ máº¥t á»Ÿ Ä‘Ã¢u. DÃ²ng khÃ´ng Ä‘á»c Ä‘Æ°á»£c Ä‘Æ°á»£c tráº£ vá» qua <paramref name="loiDocFile"/>
+    /// Ä‘á»ƒ Ä‘Æ°a vÃ o bÃ¡o cÃ¡o lá»—i cá»§a lÆ°á»£t nháº­p.
     /// </para>
     /// </summary>
     public List<SanPham> ParseProductsFromFile(
@@ -2114,17 +2140,17 @@ public sealed partial class DatabaseService
         out List<LoiDongNhap> loiDocFile)
     {
         if (string.IsNullOrWhiteSpace(filePath))
-            throw new ArgumentException("Đường dẫn file không hợp lệ.", nameof(filePath));
+            throw new ArgumentException("ÄÆ°á»ng dáº«n file khÃ´ng há»£p lá»‡.", nameof(filePath));
 
         if (!File.Exists(filePath))
-            throw new FileNotFoundException("Không tìm thấy file danh sách hàng hóa.", filePath);
+            throw new FileNotFoundException("KhÃ´ng tÃ¬m tháº¥y file danh sÃ¡ch hÃ ng hÃ³a.", filePath);
 
         loiDocFile = [];
         var rows = ReadProductRowsFromFile(filePath);
 
-        // Đọc HẾT mọi dòng trong file. Chỉ dòng không có bất kỳ dữ liệu nào mới bị
-        // loại; một dòng thiếu mã vạch / thương hiệu / mô tả / hình ảnh / nhà cung
-        // cấp vẫn là dòng hợp lệ và phải được giữ lại.
+        // Äá»c Háº¾T má»i dÃ²ng trong file. Chá»‰ dÃ²ng khÃ´ng cÃ³ báº¥t ká»³ dá»¯ liá»‡u nÃ o má»›i bá»‹
+        // loáº¡i; má»™t dÃ²ng thiáº¿u mÃ£ váº¡ch / thÆ°Æ¡ng hiá»‡u / mÃ´ táº£ / hÃ¬nh áº£nh / nhÃ  cung
+        // cáº¥p váº«n lÃ  dÃ²ng há»£p lá»‡ vÃ  pháº£i Ä‘Æ°á»£c giá»¯ láº¡i.
         var products = new List<SanPham>(rows.Count);
 
         for (var index = 0; index < rows.Count; index++)
@@ -2139,13 +2165,13 @@ public sealed partial class DatabaseService
             }
             catch (Exception ex)
             {
-                // Lỗi đọc một dòng không được làm hỏng cả lượt nhập: ghi nhận
-                // dòng lỗi rồi tiếp tục dòng tiếp theo.
+                // Lá»—i Ä‘á»c má»™t dÃ²ng khÃ´ng Ä‘Æ°á»£c lÃ m há»ng cáº£ lÆ°á»£t nháº­p: ghi nháº­n
+                // dÃ²ng lá»—i rá»“i tiáº¿p tá»¥c dÃ²ng tiáº¿p theo.
                 loiDocFile.Add(new LoiDongNhap(
                     dong.SoDongExcel,
                     GetFirstString(ChuanHoaTieuDe(dong.GiaTri), "mahang", "masanpham", "ma_san_pham"),
                     null,
-                    "Không đọc được dữ liệu của dòng: " + MoTaLoiNhap(ex)));
+                    "KhÃ´ng Ä‘á»c Ä‘Æ°á»£c dá»¯ liá»‡u cá»§a dÃ²ng: " + MoTaLoiNhap(ex)));
 
                 continue;
             }
@@ -2157,7 +2183,7 @@ public sealed partial class DatabaseService
                     dong.SoDongExcel,
                     null,
                     null,
-                    "Dòng không có mã hàng lẫn tên sản phẩm nên không tạo được sản phẩm."));
+                    "DÃ²ng khÃ´ng cÃ³ mÃ£ hÃ ng láº«n tÃªn sáº£n pháº©m nÃªn khÃ´ng táº¡o Ä‘Æ°á»£c sáº£n pháº©m."));
 
                 continue;
             }
@@ -2168,7 +2194,7 @@ public sealed partial class DatabaseService
         return products;
     }
 
-    /// <summary>Một dòng đọc từ file kèm số thứ tự dòng trong file, để báo lỗi chính xác.</summary>
+    /// <summary>Má»™t dÃ²ng Ä‘á»c tá»« file kÃ¨m sá»‘ thá»© tá»± dÃ²ng trong file, Ä‘á»ƒ bÃ¡o lá»—i chÃ­nh xÃ¡c.</summary>
     private sealed record DongFile(int SoDongExcel, Dictionary<string, string> GiaTri);
 
     private static List<DongFile> ReadProductRowsFromFile(string filePath)
@@ -2181,14 +2207,14 @@ public sealed partial class DatabaseService
         if (extension is ".xlsx" or ".xls")
             return ReadExcelProductRows(filePath);
 
-        throw new NotSupportedException("File không được hỗ trợ. Vui lòng chọn file Excel (.xlsx, .xls) hoặc CSV.");
+        throw new NotSupportedException("File khÃ´ng Ä‘Æ°á»£c há»— trá»£. Vui lÃ²ng chá»n file Excel (.xlsx, .xls) hoáº·c CSV.");
     }
 
     private static List<DongFile> ReadExcelProductRows(string filePath)
     {
         using var workbook = new XLWorkbook(filePath);
         var worksheet = workbook.Worksheets.FirstOrDefault() ??
-            throw new InvalidOperationException("File Excel không chứa sheet dữ liệu hợp lệ.");
+            throw new InvalidOperationException("File Excel khÃ´ng chá»©a sheet dá»¯ liá»‡u há»£p lá»‡.");
 
         var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? 0;
         if (lastRow < 2)
@@ -2201,8 +2227,8 @@ public sealed partial class DatabaseService
 
         var result = new List<DongFile>();
 
-        // Duyệt từ dòng 2 đến dòng cuối cùng của sheet: không giới hạn số dòng,
-        // nên file 737 dòng thì đọc đủ 736 dòng dữ liệu.
+        // Duyá»‡t tá»« dÃ²ng 2 Ä‘áº¿n dÃ²ng cuá»‘i cÃ¹ng cá»§a sheet: khÃ´ng giá»›i háº¡n sá»‘ dÃ²ng,
+        // nÃªn file 737 dÃ²ng thÃ¬ Ä‘á»c Ä‘á»§ 736 dÃ²ng dá»¯ liá»‡u.
         for (var rowNumber = 2; rowNumber <= lastRow; rowNumber++)
         {
             var row = worksheet.Row(rowNumber);
@@ -2229,18 +2255,18 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Đọc một ô của file danh sách hàng hóa.
+    /// Äá»c má»™t Ã´ cá»§a file danh sÃ¡ch hÃ ng hÃ³a.
     /// <para>
-    /// Ô ngày giờ PHẢI lấy theo kiểu dữ liệu (XLDataType.DateTime) chứ không lấy
-    /// chuỗi định dạng của ô: "20/09/2026 21:00" trong Excel là một DateTime thật
-    /// (định dạng chỉ là cách hiển thị), đọc theo chuỗi sẽ phụ thuộc vào format ô
-    /// và có thể mất giờ/phút. DateTime của Excel là giá trị không múi giờ nên
-    /// chuyển thẳng ra chuỗi "yyyy-MM-dd HH:mm:ss" — không có bước đổi múi giờ
-    /// nào và không tự đổi sang ngày hiện tại.
+    /// Ã” ngÃ y giá» PHáº¢I láº¥y theo kiá»ƒu dá»¯ liá»‡u (XLDataType.DateTime) chá»© khÃ´ng láº¥y
+    /// chuá»—i Ä‘á»‹nh dáº¡ng cá»§a Ã´: "20/09/2026 21:00" trong Excel lÃ  má»™t DateTime tháº­t
+    /// (Ä‘á»‹nh dáº¡ng chá»‰ lÃ  cÃ¡ch hiá»ƒn thá»‹), Ä‘á»c theo chuá»—i sáº½ phá»¥ thuá»™c vÃ o format Ã´
+    /// vÃ  cÃ³ thá»ƒ máº¥t giá»/phÃºt. DateTime cá»§a Excel lÃ  giÃ¡ trá»‹ khÃ´ng mÃºi giá» nÃªn
+    /// chuyá»ƒn tháº³ng ra chuá»—i "yyyy-MM-dd HH:mm:ss" â€” khÃ´ng cÃ³ bÆ°á»›c Ä‘á»•i mÃºi giá»
+    /// nÃ o vÃ  khÃ´ng tá»± Ä‘á»•i sang ngÃ y hiá»‡n táº¡i.
     /// </para>
     /// <para>
-    /// Số / chữ / boolean / ô trống vẫn giữ đúng cách đọc cũ (GetString) để không
-    /// đổi hành vi của các cột khác trong file.
+    /// Sá»‘ / chá»¯ / boolean / Ã´ trá»‘ng váº«n giá»¯ Ä‘Ãºng cÃ¡ch Ä‘á»c cÅ© (GetString) Ä‘á»ƒ khÃ´ng
+    /// Ä‘á»•i hÃ nh vi cá»§a cÃ¡c cá»™t khÃ¡c trong file.
     /// </para>
     /// </summary>
     private static string DocGiaTriOTheoKieuSanPham(IXLCell cell)
@@ -2251,9 +2277,9 @@ public sealed partial class DatabaseService
             XLDataType.TimeSpan => cell.GetTimeSpan().ToString("c", CultureInfo.InvariantCulture),
             XLDataType.Blank => string.Empty,
 
-            // Ô lỗi công thức (#DIV/0!, #VALUE!...) lấy nội dung lỗi làm chuỗi
-            // thay vì để GetString() ném exception, vì một ô hỏng trong file
-            // không được làm hỏng cả 736 dòng còn lại.
+            // Ã” lá»—i cÃ´ng thá»©c (#DIV/0!, #VALUE!...) láº¥y ná»™i dung lá»—i lÃ m chuá»—i
+            // thay vÃ¬ Ä‘á»ƒ GetString() nÃ©m exception, vÃ¬ má»™t Ã´ há»ng trong file
+            // khÃ´ng Ä‘Æ°á»£c lÃ m há»ng cáº£ 736 dÃ²ng cÃ²n láº¡i.
             XLDataType.Error => cell.Value.GetError().ToString(),
 
             _ => cell.GetString().Trim()
@@ -2336,9 +2362,9 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Đưa các tên cột trong file về dạng đã chuẩn hóa để tra cứu theo tên cột
-    /// mà code dùng (sau <see cref="NormalizeHeader"/>). Cột trùng nhau sau khi
-    /// chuẩn hóa thì giữ giá trị đầu tiên, tránh lỗi "key đã tồn tại".
+    /// ÄÆ°a cÃ¡c tÃªn cá»™t trong file vá» dáº¡ng Ä‘Ã£ chuáº©n hÃ³a Ä‘á»ƒ tra cá»©u theo tÃªn cá»™t
+    /// mÃ  code dÃ¹ng (sau <see cref="NormalizeHeader"/>). Cá»™t trÃ¹ng nhau sau khi
+    /// chuáº©n hÃ³a thÃ¬ giá»¯ giÃ¡ trá»‹ Ä‘áº§u tiÃªn, trÃ¡nh lá»—i "key Ä‘Ã£ tá»“n táº¡i".
     /// </summary>
     private static Dictionary<string, string> ChuanHoaTieuDe(Dictionary<string, string> rawRow)
     {
@@ -2359,10 +2385,10 @@ public sealed partial class DatabaseService
         var tenSanPham = GetFirstString(normalizedRow, "tenhang", "tensanpham", "ten", "name", "sanpham", "san_pham")
             ?? GetAnyNonEmptyValue(normalizedRow, "mahang", "masanpham", "mavach", "giaban", "giavon");
 
-        // Không có mã hàng thì để trống thay vì tự sinh mã theo giờ nhập: mã sinh tự động
-        // (SP-yyyyMMdd-HHmmssfff) mỗi lần nhập là một sản phẩm khác, khiến cùng một
-        // món hàng bị nhân bản mỗi lần nhập lại file. Việc sinh mã được đưa sang
-        // thao tác tạo sản phẩm thủ công, nơi người dùng thực sự cần mã mới.
+        // KhÃ´ng cÃ³ mÃ£ hÃ ng thÃ¬ Ä‘á»ƒ trá»‘ng thay vÃ¬ tá»± sinh mÃ£ theo giá» nháº­p: mÃ£ sinh tá»± Ä‘á»™ng
+        // (SP-yyyyMMdd-HHmmssfff) má»—i láº§n nháº­p lÃ  má»™t sáº£n pháº©m khÃ¡c, khiáº¿n cÃ¹ng má»™t
+        // mÃ³n hÃ ng bá»‹ nhÃ¢n báº£n má»—i láº§n nháº­p láº¡i file. Viá»‡c sinh mÃ£ Ä‘Æ°á»£c Ä‘Æ°a sang
+        // thao tÃ¡c táº¡o sáº£n pháº©m thá»§ cÃ´ng, nÆ¡i ngÆ°á»i dÃ¹ng thá»±c sá»± cáº§n mÃ£ má»›i.
         var product = new SanPham
         {
             SoDongExcel = soDongExcel,
@@ -2375,10 +2401,10 @@ public sealed partial class DatabaseService
             TonToiThieu = ParseDecimal(GetFirstString(normalizedRow, "tontoithieu", "tonthieunhat", "tonthieu"), 0m),
             TonToiDa = ParseDecimal(GetFirstString(normalizedRow, "tontoida", "tonlonnhat", "tonmax"), 0m),
             KhachDat = ParseDecimal(GetFirstString(normalizedRow, "khdat", "khachdat", "soluongdat"), 0m),
-            // "Thời gian tạo"/"Ngày tạo" phải lấy đúng từ file. Không có giá trị
-            // hợp lệ thì để NULL (xem DamBaoCotNgayTaoSanPhamAsync) chứ không
-            // gán DateTime.Now, nếu không sản phẩm khôi phục từ dữ liệu cũ sẽ bị
-            // đổi thành ngày lúc nhập và sai lịch sử.
+            // "Thá»i gian táº¡o"/"NgÃ y táº¡o" pháº£i láº¥y Ä‘Ãºng tá»« file. KhÃ´ng cÃ³ giÃ¡ trá»‹
+            // há»£p lá»‡ thÃ¬ Ä‘á»ƒ NULL (xem DamBaoCotNgayTaoSanPhamAsync) chá»© khÃ´ng
+            // gÃ¡n DateTime.Now, náº¿u khÃ´ng sáº£n pháº©m khÃ´i phá»¥c tá»« dá»¯ liá»‡u cÅ© sáº½ bá»‹
+            // Ä‘á»•i thÃ nh ngÃ y lÃºc nháº­p vÃ  sai lá»‹ch sá»­.
             NgayTao = ParseNgayTaiFileSanPham(GetFirstString(
                 normalizedRow,
                 "thoigiantao",
@@ -2399,8 +2425,8 @@ public sealed partial class DatabaseService
             DuocBanTrucTiep = ParseBoolean(GetFirstString(normalizedRow, "duocbanchirectiep", "duocbantructiep", "bantructiep"), true),
             MoTa = GetFirstString(normalizedRow, "mota", "mo_ta"),
             GhiChu = GetFirstString(normalizedRow, "ghichu", "ghi_chu"),
-            // Header thực tế là "Hình ảnh (url1,url2...)"; sau khi chuẩn hóa
-            // ngoặc bị bỏ nên cần thử cả dạng có và không có phần trong ngoặc.
+            // Header thá»±c táº¿ lÃ  "HÃ¬nh áº£nh (url1,url2...)"; sau khi chuáº©n hÃ³a
+            // ngoáº·c bá»‹ bá» nÃªn cáº§n thá»­ cáº£ dáº¡ng cÃ³ vÃ  khÃ´ng cÃ³ pháº§n trong ngoáº·c.
             HinhAnh = GetFirstString(normalizedRow, "hinhanh", "hinh", "hinh_anh", "hinh_anh_url", "hinhanhurl1url2"),
             ThuongHieu = GetFirstString(normalizedRow, "thuonghieu", "thuong_hieu", "brand"),
             MaDvtCoBan = GetFirstString(normalizedRow, "madvtcoban", "ma_dvt_co_ban"),
@@ -2446,8 +2472,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Chuyển đổi an toàn giá trị bất kỳ từ cơ sở dữ liệu sang kiểu decimal.
-    /// Hỗ trợ null, DBNull, số nguyên, số thực hoặc chuỗi số.
+    /// Chuyá»ƒn Ä‘á»•i an toÃ n giÃ¡ trá»‹ báº¥t ká»³ tá»« cÆ¡ sá»Ÿ dá»¯ liá»‡u sang kiá»ƒu decimal.
+    /// Há»— trá»£ null, DBNull, sá»‘ nguyÃªn, sá»‘ thá»±c hoáº·c chuá»—i sá»‘.
     /// </summary>
     private static decimal ToDecimal(object? value)
     {
@@ -2511,8 +2537,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Giống <see cref="ParseDecimal"/> nhưng trả về null khi ô trống hoặc không đọc
-    /// được số, để phân biệt "không có dữ liệu" với giá trị 0.
+    /// Giá»‘ng <see cref="ParseDecimal"/> nhÆ°ng tráº£ vá» null khi Ã´ trá»‘ng hoáº·c khÃ´ng Ä‘á»c
+    /// Ä‘Æ°á»£c sá»‘, Ä‘á»ƒ phÃ¢n biá»‡t "khÃ´ng cÃ³ dá»¯ liá»‡u" vá»›i giÃ¡ trá»‹ 0.
     /// </summary>
     private static decimal? ParseNullableDecimal(string? value)
     {
@@ -2537,20 +2563,20 @@ public sealed partial class DatabaseService
         if (bool.TryParse(normalized, out var result))
             return result;
 
-        return normalized is "1" or "yes" or "y" or "co" or "đúng" ? true : defaultValue;
+        return normalized is "1" or "yes" or "y" or "co" or "Ä‘Ãºng" ? true : defaultValue;
     }
 
     /// <summary>
-    /// Đọc ô "Thời gian tạo" / "Ngày tạo" của file danh sách hàng hóa.
+    /// Äá»c Ã´ "Thá»i gian táº¡o" / "NgÃ y táº¡o" cá»§a file danh sÃ¡ch hÃ ng hÃ³a.
     /// <para>
-    /// Danh sách định dạng là CỐ ĐỊNH, không nhờ vào văn hóa của máy. Nếu để
-    /// <c>DateTime.TryParse</c> với văn hóa InvariantCulture chạy trước thì
-    /// "05/09/2026" sẽ bị hiểu theo thứ tự tháng/ngày của văn hóa Mỹ, ra
-    /// 9 tháng 5 — lệch so với 5 tháng 9 mà người dùng nhìn thấy trong file.
+    /// Danh sÃ¡ch Ä‘á»‹nh dáº¡ng lÃ  Cá» Äá»ŠNH, khÃ´ng nhá» vÃ o vÄƒn hÃ³a cá»§a mÃ¡y. Náº¿u Ä‘á»ƒ
+    /// <c>DateTime.TryParse</c> vá»›i vÄƒn hÃ³a InvariantCulture cháº¡y trÆ°á»›c thÃ¬
+    /// "05/09/2026" sáº½ bá»‹ hiá»ƒu theo thá»© tá»± thÃ¡ng/ngÃ y cá»§a vÄƒn hÃ³a Má»¹, ra
+    /// 9 thÃ¡ng 5 â€” lá»‡ch so vá»›i 5 thÃ¡ng 9 mÃ  ngÆ°á»i dÃ¹ng nhÃ¬n tháº¥y trong file.
     /// </para>
     /// <para>
-    /// Ô trống hoặc không nhận ra được thì trả về NULL — không bao giờ trả về
-    /// ngày hiện tại, để người dùng biết dữ liệu cũ không có giá trị này.
+    /// Ã” trá»‘ng hoáº·c khÃ´ng nháº­n ra Ä‘Æ°á»£c thÃ¬ tráº£ vá» NULL â€” khÃ´ng bao giá» tráº£ vá»
+    /// ngÃ y hiá»‡n táº¡i, Ä‘á»ƒ ngÆ°á»i dÃ¹ng biáº¿t dá»¯ liá»‡u cÅ© khÃ´ng cÃ³ giÃ¡ trá»‹ nÃ y.
     /// </para>
     /// </summary>
     private static DateTime? ParseNgayTaiFileSanPham(string? value)
@@ -2558,8 +2584,8 @@ public sealed partial class DatabaseService
         if (string.IsNullOrWhiteSpace(value))
             return null;
 
-        // Excel không lưu múi giờ: bỏ hậu tố Z / +07:00 nếu có để giữ đúng
-        // giờ ghi trong ô, tuyệt đối không đổi theo múi giờ của máy.
+        // Excel khÃ´ng lÆ°u mÃºi giá»: bá» háº­u tá»‘ Z / +07:00 náº¿u cÃ³ Ä‘á»ƒ giá»¯ Ä‘Ãºng
+        // giá» ghi trong Ã´, tuyá»‡t Ä‘á»‘i khÃ´ng Ä‘á»•i theo mÃºi giá» cá»§a mÃ¡y.
         var text = BoHauToMuiGio(value.Trim());
 
         if (text.Length == 0)
@@ -2604,7 +2630,7 @@ public sealed partial class DatabaseService
                 DateTimeKind.Unspecified);
         }
 
-        // Ô ngày bị Excel/CSV lưu thành số serial (46287 = 20/09/2026).
+        // Ã” ngÃ y bá»‹ Excel/CSV lÆ°u thÃ nh sá»‘ serial (46287 = 20/09/2026).
         if (double.TryParse(
                 text,
                 NumberStyles.Float,
@@ -2619,8 +2645,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Bỏ hậu tố múi giờ (Z, +07:00, -05:00) ở cuối chuỗi ngày giờ để giữ nguyên
-    /// giờ ghi trong file, không chuyển đổi theo múi giờ của máy.
+    /// Bá» háº­u tá»‘ mÃºi giá» (Z, +07:00, -05:00) á»Ÿ cuá»‘i chuá»—i ngÃ y giá» Ä‘á»ƒ giá»¯ nguyÃªn
+    /// giá» ghi trong file, khÃ´ng chuyá»ƒn Ä‘á»•i theo mÃºi giá» cá»§a mÃ¡y.
     /// </summary>
     private static string BoHauToMuiGio(string value)
     {
@@ -2654,10 +2680,10 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Chuẩn hóa tên cột để so khớp giữa tên cột trong file và tên cột trong code.
-    /// Bỏ dấu, hạ chữ thường và loại bỏ mọi ký tự phân tách/đặc biệt, kể cả dấu
-    /// ngoặc — vì file thực tế có cột "Nhóm hàng(3 Cấp)" và "Hình ảnh (url1,url2...)"
-    /// mà không bỏ ngoặc thì tên cột không bao giờ khớp được với khoá tra cứu.
+    /// Chuáº©n hÃ³a tÃªn cá»™t Ä‘á»ƒ so khá»›p giá»¯a tÃªn cá»™t trong file vÃ  tÃªn cá»™t trong code.
+    /// Bá» dáº¥u, háº¡ chá»¯ thÆ°á»ng vÃ  loáº¡i bá» má»i kÃ½ tá»± phÃ¢n tÃ¡ch/Ä‘áº·c biá»‡t, ká»ƒ cáº£ dáº¥u
+    /// ngoáº·c â€” vÃ¬ file thá»±c táº¿ cÃ³ cá»™t "NhÃ³m hÃ ng(3 Cáº¥p)" vÃ  "HÃ¬nh áº£nh (url1,url2...)"
+    /// mÃ  khÃ´ng bá» ngoáº·c thÃ¬ tÃªn cá»™t khÃ´ng bao giá» khá»›p Ä‘Æ°á»£c vá»›i khoÃ¡ tra cá»©u.
     /// </summary>
     private static string NormalizeHeader(string value)
     {
@@ -2672,7 +2698,7 @@ public sealed partial class DatabaseService
             if (CharUnicodeInfo.GetUnicodeCategory(character) == UnicodeCategory.NonSpacingMark)
                 continue;
 
-            // Chỉ giữ lại chữ và số; bỏ hết dấu câu, ngoặc, khoảng trắng.
+            // Chá»‰ giá»¯ láº¡i chá»¯ vÃ  sá»‘; bá» háº¿t dáº¥u cÃ¢u, ngoáº·c, khoáº£ng tráº¯ng.
             if (char.IsLetterOrDigit(character))
                 builder.Append(FoldDangDe(char.ToLowerInvariant(character)));
         }
@@ -2691,8 +2717,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Sinh mã khách hàng tuần tự theo dạng KH0000001.
-    /// Chỉ xét các mã KH + số để không bị ảnh hưởng bởi mã cũ khác định dạng.
+    /// Sinh mÃ£ khÃ¡ch hÃ ng tuáº§n tá»± theo dáº¡ng KH0000001.
+    /// Chá»‰ xÃ©t cÃ¡c mÃ£ KH + sá»‘ Ä‘á»ƒ khÃ´ng bá»‹ áº£nh hÆ°á»Ÿng bá»Ÿi mÃ£ cÅ© khÃ¡c Ä‘á»‹nh dáº¡ng.
     /// </summary>
     public async Task<string> TaoMaKhachHangMoiAsync()
     {
@@ -2710,13 +2736,13 @@ public sealed partial class DatabaseService
         var nextNumber = await connection.ExecuteScalarAsync<long>(sql);
 
         if (nextNumber > 9_999_999)
-            throw new InvalidOperationException("Đã vượt giới hạn mã khách hàng tự động KH9999999.");
+            throw new InvalidOperationException("ÄÃ£ vÆ°á»£t giá»›i háº¡n mÃ£ khÃ¡ch hÃ ng tá»± Ä‘á»™ng KH9999999.");
 
         return $"KH{nextNumber:D7}";
     }
 
     /// <summary>
-    /// Sinh mã khách hàng nội bộ tuần tự theo dạng NB000001 (hoặc KHNB0001).
+    /// Sinh mÃ£ khÃ¡ch hÃ ng ná»™i bá»™ tuáº§n tá»± theo dáº¡ng NB000001 (hoáº·c KHNB0001).
     /// </summary>
     public async Task<string> TaoMaKhachHangNoiBoMoiAsync(string prefix = "NB")
     {
@@ -2738,7 +2764,7 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Đảm bảo nhóm "Nội bộ" tồn tại trong bảng nhom_khach_hang để gán hoặc lọc đối tác nội bộ.
+    /// Äáº£m báº£o nhÃ³m "Ná»™i bá»™" tá»“n táº¡i trong báº£ng nhom_khach_hang Ä‘á»ƒ gÃ¡n hoáº·c lá»c Ä‘á»‘i tÃ¡c ná»™i bá»™.
     /// </summary>
     public async Task<NhomKhachHang> EnsureNhomKhachHangNoiBoAsync()
     {
@@ -2747,7 +2773,7 @@ public sealed partial class DatabaseService
         const string checkSql = """
         SELECT id AS Id, ten_nhom AS TenNhom, phan_tram_giam_gia AS PhanTramGiamGia, trang_thai AS TrangThai
         FROM nhom_khach_hang
-        WHERE ten_nhom = 'Nội bộ'
+        WHERE ten_nhom = 'Ná»™i bá»™'
         LIMIT 1;
         """;
 
@@ -2755,12 +2781,12 @@ public sealed partial class DatabaseService
         if (existing is not null)
             return existing;
 
-        // ma_nhom là cột NOT NULL nên bắt buộc phải có giá trị khi thêm nhóm mới.
+        // ma_nhom lÃ  cá»™t NOT NULL nÃªn báº¯t buá»™c pháº£i cÃ³ giÃ¡ trá»‹ khi thÃªm nhÃ³m má»›i.
         var maNhom = await SinhMaNhomKhachHangAsync(connection, "NHN");
 
         const string insertSql = """
         INSERT INTO nhom_khach_hang (ma_nhom, ten_nhom, phan_tram_giam_gia, ghi_chu, trang_thai)
-        VALUES (@MaNhom, 'Nội bộ', 0, 'Nhóm khách hàng / đối tác nội bộ', 1);
+        VALUES (@MaNhom, 'Ná»™i bá»™', 0, 'NhÃ³m khÃ¡ch hÃ ng / Ä‘á»‘i tÃ¡c ná»™i bá»™', 1);
         SELECT LAST_INSERT_ID();
         """;
 
@@ -2768,13 +2794,13 @@ public sealed partial class DatabaseService
         return new NhomKhachHang
         {
             Id = id,
-            TenNhom = "Nội bộ",
+            TenNhom = "Ná»™i bá»™",
             PhanTramGiamGia = 0,
             TrangThai = true
         };
     }
 
-    /// <summary>Sinh mã nhóm khách hàng kế tiếp theo dạng {prefix} + số thứ tự.</summary>
+    /// <summary>Sinh mÃ£ nhÃ³m khÃ¡ch hÃ ng káº¿ tiáº¿p theo dáº¡ng {prefix} + sá»‘ thá»© tá»±.</summary>
     private static async Task<string> SinhMaNhomKhachHangAsync(MySqlConnection connection, string prefix)
     {
         var nextNumber = await connection.ExecuteScalarAsync<long>(
@@ -2848,9 +2874,9 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Kiểm tra số điện thoại đã tồn tại trong khách hàng đang hoạt động chưa.
-    /// So sánh sau khi bỏ khoảng trắng, dấu gạch và dấu chấm
-    /// để tránh lưu trùng khi khách gõ khác định dạng.
+    /// Kiá»ƒm tra sá»‘ Ä‘iá»‡n thoáº¡i Ä‘Ã£ tá»“n táº¡i trong khÃ¡ch hÃ ng Ä‘ang hoáº¡t Ä‘á»™ng chÆ°a.
+    /// So sÃ¡nh sau khi bá» khoáº£ng tráº¯ng, dáº¥u gáº¡ch vÃ  dáº¥u cháº¥m
+    /// Ä‘á»ƒ trÃ¡nh lÆ°u trÃ¹ng khi khÃ¡ch gÃµ khÃ¡c Ä‘á»‹nh dáº¡ng.
     /// </summary>
     public async Task<bool> KiemTraTrungSoDienThoaiAsync(
         string? soDienThoai,
@@ -2891,22 +2917,22 @@ public sealed partial class DatabaseService
 
     public async Task XoaKhachHangAsync(uint customerId)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CustomersDelete, "Bạn không có quyền xóa khách hàng.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CustomersDelete, "Báº¡n khÃ´ng cÃ³ quyá»n xÃ³a khÃ¡ch hÃ ng.");
         await using var connection = await OpenAsync();
 
-        // Giữ lại lịch sử hóa đơn/công nợ; danh sách khách hàng chỉ hiển thị bản ghi còn hoạt động.
+        // Giá»¯ láº¡i lá»‹ch sá»­ hÃ³a Ä‘Æ¡n/cÃ´ng ná»£; danh sÃ¡ch khÃ¡ch hÃ ng chá»‰ hiá»ƒn thá»‹ báº£n ghi cÃ²n hoáº¡t Ä‘á»™ng.
         var affectedRows = await connection.ExecuteAsync(
             "UPDATE khach_hang SET trang_thai = 0, ngay_cap_nhat = NOW() WHERE id = @Id AND trang_thai = 1;",
             new { Id = customerId });
 
         if (affectedRows == 0)
-            throw new InvalidOperationException("Khách hàng không tồn tại hoặc đã bị xóa.");
+            throw new InvalidOperationException("KhÃ¡ch hÃ ng khÃ´ng tá»“n táº¡i hoáº·c Ä‘Ã£ bá»‹ xÃ³a.");
     }
 
     /// <summary>
-    /// Kiểm tra bảng lưu phiếu trả hàng có tồn tại trong database hay không
-    /// (một số bản cài cũ chưa có bảng này). Kết quả được ghi nhớ để
-    /// không phải hỏi lại database ở mỗi lần tải danh sách.
+    /// Kiá»ƒm tra báº£ng lÆ°u phiáº¿u tráº£ hÃ ng cÃ³ tá»“n táº¡i trong database hay khÃ´ng
+    /// (má»™t sá»‘ báº£n cÃ i cÅ© chÆ°a cÃ³ báº£ng nÃ y). Káº¿t quáº£ Ä‘Æ°á»£c ghi nhá»› Ä‘á»ƒ
+    /// khÃ´ng pháº£i há»i láº¡i database á»Ÿ má»—i láº§n táº£i danh sÃ¡ch.
     /// </summary>
     private async Task<bool> HasBangTraHangAsync()
     {
@@ -2936,10 +2962,10 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Tổng tiền trả hàng của một khách hàng, tính theo biểu thức định danh
-    /// khách hàng đang có trong câu truy vấn gốc (ví dụ "kh.id" hoặc "@Id").
-    /// Nếu chưa có bảng trả hàng thì coi như không có giao dịch trả hàng nào,
-    /// không tự tạo số liệu.
+    /// Tá»•ng tiá»n tráº£ hÃ ng cá»§a má»™t khÃ¡ch hÃ ng, tÃ­nh theo biá»ƒu thá»©c Ä‘á»‹nh danh
+    /// khÃ¡ch hÃ ng Ä‘ang cÃ³ trong cÃ¢u truy váº¥n gá»‘c (vÃ­ dá»¥ "kh.id" hoáº·c "@Id").
+    /// Náº¿u chÆ°a cÃ³ báº£ng tráº£ hÃ ng thÃ¬ coi nhÆ° khÃ´ng cÃ³ giao dá»‹ch tráº£ hÃ ng nÃ o,
+    /// khÃ´ng tá»± táº¡o sá»‘ liá»‡u.
     /// </summary>
     private static string TongTienTraHangSql(string idExpression, bool coBangTraHang)
         => coBangTraHang
@@ -2957,10 +2983,10 @@ public sealed partial class DatabaseService
             : "0";
 
     /// <summary>
-    /// Ba biểu thức tiền của một khách hàng, dùng chung cho bảng danh sách,
-    /// thanh thống kê và vùng chi tiết để ba nơi luôn hiển thị cùng một số.
-    /// Ưu tiên số tiền đã nhập từ file KiotViet, không có thì tính từ
-    /// dữ liệu bán hàng, công nợ và trả hàng của phần mềm.
+    /// Ba biá»ƒu thá»©c tiá»n cá»§a má»™t khÃ¡ch hÃ ng, dÃ¹ng chung cho báº£ng danh sÃ¡ch,
+    /// thanh thá»‘ng kÃª vÃ  vÃ¹ng chi tiáº¿t Ä‘á»ƒ ba nÆ¡i luÃ´n hiá»ƒn thá»‹ cÃ¹ng má»™t sá»‘.
+    /// Æ¯u tiÃªn sá»‘ tiá»n Ä‘Ã£ nháº­p tá»« file KiotViet, khÃ´ng cÃ³ thÃ¬ tÃ­nh tá»«
+    /// dá»¯ liá»‡u bÃ¡n hÃ ng, cÃ´ng ná»£ vÃ  tráº£ hÃ ng cá»§a pháº§n má»m.
     /// </summary>
     private static (string NoHienTai, string TongBan, string TongBanTruTraHang) TaoBieuThucTienKhachHang(
         bool coBangTraHang,
@@ -3011,8 +3037,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Ba cột tiền của bảng danh sách khách hàng, dùng subquery tương quan theo
-    /// kh.id nên chỉ tính cho các dòng thuộc trang đang xem thay vì gom nhóm toàn bảng.
+    /// Ba cá»™t tiá»n cá»§a báº£ng danh sÃ¡ch khÃ¡ch hÃ ng, dÃ¹ng subquery tÆ°Æ¡ng quan theo
+    /// kh.id nÃªn chá»‰ tÃ­nh cho cÃ¡c dÃ²ng thuá»™c trang Ä‘ang xem thay vÃ¬ gom nhÃ³m toÃ n báº£ng.
     /// </summary>
     private static string TienTruongKhachHangSql(bool coBangTraHang, bool coCotKiotViet)
     {
@@ -3026,12 +3052,12 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Bảo đảm bảng khach_hang có đủ ba cột phục vụ việc nhập từ file KiotViet.
-    /// Các cột này được thêm một lần duy nhất, không đụng tới dữ liệu sẵn có:
-    /// co_du_lieu_kiotviet đánh dấu bản ghi có số tiền lấy từ file,
-    /// nguoi_tao_ten giữ tên người tạo ghi trong file, ngay_nhap_excel để truy vết.
-    /// Nếu thêm không được (database cũ, không đủ quyền) thì phần mềm vẫn chạy
-    /// bình thường và chỉ dùng số tiền tính từ hóa đơn, công nợ, trả hàng.
+    /// Báº£o Ä‘áº£m báº£ng khach_hang cÃ³ Ä‘á»§ ba cá»™t phá»¥c vá»¥ viá»‡c nháº­p tá»« file KiotViet.
+    /// CÃ¡c cá»™t nÃ y Ä‘Æ°á»£c thÃªm má»™t láº§n duy nháº¥t, khÃ´ng Ä‘á»¥ng tá»›i dá»¯ liá»‡u sáºµn cÃ³:
+    /// co_du_lieu_kiotviet Ä‘Ã¡nh dáº¥u báº£n ghi cÃ³ sá»‘ tiá»n láº¥y tá»« file,
+    /// nguoi_tao_ten giá»¯ tÃªn ngÆ°á»i táº¡o ghi trong file, ngay_nhap_excel Ä‘á»ƒ truy váº¿t.
+    /// Náº¿u thÃªm khÃ´ng Ä‘Æ°á»£c (database cÅ©, khÃ´ng Ä‘á»§ quyá»n) thÃ¬ pháº§n má»m váº«n cháº¡y
+    /// bÃ¬nh thÆ°á»ng vÃ  chá»‰ dÃ¹ng sá»‘ tiá»n tÃ­nh tá»« hÃ³a Ä‘Æ¡n, cÃ´ng ná»£, tráº£ hÃ ng.
     /// </summary>
     private async Task<bool> DamBaoCotDuLieuKiotVietAsync()
     {
@@ -3046,7 +3072,7 @@ public sealed partial class DatabaseService
               AND COLUMN_NAME IN ('co_du_lieu_kiotviet', 'nguoi_tao_ten', 'ngay_nhap_excel');
             """;
 
-        // Thêm từng cột một vì bảng cũ có thể đã có sẵn một trong ba cột.
+        // ThÃªm tá»«ng cá»™t má»™t vÃ¬ báº£ng cÅ© cÃ³ thá»ƒ Ä‘Ã£ cÃ³ sáºµn má»™t trong ba cá»™t.
         var cotCanThem = new (string Ten, string DinhNghia)[]
         {
             ("co_du_lieu_kiotviet", "TINYINT(1) NOT NULL DEFAULT 0"),
@@ -3072,7 +3098,7 @@ public sealed partial class DatabaseService
         }
         catch
         {
-            // Không thêm được cột thì dùng số liệu tính từ hóa đơn, công nợ, trả hàng.
+            // KhÃ´ng thÃªm Ä‘Æ°á»£c cá»™t thÃ¬ dÃ¹ng sá»‘ liá»‡u tÃ­nh tá»« hÃ³a Ä‘Æ¡n, cÃ´ng ná»£, tráº£ hÃ ng.
             _coCotDuLieuKiotViet = false;
         }
 
@@ -3080,19 +3106,19 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Bảo đảm bảng nha_cung_cap có đủ các cột phục vụ việc nhập từ file danh sách
-    /// nhà cung cấp. Đây là cột MỐI theo đúng cách đã làm với bảng khach_hang:
+    /// Báº£o Ä‘áº£m báº£ng nha_cung_cap cÃ³ Ä‘á»§ cÃ¡c cá»™t phá»¥c vá»¥ viá»‡c nháº­p tá»« file danh sÃ¡ch
+    /// nhÃ  cung cáº¥p. ÄÃ¢y lÃ  cá»™t Má»I theo Ä‘Ãºng cÃ¡ch Ä‘Ã£ lÃ m vá»›i báº£ng khach_hang:
     /// <list type="bullet">
-    /// <item>co_du_lieu_kiotviet đánh dấu bản ghi có số tiền lấy từ file,
-    /// nguoi_tao_ten giữ người tạo ghi trong file, ngay_nhap_excel để truy vết;</item>
-    /// <item>no_can_tra_hien_tai, tong_mua, tong_mua_tru_tra_hang lưu ba cột tiền
-    /// của file, không có cột này thì không thể giữ số liệu sau khi nhập;</item>
-    /// <item>khu_vuc, so_cccd, nhom_nha_cung_cap_ten, ten_cong_ty lưu các cột chữ
-    /// còn lại của file mà bảng cũ chưa có chỗ để lưu.</item>
+    /// <item>co_du_lieu_kiotviet Ä‘Ã¡nh dáº¥u báº£n ghi cÃ³ sá»‘ tiá»n láº¥y tá»« file,
+    /// nguoi_tao_ten giá»¯ ngÆ°á»i táº¡o ghi trong file, ngay_nhap_excel Ä‘á»ƒ truy váº¿t;</item>
+    /// <item>no_can_tra_hien_tai, tong_mua, tong_mua_tru_tra_hang lÆ°u ba cá»™t tiá»n
+    /// cá»§a file, khÃ´ng cÃ³ cá»™t nÃ y thÃ¬ khÃ´ng thá»ƒ giá»¯ sá»‘ liá»‡u sau khi nháº­p;</item>
+    /// <item>khu_vuc, so_cccd, nhom_nha_cung_cap_ten, ten_cong_ty lÆ°u cÃ¡c cá»™t chá»¯
+    /// cÃ²n láº¡i cá»§a file mÃ  báº£ng cÅ© chÆ°a cÃ³ chá»— Ä‘á»ƒ lÆ°u.</item>
     /// </list>
-    /// Các cột được thêm một lần duy nhất, không đụng tới dữ liệu sẵn có. Nếu thêm
-    /// không được (database cũ, không đủ quyền) thì phần mềm vẫn chạy bình thường
-    /// và chỉ dùng số tiền tính từ phiếu nhập hàng và sổ cái công nợ.
+    /// CÃ¡c cá»™t Ä‘Æ°á»£c thÃªm má»™t láº§n duy nháº¥t, khÃ´ng Ä‘á»¥ng tá»›i dá»¯ liá»‡u sáºµn cÃ³. Náº¿u thÃªm
+    /// khÃ´ng Ä‘Æ°á»£c (database cÅ©, khÃ´ng Ä‘á»§ quyá»n) thÃ¬ pháº§n má»m váº«n cháº¡y bÃ¬nh thÆ°á»ng
+    /// vÃ  chá»‰ dÃ¹ng sá»‘ tiá»n tÃ­nh tá»« phiáº¿u nháº­p hÃ ng vÃ  sá»• cÃ¡i cÃ´ng ná»£.
     /// </summary>
     private async Task<bool> DamBaoCotDuLieuKiotVietNhaCungCapAsync()
     {
@@ -3111,7 +3137,7 @@ public sealed partial class DatabaseService
               );
             """;
 
-        // Thêm từng cột một vì bảng cũ có thể đã có sẵn một trong các cột này.
+        // ThÃªm tá»«ng cá»™t má»™t vÃ¬ báº£ng cÅ© cÃ³ thá»ƒ Ä‘Ã£ cÃ³ sáºµn má»™t trong cÃ¡c cá»™t nÃ y.
         var cotCanThem = new (string Ten, string DinhNghia)[]
         {
             ("co_du_lieu_kiotviet", "TINYINT(1) NOT NULL DEFAULT 0"),
@@ -3146,7 +3172,7 @@ public sealed partial class DatabaseService
         }
         catch
         {
-            // Không thêm được cột thì dùng số liệu tính từ phiếu nhập hàng, sổ cái công nợ.
+            // KhÃ´ng thÃªm Ä‘Æ°á»£c cá»™t thÃ¬ dÃ¹ng sá»‘ liá»‡u tÃ­nh tá»« phiáº¿u nháº­p hÃ ng, sá»• cÃ¡i cÃ´ng ná»£.
             _coCotDuLieuKiotVietNhaCungCap = false;
         }
 
@@ -3154,17 +3180,17 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Ba biểu thức tiền của một nhà cung cấp, dùng chung cho bảng danh sách,
-    /// thanh thống kê, bộ lọc công nợ và vùng chi tiết để ba nơi luôn hiển thị
-    /// cùng một số. Ưu tiên số tiền đã nhập từ file danh sách, không có thì
-    /// tính từ dữ liệu nhập hàng và công nợ của phần mềm.
+    /// Ba biá»ƒu thá»©c tiá»n cá»§a má»™t nhÃ  cung cáº¥p, dÃ¹ng chung cho báº£ng danh sÃ¡ch,
+    /// thanh thá»‘ng kÃª, bá»™ lá»c cÃ´ng ná»£ vÃ  vÃ¹ng chi tiáº¿t Ä‘á»ƒ ba nÆ¡i luÃ´n hiá»ƒn thá»‹
+    /// cÃ¹ng má»™t sá»‘. Æ¯u tiÃªn sá»‘ tiá»n Ä‘Ã£ nháº­p tá»« file danh sÃ¡ch, khÃ´ng cÃ³ thÃ¬
+    /// tÃ­nh tá»« dá»¯ liá»‡u nháº­p hÃ ng vÃ  cÃ´ng ná»£ cá»§a pháº§n má»m.
     /// </summary>
     private static (string NoHienTai, string TongMua, string TongMuaTruTraHang)
         TaoBieuThucTienNhaCungCap(string idExpression, bool coCotKiotViet)
     {
-        // Sổ cái công nợ là nguồn công nợ chính, giống hệt cột "Còn nợ" và
-        // cột "Công nợ hiện tại" của vùng chi tiết.
-        // Nếu chưa có dòng sổ cái nào, tự động fallback sang tổng còn nợ của phiếu nhập.
+        // Sá»• cÃ¡i cÃ´ng ná»£ lÃ  nguá»“n cÃ´ng ná»£ chÃ­nh, giá»‘ng há»‡t cá»™t "CÃ²n ná»£" vÃ 
+        // cá»™t "CÃ´ng ná»£ hiá»‡n táº¡i" cá»§a vÃ¹ng chi tiáº¿t.
+        // Náº¿u chÆ°a cÃ³ dÃ²ng sá»• cÃ¡i nÃ o, tá»± Ä‘á»™ng fallback sang tá»•ng cÃ²n ná»£ cá»§a phiáº¿u nháº­p.
         var tienNoiBo = $"""
             COALESCE(
                 (
@@ -3182,7 +3208,7 @@ public sealed partial class DatabaseService
             )
             """;
 
-        // Tổng mua lấy từ các phiếu nhập hàng hợp lệ (DA_NHAP_HANG hoặc HOAN_THANH).
+        // Tá»•ng mua láº¥y tá»« cÃ¡c phiáº¿u nháº­p hÃ ng há»£p lá»‡ (DA_NHAP_HANG hoáº·c HOAN_THANH).
         var tienMuaNoiBo = $"""
             COALESCE(
                 (
@@ -3195,9 +3221,9 @@ public sealed partial class DatabaseService
             )
             """;
 
-        // Phần mềm chưa có phiếu trả hàng cho nhà cung cấp, nên tổng mua trừ trả
-        // hàng tính từ nội bộ bằng chính tổng mua. Khi có dữ liệu file thì lấy
-        // số của file vì file đã trừ sẵn các phiếu trả hàng.
+        // Pháº§n má»m chÆ°a cÃ³ phiáº¿u tráº£ hÃ ng cho nhÃ  cung cáº¥p, nÃªn tá»•ng mua trá»« tráº£
+        // hÃ ng tÃ­nh tá»« ná»™i bá»™ báº±ng chÃ­nh tá»•ng mua. Khi cÃ³ dá»¯ liá»‡u file thÃ¬ láº¥y
+        // sá»‘ cá»§a file vÃ¬ file Ä‘Ã£ trá»« sáºµn cÃ¡c phiáº¿u tráº£ hÃ ng.
         var tienMuaTruTraNoiBo = tienMuaNoiBo;
 
         if (!coCotKiotViet)
@@ -3209,14 +3235,14 @@ public sealed partial class DatabaseService
             $"CASE WHEN ncc.co_du_lieu_kiotviet = 1 OR ncc.tong_mua_tru_tra_hang IS NOT NULL THEN (COALESCE(ncc.tong_mua_tru_tra_hang, 0) + {tienMuaTruTraNoiBo}) ELSE {tienMuaTruTraNoiBo} END");
     }
 
-    /// <summary>Lấy danh sách khách hàng theo trang cho màn hình "Danh sách khách hàng".
-    /// Chỉ đọc dữ liệu của trang hiện tại (LIMIT/OFFSET) kèm tổng số bản ghi,
-    /// nên giao diện vẫn mượt khi bảng có hàng nghìn khách hàng.
+    /// <summary>Láº¥y danh sÃ¡ch khÃ¡ch hÃ ng theo trang cho mÃ n hÃ¬nh "Danh sÃ¡ch khÃ¡ch hÃ ng".
+    /// Chá»‰ Ä‘á»c dá»¯ liá»‡u cá»§a trang hiá»‡n táº¡i (LIMIT/OFFSET) kÃ¨m tá»•ng sá»‘ báº£n ghi,
+    /// nÃªn giao diá»‡n váº«n mÆ°á»£t khi báº£ng cÃ³ hÃ ng nghÃ¬n khÃ¡ch hÃ ng.
     /// </summary>
     /// <param name="dayDuThongTin">
-    /// false: lấy đúng các cột của bảng danh sách (mã, tên, điện thoại, email,
-    /// địa chỉ, nhóm, ngày tạo) kèm nợ hiện tại, tổng bán và tổng bán trừ trả hàng.
-    /// true: lấy đầy đủ mọi cột để dùng cho form nhập/sửa.
+    /// false: láº¥y Ä‘Ãºng cÃ¡c cá»™t cá»§a báº£ng danh sÃ¡ch (mÃ£, tÃªn, Ä‘iá»‡n thoáº¡i, email,
+    /// Ä‘á»‹a chá»‰, nhÃ³m, ngÃ y táº¡o) kÃ¨m ná»£ hiá»‡n táº¡i, tá»•ng bÃ¡n vÃ  tá»•ng bÃ¡n trá»« tráº£ hÃ ng.
+    /// true: láº¥y Ä‘áº§y Ä‘á»§ má»i cá»™t Ä‘á»ƒ dÃ¹ng cho form nháº­p/sá»­a.
     /// </param>
     public async Task<(IReadOnlyList<KhachHang> Items, int TongSoBanGhi)> GetKhachHangPagedAsync(
         string? search,
@@ -3234,8 +3260,8 @@ public sealed partial class DatabaseService
         var coBangTraHang = await HasBangTraHangAsync();
         var coCotKiotViet = await DamBaoCotDuLieuKiotVietAsync();
 
-        // Bộ lọc nhóm khách hàng và tình trạng công nợ, dùng cùng biểu thức
-        // NoHienTai với cột tiền trong bảng nên số liệu lọc luôn khớp.
+        // Bá»™ lá»c nhÃ³m khÃ¡ch hÃ ng vÃ  tÃ¬nh tráº¡ng cÃ´ng ná»£, dÃ¹ng cÃ¹ng biá»ƒu thá»©c
+        // NoHienTai vá»›i cá»™t tiá»n trong báº£ng nÃªn sá»‘ liá»‡u lá»c luÃ´n khá»›p.
         var noHienTai = TaoBieuThucTienKhachHang(coBangTraHang, "kh.id", coCotKiotViet).NoHienTai;
         var dieuKienNhom = nhomKhachHangId == 0
             ? ""
@@ -3347,7 +3373,7 @@ public sealed partial class DatabaseService
         return (items, tongSoBanGhi);
     }
 
-    /// <summary>Lấy đầy đủ thông tin một khách hàng để mở vùng chi tiết / form sửa.</summary>
+    /// <summary>Láº¥y Ä‘áº§y Ä‘á»§ thÃ´ng tin má»™t khÃ¡ch hÃ ng Ä‘á»ƒ má»Ÿ vÃ¹ng chi tiáº¿t / form sá»­a.</summary>
     public async Task<KhachHang?> GetKhachHangByIdAsync(uint customerId)
     {
         const string sql = """
@@ -3388,26 +3414,26 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Số ngày dùng để đếm "Khách hàng mới" khi giao diện không chỉ định.
-    /// Giữ ở đây để query và chữ dưới thẻ thống kê cùng một con số.
+    /// Sá»‘ ngÃ y dÃ¹ng Ä‘á»ƒ Ä‘áº¿m "KhÃ¡ch hÃ ng má»›i" khi giao diá»‡n khÃ´ng chá»‰ Ä‘á»‹nh.
+    /// Giá»¯ á»Ÿ Ä‘Ã¢y Ä‘á»ƒ query vÃ  chá»¯ dÆ°á»›i tháº» thá»‘ng kÃª cÃ¹ng má»™t con sá»‘.
     /// </summary>
     public const int SoNgayKhachMoiMacDinh = 30;
 
     /// <summary>
-    /// Số liệu tổng quan cho thanh thống kê phía trên bảng danh sách khách hàng.
-    /// Cả bốn chỉ số đều tính thẳng từ database, không lấy từ các dòng đang hiển thị:
+    /// Sá»‘ liá»‡u tá»•ng quan cho thanh thá»‘ng kÃª phÃ­a trÃªn báº£ng danh sÃ¡ch khÃ¡ch hÃ ng.
+    /// Cáº£ bá»‘n chá»‰ sá»‘ Ä‘á»u tÃ­nh tháº³ng tá»« database, khÃ´ng láº¥y tá»« cÃ¡c dÃ²ng Ä‘ang hiá»ƒn thá»‹:
     /// <list type="bullet">
-    /// <item>Tổng khách hàng = COUNT(*) của khach_hang có trang_thai = 1.</item>
-    /// <item>Khách hàng mới = số khách hàng đang hoạt động có ngay_tao nằm trong
-    /// <paramref name="soNgay"/> ngày gần nhất (mặc định 30 ngày), tính bằng
-    /// DATE_SUB(NOW(), INTERVAL ...) chứ không phải COUNT toàn bộ bảng.</item>
-    /// <item>Nợ hiện tại = SUM của biểu thức nợ của từng khách hàng, ưu tiên sổ cái
-    /// công nợ (SUM(ghi_no - ghi_co)), không có sổ cái thì lấy SUM(con_no) của
-    /// hóa đơn đã hoàn thành.</item>
-    /// <item>Tổng bán = SUM của biểu thức bán của từng khách hàng, tức tổng
-    /// khach_can_tra của các hóa đơn đã hoàn thành (đã trừ giảm giá, chưa trừ trả hàng).</item>
+    /// <item>Tá»•ng khÃ¡ch hÃ ng = COUNT(*) cá»§a khach_hang cÃ³ trang_thai = 1.</item>
+    /// <item>KhÃ¡ch hÃ ng má»›i = sá»‘ khÃ¡ch hÃ ng Ä‘ang hoáº¡t Ä‘á»™ng cÃ³ ngay_tao náº±m trong
+    /// <paramref name="soNgay"/> ngÃ y gáº§n nháº¥t (máº·c Ä‘á»‹nh 30 ngÃ y), tÃ­nh báº±ng
+    /// DATE_SUB(NOW(), INTERVAL ...) chá»© khÃ´ng pháº£i COUNT toÃ n bá»™ báº£ng.</item>
+    /// <item>Ná»£ hiá»‡n táº¡i = SUM cá»§a biá»ƒu thá»©c ná»£ cá»§a tá»«ng khÃ¡ch hÃ ng, Æ°u tiÃªn sá»• cÃ¡i
+    /// cÃ´ng ná»£ (SUM(ghi_no - ghi_co)), khÃ´ng cÃ³ sá»• cÃ¡i thÃ¬ láº¥y SUM(con_no) cá»§a
+    /// hÃ³a Ä‘Æ¡n Ä‘Ã£ hoÃ n thÃ nh.</item>
+    /// <item>Tá»•ng bÃ¡n = SUM cá»§a biá»ƒu thá»©c bÃ¡n cá»§a tá»«ng khÃ¡ch hÃ ng, tá»©c tá»•ng
+    /// khach_can_tra cá»§a cÃ¡c hÃ³a Ä‘Æ¡n Ä‘Ã£ hoÃ n thÃ nh (Ä‘Ã£ trá»« giáº£m giÃ¡, chÆ°a trá»« tráº£ hÃ ng).</item>
     /// </list>
-    /// Nhờ vậy thẻ thống kê và tổng các dòng trong bảng luôn dùng chung một quy tắc.
+    /// Nhá» váº­y tháº» thá»‘ng kÃª vÃ  tá»•ng cÃ¡c dÃ²ng trong báº£ng luÃ´n dÃ¹ng chung má»™t quy táº¯c.
     /// </summary>
     public async Task<ThongKeDanhSachKhachHang>
         GetThongKeDanhSachKhachHangAsync(int soNgay = SoNgayKhachMoiMacDinh)
@@ -3449,7 +3475,7 @@ public sealed partial class DatabaseService
 
     }
 
-    /// <summary>Danh sách nhóm khách hàng đang hoạt động, dùng cho ComboBox trong form nhập/sửa.</summary>
+    /// <summary>Danh sÃ¡ch nhÃ³m khÃ¡ch hÃ ng Ä‘ang hoáº¡t Ä‘á»™ng, dÃ¹ng cho ComboBox trong form nháº­p/sá»­a.</summary>
     public async Task<IReadOnlyList<NhomKhachHang>> GetNhomKhachHangAsync()
     {
         const string sql = """
@@ -3471,8 +3497,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Lịch sử hóa đơn của một khách hàng (mới nhất trước).
-    /// Chỉ đọc tối đa <paramref name="gioiHan"/> dòng, không quét toàn bộ bảng hóa đơn.
+    /// Lá»‹ch sá»­ hÃ³a Ä‘Æ¡n cá»§a má»™t khÃ¡ch hÃ ng (má»›i nháº¥t trÆ°á»›c).
+    /// Chá»‰ Ä‘á»c tá»‘i Ä‘a <paramref name="gioiHan"/> dÃ²ng, khÃ´ng quÃ©t toÃ n bá»™ báº£ng hÃ³a Ä‘Æ¡n.
     /// </summary>
     public async Task<IReadOnlyList<HoaDon>> GetLichSuMuaHangCuaKhachHangAsync(
         uint customerId,
@@ -3486,7 +3512,7 @@ public sealed partial class DatabaseService
             hd.ma_hoa_don AS MaHoaDon,
             hd.thoi_gian_ban AS ThoiGianBan,
             COALESCE(kh.ma_khach_hang, '') AS MaKhachHang,
-            COALESCE(NULLIF(TRIM(kh.ten_khach_hang), ''), 'Khách lẻ') AS TenKhachHang,
+            COALESCE(NULLIF(TRIM(kh.ten_khach_hang), ''), 'KhÃ¡ch láº»') AS TenKhachHang,
             hd.tong_tien_hang AS TongTienHang,
             hd.giam_gia AS GiamGia,
             hd.thu_khac AS ThuKhac,
@@ -3516,10 +3542,10 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Tổng hợp tổng tiền đã mua và công nợ hiện tại của khách hàng.
-    /// Các số tiền lấy đúng theo cùng quy tắc với bảng danh sách: ưu tiên số tiền
-    /// đã nhập từ file KiotViet, không có thì tính từ hóa đơn, sổ cái công nợ và
-    /// phiếu trả hàng. Hóa đơn chỉ tính loại đã hoàn thành.
+    /// Tá»•ng há»£p tá»•ng tiá»n Ä‘Ã£ mua vÃ  cÃ´ng ná»£ hiá»‡n táº¡i cá»§a khÃ¡ch hÃ ng.
+    /// CÃ¡c sá»‘ tiá»n láº¥y Ä‘Ãºng theo cÃ¹ng quy táº¯c vá»›i báº£ng danh sÃ¡ch: Æ°u tiÃªn sá»‘ tiá»n
+    /// Ä‘Ã£ nháº­p tá»« file KiotViet, khÃ´ng cÃ³ thÃ¬ tÃ­nh tá»« hÃ³a Ä‘Æ¡n, sá»• cÃ¡i cÃ´ng ná»£ vÃ 
+    /// phiáº¿u tráº£ hÃ ng. HÃ³a Ä‘Æ¡n chá»‰ tÃ­nh loáº¡i Ä‘Ã£ hoÃ n thÃ nh.
     /// </summary>
     public async Task<ThongKeMuaHangKhachHang> GetThongKeMuaHangCuaKhachHangAsync(uint customerId)
     {
@@ -3568,8 +3594,8 @@ public sealed partial class DatabaseService
                 FROM lich_su_cong_no_khach_hang
                 WHERE khach_hang_id = @Id
             ) AS LanGhiCongNoGanNhat,
-            -- Số tiền hiển thị: khi có dữ liệu file KiotViet thì lấy từ file,
-            -- ngược lại lấy từ hóa đơn/sổ cái/trả hàng như trước.
+            -- Sá»‘ tiá»n hiá»ƒn thá»‹: khi cÃ³ dá»¯ liá»‡u file KiotViet thÃ¬ láº¥y tá»« file,
+            -- ngÆ°á»£c láº¡i láº¥y tá»« hÃ³a Ä‘Æ¡n/sá»• cÃ¡i/tráº£ hÃ ng nhÆ° trÆ°á»›c.
             {tien.TongBan} AS TongTienDaMua,
             {tien.NoHienTai} AS TongConNoHienTai,
             {tien.TongBanTruTraHang} AS TongBanTruTraHang
@@ -3589,16 +3615,16 @@ public sealed partial class DatabaseService
 
     public async Task<uint> ThemKhachHangAsync(KhachHang customer)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CustomersCreate, "Bạn không có quyền thêm khách hàng.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CustomersCreate, "Báº¡n khÃ´ng cÃ³ quyá»n thÃªm khÃ¡ch hÃ ng.");
         await using var connection = await OpenAsync();
 
         if (string.IsNullOrWhiteSpace(customer.MaKhachHang))
-            throw new ArgumentException("Mã khách hàng không được để trống.");
+            throw new ArgumentException("MÃ£ khÃ¡ch hÃ ng khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.");
 
         if (string.IsNullOrWhiteSpace(customer.TenKhachHang))
-            throw new ArgumentException("Tên khách hàng không được để trống.");
+            throw new ArgumentException("TÃªn khÃ¡ch hÃ ng khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.");
 
-        // Kiểm tra trùng mã khách hàng
+        // Kiá»ƒm tra trÃ¹ng mÃ£ khÃ¡ch hÃ ng
         const string checkCodeSql = """
         SELECT COUNT(*)
         FROM khach_hang
@@ -3615,7 +3641,7 @@ public sealed partial class DatabaseService
 
         if (exists > 0)
             throw new InvalidOperationException(
-                $"Mã khách hàng {customer.MaKhachHang} đã tồn tại.");
+                $"MÃ£ khÃ¡ch hÃ ng {customer.MaKhachHang} Ä‘Ã£ tá»“n táº¡i.");
 
         const string sql = """
         INSERT INTO khach_hang
@@ -3691,30 +3717,30 @@ public sealed partial class DatabaseService
                 customer.GhiChu
             });
 
-        _ = LogSubAccountActivityAsync("Thêm khách hàng", "KHACH_HANG", id, customer.MaKhachHang, $"Thêm khách hàng: {customer.TenKhachHang} ({customer.SoDienThoai})");
+        _ = LogSubAccountActivityAsync("ThÃªm khÃ¡ch hÃ ng", "KHACH_HANG", id, customer.MaKhachHang, $"ThÃªm khÃ¡ch hÃ ng: {customer.TenKhachHang} ({customer.SoDienThoai})");
 
         return id;
     }
 
     /// <summary>
-    /// Thêm đối tác / khách hàng nội bộ (gắn LoaiKhachHang = "NOI_BO").
+    /// ThÃªm Ä‘á»‘i tÃ¡c / khÃ¡ch hÃ ng ná»™i bá»™ (gáº¯n LoaiKhachHang = "NOI_BO").
     /// </summary>
     public async Task<uint> ThemKhachHangNoiBoAsync(KhachHang customer)
     {
         customer.LoaiKhachHang = "NOI_BO";
         var id = await ThemKhachHangAsync(customer);
         _ = LogSubAccountActivityAsync(
-            "Thêm khách nội bộ",
+            "ThÃªm khÃ¡ch ná»™i bá»™",
             "KHACH_HANG",
             id,
             customer.MaKhachHang,
-            $"Thêm khách hàng nội bộ: {customer.TenKhachHang} ({customer.TenCongTy ?? "Nội bộ"})");
+            $"ThÃªm khÃ¡ch hÃ ng ná»™i bá»™: {customer.TenKhachHang} ({customer.TenCongTy ?? "Ná»™i bá»™"})");
         return id;
     }
 
     public async Task CapNhatKhachHangAsync(KhachHang customer)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CustomersEdit, "Bạn không có quyền sửa khách hàng.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CustomersEdit, "Báº¡n khÃ´ng cÃ³ quyá»n sá»­a khÃ¡ch hÃ ng.");
         await using var connection = await OpenAsync();
 
         const string sql = """
@@ -3742,21 +3768,21 @@ public sealed partial class DatabaseService
 
         var affectedRows = await connection.ExecuteAsync(sql, customer);
         if (affectedRows == 0)
-            throw new InvalidOperationException("Khách hàng không tồn tại hoặc đã bị xóa.");
+            throw new InvalidOperationException("KhÃ¡ch hÃ ng khÃ´ng tá»“n táº¡i hoáº·c Ä‘Ã£ bá»‹ xÃ³a.");
 
-        _ = LogSubAccountActivityAsync("Cập nhật khách hàng", "KHACH_HANG", customer.Id, customer.MaKhachHang, $"Cập nhật khách hàng: {customer.TenKhachHang} ({customer.SoDienThoai})");
+        _ = LogSubAccountActivityAsync("Cáº­p nháº­t khÃ¡ch hÃ ng", "KHACH_HANG", customer.Id, customer.MaKhachHang, $"Cáº­p nháº­t khÃ¡ch hÃ ng: {customer.TenKhachHang} ({customer.SoDienThoai})");
     }
 
-    /// <summary>Tên bảng khách hàng, dùng để sinh câu lệnh SQL.</summary>
+    /// <summary>TÃªn báº£ng khÃ¡ch hÃ ng, dÃ¹ng Ä‘á»ƒ sinh cÃ¢u lá»‡nh SQL.</summary>
     private const string BangKhachHang = "khach_hang";
 
-    /// <summary>Bảng tạm dùng để cập nhật hàng loạt khách hàng.</summary>
+    /// <summary>Báº£ng táº¡m dÃ¹ng Ä‘á»ƒ cáº­p nháº­t hÃ ng loáº¡t khÃ¡ch hÃ ng.</summary>
     private const string BangTamCapNhat = "tmp_nhap_khach_hang";
 
     /// <summary>
-    /// Các cột được ghi khi nhập từ file, đúng thứ tự với <see cref="GiaTriDongNhap"/>.
-    /// Gồm cả những cột lấy từ file KiotViet: khu vực giao hàng, người tạo,
-    /// ngày giao dịch cuối và ba cột tiền.
+    /// CÃ¡c cá»™t Ä‘Æ°á»£c ghi khi nháº­p tá»« file, Ä‘Ãºng thá»© tá»± vá»›i <see cref="GiaTriDongNhap"/>.
+    /// Gá»“m cáº£ nhá»¯ng cá»™t láº¥y tá»« file KiotViet: khu vá»±c giao hÃ ng, ngÆ°á»i táº¡o,
+    /// ngÃ y giao dá»‹ch cuá»‘i vÃ  ba cá»™t tiá»n.
     /// </summary>
     private const string CotNhapKhachHang = """
         ma_khach_hang, ten_khach_hang, loai_khach_hang, so_dien_thoai, ngay_sinh, gioi_tinh,
@@ -3768,8 +3794,8 @@ public sealed partial class DatabaseService
         """;
 
     /// <summary>
-    /// Giá trị tương ứng với từng cột trong <see cref="CotNhapKhachHang"/>.
-    /// Ngày tạo lấy theo file, khi file không có thì dùng thời điểm nhập.
+    /// GiÃ¡ trá»‹ tÆ°Æ¡ng á»©ng vá»›i tá»«ng cá»™t trong <see cref="CotNhapKhachHang"/>.
+    /// NgÃ y táº¡o láº¥y theo file, khi file khÃ´ng cÃ³ thÃ¬ dÃ¹ng thá»i Ä‘iá»ƒm nháº­p.
     /// </summary>
     private const string GiaTriDongNhap = """
         @MaKhachHang, @TenKhachHang, @LoaiKhachHang, @SoDienThoai, @NgaySinh, @GioiTinh,
@@ -3781,9 +3807,9 @@ public sealed partial class DatabaseService
         """;
 
     /// <summary>
-    /// Lấy về tập khóa "ma:" + mã khách hàng và "dt:" + số điện thoại đang có,
-    /// chỉ để đếm khách hàng trùng trước khi nhập file. Không tải danh sách
-    /// khách hàng lên giao diện.
+    /// Láº¥y vá» táº­p khÃ³a "ma:" + mÃ£ khÃ¡ch hÃ ng vÃ  "dt:" + sá»‘ Ä‘iá»‡n thoáº¡i Ä‘ang cÃ³,
+    /// chá»‰ Ä‘á»ƒ Ä‘áº¿m khÃ¡ch hÃ ng trÃ¹ng trÆ°á»›c khi nháº­p file. KhÃ´ng táº£i danh sÃ¡ch
+    /// khÃ¡ch hÃ ng lÃªn giao diá»‡n.
     /// </summary>
     public async Task<IReadOnlySet<string>> LayKhoaTrungKhopKhachHangAsync()
     {
@@ -3808,26 +3834,26 @@ public sealed partial class DatabaseService
         return keys;
     }
 
-    /// <summary>Nhập danh sách khách hàng từ file, tự đọc file và ghi log đầy đủ.</summary>
+    /// <summary>Nháº­p danh sÃ¡ch khÃ¡ch hÃ ng tá»« file, tá»± Ä‘á»c file vÃ  ghi log Ä‘áº§y Ä‘á»§.</summary>
     public async Task<KetQuaImportKhachHang> ImportKhachHangTuFileAsync(
         string filePath,
         bool replaceExisting = false)
         => await ImportKhachHangTuFileAsync(filePath, DocKhachHangTuFile(filePath), replaceExisting);
 
     /// <summary>
-    /// Nhập danh sách khách hàng đã đọc từ file.
-    /// Khách hàng đã tồn tại (trùng mã, hoặc trùng số điện thoại) được cập nhật
-    /// nếu <paramref name="replaceExisting"/> = true, ngược lại được giữ nguyên.
-    /// Không bao giờ xóa khách hàng nào không có trong file.
+    /// Nháº­p danh sÃ¡ch khÃ¡ch hÃ ng Ä‘Ã£ Ä‘á»c tá»« file.
+    /// KhÃ¡ch hÃ ng Ä‘Ã£ tá»“n táº¡i (trÃ¹ng mÃ£, hoáº·c trÃ¹ng sá»‘ Ä‘iá»‡n thoáº¡i) Ä‘Æ°á»£c cáº­p nháº­t
+    /// náº¿u <paramref name="replaceExisting"/> = true, ngÆ°á»£c láº¡i Ä‘Æ°á»£c giá»¯ nguyÃªn.
+    /// KhÃ´ng bao giá» xÃ³a khÃ¡ch hÃ ng nÃ o khÃ´ng cÃ³ trong file.
     /// </summary>
     public async Task<KetQuaImportKhachHang> ImportKhachHangTuFileAsync(
         string filePath,
         KetQuaDocKhachHang doc,
         bool replaceExisting = false)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CustomersImport, "Bạn không có quyền import khách hàng.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CustomersImport, "Báº¡n khÃ´ng cÃ³ quyá»n import khÃ¡ch hÃ ng.");
         if (string.IsNullOrWhiteSpace(filePath))
-            throw new ArgumentException("Đường dẫn file không hợp lệ.", nameof(filePath));
+            throw new ArgumentException("ÄÆ°á»ng dáº«n file khÃ´ng há»£p lá»‡.", nameof(filePath));
 
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
@@ -3854,8 +3880,8 @@ public sealed partial class DatabaseService
         await using var connection = await OpenAsync();
         await using var transaction = await connection.BeginTransactionAsync();
 
-        // Nạp sẵn khách hàng đang có, nhóm khách hàng và tài khoản để tra cứu trong
-        // bộ nhớ, tránh hỏi database 849 lần cho 849 dòng.
+        // Náº¡p sáºµn khÃ¡ch hÃ ng Ä‘ang cÃ³, nhÃ³m khÃ¡ch hÃ ng vÃ  tÃ i khoáº£n Ä‘á»ƒ tra cá»©u trong
+        // bá»™ nhá»›, trÃ¡nh há»i database 849 láº§n cho 849 dÃ²ng.
         var byCode = new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase);
         var byPhone = new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase);
 
@@ -3912,11 +3938,11 @@ public sealed partial class DatabaseService
                 customer.MaKhachHang = ma;
             }
 
-            // File đã có mã lặp thì chỉ giữ dòng đầu tiên.
+            // File Ä‘Ã£ cÃ³ mÃ£ láº·p thÃ¬ chá»‰ giá»¯ dÃ²ng Ä‘áº§u tiÃªn.
             if (!seenCodes.Add(ma))
             {
                 result.SoBoQua++;
-                errors.Add($"Mã '{ma}' bị lặp trong file, bỏ qua dòng lặp");
+                errors.Add($"MÃ£ '{ma}' bá»‹ láº·p trong file, bá» qua dÃ²ng láº·p");
                 continue;
             }
 
@@ -4013,8 +4039,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Câu lệnh ghi một lô khách hàng. Khi ghi vào bảng tạm phải kèm cột id
-    /// để còn nối được với đúng khách hàng đang cần cập nhật.
+    /// CÃ¢u lá»‡nh ghi má»™t lÃ´ khÃ¡ch hÃ ng. Khi ghi vÃ o báº£ng táº¡m pháº£i kÃ¨m cá»™t id
+    /// Ä‘á»ƒ cÃ²n ná»‘i Ä‘Æ°á»£c vá»›i Ä‘Ãºng khÃ¡ch hÃ ng Ä‘ang cáº§n cáº­p nháº­t.
     /// </summary>
     private static string InsertKhachHangSql(string table, bool gheKhoaChinh = false)
     {
@@ -4034,8 +4060,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Cập nhật hàng loạt qua bảng tạm, để 849 dòng chỉ tốn vài câu lệnh thay vì
-    /// 849 lần gọi database. Ngày tạo và nhóm/người tạo chỉ bị ghi đè khi file thật sự có dữ liệu.
+    /// Cáº­p nháº­t hÃ ng loáº¡t qua báº£ng táº¡m, Ä‘á»ƒ 849 dÃ²ng chá»‰ tá»‘n vÃ i cÃ¢u lá»‡nh thay vÃ¬
+    /// 849 láº§n gá»i database. NgÃ y táº¡o vÃ  nhÃ³m/ngÆ°á»i táº¡o chá»‰ bá»‹ ghi Ä‘Ã¨ khi file tháº­t sá»± cÃ³ dá»¯ liá»‡u.
     /// </summary>
     private async Task CapNhatNhieuKhachHangAsync(
         MySqlConnection connection,
@@ -4082,8 +4108,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Nạp danh sách tên kèm khóa để tra cứu khi nhập. Nếu bảng không tồn tại
-    /// thì trả về danh sách rỗng, không làm hỏng việc nhập.
+    /// Náº¡p danh sÃ¡ch tÃªn kÃ¨m khÃ³a Ä‘á»ƒ tra cá»©u khi nháº­p. Náº¿u báº£ng khÃ´ng tá»“n táº¡i
+    /// thÃ¬ tráº£ vá» danh sÃ¡ch rá»—ng, khÃ´ng lÃ m há»ng viá»‡c nháº­p.
     /// </summary>
     private static async Task<Dictionary<string, uint>> TaiDanhSachTenAsync(
         MySqlConnection connection,
@@ -4101,15 +4127,15 @@ public sealed partial class DatabaseService
                 if (ten.Length == 0)
                     continue;
 
-                // Tên trong file KiotViet có thể là "Phương Khánh" hoặc "Khách lẻ",
-                // nên phải giữ nguyên cả tên chứ không tách từng từ.
+                // TÃªn trong file KiotViet cÃ³ thá»ƒ lÃ  "PhÆ°Æ¡ng KhÃ¡nh" hoáº·c "KhÃ¡ch láº»",
+                // nÃªn pháº£i giá»¯ nguyÃªn cáº£ tÃªn chá»© khÃ´ng tÃ¡ch tá»«ng tá»«.
                 result.TryAdd(ten, row.Id);
                 result.TryAdd(NormalizeHeaderKey(ten), row.Id);
             }
         }
         catch
         {
-            // Bảng tra cứu không tồn tại thì bỏ qua phần này.
+            // Báº£ng tra cá»©u khÃ´ng tá»“n táº¡i thÃ¬ bá» qua pháº§n nÃ y.
         }
 
         return result;
@@ -4145,29 +4171,29 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Ghi log kết quả nhập ra tệp trong thư mục dữ liệu ứng dụng để tra cứu được
-    /// khi có sự cố, không ảnh hưởng tới việc chạy của ứng dụng.
+    /// Ghi log káº¿t quáº£ nháº­p ra tá»‡p trong thÆ° má»¥c dá»¯ liá»‡u á»©ng dá»¥ng Ä‘á»ƒ tra cá»©u Ä‘Æ°á»£c
+    /// khi cÃ³ sá»± cá»‘, khÃ´ng áº£nh hÆ°á»Ÿng tá»›i viá»‡c cháº¡y cá»§a á»©ng dá»¥ng.
     /// </summary>
     private void GhiLogNhapKhachHang(KetQuaImportKhachHang result)
     {
         var dong = $"[NHAP KHACH HANG] {result.ThongBaoTatCa}";
 
         if (result.SoNhomKhachHangKhongKhop > 0)
-            dong += $" | nhóm khách hàng không khớp: {result.SoNhomKhachHangKhongKhop}";
+            dong += $" | nhÃ³m khÃ¡ch hÃ ng khÃ´ng khá»›p: {result.SoNhomKhachHangKhongKhop}";
 
         if (result.SoNguoiTaoKhongKhop > 0)
-            dong += $" | người tạo không khớp tài khoản: {result.SoNguoiTaoKhongKhop}";
+            dong += $" | ngÆ°á»i táº¡o khÃ´ng khá»›p tÃ i khoáº£n: {result.SoNguoiTaoKhongKhop}";
 
         GhiLog(dong);
 
         foreach (var loi in result.DanhSachLoi)
-            GhiLog($"[NHAP KHACH HANG] LỖI {result.TenFile}: {loi}");
+            GhiLog($"[NHAP KHACH HANG] Lá»–I {result.TenFile}: {loi}");
     }
 
-    /// <param name="message">Nội dung cần ghi.</param>
+    /// <param name="message">Ná»™i dung cáº§n ghi.</param>
     /// <param name="tenTep">
-    /// Tiền tố tên tệp log theo ngày. Mặc định là log nhập khách hàng;
-    /// mỗi loại nhập dùng một tệp riêng để tra cứu không lẫn lộn.
+    /// Tiá»n tá»‘ tÃªn tá»‡p log theo ngÃ y. Máº·c Ä‘á»‹nh lÃ  log nháº­p khÃ¡ch hÃ ng;
+    /// má»—i loáº¡i nháº­p dÃ¹ng má»™t tá»‡p riÃªng Ä‘á»ƒ tra cá»©u khÃ´ng láº«n lá»™n.
     /// </param>
     internal void GhiLog(string message, string tenTep = "nhap-khach-hang")
     {
@@ -4188,11 +4214,11 @@ public sealed partial class DatabaseService
         }
         catch
         {
-            // Không ghi được log thì bỏ qua, không được làm hỏng luồng nhập.
+            // KhÃ´ng ghi Ä‘Æ°á»£c log thÃ¬ bá» qua, khÃ´ng Ä‘Æ°á»£c lÃ m há»ng luá»“ng nháº­p.
         }
     }
 
-    /// <summary>Một dòng khách hàng sẵn có trong database, dùng để tìm khách hàng trùng.</summary>
+    /// <summary>Má»™t dÃ²ng khÃ¡ch hÃ ng sáºµn cÃ³ trong database, dÃ¹ng Ä‘á»ƒ tÃ¬m khÃ¡ch hÃ ng trÃ¹ng.</summary>
     private sealed class DongKhachHangTonTai
     {
         public uint Id { get; set; }
@@ -4200,7 +4226,7 @@ public sealed partial class DatabaseService
         public string? SoDienThoai { get; set; }
     }
 
-    /// <summary>Một dòng chỉ có khóa và tên, dùng cho bảng nhóm khách hàng và người dùng.</summary>
+    /// <summary>Má»™t dÃ²ng chá»‰ cÃ³ khÃ³a vÃ  tÃªn, dÃ¹ng cho báº£ng nhÃ³m khÃ¡ch hÃ ng vÃ  ngÆ°á»i dÃ¹ng.</summary>
     private sealed class DongTen
     {
         public uint Id { get; set; }
@@ -4208,8 +4234,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Một dòng khách hàng sẽ ghi xuống database, đúng thứ tự cột trong
-    /// <see cref="CotNhapKhachHang"/>. Các cột tiền lấy từ file KiotViet.
+    /// Má»™t dÃ²ng khÃ¡ch hÃ ng sáº½ ghi xuá»‘ng database, Ä‘Ãºng thá»© tá»± cá»™t trong
+    /// <see cref="CotNhapKhachHang"/>. CÃ¡c cá»™t tiá»n láº¥y tá»« file KiotViet.
     /// </summary>
     private sealed class DongNhapKhachHang
     {
@@ -4245,7 +4271,7 @@ public sealed partial class DatabaseService
         public DateTime? NgayTao { get; set; }
         public DateTime NgayCapNhat { get; set; }
 
-        /// <summary>Tên nhóm trong file, chỉ dùng để tra cứu rồi bỏ đi.</summary>
+        /// <summary>TÃªn nhÃ³m trong file, chá»‰ dÃ¹ng Ä‘á»ƒ tra cá»©u rá»“i bá» Ä‘i.</summary>
         public string? NhomKhachHangTen { get; set; }
     }
 
@@ -4253,16 +4279,16 @@ public sealed partial class DatabaseService
         => DocKhachHangTuFile(filePath).KhachHangs.ToList();
 
     /// <summary>
-    /// Đọc file danh sách khách hàng và trả về kèm số liệu thống kê để ghi log:
-    /// tổng số dòng trong file, số dòng hợp lệ và chi tiết các dòng bị loại.
+    /// Äá»c file danh sÃ¡ch khÃ¡ch hÃ ng vÃ  tráº£ vá» kÃ¨m sá»‘ liá»‡u thá»‘ng kÃª Ä‘á»ƒ ghi log:
+    /// tá»•ng sá»‘ dÃ²ng trong file, sá»‘ dÃ²ng há»£p lá»‡ vÃ  chi tiáº¿t cÃ¡c dÃ²ng bá»‹ loáº¡i.
     /// </summary>
     public KetQuaDocKhachHang DocKhachHangTuFile(string filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath))
-            throw new ArgumentException("Đường dẫn file không hợp lệ.", nameof(filePath));
+            throw new ArgumentException("ÄÆ°á»ng dáº«n file khÃ´ng há»£p lá»‡.", nameof(filePath));
 
         if (!File.Exists(filePath))
-            throw new FileNotFoundException("Không tìm thấy file danh sách khách hàng.", filePath);
+            throw new FileNotFoundException("KhÃ´ng tÃ¬m tháº¥y file danh sÃ¡ch khÃ¡ch hÃ ng.", filePath);
 
         var rows = ReadCustomerRowsFromFile(filePath);
         var customers = new List<KhachHang>(rows.Count);
@@ -4278,7 +4304,7 @@ public sealed partial class DatabaseService
                 soDongLoi++;
 
                 if (errors.Count < 20)
-                    errors.Add($"Dòng {index + 2}: thiếu tên khách hàng");
+                    errors.Add($"DÃ²ng {index + 2}: thiáº¿u tÃªn khÃ¡ch hÃ ng");
 
                 continue;
             }
@@ -4307,14 +4333,14 @@ public sealed partial class DatabaseService
         if (extension is ".xlsx" or ".xls")
             return ReadExcelRows(filePath);
 
-        throw new NotSupportedException("File không được hỗ trợ. Vui lòng chọn file Excel (.xlsx, .xls) hoặc CSV.");
+        throw new NotSupportedException("File khÃ´ng Ä‘Æ°á»£c há»— trá»£. Vui lÃ²ng chá»n file Excel (.xlsx, .xls) hoáº·c CSV.");
     }
 
     private static List<Dictionary<string, string>> ReadExcelRows(string filePath)
     {
         using var workbook = new XLWorkbook(filePath);
         var worksheet = workbook.Worksheets.FirstOrDefault() ??
-            throw new InvalidOperationException("File Excel không chứa sheet dữ liệu hợp lệ.");
+            throw new InvalidOperationException("File Excel khÃ´ng chá»©a sheet dá»¯ liá»‡u há»£p lá»‡.");
 
         var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? 0;
         if (lastRow == 0)
@@ -4322,7 +4348,7 @@ public sealed partial class DatabaseService
 
         var headerRowNumber = FindCustomerHeaderRow(worksheet, lastRow);
         if (headerRowNumber == 0)
-            throw new InvalidOperationException("Không tìm thấy dòng tiêu đề khách hàng trong file.");
+            throw new InvalidOperationException("KhÃ´ng tÃ¬m tháº¥y dÃ²ng tiÃªu Ä‘á» khÃ¡ch hÃ ng trong file.");
 
         var firstHeaderColumn = worksheet.Row(headerRowNumber).FirstCellUsed()?.Address.ColumnNumber ?? 1;
         var lastHeaderColumn = worksheet.Row(headerRowNumber).LastCellUsed()?.Address.ColumnNumber ?? 0;
@@ -4379,11 +4405,11 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Lấy giá trị ô theo đúng kiểu dữ liệu thay vì lấy chuỗi đã định dạng.
-    /// Cần thiết vì file KiotViet định dạng tiền theo kiểu "195,000" và ngày theo
-    /// kiểu "30/09/2026": đọc chuỗi định dạng sẽ làm sai số tiền (văn hóa Việt
-    /// dùng dấu phẩy làm dấu thập phân). Giá trị số/ngày được chuyển sang
-    /// chuỗi theo quy ước bất biến để ParseSoTien/ParseNgayTaiFile đọc đúng.
+    /// Láº¥y giÃ¡ trá»‹ Ã´ theo Ä‘Ãºng kiá»ƒu dá»¯ liá»‡u thay vÃ¬ láº¥y chuá»—i Ä‘Ã£ Ä‘á»‹nh dáº¡ng.
+    /// Cáº§n thiáº¿t vÃ¬ file KiotViet Ä‘á»‹nh dáº¡ng tiá»n theo kiá»ƒu "195,000" vÃ  ngÃ y theo
+    /// kiá»ƒu "30/09/2026": Ä‘á»c chuá»—i Ä‘á»‹nh dáº¡ng sáº½ lÃ m sai sá»‘ tiá»n (vÄƒn hÃ³a Viá»‡t
+    /// dÃ¹ng dáº¥u pháº©y lÃ m dáº¥u tháº­p phÃ¢n). GiÃ¡ trá»‹ sá»‘/ngÃ y Ä‘Æ°á»£c chuyá»ƒn sang
+    /// chuá»—i theo quy Æ°á»›c báº¥t biáº¿n Ä‘á»ƒ ParseSoTien/ParseNgayTaiFile Ä‘á»c Ä‘Ãºng.
     /// </summary>
     internal static string DocGiaTriOTheoKieu(IXLCell cell)
     {
@@ -4449,11 +4475,11 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Đưa chữ "Đ" (U+0110) và "đ" về "d"/"d".
-    /// Hai ký tự này không có dạng phân rã chuẩn nên FormD giữ nguyên chúng,
-    /// khiến tiêu đề "Điện thoại" hoá thành "đien_thoai" và không khớp với
-    /// danh sách tên cột viết bằng chữ "d" thông thường. Ô "Điện thoại" và
-    /// "Địa chỉ" trong file Excel sẽ bị bỏ qua nếu thiếu bước gộp này.
+    /// ÄÆ°a chá»¯ "Ä" (U+0110) vÃ  "Ä‘" vá» "d"/"d".
+    /// Hai kÃ½ tá»± nÃ y khÃ´ng cÃ³ dáº¡ng phÃ¢n rÃ£ chuáº©n nÃªn FormD giá»¯ nguyÃªn chÃºng,
+    /// khiáº¿n tiÃªu Ä‘á» "Äiá»‡n thoáº¡i" hoÃ¡ thÃ nh "Ä‘ien_thoai" vÃ  khÃ´ng khá»›p vá»›i
+    /// danh sÃ¡ch tÃªn cá»™t viáº¿t báº±ng chá»¯ "d" thÃ´ng thÆ°á»ng. Ã” "Äiá»‡n thoáº¡i" vÃ 
+    /// "Äá»‹a chá»‰" trong file Excel sáº½ bá»‹ bá» qua náº¿u thiáº¿u bÆ°á»›c gá»™p nÃ y.
     /// </summary>
     private static char FoldDangDe(char character)
         => character switch
@@ -4479,42 +4505,42 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Chuyển một dòng đã đọc từ file thành khách hàng.
-    /// Mọi cột đều tìm theo TÊN CỘT (đã bỏ dấu và chữ thường), không theo vị trí,
-    /// nên thứ tự cột trong file không ảnh hưởng kết quả.
+    /// Chuyá»ƒn má»™t dÃ²ng Ä‘Ã£ Ä‘á»c tá»« file thÃ nh khÃ¡ch hÃ ng.
+    /// Má»i cá»™t Ä‘á»u tÃ¬m theo TÃŠN Cá»˜T (Ä‘Ã£ bá» dáº¥u vÃ  chá»¯ thÆ°á»ng), khÃ´ng theo vá»‹ trÃ­,
+    /// nÃªn thá»© tá»± cá»™t trong file khÃ´ng áº£nh hÆ°á»Ÿng káº¿t quáº£.
     /// </summary>
     private static KhachHang MapRowToKhachHang(Dictionary<string, string> row)
     {
         var customer = new KhachHang
         {
-            MaKhachHang = GetCellValue(row, "ma_khach_hang", "mã khách hàng", "ma khach hang", "mã khách hàng", "customer code", "customer_code", "mã", "mã khách hàng") ?? string.Empty,
-            TenKhachHang = GetCellValue(row, "ten_khach_hang", "tên khách hàng", "ten khach hang", "customer name", "name", "tên", "tên khách hàng") ?? string.Empty,
-            LoaiKhachHang = ChuanHoaLoaiKhachHang(GetCellValue(row, "loai_khach_hang", "loại khách hàng", "loai khach hang", "customer type", "loại khách", "loai khach", "loại")),
-            SoDienThoai = GetCellValue(row, "so_dien_thoai", "số điện thoại", "so dien thoai", "dien thoai", "điện thoại", "phone", "sdt", "đt", "số điện thoại"),
+            MaKhachHang = GetCellValue(row, "ma_khach_hang", "mÃ£ khÃ¡ch hÃ ng", "ma khach hang", "mÃ£ khÃ¡ch hÃ ng", "customer code", "customer_code", "mÃ£", "mÃ£ khÃ¡ch hÃ ng") ?? string.Empty,
+            TenKhachHang = GetCellValue(row, "ten_khach_hang", "tÃªn khÃ¡ch hÃ ng", "ten khach hang", "customer name", "name", "tÃªn", "tÃªn khÃ¡ch hÃ ng") ?? string.Empty,
+            LoaiKhachHang = ChuanHoaLoaiKhachHang(GetCellValue(row, "loai_khach_hang", "loáº¡i khÃ¡ch hÃ ng", "loai khach hang", "customer type", "loáº¡i khÃ¡ch", "loai khach", "loáº¡i")),
+            SoDienThoai = GetCellValue(row, "so_dien_thoai", "sá»‘ Ä‘iá»‡n thoáº¡i", "so dien thoai", "dien thoai", "Ä‘iá»‡n thoáº¡i", "phone", "sdt", "Ä‘t", "sá»‘ Ä‘iá»‡n thoáº¡i"),
             Email = GetCellValue(row, "email"),
-            DiaChi = GetCellValue(row, "dia_chi", "địa chỉ", "dia chi", "address", "địa chỉ"),
-            PhuongXa = GetCellValue(row, "phuong_xa", "phường/xã", "phuong xa", "ward", "phường xã"),
-            QuanHuyen = GetCellValue(row, "quan_huyen", "quận/huyện", "quan huyen", "district"),
-            TinhThanh = GetCellValue(row, "tinh_thanh", "tỉnh/thành", "tinh thanh", "province"),
-            NhomKhachHang = GetCellValue(row, "nhom_khach_hang", "nhóm khách hàng", "nhom khach hang", "group", "nhóm", "nhom"),
-            MaSoThue = GetCellValue(row, "ma_so_thue", "mã số thuế", "ma so thue", "tax code", "mst"),
-            TenNguoiMuaHoaDon = GetCellValue(row, "ten_nguoi_mua_hoa_don", "tên người mua hóa đơn", "nguoi mua hoa don"),
-            TenCongTy = GetCellValue(row, "ten_cong_ty", "tên công ty", "cong ty"),
-            DiaChiXuatHoaDon = GetCellValue(row, "dia_chi_xuat_hoa_don", "địa chỉ xuất hóa đơn", "dia chi xuat hoa don"),
-            GhiChu = GetCellValue(row, "ghi_chu", "ghi chú", "note", "chú thích"),
-            KhuVucGiaoHang = GetCellValue(row, "khu_vuc_giao_hang", "khu vuc giao hang", "khu vực", "khu vuc", "khu vực giao hàng"),
-            ChiNhanhTao = GetCellValue(row, "chi_nhanh_tao", "chi nhánh tạo", "chi nhanh tao", "chi nhánh", "chi nhanh"),
-            NguoiTaoTen = GetCellValue(row, "nguoi_tao", "người tạo", "nguoi tao", "nguoi_tao", "người tạo"),
-            NgayGiaoDichCuoi = ParseNgayTaiFile(GetCellValue(row, "ngay_giao_dich_cuoi", "ngày giao dịch cuối", "ngay giao dich cuoi", "ngày giao dịch cuối cùng", "ngay giao dich gan nhat", "last transaction")),
-            NgayTao = ParseNgayTaiFile(GetCellValue(row, "ngay_tao", "ngày tạo", "ngay tao", "created at", "ngày tạo")),
-            NoCanThuHienTaiExcel = ParseSoTien(GetCellValue(row, "no_can_thu_hien_tai", "nợ cần thu hiện tại", "no can thu hien tai", "nợ hiện tại", "no hien tai", "nợ cần thu")),
-            TongBanExcel = ParseSoTien(GetCellValue(row, "tong_ban", "tổng bán", "tong ban", "tổng bán")),
-            TongBanTruTraHangExcel = ParseSoTien(GetCellValue(row, "tong_ban_tru_tra_hang", "tổng bán trừ trả hàng", "tong ban tru tra hang", "tổng bán trừ trả", "tong ban tru tra")),
-            GioiTinh = GetCellValue(row, "gioi_tinh", "giới tính", "gender", "sex", "gioi tinh"),
-            NgaySinh = ParseNgayTaiFile(GetCellValue(row, "ngay_sinh", "ngày sinh", "ngay sinh", "birthday", "dob"))
+            DiaChi = GetCellValue(row, "dia_chi", "Ä‘á»‹a chá»‰", "dia chi", "address", "Ä‘á»‹a chá»‰"),
+            PhuongXa = GetCellValue(row, "phuong_xa", "phÆ°á»ng/xÃ£", "phuong xa", "ward", "phÆ°á»ng xÃ£"),
+            QuanHuyen = GetCellValue(row, "quan_huyen", "quáº­n/huyá»‡n", "quan huyen", "district"),
+            TinhThanh = GetCellValue(row, "tinh_thanh", "tá»‰nh/thÃ nh", "tinh thanh", "province"),
+            NhomKhachHang = GetCellValue(row, "nhom_khach_hang", "nhÃ³m khÃ¡ch hÃ ng", "nhom khach hang", "group", "nhÃ³m", "nhom"),
+            MaSoThue = GetCellValue(row, "ma_so_thue", "mÃ£ sá»‘ thuáº¿", "ma so thue", "tax code", "mst"),
+            TenNguoiMuaHoaDon = GetCellValue(row, "ten_nguoi_mua_hoa_don", "tÃªn ngÆ°á»i mua hÃ³a Ä‘Æ¡n", "nguoi mua hoa don"),
+            TenCongTy = GetCellValue(row, "ten_cong_ty", "tÃªn cÃ´ng ty", "cong ty"),
+            DiaChiXuatHoaDon = GetCellValue(row, "dia_chi_xuat_hoa_don", "Ä‘á»‹a chá»‰ xuáº¥t hÃ³a Ä‘Æ¡n", "dia chi xuat hoa don"),
+            GhiChu = GetCellValue(row, "ghi_chu", "ghi chÃº", "note", "chÃº thÃ­ch"),
+            KhuVucGiaoHang = GetCellValue(row, "khu_vuc_giao_hang", "khu vuc giao hang", "khu vá»±c", "khu vuc", "khu vá»±c giao hÃ ng"),
+            ChiNhanhTao = GetCellValue(row, "chi_nhanh_tao", "chi nhÃ¡nh táº¡o", "chi nhanh tao", "chi nhÃ¡nh", "chi nhanh"),
+            NguoiTaoTen = GetCellValue(row, "nguoi_tao", "ngÆ°á»i táº¡o", "nguoi tao", "nguoi_tao", "ngÆ°á»i táº¡o"),
+            NgayGiaoDichCuoi = ParseNgayTaiFile(GetCellValue(row, "ngay_giao_dich_cuoi", "ngÃ y giao dá»‹ch cuá»‘i", "ngay giao dich cuoi", "ngÃ y giao dá»‹ch cuá»‘i cÃ¹ng", "ngay giao dich gan nhat", "last transaction")),
+            NgayTao = ParseNgayTaiFile(GetCellValue(row, "ngay_tao", "ngÃ y táº¡o", "ngay tao", "created at", "ngÃ y táº¡o")),
+            NoCanThuHienTaiExcel = ParseSoTien(GetCellValue(row, "no_can_thu_hien_tai", "ná»£ cáº§n thu hiá»‡n táº¡i", "no can thu hien tai", "ná»£ hiá»‡n táº¡i", "no hien tai", "ná»£ cáº§n thu")),
+            TongBanExcel = ParseSoTien(GetCellValue(row, "tong_ban", "tá»•ng bÃ¡n", "tong ban", "tá»•ng bÃ¡n")),
+            TongBanTruTraHangExcel = ParseSoTien(GetCellValue(row, "tong_ban_tru_tra_hang", "tá»•ng bÃ¡n trá»« tráº£ hÃ ng", "tong ban tru tra hang", "tá»•ng bÃ¡n trá»« tráº£", "tong ban tru tra")),
+            GioiTinh = GetCellValue(row, "gioi_tinh", "giá»›i tÃ­nh", "gender", "sex", "gioi tinh"),
+            NgaySinh = ParseNgayTaiFile(GetCellValue(row, "ngay_sinh", "ngÃ y sinh", "ngay sinh", "birthday", "dob"))
         };
 
-        var trangThai = ParseTrangThai(GetCellValue(row, "trang_thai", "trạng thái", "trang thai", "status", "active", "trạng thái"));
+        var trangThai = ParseTrangThai(GetCellValue(row, "trang_thai", "tráº¡ng thÃ¡i", "trang thai", "status", "active", "tráº¡ng thÃ¡i"));
         if (trangThai.HasValue)
             customer.TrangThai = trangThai.Value;
 
@@ -4528,8 +4554,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Chuẩn hóa loại khách hàng. File KiotViet ghi "Cá nhân" (sai chính tả),
-    /// phần mềm dùng mã "CA_NHAN"/"DOAN".
+    /// Chuáº©n hÃ³a loáº¡i khÃ¡ch hÃ ng. File KiotViet ghi "CÃ¡ nhÃ¢n" (sai chÃ­nh táº£),
+    /// pháº§n má»m dÃ¹ng mÃ£ "CA_NHAN"/"DOAN".
     /// </summary>
     private static string ChuanHoaLoaiKhachHang(string? value)
     {
@@ -4547,8 +4573,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Đọc số tiền từ ô. Giá trị đọc từ file Excel đã là chuỗi số theo quy ước
-    /// bất biến, còn dữ liệu CSV có thể là "195.000", "195,000" hoặc "1.234,56".
+    /// Äá»c sá»‘ tiá»n tá»« Ã´. GiÃ¡ trá»‹ Ä‘á»c tá»« file Excel Ä‘Ã£ lÃ  chuá»—i sá»‘ theo quy Æ°á»›c
+    /// báº¥t biáº¿n, cÃ²n dá»¯ liá»‡u CSV cÃ³ thá»ƒ lÃ  "195.000", "195,000" hoáº·c "1.234,56".
     /// </summary>
     internal static decimal? ParseSoTien(string? value)
     {
@@ -4558,9 +4584,9 @@ public sealed partial class DatabaseService
         var text = value.Trim()
             .Replace("\u00A0", "")
             .Replace(" ", "")
-            .Replace("₫", "")
-            .Replace("đ", "")
-            .Replace("Đ", "");
+            .Replace("â‚«", "")
+            .Replace("Ä‘", "")
+            .Replace("Ä", "");
 
         if (text.Length == 0)
             return null;
@@ -4586,7 +4612,7 @@ public sealed partial class DatabaseService
                 continue;
             }
 
-            // Dấu trừ ở đầu là dấu âm, các ký tự khác bị bỏ qua.
+            // Dáº¥u trá»« á»Ÿ Ä‘áº§u lÃ  dáº¥u Ã¢m, cÃ¡c kÃ½ tá»± khÃ¡c bá»‹ bá» qua.
             if (character == '-' && cleaned.Length == 0)
                 cleaned.Append(character);
             else if (character == lastSeparator)
@@ -4611,8 +4637,8 @@ public sealed partial class DatabaseService
     }
 
     /// <summary>
-    /// Đọc ngày từ ô. Chấp nhận cả chuỗi không dấu phân cách do Excel sinh ra
-    /// ("2026-09-30 12:37:50"), dạng Việt Nam ("30/09/2026") và dạng quốc tế.
+    /// Äá»c ngÃ y tá»« Ã´. Cháº¥p nháº­n cáº£ chuá»—i khÃ´ng dáº¥u phÃ¢n cÃ¡ch do Excel sinh ra
+    /// ("2026-09-30 12:37:50"), dáº¡ng Viá»‡t Nam ("30/09/2026") vÃ  dáº¡ng quá»‘c táº¿.
     /// </summary>
     internal static DateTime? ParseNgayTaiFile(string? value)
     {
@@ -4634,7 +4660,7 @@ public sealed partial class DatabaseService
         return DateTime.TryParse(text, out var fallback) ? fallback : null;
     }
 
-    /// <summary>Đọc trạng thái: 1/0, Có/Không, Active/Inactive, Đang hoạt động...</summary>
+    /// <summary>Äá»c tráº¡ng thÃ¡i: 1/0, CÃ³/KhÃ´ng, Active/Inactive, Äang hoáº¡t Ä‘á»™ng...</summary>
     private static bool? ParseTrangThai(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -4664,7 +4690,7 @@ SELECT
     hd.thoi_gian_ban AS ThoiGianBan,
 
     COALESCE(kh.ma_khach_hang, '') AS MaKhachHang,
-    COALESCE(NULLIF(TRIM(kh.ten_khach_hang), ''), 'Khách lẻ') AS TenKhachHang,
+    COALESCE(NULLIF(TRIM(kh.ten_khach_hang), ''), 'KhÃ¡ch láº»') AS TenKhachHang,
 
     hd.tong_tien_hang AS TongTienHang,
     hd.giam_gia AS GiamGia,
@@ -4706,20 +4732,20 @@ LIMIT 500;
         ).AsList();
     }
     /// <summary>
-    /// Sinh mã hóa đơn kế tiếp trong ngày, dạng HDyyMMdd-NNN (VD: HD261005-002).
+    /// Sinh mÃ£ hÃ³a Ä‘Æ¡n káº¿ tiáº¿p trong ngÃ y, dáº¡ng HDyyMMdd-NNN (VD: HD261005-002).
     /// <para>
-    /// PHẢI cắt chuỗi tại <c>CHAR_LENGTH(@Prefix) + 2</c>. Mã hóa đơn gồm 8 ký tự
-    /// tiền tố + 1 dấu gạch nối nên phần số bắt đầu ở vị trí 10. Bản cũ dùng cứng
-    /// <c>SUBSTRING(ma_hoa_don, 9)</c> nên cắt trúng dấu "-" và cắt dấu "-" đi
-    /// ("-001"); MySQL/MariaDB ép "-001" sang UNSIGNED thành 18446744073709551615,
-    /// rồi <c>MAX(...) + 1</c> tràn số khiến Dapper ném
-    /// <see cref="OverflowException"/>. Hệ quả: đơn đầu tiên vẫn tạo được (bảng
-    /// rỗng nên MAX là NULL, COALESCE về 0) nhưng TỪ ĐƠN THỨ HAI TRỞ ĐI LUÔN LỖI:
-    /// không INSERT được gì và không hiện hóa đơn.
+    /// PHáº¢I cáº¯t chuá»—i táº¡i <c>CHAR_LENGTH(@Prefix) + 2</c>. MÃ£ hÃ³a Ä‘Æ¡n gá»“m 8 kÃ½ tá»±
+    /// tiá»n tá»‘ + 1 dáº¥u gáº¡ch ná»‘i nÃªn pháº§n sá»‘ báº¯t Ä‘áº§u á»Ÿ vá»‹ trÃ­ 10. Báº£n cÅ© dÃ¹ng cá»©ng
+    /// <c>SUBSTRING(ma_hoa_don, 9)</c> nÃªn cáº¯t trÃºng dáº¥u "-" vÃ  cáº¯t dáº¥u "-" Ä‘i
+    /// ("-001"); MySQL/MariaDB Ã©p "-001" sang UNSIGNED thÃ nh 18446744073709551615,
+    /// rá»“i <c>MAX(...) + 1</c> trÃ n sá»‘ khiáº¿n Dapper nÃ©m
+    /// <see cref="OverflowException"/>. Há»‡ quáº£: Ä‘Æ¡n Ä‘áº§u tiÃªn váº«n táº¡o Ä‘Æ°á»£c (báº£ng
+    /// rá»—ng nÃªn MAX lÃ  NULL, COALESCE vá» 0) nhÆ°ng Tá»ª ÄÆ N THá»¨ HAI TRá»ž ÄI LUÃ”N Lá»–I:
+    /// khÃ´ng INSERT Ä‘Æ°á»£c gÃ¬ vÃ  khÃ´ng hiá»‡n hÃ³a Ä‘Æ¡n.
     /// </para>
     /// <para>
-    /// Đọc kết quả bằng <see cref="decimal"/> để mã hóa đơn bẩn/sai định dạng
-    /// không làm tràn số lúc quy đổi sang <see cref="long"/>.
+    /// Äá»c káº¿t quáº£ báº±ng <see cref="decimal"/> Ä‘á»ƒ mÃ£ hÃ³a Ä‘Æ¡n báº©n/sai Ä‘á»‹nh dáº¡ng
+    /// khÃ´ng lÃ m trÃ n sá»‘ lÃºc quy Ä‘á»•i sang <see cref="long"/>.
     /// </para>
     /// </summary>
     private static async Task<string> TaoMaHoaDonMoiTrongGiaoDichAsync(
@@ -4748,18 +4774,18 @@ LIMIT 500;
         return $"{prefix}-{nextNumber:D3}";
     }
 
-    /// <summary>Lấy mã hóa đơn kế tiếp (dùng ngoài giao dịch bán hàng).</summary>
+    /// <summary>Láº¥y mÃ£ hÃ³a Ä‘Æ¡n káº¿ tiáº¿p (dÃ¹ng ngoÃ i giao dá»‹ch bÃ¡n hÃ ng).</summary>
     public async Task<string> TaoMaHoaDonMoiAsync()
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SalesPayment, "Bạn không có quyền tạo hóa đơn bán hàng.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SalesPayment, "Báº¡n khÃ´ng cÃ³ quyá»n táº¡o hÃ³a Ä‘Æ¡n bÃ¡n hÃ ng.");
         await using var connection = await OpenAsync();
 
         return await TaoMaHoaDonMoiTrongGiaoDichAsync(connection, null);
     }
 
     /// <summary>
-    /// Dựng lại hóa đơn bán hàng từ database (đầy đủ cả chi tiết) để mở lại
-    /// xem / in một hóa đơn đã có. Trả về null nếu mã hóa đơn không tồn tại.
+    /// Dá»±ng láº¡i hÃ³a Ä‘Æ¡n bÃ¡n hÃ ng tá»« database (Ä‘áº§y Ä‘á»§ cáº£ chi tiáº¿t) Ä‘á»ƒ má»Ÿ láº¡i
+    /// xem / in má»™t hÃ³a Ä‘Æ¡n Ä‘Ã£ cÃ³. Tráº£ vá» null náº¿u mÃ£ hÃ³a Ä‘Æ¡n khÃ´ng tá»“n táº¡i.
     /// </summary>
     public async Task<HoaDonBanHangReceipt?> GetHoaDonBanHangTheoMaAsync(
         string maHoaDon)
@@ -4787,7 +4813,7 @@ LIMIT 500;
               0                                                AS InKemThongTin
               """;
 
-        // Phương thức thanh toán nằm ở phiếu thu sổ quỹ, liên kết ngược về hóa đơn.
+        // PhÆ°Æ¡ng thá»©c thanh toÃ¡n náº±m á»Ÿ phiáº¿u thu sá»• quá»¹, liÃªn káº¿t ngÆ°á»£c vá» hÃ³a Ä‘Æ¡n.
         var phuongThucCols = coCotLienKet
             ? """
               (SELECT pc.phuong_thuc
@@ -4803,7 +4829,7 @@ LIMIT 500;
             hd.id                       AS HoaDonId,
             hd.ma_hoa_don               AS MaHoaDon,
             hd.thoi_gian_ban            AS ThoiGianBan,
-            COALESCE(NULLIF(TRIM(kh.ten_khach_hang), ''), 'Khách lẻ') AS TenKhachHang,
+            COALESCE(NULLIF(TRIM(kh.ten_khach_hang), ''), 'KhÃ¡ch láº»') AS TenKhachHang,
             COALESCE(nd.ho_ten, '')     AS TenNhanVien,
             hd.tong_tien_hang           AS TongTienHang,
             hd.giam_gia                 AS GiamGia,
@@ -4839,8 +4865,8 @@ LIMIT 500;
         ORDER BY id;
         """;
 
-        // Có cột ghi nhận hàng tặng kèm thì đọc thêm để hóa đơn hiển thị
-        // đúng nhãn "TẶNG KÈM" và tên chương trình khuyến mãi.
+        // CÃ³ cá»™t ghi nháº­n hÃ ng táº·ng kÃ¨m thÃ¬ Ä‘á»c thÃªm Ä‘á»ƒ hÃ³a Ä‘Æ¡n hiá»ƒn thá»‹
+        // Ä‘Ãºng nhÃ£n "Táº¶NG KÃˆM" vÃ  tÃªn chÆ°Æ¡ng trÃ¬nh khuyáº¿n mÃ£i.
         const string detailSqlCoHangTang = """
         SELECT
             ten_san_pham    AS TenSanPham,
@@ -4873,7 +4899,7 @@ LIMIT 500;
             HoaDonId = (uint)header.HoaDonId,
             MaHoaDon = header.MaHoaDon ?? maCanTim,
             ThoiGianBan = header.ThoiGianBan,
-            TenKhachHang = header.TenKhachHang ?? "Khách lẻ",
+            TenKhachHang = header.TenKhachHang ?? "KhÃ¡ch láº»",
             TenNhanVien = header.TenNhanVien ?? "",
             SoDienThoai = header.SoDienThoai?.ToString(),
             DiaChi = header.DiaChi?.ToString(),
@@ -4886,7 +4912,7 @@ LIMIT 500;
             KhachDaThanhToan = daThanhToan,
             ConNo = conNo,
 
-            // "Tiền khách đưa" = số tiền đã trả + tiền thối
+            // "Tiá»n khÃ¡ch Ä‘Æ°a" = sá»‘ tiá»n Ä‘Ã£ tráº£ + tiá»n thá»‘i
             TienKhachDua = daThanhToan + thuKhac,
             TienThoi = thuKhac,
 
@@ -4902,16 +4928,16 @@ LIMIT 500;
 
     private static string TrangThaiThanhToanHienThi(bool conNo, bool coTienThoi)
         => conNo
-            ? "Thanh toán thiếu - Công nợ"
+            ? "Thanh toÃ¡n thiáº¿u - CÃ´ng ná»£"
             : coTienThoi
-                ? "Đã thanh toán đủ - Tiền thối"
-                : "Đã thanh toán đủ";
+                ? "ÄÃ£ thanh toÃ¡n Ä‘á»§ - Tiá»n thá»‘i"
+                : "ÄÃ£ thanh toÃ¡n Ä‘á»§";
 
     /// <summary>
-    /// Lưu một đơn bán hàng: hóa đơn + chi tiết + trừ tồn kho + ghi lịch sử xuất
-    /// kho + công nợ khách hàng, tất cả trong MỘT giao dịch duy nhất.
-    /// Chỉ khi commit thành công mới trả về hóa đơn đã đọc lại từ database;
-    /// bất kỳ bước nào lỗi thì rollback toàn bộ và ném lỗi ra ngoài.
+    /// LÆ°u má»™t Ä‘Æ¡n bÃ¡n hÃ ng: hÃ³a Ä‘Æ¡n + chi tiáº¿t + trá»« tá»“n kho + ghi lá»‹ch sá»­ xuáº¥t
+    /// kho + cÃ´ng ná»£ khÃ¡ch hÃ ng, táº¥t cáº£ trong Má»˜T giao dá»‹ch duy nháº¥t.
+    /// Chá»‰ khi commit thÃ nh cÃ´ng má»›i tráº£ vá» hÃ³a Ä‘Æ¡n Ä‘Ã£ Ä‘á»c láº¡i tá»« database;
+    /// báº¥t ká»³ bÆ°á»›c nÃ o lá»—i thÃ¬ rollback toÃ n bá»™ vÃ  nÃ©m lá»—i ra ngoÃ i.
     /// </summary>
     public async Task<HoaDonBanHangReceipt> TaoHoaDonBanHangAsync(
     IReadOnlyCollection<SaleCartItem> items,
@@ -4924,14 +4950,14 @@ LIMIT 500;
     string? diaChi = null,
     bool inKemThongTin = false)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SalesPayment, "Bạn không có quyền tạo hóa đơn bán hàng.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SalesPayment, "Báº¡n khÃ´ng cÃ³ quyá»n táº¡o hÃ³a Ä‘Æ¡n bÃ¡n hÃ ng.");
         if (items.Count == 0)
-            throw new InvalidOperationException("Giỏ hàng đang trống.");
+            throw new InvalidOperationException("Giá» hÃ ng Ä‘ang trá»‘ng.");
 
         var now = DateTime.Now;
 
         // ============================================================
-        // 0. KIỂM TRA DỮ LIỆU ĐẦU VÀO (trước khi mở giao dịch)
+        // 0. KIá»‚M TRA Dá»® LIá»†U Äáº¦U VÃ€O (trÆ°á»›c khi má»Ÿ giao dá»‹ch)
         // ============================================================
 
         var cart = new List<SaleCartItem>(items.Count);
@@ -4939,54 +4965,54 @@ LIMIT 500;
         foreach (var item in items)
         {
             if (item?.SanPham is null)
-                throw new InvalidOperationException("Giỏ hàng có dòng sản phẩm không hợp lệ.");
+                throw new InvalidOperationException("Giá» hÃ ng cÃ³ dÃ²ng sáº£n pháº©m khÃ´ng há»£p lá»‡.");
 
             if (item.SanPham.Id == 0)
                 throw new InvalidOperationException(
-                    $"Sản phẩm \"{item.SanPham.TenSanPham}\" chưa được lưu vào hệ thống nên không thể bán.");
+                    $"Sáº£n pháº©m \"{item.SanPham.TenSanPham}\" chÆ°a Ä‘Æ°á»£c lÆ°u vÃ o há»‡ thá»‘ng nÃªn khÃ´ng thá»ƒ bÃ¡n.");
 
             if (item.SoLuong <= 0)
                 throw new InvalidOperationException(
-                    $"Số lượng của sản phẩm \"{item.SanPham.TenSanPham}\" phải lớn hơn 0.");
+                    $"Sá»‘ lÆ°á»£ng cá»§a sáº£n pháº©m \"{item.SanPham.TenSanPham}\" pháº£i lá»›n hÆ¡n 0.");
 
             if (item.SanPham.GiaBan <= 0)
                 throw new InvalidOperationException(
-                    $"Sản phẩm \"{item.SanPham.TenSanPham}\" chưa có giá bán.");
+                    $"Sáº£n pháº©m \"{item.SanPham.TenSanPham}\" chÆ°a cÃ³ giÃ¡ bÃ¡n.");
 
             cart.Add(item);
         }
 
-        // Tổng tiền hàng
+        // Tá»•ng tiá»n hÃ ng
         var total = cart.Sum(item => item.ThanhTien);
 
-        // Giảm giá hợp lệ
+        // Giáº£m giÃ¡ há»£p lá»‡
         var safeDiscount = Math.Clamp(discount, 0, total);
 
-        // Khách cần thanh toán
+        // KhÃ¡ch cáº§n thanh toÃ¡n
         var amountDue = total - safeDiscount;
 
-        // Tiền khách đưa không được âm
+        // Tiá»n khÃ¡ch Ä‘Æ°a khÃ´ng Ä‘Æ°á»£c Ã¢m
         var cashReceived = Math.Max(0, tienKhachDua);
 
-        // Số tiền thực tế được tính là đã thanh toán
-        // Nếu khách đưa dư thì chỉ ghi nhận bằng số tiền cần trả.
+        // Sá»‘ tiá»n thá»±c táº¿ Ä‘Æ°á»£c tÃ­nh lÃ  Ä‘Ã£ thanh toÃ¡n
+        // Náº¿u khÃ¡ch Ä‘Æ°a dÆ° thÃ¬ chá»‰ ghi nháº­n báº±ng sá»‘ tiá»n cáº§n tráº£.
         var paidAmount = Math.Min(cashReceived, amountDue);
 
-        // Công nợ phát sinh
+        // CÃ´ng ná»£ phÃ¡t sinh
         var debtAmount = Math.Max(0, amountDue - paidAmount);
 
-        // Khách lẻ (không gắn hồ sơ khách hàng) KHÔNG được phép ghi nợ.
-        // Chặn ngay tại tầng nghiệp vụ, TRƯỚC khi mở giao dịch, nên không tạo hóa đơn,
-        // không trừ tồn kho, không ghi sổ quỹ và không ghi công nợ khách hàng.
+        // KhÃ¡ch láº» (khÃ´ng gáº¯n há»“ sÆ¡ khÃ¡ch hÃ ng) KHÃ”NG Ä‘Æ°á»£c phÃ©p ghi ná»£.
+        // Cháº·n ngay táº¡i táº§ng nghiá»‡p vá»¥, TRÆ¯á»šC khi má»Ÿ giao dá»‹ch, nÃªn khÃ´ng táº¡o hÃ³a Ä‘Æ¡n,
+        // khÃ´ng trá»« tá»“n kho, khÃ´ng ghi sá»• quá»¹ vÃ  khÃ´ng ghi cÃ´ng ná»£ khÃ¡ch hÃ ng.
         if (debtAmount > 0m && (customer is null || customer.Id == 0))
         {
             throw new InvalidOperationException(
-                "Khách lẻ không được phép ghi nợ. Vui lòng nhập đủ số tiền khách thanh toán " +
-                "hoặc chọn khách hàng có thông tin để ghi nhận công nợ.");
+                "KhÃ¡ch láº» khÃ´ng Ä‘Æ°á»£c phÃ©p ghi ná»£. Vui lÃ²ng nháº­p Ä‘á»§ sá»‘ tiá»n khÃ¡ch thanh toÃ¡n " +
+                "hoáº·c chá»n khÃ¡ch hÃ ng cÃ³ thÃ´ng tin Ä‘á»ƒ ghi nháº­n cÃ´ng ná»£.");
         }
 
-        // Tiền thối: chỉ có khi thanh toán bằng tiền mặt. Thanh toán bằng
-        // chuyển khoản / thẻ / ví điện tử thì không có tiền mặt đổi lại.
+        // Tiá»n thá»‘i: chá»‰ cÃ³ khi thanh toÃ¡n báº±ng tiá»n máº·t. Thanh toÃ¡n báº±ng
+        // chuyá»ƒn khoáº£n / tháº» / vÃ­ Ä‘iá»‡n tá»­ thÃ¬ khÃ´ng cÃ³ tiá»n máº·t Ä‘á»•i láº¡i.
         var phuongThucHienThi = ChuanHoaPhuongThuc(phuongThucThanhToan);
         var laThanhToanTienMat = string.Equals(phuongThucHienThi, "TIEN_MAT", StringComparison.Ordinal);
 
@@ -4994,15 +5020,15 @@ LIMIT 500;
             ? Math.Max(0, cashReceived - amountDue)
             : 0m;
 
-        // Trạng thái thanh toán
+        // Tráº¡ng thÃ¡i thanh toÃ¡n
         var paymentStatus = debtAmount > 0 ? "CONG_NO" : "DA_THANH_TOAN";
 
         var branchId = Session.CurrentUser?.ChiNhanhId ?? 1;
         var userId = Session.CurrentUser?.Id;
 
-        // Đảm bảo cột liên kết phiếu thu và cột thông tin liên hệ tồn tại TRƯỚC khi mở giao dịch.
-        // ALTER TABLE bên trong transaction sẽ làm MySQL báo
-        // "Table definition has changed" và huỷ cả giao dịch.
+        // Äáº£m báº£o cá»™t liÃªn káº¿t phiáº¿u thu vÃ  cá»™t thÃ´ng tin liÃªn há»‡ tá»“n táº¡i TRÆ¯á»šC khi má»Ÿ giao dá»‹ch.
+        // ALTER TABLE bÃªn trong transaction sáº½ lÃ m MySQL bÃ¡o
+        // "Table definition has changed" vÃ  huá»· cáº£ giao dá»‹ch.
         var coCotPhieuThuLienKet = await EnsurePhieuQuyHoaDonColumnsAsync();
         var coCotContactHoaDon = await EnsureHoaDonContactColumnsAsync();
         var coCotHangTang = await EnsureChiTietHoaDonHangTangColumnsAsync();
@@ -5013,15 +5039,15 @@ LIMIT 500;
 
         var daCommit = false;
 
-        // Mã phiếu thu sổ quỹ sinh ra từ hóa đơn này (rỗng nếu khách trả 0 đồng).
+        // MÃ£ phiáº¿u thu sá»• quá»¹ sinh ra tá»« hÃ³a Ä‘Æ¡n nÃ y (rá»—ng náº¿u khÃ¡ch tráº£ 0 Ä‘á»“ng).
         var maPhieuThu = "";
 
         try
         {
             // ============================================================
-            // 1. TẠO HÓA ĐƠN
-            //    Mã hóa đơn sinh NGAY TRONG giao dịch (cùng connection) để
-            //    không trùng mã, và thử lại nếu chạm UNIQUE index ma_hoa_don.
+            // 1. Táº O HÃ“A ÄÆ N
+            //    MÃ£ hÃ³a Ä‘Æ¡n sinh NGAY TRONG giao dá»‹ch (cÃ¹ng connection) Ä‘á»ƒ
+            //    khÃ´ng trÃ¹ng mÃ£, vÃ  thá»­ láº¡i náº¿u cháº¡m UNIQUE index ma_hoa_don.
             // ============================================================
 
             var insertInvoiceSql = coCotContactHoaDon
@@ -5141,16 +5167,16 @@ LIMIT 500;
                             TongTienHang = total,
                             GiamGia = safeDiscount,
 
-                            // Tiền thối
+                            // Tiá»n thá»‘i
                             ThuKhac = changeAmount,
 
-                            // Khách cần trả
+                            // KhÃ¡ch cáº§n tráº£
                             KhachCanTra = amountDue,
 
-                            // Khách thực tế đã thanh toán
+                            // KhÃ¡ch thá»±c táº¿ Ä‘Ã£ thanh toÃ¡n
                             KhachDaThanhToan = paidAmount,
 
-                            // Công nợ
+                            // CÃ´ng ná»£
                             ConNo = debtAmount,
 
                             TrangThaiThanhToan = paymentStatus,
@@ -5159,8 +5185,8 @@ LIMIT 500;
                         },
                         transaction);
 
-                    // Đọc LAST_INSERT_ID() bằng lệnh riêng, không gộp batch nhiều
-                    // câu lệnh (batch phụ thuộc cờ AllowBatch của driver).
+                    // Äá»c LAST_INSERT_ID() báº±ng lá»‡nh riÃªng, khÃ´ng gá»™p batch nhiá»u
+                    // cÃ¢u lá»‡nh (batch phá»¥ thuá»™c cá» AllowBatch cá»§a driver).
                     invoiceId = await connection.ExecuteScalarAsync<uint>(
                         "SELECT LAST_INSERT_ID();",
                         null,
@@ -5170,16 +5196,16 @@ LIMIT 500;
                 }
                 catch (MySqlException ex) when (ex.Number == 1062 && lan < soLanThuLai)
                 {
-                    // 1062 = Duplicate entry: mã hóa đơn bị trùng, thử mã kế tiếp.
+                    // 1062 = Duplicate entry: mÃ£ hÃ³a Ä‘Æ¡n bá»‹ trÃ¹ng, thá»­ mÃ£ káº¿ tiáº¿p.
                 }
             }
 
             if (invoiceId == 0)
                 throw new InvalidOperationException(
-                    "Không tạo được hóa đơn trong database. Giao dịch đã hủy, dữ liệu bán hàng không bị thay đổi.");
+                    "KhÃ´ng táº¡o Ä‘Æ°á»£c hÃ³a Ä‘Æ¡n trong database. Giao dá»‹ch Ä‘Ã£ há»§y, dá»¯ liá»‡u bÃ¡n hÃ ng khÃ´ng bá»‹ thay Ä‘á»•i.");
 
             // ============================================================
-            // 2. CHI TIẾT HÓA ĐƠN
+            // 2. CHI TIáº¾T HÃ“A ÄÆ N
             // ============================================================
 
             const string detailSql = """
@@ -5209,7 +5235,7 @@ LIMIT 500;
             );
             """;
 
-            // Bản chi tiết có thêm cột ghi nhận hàng tặng kèm (is_hang_tang...).
+            // Báº£n chi tiáº¿t cÃ³ thÃªm cá»™t ghi nháº­n hÃ ng táº·ng kÃ¨m (is_hang_tang...).
             const string detailSqlCoHangTang = """
             INSERT INTO chi_tiet_hoa_don_ban_hang
             (
@@ -5272,11 +5298,11 @@ LIMIT 500;
 
                 if (affectedRows != 1)
                     throw new InvalidOperationException(
-                        $"Không lưu được dòng sản phẩm \"{item.SanPham.TenSanPham}\" vào hóa đơn {invoiceCode}.");
+                        $"KhÃ´ng lÆ°u Ä‘Æ°á»£c dÃ²ng sáº£n pháº©m \"{item.SanPham.TenSanPham}\" vÃ o hÃ³a Ä‘Æ¡n {invoiceCode}.");
             }
 
-            // Bảng chi tiết KHÔNG có khoá ngoại nên phải tự đối chiếu số dòng,
-            // tránh trường hợp "có hóa đơn nhưng hụt chi tiết" vẫn commit.
+            // Báº£ng chi tiáº¿t KHÃ”NG cÃ³ khoÃ¡ ngoáº¡i nÃªn pháº£i tá»± Ä‘á»‘i chiáº¿u sá»‘ dÃ²ng,
+            // trÃ¡nh trÆ°á»ng há»£p "cÃ³ hÃ³a Ä‘Æ¡n nhÆ°ng há»¥t chi tiáº¿t" váº«n commit.
             var soDongChiTiet = await connection.ExecuteScalarAsync<int>(
                 """
                 SELECT COUNT(*)
@@ -5288,10 +5314,10 @@ LIMIT 500;
 
             if (soDongChiTiet != cart.Count)
                 throw new InvalidOperationException(
-                    $"Hóa đơn {invoiceCode} chỉ lưu được {soDongChiTiet}/{cart.Count} dòng sản phẩm. Giao dịch đã hủy.");
+                    $"HÃ³a Ä‘Æ¡n {invoiceCode} chá»‰ lÆ°u Ä‘Æ°á»£c {soDongChiTiet}/{cart.Count} dÃ²ng sáº£n pháº©m. Giao dá»‹ch Ä‘Ã£ há»§y.");
 
             // ============================================================
-            // 3. TRỪ TỒN KHO + GHI LỊCH SỬ NHẬP/XUẤT
+            // 3. TRá»ª Tá»’N KHO + GHI Lá»ŠCH Sá»¬ NHáº¬P/XUáº¤T
             // ============================================================
 
             var canhBao = new List<string>();
@@ -5307,12 +5333,12 @@ LIMIT 500;
                     canhBao);
 
             // ============================================================
-            // 4. NẾU CÓ CÔNG NỢ -> LƯU VÀO LỊCH SỬ CÔNG NỢ KHÁCH HÀNG
+            // 4. Náº¾U CÃ“ CÃ”NG Ná»¢ -> LÆ¯U VÃ€O Lá»ŠCH Sá»¬ CÃ”NG Ná»¢ KHÃCH HÃ€NG
             // ============================================================
 
             if (customer is not null && customer.Id > 0 && debtAmount > 0)
             {
-                // Lấy công nợ hiện tại của khách
+                // Láº¥y cÃ´ng ná»£ hiá»‡n táº¡i cá»§a khÃ¡ch
                 const string currentDebtSql = """
                 SELECT COALESCE(
                     SUM(ghi_no - ghi_co),
@@ -5331,10 +5357,10 @@ LIMIT 500;
                     },
                     transaction);
 
-                // Công nợ mới sau khi phát sinh hóa đơn
+                // CÃ´ng ná»£ má»›i sau khi phÃ¡t sinh hÃ³a Ä‘Æ¡n
                 var newDebtBalance = currentDebt + debtAmount;
 
-                // Ghi lịch sử công nợ
+                // Ghi lá»‹ch sá»­ cÃ´ng ná»£
                 const string debtSql = """
                 INSERT INTO lich_su_cong_no_khach_hang
                 (
@@ -5358,27 +5384,27 @@ LIMIT 500;
 
                         MaChungTu = invoiceCode,
 
-                        // Khoản nợ phát sinh
+                        // Khoáº£n ná»£ phÃ¡t sinh
                         GhiNo = debtAmount,
 
-                        // Số dư công nợ mới
+                        // Sá»‘ dÆ° cÃ´ng ná»£ má»›i
                         SoDu = newDebtBalance,
 
                         ThoiGian = now,
                         NguoiThucHienId = userId,
 
                         GhiChu =
-                            $"Công nợ phát sinh từ hóa đơn {invoiceCode}"
+                            $"CÃ´ng ná»£ phÃ¡t sinh tá»« hÃ³a Ä‘Æ¡n {invoiceCode}"
                     },
                     transaction);
             }
 
             // ============================================================
-            // 5. GHI PHIẾU THU SỔ QUỸ
-            //    Chỉ ghi phần tiền khách trả thật (không kể tiền thối và
-            //    không tính phần còn nợ) và ghi trong CÙNG giao dịch với hóa đơn
-            //    nên không bao giờ có hóa đơn không kèm phiếu thu, hoặc phiếu thu
-            //    mồ côi khi hóa đơn bị rollback.
+            // 5. GHI PHIáº¾U THU Sá»” QUá»¸
+            //    Chá»‰ ghi pháº§n tiá»n khÃ¡ch tráº£ tháº­t (khÃ´ng ká»ƒ tiá»n thá»‘i vÃ 
+            //    khÃ´ng tÃ­nh pháº§n cÃ²n ná»£) vÃ  ghi trong CÃ™NG giao dá»‹ch vá»›i hÃ³a Ä‘Æ¡n
+            //    nÃªn khÃ´ng bao giá» cÃ³ hÃ³a Ä‘Æ¡n khÃ´ng kÃ¨m phiáº¿u thu, hoáº·c phiáº¿u thu
+            //    má»“ cÃ´i khi hÃ³a Ä‘Æ¡n bá»‹ rollback.
             // ============================================================
 
             maPhieuThu = await GhiPhieuThuBanHangAsync(
@@ -5404,25 +5430,25 @@ LIMIT 500;
             daCommit = true;
 
             _ = LogSubAccountActivityAsync(
-                "Bán hàng",
+                "BÃ¡n hÃ ng",
                 "HOA_DON",
                 invoiceId,
                 invoiceCode,
-                $"Bán hóa đơn {invoiceCode} cho {(customer != null && !string.IsNullOrWhiteSpace(customer.TenKhachHang) ? customer.TenKhachHang : "Khách lẻ")} (Tổng thanh toán: {amountDue:N0} đ)",
+                $"BÃ¡n hÃ³a Ä‘Æ¡n {invoiceCode} cho {(customer != null && !string.IsNullOrWhiteSpace(customer.TenKhachHang) ? customer.TenKhachHang : "KhÃ¡ch láº»")} (Tá»•ng thanh toÃ¡n: {amountDue:N0} Ä‘)",
                 amountDue);
 
             // ============================================================
-            // 7. ĐỌC LẠI HÓA ĐƠN ĐÃ LƯU ĐỂ HIỂN THỊ
-            //    Lấy dữ liệu thật trong database thay vì dựng lại từ RAM, nhờ
-            //    vậy mã hóa đơn, tổng tiền, tiền thối, công nợ và danh sách hàng
-            //    trên hóa đơn luôn khớp với dữ liệu đã lưu.
+            // 7. Äá»ŒC Láº I HÃ“A ÄÆ N ÄÃƒ LÆ¯U Äá»‚ HIá»‚N THá»Š
+            //    Láº¥y dá»¯ liá»‡u tháº­t trong database thay vÃ¬ dá»±ng láº¡i tá»« RAM, nhá»
+            //    váº­y mÃ£ hÃ³a Ä‘Æ¡n, tá»•ng tiá»n, tiá»n thá»‘i, cÃ´ng ná»£ vÃ  danh sÃ¡ch hÃ ng
+            //    trÃªn hÃ³a Ä‘Æ¡n luÃ´n khá»›p vá»›i dá»¯ liá»‡u Ä‘Ã£ lÆ°u.
             // ============================================================
 
             var receipt = await GetHoaDonBanHangTheoMaAsync(invoiceCode);
 
             if (receipt is null)
                 throw new InvalidOperationException(
-                    $"Đã lưu hóa đơn {invoiceCode} nhưng không đọc lại được. Hãy kiểm tra danh sách hóa đơn.");
+                    $"ÄÃ£ lÆ°u hÃ³a Ä‘Æ¡n {invoiceCode} nhÆ°ng khÃ´ng Ä‘á»c láº¡i Ä‘Æ°á»£c. HÃ£y kiá»ƒm tra danh sÃ¡ch hÃ³a Ä‘Æ¡n.");
 
             receipt.CanhBao.AddRange(canhBao);
 
@@ -5453,10 +5479,10 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Ghi nhận khách trả thêm tiền cho một hóa đơn còn nợ: cập nhật số đã trả /
-    /// còn nợ / trạng thái của hóa đơn, lưu một dòng vào bảng <c>thanh_toan</c>,
-    /// cập nhật lịch sử công nợ khách hàng và tạo phiếu thu trong sổ quỹ — tất cả
-    /// trong MỘT giao dịch. Trả về hóa đơn đã đọc lại từ database.
+    /// Ghi nháº­n khÃ¡ch tráº£ thÃªm tiá»n cho má»™t hÃ³a Ä‘Æ¡n cÃ²n ná»£: cáº­p nháº­t sá»‘ Ä‘Ã£ tráº£ /
+    /// cÃ²n ná»£ / tráº¡ng thÃ¡i cá»§a hÃ³a Ä‘Æ¡n, lÆ°u má»™t dÃ²ng vÃ o báº£ng <c>thanh_toan</c>,
+    /// cáº­p nháº­t lá»‹ch sá»­ cÃ´ng ná»£ khÃ¡ch hÃ ng vÃ  táº¡o phiáº¿u thu trong sá»• quá»¹ â€” táº¥t cáº£
+    /// trong Má»˜T giao dá»‹ch. Tráº£ vá» hÃ³a Ä‘Æ¡n Ä‘Ã£ Ä‘á»c láº¡i tá»« database.
     /// </summary>
     public async Task<HoaDonBanHangReceipt> ThuNoHoaDonAsync(
         string maHoaDon,
@@ -5467,13 +5493,13 @@ LIMIT 500;
         Quyen.RequirePermission(
             Session.CurrentUser,
             PermissionKeys.CustomersDebtPay,
-            "Bạn không có quyền thu công nợ khách hàng.");
+            "Báº¡n khÃ´ng cÃ³ quyá»n thu cÃ´ng ná»£ khÃ¡ch hÃ ng.");
 
         if (string.IsNullOrWhiteSpace(maHoaDon))
-            throw new InvalidOperationException("Thiếu mã hóa đơn cần thu nợ.");
+            throw new InvalidOperationException("Thiáº¿u mÃ£ hÃ³a Ä‘Æ¡n cáº§n thu ná»£.");
 
         if (soTien <= 0)
-            throw new InvalidOperationException("Số tiền thu phải lớn hơn 0.");
+            throw new InvalidOperationException("Sá»‘ tiá»n thu pháº£i lá»›n hÆ¡n 0.");
 
         var maCanTim = maHoaDon.Trim();
         var now = DateTime.Now;
@@ -5508,7 +5534,7 @@ LIMIT 500;
                 transaction);
 
             if (hd is null)
-                throw new InvalidOperationException($"Không tìm thấy hóa đơn {maCanTim} trong database.");
+                throw new InvalidOperationException($"KhÃ´ng tÃ¬m tháº¥y hÃ³a Ä‘Æ¡n {maCanTim} trong database.");
 
             var hoaDonId = hd.Id;
             var branchCuaHoaDon = hd.ChiNhanhId;
@@ -5520,7 +5546,7 @@ LIMIT 500;
 
             if (conNoCu <= 0)
                 throw new InvalidOperationException(
-                    $"Hóa đơn {maCanTim} đã thanh toán đủ, không còn công nợ.");
+                    $"HÃ³a Ä‘Æ¡n {maCanTim} Ä‘Ã£ thanh toÃ¡n Ä‘á»§, khÃ´ng cÃ²n cÃ´ng ná»£.");
 
             var (maPhieu, thu, conNoMoi) = await GhiNhanMotLanThuNoTrongGiaoDichAsync(
                 connection,
@@ -5543,18 +5569,18 @@ LIMIT 500;
             daCommit = true;
 
             _ = LogSubAccountActivityAsync(
-                "Thu nợ",
+                "Thu ná»£",
                 "HOA_DON",
                 hoaDonId,
                 maCanTim,
-                $"Thu nợ hóa đơn {maCanTim}: {thu:N0} đ (còn nợ {conNoMoi:N0} đ)",
+                $"Thu ná»£ hÃ³a Ä‘Æ¡n {maCanTim}: {thu:N0} Ä‘ (cÃ²n ná»£ {conNoMoi:N0} Ä‘)",
                 thu);
 
             var receipt = await GetHoaDonBanHangTheoMaAsync(maCanTim);
 
             if (receipt is null)
                 throw new InvalidOperationException(
-                    $"Đã thu nợ nhưng không đọc lại được hóa đơn {maCanTim}.");
+                    $"ÄÃ£ thu ná»£ nhÆ°ng khÃ´ng Ä‘á»c láº¡i Ä‘Æ°á»£c hÃ³a Ä‘Æ¡n {maCanTim}.");
 
             receipt.MaPhieuThu = maPhieu;
 
@@ -5583,11 +5609,11 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Ghi nhận một lần thu nợ cho đúng MỘT hóa đơn trong giao dịch đang mở:
-    /// cập nhật số đã trả / còn nợ / trạng thái của hóa đơn, lưu dòng thanh toán,
-    /// ghi có vào sổ cái công nợ khách hàng và tạo phiếu thu sổ quỹ. Không tự mở
-    /// giao dịch — dùng chung connection/transaction của hàm gọi để nhiều hóa đơn
-    /// hoặc phần nợ không theo hóa đơn có thể nằm trong CÙNG một giao dịch.
+    /// Ghi nháº­n má»™t láº§n thu ná»£ cho Ä‘Ãºng Má»˜T hÃ³a Ä‘Æ¡n trong giao dá»‹ch Ä‘ang má»Ÿ:
+    /// cáº­p nháº­t sá»‘ Ä‘Ã£ tráº£ / cÃ²n ná»£ / tráº¡ng thÃ¡i cá»§a hÃ³a Ä‘Æ¡n, lÆ°u dÃ²ng thanh toÃ¡n,
+    /// ghi cÃ³ vÃ o sá»• cÃ¡i cÃ´ng ná»£ khÃ¡ch hÃ ng vÃ  táº¡o phiáº¿u thu sá»• quá»¹. KhÃ´ng tá»± má»Ÿ
+    /// giao dá»‹ch â€” dÃ¹ng chung connection/transaction cá»§a hÃ m gá»i Ä‘á»ƒ nhiá»u hÃ³a Ä‘Æ¡n
+    /// hoáº·c pháº§n ná»£ khÃ´ng theo hÃ³a Ä‘Æ¡n cÃ³ thá»ƒ náº±m trong CÃ™NG má»™t giao dá»‹ch.
     /// </summary>
     private async Task<(string MaPhieu, decimal Thu, decimal ConNoMoi)>
         GhiNhanMotLanThuNoTrongGiaoDichAsync(
@@ -5607,7 +5633,7 @@ LIMIT 500;
             uint? userId,
             bool coCotLienKet)
     {
-        // Không cho thu vượt quá số còn nợ của hóa đơn.
+        // KhÃ´ng cho thu vÆ°á»£t quÃ¡ sá»‘ cÃ²n ná»£ cá»§a hÃ³a Ä‘Æ¡n.
         var thu = Math.Min(soTien, conNoCu);
         var daTraMoi = daTraCu + thu;
         var conNoMoi = Math.Max(0, khachCanTra - daTraMoi);
@@ -5634,7 +5660,7 @@ LIMIT 500;
             },
             transaction);
 
-        // Lưu dòng thanh toán.
+        // LÆ°u dÃ²ng thanh toÃ¡n.
         var maThanhToan = await SinhMaThanhToanTrongGiaoDichAsync(connection, transaction);
 
         const string insertTtSql = """
@@ -5661,7 +5687,7 @@ LIMIT 500;
             },
             transaction);
 
-        // Cập nhật lịch sử công nợ khách hàng (ghi có = giảm nợ).
+        // Cáº­p nháº­t lá»‹ch sá»­ cÃ´ng ná»£ khÃ¡ch hÃ ng (ghi cÃ³ = giáº£m ná»£).
         if (khachHangId is > 0)
         {
             const string currentDebtSql = """
@@ -5696,19 +5722,19 @@ LIMIT 500;
                     SoDu = soDuCu - thu,
                     ThoiGian = now,
                     NguoiThucHienId = userId,
-                    GhiChu = $"Thu nợ hóa đơn {maHoaDon}"
+                    GhiChu = $"Thu ná»£ hÃ³a Ä‘Æ¡n {maHoaDon}"
                 },
                 transaction);
         }
 
-        // Ghi phiếu thu sổ quỹ (mã PT). KHÔNG gán hoa_don_ban_hang_id vì chỉ mục
-        // duy nhất chỉ cho phép 1 phiếu/hóa đơn — phiếu thu đầu tiên đã giữ chỗ đó.
+        // Ghi phiáº¿u thu sá»• quá»¹ (mÃ£ PT). KHÃ”NG gÃ¡n hoa_don_ban_hang_id vÃ¬ chá»‰ má»¥c
+        // duy nháº¥t chá»‰ cho phÃ©p 1 phiáº¿u/hÃ³a Ä‘Æ¡n â€” phiáº¿u thu Ä‘áº§u tiÃªn Ä‘Ã£ giá»¯ chá»— Ä‘Ã³.
         var maPhieu = await SinhMaPhieuThuTrongGiaoDichAsync(connection, transaction);
 
-        // Phiếu thu nợ hóa đơn luôn thuộc loại "Thu khách hàng".
+        // Phiáº¿u thu ná»£ hÃ³a Ä‘Æ¡n luÃ´n thuá»™c loáº¡i "Thu khÃ¡ch hÃ ng".
         var idNhomThuKhachHang = await LayIdNhomChiPhiTheoMaAsync(connection, transaction, "THU_KHACH_HANG");
 
-        var noiDung = $"Thu nợ hóa đơn {maHoaDon}";
+        var noiDung = $"Thu ná»£ hÃ³a Ä‘Æ¡n {maHoaDon}";
         var ghiChuPhieu = string.IsNullOrWhiteSpace(ghiChu)
             ? noiDung
             : $"{noiDung}. {ghiChu.Trim()}";
@@ -5765,11 +5791,11 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Thu công nợ theo khách hàng: trừ dần số tiền khách trả vào các hóa đơn còn nợ
-    /// (cũ nhất trước), phần vượt quá tổng nợ trên hóa đơn (ví dụ nợ nhập từ KiotViet
-    /// không gắn hóa đơn) ghi thẳng vào sổ cái công nợ khách hàng. Mọi hóa đơn được
-    /// cấn trừ, dòng thanh toán và phiếu thu sổ quỹ đều nằm trong CÙNG một giao dịch
-    /// nên không bao giờ lệch sổ.
+    /// Thu cÃ´ng ná»£ theo khÃ¡ch hÃ ng: trá»« dáº§n sá»‘ tiá»n khÃ¡ch tráº£ vÃ o cÃ¡c hÃ³a Ä‘Æ¡n cÃ²n ná»£
+    /// (cÅ© nháº¥t trÆ°á»›c), pháº§n vÆ°á»£t quÃ¡ tá»•ng ná»£ trÃªn hÃ³a Ä‘Æ¡n (vÃ­ dá»¥ ná»£ nháº­p tá»« KiotViet
+    /// khÃ´ng gáº¯n hÃ³a Ä‘Æ¡n) ghi tháº³ng vÃ o sá»• cÃ¡i cÃ´ng ná»£ khÃ¡ch hÃ ng. Má»i hÃ³a Ä‘Æ¡n Ä‘Æ°á»£c
+    /// cáº¥n trá»«, dÃ²ng thanh toÃ¡n vÃ  phiáº¿u thu sá»• quá»¹ Ä‘á»u náº±m trong CÃ™NG má»™t giao dá»‹ch
+    /// nÃªn khÃ´ng bao giá» lá»‡ch sá»•.
     /// </summary>
     public async Task<ThuNoKhachHangKetQua> ThuNoKhachHangAsync(
         uint khachHangId,
@@ -5780,13 +5806,13 @@ LIMIT 500;
         Quyen.RequirePermission(
             Session.CurrentUser,
             PermissionKeys.CustomersDebtPay,
-            "Bạn không có quyền thu công nợ khách hàng.");
+            "Báº¡n khÃ´ng cÃ³ quyá»n thu cÃ´ng ná»£ khÃ¡ch hÃ ng.");
 
         if (khachHangId == 0)
-            throw new InvalidOperationException("Thiếu khách hàng cần thu nợ.");
+            throw new InvalidOperationException("Thiáº¿u khÃ¡ch hÃ ng cáº§n thu ná»£.");
 
         if (soTien <= 0)
-            throw new InvalidOperationException("Số tiền thu phải lớn hơn 0.");
+            throw new InvalidOperationException("Sá»‘ tiá»n thu pháº£i lá»›n hÆ¡n 0.");
 
         var now = DateTime.Now;
         var userId = Session.CurrentUser?.Id;
@@ -5819,7 +5845,7 @@ LIMIT 500;
 
             if (khach is null)
                 throw new InvalidOperationException(
-                    $"Không tìm thấy khách hàng (id {khachHangId}) trong database.");
+                    $"KhÃ´ng tÃ¬m tháº¥y khÃ¡ch hÃ ng (id {khachHangId}) trong database.");
 
             string? tenKhach = string.IsNullOrWhiteSpace(khach.TenKhachHang)
                 ? null
@@ -5827,8 +5853,8 @@ LIMIT 500;
 
             uint chiNhanhCuaKhach = khach.ChiNhanhId ?? (Session.CurrentUser?.ChiNhanhId ?? 1);
 
-            // Chặn thu vượt quá dư nợ thực tế theo cùng công thức hiển thị ở
-            // danh sách khách hàng (sổ cái + số dư KiotViet nếu có).
+            // Cháº·n thu vÆ°á»£t quÃ¡ dÆ° ná»£ thá»±c táº¿ theo cÃ¹ng cÃ´ng thá»©c hiá»ƒn thá»‹ á»Ÿ
+            // danh sÃ¡ch khÃ¡ch hÃ ng (sá»• cÃ¡i + sá»‘ dÆ° KiotViet náº¿u cÃ³).
             var bieuThucNo = TaoBieuThucTienKhachHang(false, "kh.id", coCotKiotViet).NoHienTai;
             var noHienTai = await connection.ExecuteScalarAsync<decimal>(
                 $"SELECT {bieuThucNo} FROM khach_hang kh WHERE kh.id = @Id;",
@@ -5838,16 +5864,16 @@ LIMIT 500;
             if (noHienTai <= 0)
             {
                 throw new InvalidOperationException(
-                    $"Khách hàng {(tenKhach ?? khachHangId.ToString())} hiện không còn nợ để thu.");
+                    $"KhÃ¡ch hÃ ng {(tenKhach ?? khachHangId.ToString())} hiá»‡n khÃ´ng cÃ²n ná»£ Ä‘á»ƒ thu.");
             }
 
             if (soTien - noHienTai > 0.009m)
             {
                 throw new InvalidOperationException(
-                    $"Số tiền thu ({soTien:N0} đ) vượt quá dư nợ hiện tại ({noHienTai:N0} đ).");
+                    $"Sá»‘ tiá»n thu ({soTien:N0} Ä‘) vÆ°á»£t quÃ¡ dÆ° ná»£ hiá»‡n táº¡i ({noHienTai:N0} Ä‘).");
             }
 
-            // Các hóa đơn còn nợ của khách, cũ nhất trước, khoá để tránh thu trùng.
+            // CÃ¡c hÃ³a Ä‘Æ¡n cÃ²n ná»£ cá»§a khÃ¡ch, cÅ© nháº¥t trÆ°á»›c, khoÃ¡ Ä‘á»ƒ trÃ¡nh thu trÃ¹ng.
             const string hoaDonSql = """
             SELECT
                 id                  AS Id,
@@ -5932,14 +5958,14 @@ LIMIT 500;
             daCommit = true;
 
             _ = LogSubAccountActivityAsync(
-                "Thu nợ",
+                "Thu ná»£",
                 "KHACH_HANG",
                 khachHangId,
                 null,
-                $"Thu nợ khách hàng {(tenKhach ?? khachHangId.ToString())}: {tongDaThu:N0} đ",
+                $"Thu ná»£ khÃ¡ch hÃ ng {(tenKhach ?? khachHangId.ToString())}: {tongDaThu:N0} Ä‘",
                 tongDaThu);
 
-            // Đọc lại công nợ còn lại theo cùng cách hiển thị ở danh sách khách hàng.
+            // Äá»c láº¡i cÃ´ng ná»£ cÃ²n láº¡i theo cÃ¹ng cÃ¡ch hiá»ƒn thá»‹ á»Ÿ danh sÃ¡ch khÃ¡ch hÃ ng.
             var thongKe = await GetThongKeMuaHangCuaKhachHangAsync(khachHangId);
 
             return new ThuNoKhachHangKetQua
@@ -5975,8 +6001,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Ghi nhận phần tiền thu nợ không gắn với hóa đơn nào (nợ tổng hợp từ KiotViet
-    /// hoặc ghi nợ tay) vào sổ cái công nợ khách hàng và tạo phiếu thu sổ quỹ.
+    /// Ghi nháº­n pháº§n tiá»n thu ná»£ khÃ´ng gáº¯n vá»›i hÃ³a Ä‘Æ¡n nÃ o (ná»£ tá»•ng há»£p tá»« KiotViet
+    /// hoáº·c ghi ná»£ tay) vÃ o sá»• cÃ¡i cÃ´ng ná»£ khÃ¡ch hÃ ng vÃ  táº¡o phiáº¿u thu sá»• quá»¹.
     /// </summary>
     private async Task<string> GhiNhanThuNoKhongTheoHoaDonTrongGiaoDichAsync(
         MySqlConnection connection,
@@ -6023,17 +6049,17 @@ LIMIT 500;
                 ThoiGian = now,
                 NguoiThucHienId = userId,
                 GhiChu = string.IsNullOrWhiteSpace(ghiChu)
-                    ? "Thu nợ khách hàng"
-                    : $"Thu nợ khách hàng. {ghiChu.Trim()}"
+                    ? "Thu ná»£ khÃ¡ch hÃ ng"
+                    : $"Thu ná»£ khÃ¡ch hÃ ng. {ghiChu.Trim()}"
             },
             transaction);
 
         var maPhieu = await SinhMaPhieuThuTrongGiaoDichAsync(connection, transaction);
 
-        // Phiếu thu nợ khách hàng luôn thuộc loại "Thu khách hàng".
+        // Phiáº¿u thu ná»£ khÃ¡ch hÃ ng luÃ´n thuá»™c loáº¡i "Thu khÃ¡ch hÃ ng".
         var idNhomThuKhachHang = await LayIdNhomChiPhiTheoMaAsync(connection, transaction, "THU_KHACH_HANG");
 
-        var noiDung = "Thu nợ khách hàng";
+        var noiDung = "Thu ná»£ khÃ¡ch hÃ ng";
         var ghiChuPhieu = string.IsNullOrWhiteSpace(ghiChu)
             ? noiDung
             : $"{noiDung}. {ghiChu.Trim()}";
@@ -6081,7 +6107,7 @@ LIMIT 500;
         return maPhieu;
     }
 
-    /// <summary>Dòng khách hàng dùng khi thu nợ theo khách hàng.</summary>
+    /// <summary>DÃ²ng khÃ¡ch hÃ ng dÃ¹ng khi thu ná»£ theo khÃ¡ch hÃ ng.</summary>
     private sealed class KhachHangCongNoRow
     {
         public uint Id { get; set; }
@@ -6089,7 +6115,7 @@ LIMIT 500;
         public uint? ChiNhanhId { get; set; }
     }
 
-    /// <summary>Dòng hóa đơn còn nợ dùng khi thu nợ theo hóa đơn/khách hàng.</summary>
+    /// <summary>DÃ²ng hÃ³a Ä‘Æ¡n cÃ²n ná»£ dÃ¹ng khi thu ná»£ theo hÃ³a Ä‘Æ¡n/khÃ¡ch hÃ ng.</summary>
     private sealed class HoaDonCongNoRow
     {
         public uint Id { get; set; }
@@ -6101,7 +6127,7 @@ LIMIT 500;
         public decimal ConNo { get; set; }
     }
 
-    /// <summary>Dòng phiếu nhập cần cho việc ghi nhận thanh toán công nợ.</summary>
+    /// <summary>DÃ²ng phiáº¿u nháº­p cáº§n cho viá»‡c ghi nháº­n thanh toÃ¡n cÃ´ng ná»£.</summary>
     private sealed class PhieuNhapCongNoRow
     {
         public uint Id { get; set; }
@@ -6116,20 +6142,20 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Ghi nhận thanh toán công nợ cho MỘT phiếu nhập hàng. Toàn bộ thao tác nằm
-    /// trong MỘT giao dịch:
+    /// Ghi nháº­n thanh toÃ¡n cÃ´ng ná»£ cho Má»˜T phiáº¿u nháº­p hÃ ng. ToÃ n bá»™ thao tÃ¡c náº±m
+    /// trong Má»˜T giao dá»‹ch:
     /// <list type="number">
-    /// <item>Khoá dòng phiếu và kiểm tra còn nợ, số tiền không vượt quá công nợ.</item>
-    /// <item>Cập nhật <c>da_thanh_toan</c> / <c>con_no</c> của đầu phiếu.</item>
-    /// <item>Lưu một dòng lịch sử vào <c>thanh_toan_nha_cung_cap</c> (mã TTNCC...).</item>
-    /// <item>Ghi có vào sổ cái công nợ nhà cung cấp để công nợ giảm đúng số đã trả.</item>
-    /// <item>Ghi phiếu chi (mã PC...) vào sổ quỹ, gắn với chính phiếu nhập.</item>
+    /// <item>KhoÃ¡ dÃ²ng phiáº¿u vÃ  kiá»ƒm tra cÃ²n ná»£, sá»‘ tiá»n khÃ´ng vÆ°á»£t quÃ¡ cÃ´ng ná»£.</item>
+    /// <item>Cáº­p nháº­t <c>da_thanh_toan</c> / <c>con_no</c> cá»§a Ä‘áº§u phiáº¿u.</item>
+    /// <item>LÆ°u má»™t dÃ²ng lá»‹ch sá»­ vÃ o <c>thanh_toan_nha_cung_cap</c> (mÃ£ TTNCC...).</item>
+    /// <item>Ghi cÃ³ vÃ o sá»• cÃ¡i cÃ´ng ná»£ nhÃ  cung cáº¥p Ä‘á»ƒ cÃ´ng ná»£ giáº£m Ä‘Ãºng sá»‘ Ä‘Ã£ tráº£.</item>
+    /// <item>Ghi phiáº¿u chi (mÃ£ PC...) vÃ o sá»• quá»¹, gáº¯n vá»›i chÃ­nh phiáº¿u nháº­p.</item>
     /// </list>
-    /// Trạng thái thanh toán (chưa/một phần/đủ) được SUY RA từ số đã trả và còn nợ,
-    /// không lưu thêm cột riêng.
+    /// Tráº¡ng thÃ¡i thanh toÃ¡n (chÆ°a/má»™t pháº§n/Ä‘á»§) Ä‘Æ°á»£c SUY RA tá»« sá»‘ Ä‘Ã£ tráº£ vÃ  cÃ²n ná»£,
+    /// khÃ´ng lÆ°u thÃªm cá»™t riÃªng.
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Phiếu không tồn tại, đang lưu tạm/hủy, đã trả đủ, hoặc số tiền không hợp lệ.
+    /// Phiáº¿u khÃ´ng tá»“n táº¡i, Ä‘ang lÆ°u táº¡m/há»§y, Ä‘Ã£ tráº£ Ä‘á»§, hoáº·c sá»‘ tiá»n khÃ´ng há»£p lá»‡.
     /// </exception>
     public async Task<ThanhToanPhieuNhapKetQua> ThanhToanPhieuNhapAsync(
         string maPhieuNhap,
@@ -6141,13 +6167,13 @@ LIMIT 500;
         Quyen.RequirePermission(
             Session.CurrentUser,
             PermissionKeys.SuppliersDebtPay,
-            "Bạn không có quyền thanh toán công nợ nhà cung cấp.");
+            "Báº¡n khÃ´ng cÃ³ quyá»n thanh toÃ¡n cÃ´ng ná»£ nhÃ  cung cáº¥p.");
 
         if (string.IsNullOrWhiteSpace(maPhieuNhap))
-            throw new InvalidOperationException("Thiếu mã phiếu nhập cần thanh toán.");
+            throw new InvalidOperationException("Thiáº¿u mÃ£ phiáº¿u nháº­p cáº§n thanh toÃ¡n.");
 
         if (soTien <= 0)
-            throw new InvalidOperationException("Số tiền thanh toán phải lớn hơn 0.");
+            throw new InvalidOperationException("Sá»‘ tiá»n thanh toÃ¡n pháº£i lá»›n hÆ¡n 0.");
 
         var maCanTim = maPhieuNhap.Trim();
         var now = thoiGianThanhToan ?? DateTime.Now;
@@ -6187,25 +6213,25 @@ LIMIT 500;
                 transaction);
 
             if (phieu is null)
-                throw new InvalidOperationException($"Không tìm thấy phiếu nhập {maCanTim} trong database.");
+                throw new InvalidOperationException($"KhÃ´ng tÃ¬m tháº¥y phiáº¿u nháº­p {maCanTim} trong database.");
 
             if (!TrangThaiThanhToanPhieuNhap.LaPhieuThanhToanDuoc(phieu.TrangThai))
                 throw new InvalidOperationException(
-                    $"Phiếu nhập {maCanTim} đang ở trạng thái không thể thanh toán.");
+                    $"Phiáº¿u nháº­p {maCanTim} Ä‘ang á»Ÿ tráº¡ng thÃ¡i khÃ´ng thá»ƒ thanh toÃ¡n.");
 
             if (phieu.ConNo <= 0m)
                 throw new InvalidOperationException(
-                    $"Phiếu nhập {maCanTim} đã thanh toán đủ, không còn công nợ.");
+                    $"Phiáº¿u nháº­p {maCanTim} Ä‘Ã£ thanh toÃ¡n Ä‘á»§, khÃ´ng cÃ²n cÃ´ng ná»£.");
 
             if (soTien > phieu.ConNo)
                 throw new InvalidOperationException(
-                    $"Số tiền thanh toán ({soTien:N0} đ) vượt quá công nợ còn lại ({phieu.ConNo:N0} đ).");
+                    $"Sá»‘ tiá»n thanh toÃ¡n ({soTien:N0} Ä‘) vÆ°á»£t quÃ¡ cÃ´ng ná»£ cÃ²n láº¡i ({phieu.ConNo:N0} Ä‘).");
 
             var daTraMoi = phieu.DaThanhToan + soTien;
             var conNoMoi = Math.Max(0m, phieu.TongTienNhap - daTraMoi);
             var phuongThuc = ChuanHoaPhuongThuc(phuongThucThanhToan);
 
-            // 1. Cập nhật đầu phiếu: tổng đã trả tăng, còn nợ giảm.
+            // 1. Cáº­p nháº­t Ä‘áº§u phiáº¿u: tá»•ng Ä‘Ã£ tráº£ tÄƒng, cÃ²n ná»£ giáº£m.
             await connection.ExecuteAsync(
                 """
                 UPDATE phieu_nhap_hang
@@ -6223,7 +6249,7 @@ LIMIT 500;
                 },
                 transaction);
 
-            // 2. Lưu một dòng lịch sử thanh toán riêng cho lần trả này.
+            // 2. LÆ°u má»™t dÃ²ng lá»‹ch sá»­ thanh toÃ¡n riÃªng cho láº§n tráº£ nÃ y.
             var maThanhToan = await SinhMaThanhToanNhaCungCapTrongGiaoDichAsync(connection, transaction);
 
             if (phieu.NhaCungCapId is uint nccId && nccId > 0)
@@ -6254,7 +6280,7 @@ LIMIT 500;
                     },
                     transaction);
 
-                // 3. Ghi có sổ cái công nợ nhà cung cấp -> công nợ giảm đúng số đã trả.
+                // 3. Ghi cÃ³ sá»• cÃ¡i cÃ´ng ná»£ nhÃ  cung cáº¥p -> cÃ´ng ná»£ giáº£m Ä‘Ãºng sá»‘ Ä‘Ã£ tráº£.
                 await GhiMotDongCongNoNhaCungCapAsync(
                     connection,
                     transaction,
@@ -6267,21 +6293,21 @@ LIMIT 500;
                     now,
                     userId,
                     string.IsNullOrWhiteSpace(ghiChu)
-                        ? $"Thanh toán {soTien:N0} đ cho phiếu {maCanTim}"
-                        : $"Thanh toán {soTien:N0} đ cho phiếu {maCanTim}. {ghiChu.Trim()}");
+                        ? $"Thanh toÃ¡n {soTien:N0} Ä‘ cho phiáº¿u {maCanTim}"
+                        : $"Thanh toÃ¡n {soTien:N0} Ä‘ cho phiáº¿u {maCanTim}. {ghiChu.Trim()}");
             }
 
-            // 4. Ghi phiếu chi trong sổ quỹ.
+            // 4. Ghi phiáº¿u chi trong sá»• quá»¹.
             var maPhieuChi = await SinhMaPhieuChiTrongGiaoDichAsync(connection, transaction);
 
-            // Phiếu chi thanh toán nhập hàng luôn thuộc loại "Chi nhà cung cấp".
+            // Phiáº¿u chi thanh toÃ¡n nháº­p hÃ ng luÃ´n thuá»™c loáº¡i "Chi nhÃ  cung cáº¥p".
             var idNhomChiNhaCungCap = await LayIdNhomChiPhiTheoMaAsync(connection, transaction, "CHI_NHA_CUNG_CAP");
 
             var tenNcc = string.IsNullOrWhiteSpace(phieu.TenNhaCungCap)
                 ? phieu.NhaCungCapId?.ToString()
                 : phieu.TenNhaCungCap;
-            var noiDung = $"Thanh toán công nợ nhập hàng - phiếu {maCanTim}";
-            var ghiChuPhieu = $"Chi trả công nợ cho nhà cung cấp {tenNcc} theo phiếu nhập {maCanTim}.";
+            var noiDung = $"Thanh toÃ¡n cÃ´ng ná»£ nháº­p hÃ ng - phiáº¿u {maCanTim}";
+            var ghiChuPhieu = $"Chi tráº£ cÃ´ng ná»£ cho nhÃ  cung cáº¥p {tenNcc} theo phiáº¿u nháº­p {maCanTim}.";
 
             string insertPhieuChiSql;
             if (coCotPhieuNhap && coCotNguoiNopNhanGhiChu)
@@ -6358,11 +6384,11 @@ LIMIT 500;
             daCommit = true;
 
             _ = LogSubAccountActivityAsync(
-                "Thanh toán NCC",
+                "Thanh toÃ¡n NCC",
                 "PHIEU_NHAP",
                 phieu.Id,
                 maCanTim,
-                $"Thanh toán công nợ phiếu {maCanTim}: {soTien:N0} đ (còn nợ {conNoMoi:N0} đ)",
+                $"Thanh toÃ¡n cÃ´ng ná»£ phiáº¿u {maCanTim}: {soTien:N0} Ä‘ (cÃ²n ná»£ {conNoMoi:N0} Ä‘)",
                 soTien);
 
             return new ThanhToanPhieuNhapKetQua
@@ -6389,19 +6415,19 @@ LIMIT 500;
                 }
                 catch (Exception rollbackEx)
                 {
-                    SafeLog.WriteError("Không rollback được giao dịch thanh toán phiếu nhập", rollbackEx);
+                    SafeLog.WriteError("KhÃ´ng rollback Ä‘Æ°á»£c giao dá»‹ch thanh toÃ¡n phiáº¿u nháº­p", rollbackEx);
                 }
             }
 
-            SafeLog.WriteError("Lỗi thanh toán công nợ phiếu nhập", ex);
+            SafeLog.WriteError("Lá»—i thanh toÃ¡n cÃ´ng ná»£ phiáº¿u nháº­p", ex);
             throw;
         }
     }
 
     /// <summary>
-    /// Cấp mã lịch sử thanh toán nhà cung cấp kế tiếp (TTNCC0001, TTNCC0002...)
-    /// bằng chính connection và transaction đang chạy, tránh trùng mã
-    /// (cột <c>ma_thanh_toan</c> có UNIQUE).
+    /// Cáº¥p mÃ£ lá»‹ch sá»­ thanh toÃ¡n nhÃ  cung cáº¥p káº¿ tiáº¿p (TTNCC0001, TTNCC0002...)
+    /// báº±ng chÃ­nh connection vÃ  transaction Ä‘ang cháº¡y, trÃ¡nh trÃ¹ng mÃ£
+    /// (cá»™t <c>ma_thanh_toan</c> cÃ³ UNIQUE).
     /// </summary>
     private static async Task<string> SinhMaThanhToanNhaCungCapTrongGiaoDichAsync(
         MySqlConnection connection,
@@ -6440,8 +6466,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Cấp mã thanh toán kế tiếp (TT0001, TT0002...) bằng chính connection và
-    /// transaction đang chạy, tránh trùng mã (cột <c>ma_thanh_toan</c> có UNIQUE).
+    /// Cáº¥p mÃ£ thanh toÃ¡n káº¿ tiáº¿p (TT0001, TT0002...) báº±ng chÃ­nh connection vÃ 
+    /// transaction Ä‘ang cháº¡y, trÃ¡nh trÃ¹ng mÃ£ (cá»™t <c>ma_thanh_toan</c> cÃ³ UNIQUE).
     /// </summary>
     private async Task<string> SinhMaThanhToanTrongGiaoDichAsync(
         MySqlConnection connection,
@@ -6480,9 +6506,9 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Trừ tồn kho khi bán hàng và ghi lịch sử nhập/xuất kho, trong CÙNG giao dịch
-    /// với hóa đơn. Trước đây luồng bán hàng không hề đụng tới bảng ton_kho nên
-    /// tồn kho không bao giờ giảm và không có dấu vết xuất hàng.
+    /// Trá»« tá»“n kho khi bÃ¡n hÃ ng vÃ  ghi lá»‹ch sá»­ nháº­p/xuáº¥t kho, trong CÃ™NG giao dá»‹ch
+    /// vá»›i hÃ³a Ä‘Æ¡n. TrÆ°á»›c Ä‘Ã¢y luá»“ng bÃ¡n hÃ ng khÃ´ng há» Ä‘á»¥ng tá»›i báº£ng ton_kho nÃªn
+    /// tá»“n kho khÃ´ng bao giá» giáº£m vÃ  khÃ´ng cÃ³ dáº¥u váº¿t xuáº¥t hÃ ng.
     /// </summary>
     private async Task CapNhatTonKhoBanHangAsync(
         MySqlConnection connection,
@@ -6580,10 +6606,10 @@ LIMIT 500;
 
         if (!coBanGhiTon)
             canhBao.Add(
-                $"\"{item.SanPham.TenSanPham}\" chưa có số tồn trong kho, tồn sau khi bán = {tonSau:N0}.");
+                $"\"{item.SanPham.TenSanPham}\" chÆ°a cÃ³ sá»‘ tá»“n trong kho, tá»“n sau khi bÃ¡n = {tonSau:N0}.");
         else if (tonSau < 0)
             canhBao.Add(
-                $"\"{item.SanPham.TenSanPham}\" bán vượt tồn kho (còn {tonTruoc:N0}, bán {item.SoLuong:N0}).");
+                $"\"{item.SanPham.TenSanPham}\" bÃ¡n vÆ°á»£t tá»“n kho (cÃ²n {tonTruoc:N0}, bÃ¡n {item.SoLuong:N0}).");
 
         await connection.ExecuteAsync(
             upsertTonSql,
@@ -6608,17 +6634,17 @@ LIMIT 500;
                 TonSau = tonSau,
                 GiaVon = item.SanPham.GiaVon,
                 NguoiThucHienId = userId,
-                GhiChu = $"Xuất kho bán hàng theo hóa đơn {invoiceCode}"
+                GhiChu = $"Xuáº¥t kho bÃ¡n hÃ ng theo hÃ³a Ä‘Æ¡n {invoiceCode}"
             },
             transaction);
     }
 
     /// <summary>
-    /// Ghi phiếu Thu trong sổ quỹ cho một hóa đơn bán hàng, dùng CHUNG connection
-    /// và transaction với lần ghi hóa đơn nên hai thao tác cùng thành công hoặc
-    /// cùng bị rollback.
-    /// Chỉ ghi khi khách trả thật (&gt; 0); tiền thối và phần còn nợ không ghi vào quỹ.
-    /// Trả về mã phiếu Thu vừa tạo, rỗng nếu không tạo phiếu.
+    /// Ghi phiáº¿u Thu trong sá»• quá»¹ cho má»™t hÃ³a Ä‘Æ¡n bÃ¡n hÃ ng, dÃ¹ng CHUNG connection
+    /// vÃ  transaction vá»›i láº§n ghi hÃ³a Ä‘Æ¡n nÃªn hai thao tÃ¡c cÃ¹ng thÃ nh cÃ´ng hoáº·c
+    /// cÃ¹ng bá»‹ rollback.
+    /// Chá»‰ ghi khi khÃ¡ch tráº£ tháº­t (&gt; 0); tiá»n thá»‘i vÃ  pháº§n cÃ²n ná»£ khÃ´ng ghi vÃ o quá»¹.
+    /// Tráº£ vá» mÃ£ phiáº¿u Thu vá»«a táº¡o, rá»—ng náº¿u khÃ´ng táº¡o phiáº¿u.
     /// </summary>
     private async Task<string> GhiPhieuThuBanHangAsync(
         MySqlConnection connection,
@@ -6638,8 +6664,8 @@ LIMIT 500;
         if (paidAmount <= 0)
             return "";
 
-        // Chống tạo trùng: nếu hóa đơn này đã có phiếu thu thì lấy lại mã cũ,
-        // không ghi thêm (an toàn kể cả khi giao dịch bị chạy lại).
+        // Chá»‘ng táº¡o trÃ¹ng: náº¿u hÃ³a Ä‘Æ¡n nÃ y Ä‘Ã£ cÃ³ phiáº¿u thu thÃ¬ láº¥y láº¡i mÃ£ cÅ©,
+        // khÃ´ng ghi thÃªm (an toÃ n ká»ƒ cáº£ khi giao dá»‹ch bá»‹ cháº¡y láº¡i).
         if (coCotLienKet)
         {
             var maPhieuDaCo = await connection.QueryFirstOrDefaultAsync<string>(
@@ -6651,19 +6677,19 @@ LIMIT 500;
                 return maPhieuDaCo;
         }
 
-        // Cấp mã PT ngay trong giao dịch để không trùng với phiếu đang mở ở máy khác.
+        // Cáº¥p mÃ£ PT ngay trong giao dá»‹ch Ä‘á»ƒ khÃ´ng trÃ¹ng vá»›i phiáº¿u Ä‘ang má»Ÿ á»Ÿ mÃ¡y khÃ¡c.
         var maPhieu = await SinhMaPhieuThuTrongGiaoDichAsync(connection, transaction);
 
-        // Phiếu thu bán hàng luôn thuộc loại "Thu khách hàng".
+        // Phiáº¿u thu bÃ¡n hÃ ng luÃ´n thuá»™c loáº¡i "Thu khÃ¡ch hÃ ng".
         var idNhomThuKhachHang = await LayIdNhomChiPhiTheoMaAsync(connection, transaction, "THU_KHACH_HANG");
 
-        var ghiChu = $"Thu tiền thanh toán hóa đơn {invoiceCode}.";
+        var ghiChu = $"Thu tiá»n thanh toÃ¡n hÃ³a Ä‘Æ¡n {invoiceCode}.";
 
         if (changeAmount > 0)
-            ghiChu += $" Tiền thối {changeAmount:N0} đã trả lại khách, không tính vào quỹ.";
+            ghiChu += $" Tiá»n thá»‘i {changeAmount:N0} Ä‘Ã£ tráº£ láº¡i khÃ¡ch, khÃ´ng tÃ­nh vÃ o quá»¹.";
 
         if (debtAmount > 0)
-            ghiChu += $" Còn nợ {debtAmount:N0} ghi vào sổ công nợ khách hàng.";
+            ghiChu += $" CÃ²n ná»£ {debtAmount:N0} ghi vÃ o sá»• cÃ´ng ná»£ khÃ¡ch hÃ ng.";
 
         var sql = coCotLienKet
             ? """
@@ -6704,7 +6730,7 @@ LIMIT 500;
                 NhomChiPhiId = idNhomThuKhachHang,
                 SoTien = paidAmount,
                 PhuongThuc = phuongThucThanhToan,
-                NoiDung = $"Thu tiền bán hàng - hóa đơn {invoiceCode}",
+                NoiDung = $"Thu tiá»n bÃ¡n hÃ ng - hÃ³a Ä‘Æ¡n {invoiceCode}",
                 NguoiNopNhan = Truncate150(customer?.TenKhachHang),
                 GhiChu = ghiChu,
                 ThoiGian = thoiGian,
@@ -6719,8 +6745,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Chuẩn hóa mã phương thức thanh toán cho cột <c>phieu_chi.phuong_thuc</c>
-    /// (varchar(30)). Mã rỗng/không hợp lệ quay về "TIEN_MAT".
+    /// Chuáº©n hÃ³a mÃ£ phÆ°Æ¡ng thá»©c thanh toÃ¡n cho cá»™t <c>phieu_chi.phuong_thuc</c>
+    /// (varchar(30)). MÃ£ rá»—ng/khÃ´ng há»£p lá»‡ quay vá» "TIEN_MAT".
     /// </summary>
     private static string ChuanHoaPhuongThuc(string? ma)
     {
@@ -6738,8 +6764,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Cấp mã phiếu Thu kế tiếp (PT0001, PT0002...) bằng chính connection và
-    /// transaction của giao dịch đang chạy, tránh mở thêm kết nối và tránh trùng mã.
+    /// Cáº¥p mÃ£ phiáº¿u Thu káº¿ tiáº¿p (PT0001, PT0002...) báº±ng chÃ­nh connection vÃ 
+    /// transaction cá»§a giao dá»‹ch Ä‘ang cháº¡y, trÃ¡nh má»Ÿ thÃªm káº¿t ná»‘i vÃ  trÃ¡nh trÃ¹ng mÃ£.
     /// </summary>
     private async Task<string> SinhMaPhieuThuTrongGiaoDichAsync(
         MySqlConnection connection,
@@ -6766,8 +6792,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Cấp mã phiếu Chi kế tiếp (PC0001, PC0002...) bằng chính connection và
-    /// transaction của giao dịch đang chạy, tránh mở thêm kết nối và tránh trùng mã.
+    /// Cáº¥p mÃ£ phiáº¿u Chi káº¿ tiáº¿p (PC0001, PC0002...) báº±ng chÃ­nh connection vÃ 
+    /// transaction cá»§a giao dá»‹ch Ä‘ang cháº¡y, trÃ¡nh má»Ÿ thÃªm káº¿t ná»‘i vÃ  trÃ¡nh trÃ¹ng mÃ£.
     /// </summary>
     private static async Task<string> SinhMaPhieuChiTrongGiaoDichAsync(
         MySqlConnection connection,
@@ -6826,28 +6852,28 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Sinh mã nhà cung cấp tuần tự theo dạng NCC0000001.
-    /// Chỉ dùng các mã NCC + số tối đa 7 chữ số để không bị ảnh hưởng
-    /// bởi các mã cũ dạng timestamp.
+    /// Sinh mÃ£ nhÃ  cung cáº¥p tuáº§n tá»± theo dáº¡ng NCC0000001.
+    /// Chá»‰ dÃ¹ng cÃ¡c mÃ£ NCC + sá»‘ tá»‘i Ä‘a 7 chá»¯ sá»‘ Ä‘á»ƒ khÃ´ng bá»‹ áº£nh hÆ°á»Ÿng
+    /// bá»Ÿi cÃ¡c mÃ£ cÅ© dáº¡ng timestamp.
     /// </summary>
     // ==========================================
-    // DANH SÁCH NHÀ CUNG CẤP: LỌC + PHÂN TRANG SERVER-SIDE
+    // DANH SÃCH NHÃ€ CUNG Cáº¤P: Lá»ŒC + PHÃ‚N TRANG SERVER-SIDE
     // ==========================================
 
     /// <summary>
-    /// Mệnh đề FROM dùng chung cho cả truy vấn lấy trang và truy vấn đếm/thống kê,
-    /// để danh sách và các thẻ thống kê luôn nói về cùng một tập nhà cung cấp.
-    /// Công nợ, tổng mua và tổng mua trừ trả hàng đều lấy từ cùng một biểu thức
-    /// trong <see cref="TaoBieuThucTienNhaCungCap"/> nên không cần JOIN bảng view.
+    /// Má»‡nh Ä‘á» FROM dÃ¹ng chung cho cáº£ truy váº¥n láº¥y trang vÃ  truy váº¥n Ä‘áº¿m/thá»‘ng kÃª,
+    /// Ä‘á»ƒ danh sÃ¡ch vÃ  cÃ¡c tháº» thá»‘ng kÃª luÃ´n nÃ³i vá» cÃ¹ng má»™t táº­p nhÃ  cung cáº¥p.
+    /// CÃ´ng ná»£, tá»•ng mua vÃ  tá»•ng mua trá»« tráº£ hÃ ng Ä‘á»u láº¥y tá»« cÃ¹ng má»™t biá»ƒu thá»©c
+    /// trong <see cref="TaoBieuThucTienNhaCungCap"/> nÃªn khÃ´ng cáº§n JOIN báº£ng view.
     /// </summary>
     private const string NhaCungCapFrom = """
     FROM nha_cung_cap ncc
     """;
 
     /// <summary>
-    /// Danh sách cột của bảng nhà cung cấp, dùng chung cho nhiều câu SQL.
-    /// Ba cột tiền dùng đúng biểu thức mà bộ lọc và thẻ thống kê đang dùng nên
-    /// số tiền hiển thị ở mọi nơi luôn khớp nhau.
+    /// Danh sÃ¡ch cá»™t cá»§a báº£ng nhÃ  cung cáº¥p, dÃ¹ng chung cho nhiá»u cÃ¢u SQL.
+    /// Ba cá»™t tiá»n dÃ¹ng Ä‘Ãºng biá»ƒu thá»©c mÃ  bá»™ lá»c vÃ  tháº» thá»‘ng kÃª Ä‘ang dÃ¹ng nÃªn
+    /// sá»‘ tiá»n hiá»ƒn thá»‹ á»Ÿ má»i nÆ¡i luÃ´n khá»›p nhau.
     /// </summary>
     private static string TaoDanhSachCotNhaCungCap(bool coCotKiotViet)
     {
@@ -6875,9 +6901,9 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Các cột lấy từ file danh sách (đã lưu xuống database) dành cho truy vấn
-    /// chi tiết một nhà cung cấp. Không dùng cho bảng danh sách vì chỉ cần ba
-    /// cột tiền đã được tính sẵn trong <see cref="TaoDanhSachCotNhaCungCap"/>.
+    /// CÃ¡c cá»™t láº¥y tá»« file danh sÃ¡ch (Ä‘Ã£ lÆ°u xuá»‘ng database) dÃ nh cho truy váº¥n
+    /// chi tiáº¿t má»™t nhÃ  cung cáº¥p. KhÃ´ng dÃ¹ng cho báº£ng danh sÃ¡ch vÃ¬ chá»‰ cáº§n ba
+    /// cá»™t tiá»n Ä‘Ã£ Ä‘Æ°á»£c tÃ­nh sáºµn trong <see cref="TaoDanhSachCotNhaCungCap"/>.
     /// </summary>
     private static string TaoDanhSachCotFileNhaCungCap() => """
             ncc.co_du_lieu_kiotviet AS CoDuLieuKiotViet,
@@ -6893,10 +6919,10 @@ LIMIT 500;
     """;
 
     /// <summary>
-    /// Sinh mệnh đề WHERE từ bộ lọc. Mọi điều kiện đều là tham số hóa nên an toàn
-    /// với dấu nháy trong từ khóa, và đều được đẩy xuống MySQL xử lý.
-    /// Lọc công nợ dùng chính biểu thức công nợ của bảng danh sách để người
-    /// dùng không lọc ra một danh sách mà cột "Còn nợ" lại hiển thị khác.
+    /// Sinh má»‡nh Ä‘á» WHERE tá»« bá»™ lá»c. Má»i Ä‘iá»u kiá»‡n Ä‘á»u lÃ  tham sá»‘ hÃ³a nÃªn an toÃ n
+    /// vá»›i dáº¥u nhÃ¡y trong tá»« khÃ³a, vÃ  Ä‘á»u Ä‘Æ°á»£c Ä‘áº©y xuá»‘ng MySQL xá»­ lÃ½.
+    /// Lá»c cÃ´ng ná»£ dÃ¹ng chÃ­nh biá»ƒu thá»©c cÃ´ng ná»£ cá»§a báº£ng danh sÃ¡ch Ä‘á»ƒ ngÆ°á»i
+    /// dÃ¹ng khÃ´ng lá»c ra má»™t danh sÃ¡ch mÃ  cá»™t "CÃ²n ná»£" láº¡i hiá»ƒn thá»‹ khÃ¡c.
     /// </summary>
     private static string TaoDieuKienNhaCungCap(BoLocNhaCungCap loc, string bieuThucConNo)
     {
@@ -6904,7 +6930,7 @@ LIMIT 500;
 
         dieuKien.Append("ncc.trang_thai = 1");
 
-        // Ô tìm kiếm: mã NCC, tên, số điện thoại, email.
+        // Ã” tÃ¬m kiáº¿m: mÃ£ NCC, tÃªn, sá»‘ Ä‘iá»‡n thoáº¡i, email.
         dieuKien.Append(
             " AND (@TimKiem = ''"
             + " OR ncc.ma_nha_cung_cap LIKE @TimKiemLike"
@@ -6912,14 +6938,14 @@ LIMIT 500;
             + " OR COALESCE(ncc.so_dien_thoai, '') LIKE @TimKiemLike"
             + " OR COALESCE(ncc.email, '') LIKE @TimKiemLike)");
 
-        // Từng ô của bộ lọc chi tiết.
+        // Tá»«ng Ã´ cá»§a bá»™ lá»c chi tiáº¿t.
         dieuKien.Append(" AND (@MaNhaCungCap = '' OR ncc.ma_nha_cung_cap LIKE @MaNhaCungCapLike)");
         dieuKien.Append(" AND (@TenNhaCungCap = '' OR ncc.ten_nha_cung_cap LIKE @TenNhaCungCapLike)");
         dieuKien.Append(" AND (@SoDienThoai = '' OR COALESCE(ncc.so_dien_thoai, '') LIKE @SoDienThoaiLike)");
         dieuKien.Append(" AND (@Email = '' OR COALESCE(ncc.email, '') LIKE @EmailLike)");
 
-        // Địa chỉ khớp cả 4 cột địa chỉ để lọc được cả khi người dùng chỉ nhớ
-        // tên phường/xã, quận/huyện hoặc tỉnh/thành.
+        // Äá»‹a chá»‰ khá»›p cáº£ 4 cá»™t Ä‘á»‹a chá»‰ Ä‘á»ƒ lá»c Ä‘Æ°á»£c cáº£ khi ngÆ°á»i dÃ¹ng chá»‰ nhá»›
+        // tÃªn phÆ°á»ng/xÃ£, quáº­n/huyá»‡n hoáº·c tá»‰nh/thÃ nh.
         dieuKien.Append(
             " AND (@DiaChi = ''"
             + " OR COALESCE(ncc.dia_chi, '') LIKE @DiaChiLike"
@@ -6927,20 +6953,20 @@ LIMIT 500;
             + " OR COALESCE(ncc.quan_huyen, '') LIKE @DiaChiLike"
             + " OR COALESCE(ncc.tinh_thanh, '') LIKE @DiaChiLike)");
 
-        // Trạng thái công nợ: tất cả / còn nợ / không còn nợ.
+        // Tráº¡ng thÃ¡i cÃ´ng ná»£: táº¥t cáº£ / cÃ²n ná»£ / khÃ´ng cÃ²n ná»£.
         dieuKien.Append(
             " AND (@CongNoMode = 0"
             + $" OR (@CongNoMode = 1 AND COALESCE({bieuThucConNo}, 0) > 0)"
             + $" OR (@CongNoMode = 2 AND COALESCE({bieuThucConNo}, 0) = 0))");
 
-        // Khoảng công nợ.
+        // Khoáº£ng cÃ´ng ná»£.
         dieuKien.Append($" AND (@ConNoTu IS NULL OR COALESCE({bieuThucConNo}, 0) >= @ConNoTu)");
         dieuKien.Append($" AND (@ConNoDen IS NULL OR COALESCE({bieuThucConNo}, 0) <= @ConNoDen)");
 
         return dieuKien.ToString();
     }
 
-    /// <summary>Gom bộ lọc thành đúng bộ tham số mà các câu SQL kia đang mong đợi.</summary>
+    /// <summary>Gom bá»™ lá»c thÃ nh Ä‘Ãºng bá»™ tham sá»‘ mÃ  cÃ¡c cÃ¢u SQL kia Ä‘ang mong Ä‘á»£i.</summary>
     private static object TaoThamSoNhaCungCap(BoLocNhaCungCap loc)
     {
         var timKiem = (loc.TimKiem ?? "").Trim();
@@ -6971,9 +6997,9 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Lấy một trang nhà cung cấp theo bộ lọc, kèm tổng số bản ghi khớp bộ lọc.
-    /// Chỉ đọc đúng <paramref name="pageSize"/> dòng (LIMIT/OFFSET), không bao giờ
-    /// kéo toàn bộ bảng nha_cung_cap về rồi mới lọc ở C#.
+    /// Láº¥y má»™t trang nhÃ  cung cáº¥p theo bá»™ lá»c, kÃ¨m tá»•ng sá»‘ báº£n ghi khá»›p bá»™ lá»c.
+    /// Chá»‰ Ä‘á»c Ä‘Ãºng <paramref name="pageSize"/> dÃ²ng (LIMIT/OFFSET), khÃ´ng bao giá»
+    /// kÃ©o toÃ n bá»™ báº£ng nha_cung_cap vá» rá»“i má»›i lá»c á»Ÿ C#.
     /// </summary>
     public async Task<(IReadOnlyList<NhaCungCap> Items, int TongSoBanGhi)> GetNhaCungCapPagedAsync(
         BoLocNhaCungCap loc,
@@ -7023,12 +7049,12 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Lấy TOÀN BỘ nhà cung cấp khớp bộ lọc để xuất file Excel, không phân trang.
+    /// Láº¥y TOÃ€N Bá»˜ nhÃ  cung cáº¥p khá»›p bá»™ lá»c Ä‘á»ƒ xuáº¥t file Excel, khÃ´ng phÃ¢n trang.
     ///
-    /// Cố tình dùng chung <see cref="TaoDieuKienNhaCungCap"/> và chung bộ cột
-    /// tiền với truy vấn lấy danh sách trên màn hình, nên số tiền xuất ra file
-    /// luôn khớp với thẻ thống kê và cột "Tổng mua"/"Còn nợ" đang hiển thị.
-    /// Không có LIMIT/OFFSET nên xuất 48 dòng khi trang đang xem 20 dòng.
+    /// Cá»‘ tÃ¬nh dÃ¹ng chung <see cref="TaoDieuKienNhaCungCap"/> vÃ  chung bá»™ cá»™t
+    /// tiá»n vá»›i truy váº¥n láº¥y danh sÃ¡ch trÃªn mÃ n hÃ¬nh, nÃªn sá»‘ tiá»n xuáº¥t ra file
+    /// luÃ´n khá»›p vá»›i tháº» thá»‘ng kÃª vÃ  cá»™t "Tá»•ng mua"/"CÃ²n ná»£" Ä‘ang hiá»ƒn thá»‹.
+    /// KhÃ´ng cÃ³ LIMIT/OFFSET nÃªn xuáº¥t 48 dÃ²ng khi trang Ä‘ang xem 20 dÃ²ng.
     /// </summary>
     public async Task<IReadOnlyList<NhaCungCap>> GetAllNhaCungCapForExportAsync(
         BoLocNhaCungCap loc)
@@ -7056,8 +7082,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Thống kê phía trên bảng nhà cung cấp. Cùng bộ lọc với truy vấn lấy danh
-    /// sách nên khi đổi bộ lọc thì cả bảng lẫn thống kê cùng cập nhật.
+    /// Thá»‘ng kÃª phÃ­a trÃªn báº£ng nhÃ  cung cáº¥p. CÃ¹ng bá»™ lá»c vá»›i truy váº¥n láº¥y danh
+    /// sÃ¡ch nÃªn khi Ä‘á»•i bá»™ lá»c thÃ¬ cáº£ báº£ng láº«n thá»‘ng kÃª cÃ¹ng cáº­p nháº­t.
     /// </summary>
     public async Task<ThongKeDanhSachNhaCungCap> GetThongKeDanhSachNhaCungCapAsync(
         BoLocNhaCungCap loc)
@@ -7104,7 +7130,7 @@ LIMIT 500;
         return thongKe ?? new ThongKeDanhSachNhaCungCap();
     }
 
-    /// <summary>Lấy đầy đủ thông tin một nhà cung cấp để mở vùng chi tiết / form sửa.</summary>
+    /// <summary>Láº¥y Ä‘áº§y Ä‘á»§ thÃ´ng tin má»™t nhÃ  cung cáº¥p Ä‘á»ƒ má»Ÿ vÃ¹ng chi tiáº¿t / form sá»­a.</summary>
     public async Task<NhaCungCap?> GetNhaCungCapByIdAsync(uint supplierId)
     {
         var coCotKiotViet = await DamBaoCotDuLieuKiotVietNhaCungCapAsync();
@@ -7126,8 +7152,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Lịch sử nhập hàng của một nhà cung cấp. Chỉ gọi khi người dùng mở vùng
-    /// chi tiết, và chỉ lấy <paramref name="limit"/> phiếu gần nhất.
+    /// Lá»‹ch sá»­ nháº­p hÃ ng cá»§a má»™t nhÃ  cung cáº¥p. Chá»‰ gá»i khi ngÆ°á»i dÃ¹ng má»Ÿ vÃ¹ng
+    /// chi tiáº¿t, vÃ  chá»‰ láº¥y <paramref name="limit"/> phiáº¿u gáº§n nháº¥t.
     /// </summary>
     public async Task<IReadOnlyList<PhieuNhapHang>> GetPhieuNhapCuaNhaCungCapAsync(
         uint supplierId,
@@ -7176,8 +7202,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Sổ cái công nợ của một nhà cung cấp (bảng lich_su_cong_no_nha_cung_cap).
-    /// Cũng chỉ đọc khi người dùng mở chi tiết.
+    /// Sá»• cÃ¡i cÃ´ng ná»£ cá»§a má»™t nhÃ  cung cáº¥p (báº£ng lich_su_cong_no_nha_cung_cap).
+    /// CÅ©ng chá»‰ Ä‘á»c khi ngÆ°á»i dÃ¹ng má»Ÿ chi tiáº¿t.
     /// </summary>
     public async Task<IReadOnlyList<LichSuCongNoNhaCungCap>> GetLichSuCongNoNhaCungCapAsync(
         uint supplierId,
@@ -7211,8 +7237,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Tổng hợp tài chính của một nhà cung cấp: tổng tiền nhập, đã thanh toán,
-    /// còn nợ (theo sổ cái công nợ nếu có, không thì theo phiếu nhập hàng).
+    /// Tá»•ng há»£p tÃ i chÃ­nh cá»§a má»™t nhÃ  cung cáº¥p: tá»•ng tiá»n nháº­p, Ä‘Ã£ thanh toÃ¡n,
+    /// cÃ²n ná»£ (theo sá»• cÃ¡i cÃ´ng ná»£ náº¿u cÃ³, khÃ´ng thÃ¬ theo phiáº¿u nháº­p hÃ ng).
     /// </summary>
     public async Task<ThongKeTaiChinhNhaCungCap> GetThongKeTaiChinhNhaCungCapAsync(uint supplierId)
     {
@@ -7267,9 +7293,9 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Trong số mã nhà cung cấp được truyền vào, trả về tập mã đã tồn tại trong
-    /// database (kể cả nhà cung cấp đã bị ẩn). Dùng cho bước kiểm tra trùng khi
-    /// import: chỉ hỏi đúng các mã trong file thay vì tải toàn bộ danh sách NCC.
+    /// Trong sá»‘ mÃ£ nhÃ  cung cáº¥p Ä‘Æ°á»£c truyá»n vÃ o, tráº£ vá» táº­p mÃ£ Ä‘Ã£ tá»“n táº¡i trong
+    /// database (ká»ƒ cáº£ nhÃ  cung cáº¥p Ä‘Ã£ bá»‹ áº©n). DÃ¹ng cho bÆ°á»›c kiá»ƒm tra trÃ¹ng khi
+    /// import: chá»‰ há»i Ä‘Ãºng cÃ¡c mÃ£ trong file thay vÃ¬ táº£i toÃ n bá»™ danh sÃ¡ch NCC.
     /// </summary>
     public async Task<IReadOnlySet<string>> LayMaNhaCungCapDaTonTaiAsync(
         IEnumerable<string> maNhaCungCap)
@@ -7321,7 +7347,7 @@ LIMIT 500;
         var nextNumber = await connection.ExecuteScalarAsync<long>(sql);
 
         if (nextNumber > 9_999_999)
-            throw new InvalidOperationException("Đã vượt giới hạn mã nhà cung cấp tự động NCC9999999.");
+            throw new InvalidOperationException("ÄÃ£ vÆ°á»£t giá»›i háº¡n mÃ£ nhÃ  cung cáº¥p tá»± Ä‘á»™ng NCC9999999.");
 
         return $"NCC{nextNumber:D7}";
     }
@@ -7341,13 +7367,13 @@ LIMIT 500;
         }
         catch
         {
-            // Bỏ qua nếu không đủ quyền ALTER hoặc cột đã thỏa mãn
+            // Bá» qua náº¿u khÃ´ng Ä‘á»§ quyá»n ALTER hoáº·c cá»™t Ä‘Ã£ thá»a mÃ£n
             _daMoRongCotSoDienThoaiNcc = true;
         }
     }
 
     /// <summary>
-    /// Kiểm tra xem mã nhà cung cấp đã tồn tại trong database chưa (bỏ qua id hiện tại nếu có).
+    /// Kiá»ƒm tra xem mÃ£ nhÃ  cung cáº¥p Ä‘Ã£ tá»“n táº¡i trong database chÆ°a (bá» qua id hiá»‡n táº¡i náº¿u cÃ³).
     /// </summary>
     public async Task<bool> KiemTraTrungMaNhaCungCapAsync(string maNhaCungCap, uint idHienTai = 0)
     {
@@ -7371,7 +7397,7 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Lấy danh sách các nhóm nhà cung cấp đã có trong database để gợi ý khi nhập liệu.
+    /// Láº¥y danh sÃ¡ch cÃ¡c nhÃ³m nhÃ  cung cáº¥p Ä‘Ã£ cÃ³ trong database Ä‘á»ƒ gá»£i Ã½ khi nháº­p liá»‡u.
     /// </summary>
     public async Task<IReadOnlyList<string>> LayDanhSachNhomNhaCungCapAsync()
     {
@@ -7401,7 +7427,7 @@ LIMIT 500;
 
     public async Task<uint> ThemNhaCungCapAsync(NhaCungCap supplier)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SuppliersCreate, "Bạn không có quyền thêm nhà cung cấp.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SuppliersCreate, "Báº¡n khÃ´ng cÃ³ quyá»n thÃªm nhÃ  cung cáº¥p.");
         var coCotKiotViet = await DamBaoCotDuLieuKiotVietNhaCungCapAsync();
 
         if (string.IsNullOrWhiteSpace(supplier.MaNhaCungCap))
@@ -7410,8 +7436,8 @@ LIMIT 500;
         await using var connection = await OpenAsync();
         await DamBaoDoDaiSoDienThoaiNhaCungCapAsync(connection);
 
-        // Bản đầy đủ ghi cả các cột lấy từ file danh sách nhà cung cấp. Nếu bảng
-        // cũ không thêm được cột thì dùng bản rút gọn như trước để vẫn nhập được.
+        // Báº£n Ä‘áº§y Ä‘á»§ ghi cáº£ cÃ¡c cá»™t láº¥y tá»« file danh sÃ¡ch nhÃ  cung cáº¥p. Náº¿u báº£ng
+        // cÅ© khÃ´ng thÃªm Ä‘Æ°á»£c cá»™t thÃ¬ dÃ¹ng báº£n rÃºt gá»n nhÆ° trÆ°á»›c Ä‘á»ƒ váº«n nháº­p Ä‘Æ°á»£c.
         var sql = coCotKiotViet
             ? """
             INSERT INTO nha_cung_cap
@@ -7485,7 +7511,7 @@ LIMIT 500;
 
     public async Task CapNhatNhaCungCapAsync(NhaCungCap supplier)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SuppliersEdit, "Bạn không có quyền sửa nhà cung cấp.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SuppliersEdit, "Báº¡n khÃ´ng cÃ³ quyá»n sá»­a nhÃ  cung cáº¥p.");
         await using var connection = await OpenAsync();
         await DamBaoDoDaiSoDienThoaiNhaCungCapAsync(connection);
         var coCotKiotViet = await DamBaoCotDuLieuKiotVietNhaCungCapAsync();
@@ -7530,18 +7556,18 @@ LIMIT 500;
 
         var affectedRows = await connection.ExecuteAsync(sql, supplier);
         if (affectedRows == 0)
-            throw new InvalidOperationException("Nhà cung cấp không tồn tại hoặc đã bị xóa.");
+            throw new InvalidOperationException("NhÃ  cung cáº¥p khÃ´ng tá»“n táº¡i hoáº·c Ä‘Ã£ bá»‹ xÃ³a.");
     }
 
     /// <summary>
-    /// Cập nhật nhà cung cấp với đầy đủ dữ liệu đọc từ file danh sách, bao gồm
-    /// ba cột tiền, người tạo, ngày tạo và các cột chữ còn lại. Chỉ dùng cho
-    /// bước cập nhật khi nhập file, không dùng cho form sửa (form sửa không
-    /// được phép xoá số tiền lấy từ file).
+    /// Cáº­p nháº­t nhÃ  cung cáº¥p vá»›i Ä‘áº§y Ä‘á»§ dá»¯ liá»‡u Ä‘á»c tá»« file danh sÃ¡ch, bao gá»“m
+    /// ba cá»™t tiá»n, ngÆ°á»i táº¡o, ngÃ y táº¡o vÃ  cÃ¡c cá»™t chá»¯ cÃ²n láº¡i. Chá»‰ dÃ¹ng cho
+    /// bÆ°á»›c cáº­p nháº­t khi nháº­p file, khÃ´ng dÃ¹ng cho form sá»­a (form sá»­a khÃ´ng
+    /// Ä‘Æ°á»£c phÃ©p xoÃ¡ sá»‘ tiá»n láº¥y tá»« file).
     /// </summary>
     public async Task CapNhatNhaCungCapTuFileAsync(NhaCungCap supplier)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SuppliersEdit, "Bạn không có quyền sửa nhà cung cấp.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SuppliersEdit, "Báº¡n khÃ´ng cÃ³ quyá»n sá»­a nhÃ  cung cáº¥p.");
         await using var connection = await OpenAsync();
 
         const string sql = """
@@ -7577,7 +7603,7 @@ LIMIT 500;
 
     public async Task XoaNhaCungCapAsync(uint supplierId)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SuppliersDelete, "Bạn không có quyền xóa nhà cung cấp.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SuppliersDelete, "Báº¡n khÃ´ng cÃ³ quyá»n xÃ³a nhÃ  cung cáº¥p.");
         await using var connection = await OpenAsync();
 
         var affectedRows = await connection.ExecuteAsync(
@@ -7585,7 +7611,7 @@ LIMIT 500;
             new { Id = supplierId });
 
         if (affectedRows == 0)
-            throw new InvalidOperationException("Nhà cung cấp không tồn tại hoặc đã bị xóa.");
+            throw new InvalidOperationException("NhÃ  cung cáº¥p khÃ´ng tá»“n táº¡i hoáº·c Ä‘Ã£ bá»‹ xÃ³a.");
     }
 
     public async Task<int> ImportNhaCungCapTuFileAsync(string filePath)
@@ -7595,11 +7621,11 @@ LIMIT 500;
         => (await ImportNhaCungCapTuFileAsync(filePath, suppliersOverride, null)).SoThemMoi;
 
     /// <summary>
-    /// Nhập danh sách nhà cung cấp từ file và trả về báo cáo chi tiết để
-    /// người dùng biết chính xác tổng số dòng, số thành công, số bỏ qua và số lỗi.
-    /// Mã trùng với database hoặc trùng ngay trong file đều được bỏ qua an toàn,
-    /// trừ khi <paramref name="capNhatNhaCungCapDaTonTai"/> = true: khi đó nhà cung
-    /// cấp có mã đã có trong database được cập nhật lại bằng dữ liệu của file.
+    /// Nháº­p danh sÃ¡ch nhÃ  cung cáº¥p tá»« file vÃ  tráº£ vá» bÃ¡o cÃ¡o chi tiáº¿t Ä‘á»ƒ
+    /// ngÆ°á»i dÃ¹ng biáº¿t chÃ­nh xÃ¡c tá»•ng sá»‘ dÃ²ng, sá»‘ thÃ nh cÃ´ng, sá»‘ bá» qua vÃ  sá»‘ lá»—i.
+    /// MÃ£ trÃ¹ng vá»›i database hoáº·c trÃ¹ng ngay trong file Ä‘á»u Ä‘Æ°á»£c bá» qua an toÃ n,
+    /// trá»« khi <paramref name="capNhatNhaCungCapDaTonTai"/> = true: khi Ä‘Ã³ nhÃ  cung
+    /// cáº¥p cÃ³ mÃ£ Ä‘Ã£ cÃ³ trong database Ä‘Æ°á»£c cáº­p nháº­t láº¡i báº±ng dá»¯ liá»‡u cá»§a file.
     /// </summary>
     public async Task<KetQuaImportNhaCungCap> ImportNhaCungCapTuFileAsync(
         string filePath,
@@ -7607,17 +7633,17 @@ LIMIT 500;
         IProgress<int>? progress,
         bool capNhatNhaCungCapDaTonTai = false)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SuppliersImport, "Bạn không có quyền import nhà cung cấp.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.SuppliersImport, "Báº¡n khÃ´ng cÃ³ quyá»n import nhÃ  cung cáº¥p.");
         if (string.IsNullOrWhiteSpace(filePath))
-            throw new ArgumentException("Đường dẫn file không hợp lệ.", nameof(filePath));
+            throw new ArgumentException("ÄÆ°á»ng dáº«n file khÃ´ng há»£p lá»‡.", nameof(filePath));
 
         if (!File.Exists(filePath))
-            throw new FileNotFoundException("Không tìm thấy file danh sách nhà cung cấp.", filePath);
+            throw new FileNotFoundException("KhÃ´ng tÃ¬m tháº¥y file danh sÃ¡ch nhÃ  cung cáº¥p.", filePath);
 
         var suppliers = suppliersOverride ?? ParseNhaCungCapFromFile(filePath);
 
-        // Khi chọn cập nhật nhà cung cấp đã có, bảo đảm các cột lưu dữ liệu từ
-        // file đã tồn tại trước khi UPDATE, nếu không toàn bộ file sẽ bị lỗi.
+        // Khi chá»n cáº­p nháº­t nhÃ  cung cáº¥p Ä‘Ã£ cÃ³, báº£o Ä‘áº£m cÃ¡c cá»™t lÆ°u dá»¯ liá»‡u tá»«
+        // file Ä‘Ã£ tá»“n táº¡i trÆ°á»›c khi UPDATE, náº¿u khÃ´ng toÃ n bá»™ file sáº½ bá»‹ lá»—i.
         if (capNhatNhaCungCapDaTonTai)
             await DamBaoCotDuLieuKiotVietNhaCungCapAsync();
 
@@ -7630,8 +7656,8 @@ LIMIT 500;
         if (suppliers.Count == 0)
             return result;
 
-        // Ô tên trống thì không tạo được nhà cung cấp: bỏ qua và ghi log,
-        // không ném lỗi để phần còn lại của file vẫn được nhập.
+        // Ã” tÃªn trá»‘ng thÃ¬ khÃ´ng táº¡o Ä‘Æ°á»£c nhÃ  cung cáº¥p: bá» qua vÃ  ghi log,
+        // khÃ´ng nÃ©m lá»—i Ä‘á»ƒ pháº§n cÃ²n láº¡i cá»§a file váº«n Ä‘Æ°á»£c nháº­p.
         var hopLe = new List<NhaCungCap>(suppliers.Count);
 
         for (var i = 0; i < suppliers.Count; i++)
@@ -7639,7 +7665,7 @@ LIMIT 500;
             if (string.IsNullOrWhiteSpace(suppliers.ElementAt(i).TenNhaCungCap))
             {
                 result.SoLoi++;
-                GhiLoi(result, $"Dòng {i + 2}: thiếu tên nhà cung cấp.");
+                GhiLoi(result, $"DÃ²ng {i + 2}: thiáº¿u tÃªn nhÃ  cung cáº¥p.");
             }
             else
             {
@@ -7652,14 +7678,14 @@ LIMIT 500;
         if (hopLe.Count == 0)
             return result;
 
-        // Chỉ hỏi database về những mã thực sự có trong file, không tải toàn bộ danh sách.
+        // Chá»‰ há»i database vá» nhá»¯ng mÃ£ thá»±c sá»± cÃ³ trong file, khÃ´ng táº£i toÃ n bá»™ danh sÃ¡ch.
         var maTrongDatabase = await LayMaNhaCungCapDaTonTaiAsync(
             hopLe.Select(ncc => ncc.MaNhaCungCap));
 
         var maDaDung = new HashSet<string>(maTrongDatabase, StringComparer.OrdinalIgnoreCase);
 
-        // Cảnh báo mềm: tên + số điện thoại trùng nhà cung cấp đã có.
-        // Bảng không có UNIQUE cho hai cột này nên vẫn nhập, chỉ báo cho người dùng.
+        // Cáº£nh bÃ¡o má»m: tÃªn + sá»‘ Ä‘iá»‡n thoáº¡i trÃ¹ng nhÃ  cung cáº¥p Ä‘Ã£ cÃ³.
+        // Báº£ng khÃ´ng cÃ³ UNIQUE cho hai cá»™t nÃ y nÃªn váº«n nháº­p, chá»‰ bÃ¡o cho ngÆ°á»i dÃ¹ng.
         result.SoTrungTenVaDienThoai = await DemNhaCungCapTrungTenVaDienThoaiAsync(
             hopLe.Select(ncc => (ncc.TenNhaCungCap, ncc.SoDienThoai)));
 
@@ -7676,7 +7702,7 @@ LIMIT 500;
 
             if (maDaDung.Contains(ma))
             {
-                // Mã đã có trong database.
+                // MÃ£ Ä‘Ã£ cÃ³ trong database.
                 if (capNhatNhaCungCapDaTonTai)
                 {
                     try
@@ -7687,7 +7713,7 @@ LIMIT 500;
                     catch (Exception ex)
                     {
                         result.SoLoi++;
-                        GhiLoi(result, $"Dòng {i + 2} ({ma}): {ex.Message}");
+                        GhiLoi(result, $"DÃ²ng {i + 2} ({ma}): {ex.Message}");
                     }
                 }
                 else
@@ -7697,7 +7723,7 @@ LIMIT 500;
             }
             else if (!maDaDung.Add(ma))
             {
-                // Mã bị trùng ngay trong chính file này.
+                // MÃ£ bá»‹ trÃ¹ng ngay trong chÃ­nh file nÃ y.
                 result.SoTrungMaTrongFile++;
             }
             else
@@ -7709,13 +7735,13 @@ LIMIT 500;
                 }
                 catch (MySqlException ex) when (ex.Number == 1062)
                 {
-                    // Có tiến trình khác vừa chèn mã này: bỏ qua và tiếp tục.
+                    // CÃ³ tiáº¿n trÃ¬nh khÃ¡c vá»«a chÃ¨n mÃ£ nÃ y: bá» qua vÃ  tiáº¿p tá»¥c.
                     result.SoTrungMa++;
                 }
                 catch (Exception ex)
                 {
                     result.SoLoi++;
-                    GhiLoi(result, $"Dòng {i + 2} ({ma}): {ex.Message}");
+                    GhiLoi(result, $"DÃ²ng {i + 2} ({ma}): {ex.Message}");
                 }
             }
         }
@@ -7726,8 +7752,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Đếm số nhà cung cấp trong danh sách đang xét trùng (tên + số điện thoại)
-    /// với nhà cung cấp đã có trong database. Chỉ dùng để báo người dùng.
+    /// Äáº¿m sá»‘ nhÃ  cung cáº¥p trong danh sÃ¡ch Ä‘ang xÃ©t trÃ¹ng (tÃªn + sá»‘ Ä‘iá»‡n thoáº¡i)
+    /// vá»›i nhÃ  cung cáº¥p Ä‘Ã£ cÃ³ trong database. Chá»‰ dÃ¹ng Ä‘á»ƒ bÃ¡o ngÆ°á»i dÃ¹ng.
     /// </summary>
     public async Task<int> DemNhaCungCapTrungTenVaDienThoaiAsync(
         IEnumerable<(string Ten, string? SoDienThoai)> danhSach)
@@ -7777,7 +7803,7 @@ LIMIT 500;
 
     private static void GhiLoi(KetQuaImportNhaCungCap result, string loi)
     {
-        // Chỉ giữ 20 lỗi đầu để thông báo không bị quá dài.
+        // Chá»‰ giá»¯ 20 lá»—i Ä‘áº§u Ä‘á»ƒ thÃ´ng bÃ¡o khÃ´ng bá»‹ quÃ¡ dÃ i.
         if (result.DanhSachLoi.Count < 20)
             result.DanhSachLoi.Add(loi);
     }
@@ -7802,12 +7828,12 @@ LIMIT 500;
     {
         if (string.IsNullOrWhiteSpace(filePath))
             throw new ArgumentException(
-                "Đường dẫn file không hợp lệ.",
+                "ÄÆ°á»ng dáº«n file khÃ´ng há»£p lá»‡.",
                 nameof(filePath));
 
         if (!File.Exists(filePath))
             throw new FileNotFoundException(
-                "Không tìm thấy file danh sách nhà cung cấp.",
+                "KhÃ´ng tÃ¬m tháº¥y file danh sÃ¡ch nhÃ  cung cáº¥p.",
                 filePath);
 
         var rows = ReadSupplierRowsFromFile(filePath);
@@ -7833,7 +7859,7 @@ LIMIT 500;
             return ReadSupplierExcelRows(filePath);
 
         throw new NotSupportedException(
-            "File không được hỗ trợ. Vui lòng chọn file Excel (.xlsx) hoặc CSV.");
+            "File khÃ´ng Ä‘Æ°á»£c há»— trá»£. Vui lÃ²ng chá»n file Excel (.xlsx) hoáº·c CSV.");
     }
     private static List<Dictionary<string, string>> ReadSupplierExcelRows(
     string filePath)
@@ -7844,14 +7870,14 @@ LIMIT 500;
 
         if (worksheet is null)
             throw new InvalidOperationException(
-                "File Excel không chứa sheet dữ liệu hợp lệ.");
+                "File Excel khÃ´ng chá»©a sheet dá»¯ liá»‡u há»£p lá»‡.");
 
         var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? 0;
 
         if (lastRow == 0)
             return [];
 
-        // Tìm dòng tiêu đề nhà cung cấp
+        // TÃ¬m dÃ²ng tiÃªu Ä‘á» nhÃ  cung cáº¥p
         var headerRowNumber = FindSupplierHeaderRow(
             worksheet,
             lastRow);
@@ -7859,7 +7885,7 @@ LIMIT 500;
         if (headerRowNumber == 0)
         {
             throw new InvalidOperationException(
-                "Không tìm thấy dòng tiêu đề nhà cung cấp trong file.");
+                "KhÃ´ng tÃ¬m tháº¥y dÃ²ng tiÃªu Ä‘á» nhÃ  cung cáº¥p trong file.");
         }
 
         var firstHeaderColumn =
@@ -7987,35 +8013,35 @@ LIMIT 500;
     private static NhaCungCap MapRowToNhaCungCap(Dictionary<string, string> row)
     {
         var noCanTra = ParseSoTien(
-            GetCellValue(row, "no_can_tra_hien_tai", "nợ cần trả hiện tại", "no can tra hien tai", "nợ hiện tại", "no hien tai", "nợ cần trả"));
+            GetCellValue(row, "no_can_tra_hien_tai", "ná»£ cáº§n tráº£ hiá»‡n táº¡i", "no can tra hien tai", "ná»£ hiá»‡n táº¡i", "no hien tai", "ná»£ cáº§n tráº£"));
         var tongMua = ParseSoTien(
-            GetCellValue(row, "tong_mua", "tổng mua", "tong mua"));
+            GetCellValue(row, "tong_mua", "tá»•ng mua", "tong mua"));
         var tongMuaTruTraHang = ParseSoTien(
-            GetCellValue(row, "tong_mua_tru_tra_hang", "tổng mua trừ trả hàng", "tong mua tru tra hang", "tổng mua trừ trả", "tong mua tru tra"));
+            GetCellValue(row, "tong_mua_tru_tra_hang", "tá»•ng mua trá»« tráº£ hÃ ng", "tong mua tru tra hang", "tá»•ng mua trá»« tráº£", "tong mua tru tra"));
 
         var trangThai = ParseBoolean(
-            GetCellValue(row, "trang_thai", "trạng thái", "trang thai", "status"),
+            GetCellValue(row, "trang_thai", "tráº¡ng thÃ¡i", "trang thai", "status"),
             true);
 
         var supplier = new NhaCungCap
         {
-            MaNhaCungCap = GetCellValue(row, "ma_nha_cung_cap", "mã nhà cung cấp", "ma ncc", "supplier code") ?? string.Empty,
-            TenNhaCungCap = GetCellValue(row, "ten_nha_cung_cap", "tên nhà cung cấp", "ten ncc", "supplier name", "name") ?? string.Empty,
-            SoDienThoai = GetCellValue(row, "so_dien_thoai", "số điện thoại", "dien thoai", "phone", "sdt"),
+            MaNhaCungCap = GetCellValue(row, "ma_nha_cung_cap", "mÃ£ nhÃ  cung cáº¥p", "ma ncc", "supplier code") ?? string.Empty,
+            TenNhaCungCap = GetCellValue(row, "ten_nha_cung_cap", "tÃªn nhÃ  cung cáº¥p", "ten ncc", "supplier name", "name") ?? string.Empty,
+            SoDienThoai = GetCellValue(row, "so_dien_thoai", "sá»‘ Ä‘iá»‡n thoáº¡i", "dien thoai", "phone", "sdt"),
             Email = GetCellValue(row, "email"),
-            DiaChi = GetCellValue(row, "dia_chi", "địa chỉ", "dia chi", "address"),
-            PhuongXa = GetCellValue(row, "phuong_xa", "phường/xã", "phuong xa", "ward"),
-            QuanHuyen = GetCellValue(row, "quan_huyen", "quận/huyện", "quan huyen", "district"),
-            TinhThanh = GetCellValue(row, "tinh_thanh", "tỉnh/thành", "tinh thanh", "province"),
-            MaSoThue = GetCellValue(row, "ma_so_thue", "mã số thuế", "ma so thue", "tax code"),
-            NguoiLienHe = GetCellValue(row, "nguoi_lien_he", "người liên hệ", "lien he", "contact"),
-            GhiChu = GetCellValue(row, "ghi_chu", "ghi chú", "note"),
-            KhuVuc = GetCellValue(row, "khu_vuc", "khu vực", "khu vuc", "region"),
-            SoCccd = GetCellValue(row, "so_cmnd_cccd", "số cmnd/cccd", "so cmnd cccd", "cmnd", "cccd"),
-            NhomNhaCungCapTen = GetCellValue(row, "nhom_nha_cung_cap", "nhóm nhà cung cấp", "nhom ncc", "nhóm"),
-            TenCongTy = GetCellValue(row, "cong_ty", "công ty", "ten cong ty"),
-            NguoiTaoTen = GetCellValue(row, "nguoi_tao", "người tạo", "nguoi tao", "nguoi_tao_ten"),
-            NgayTao = ParseNgayTaiFile(GetCellValue(row, "ngay_tao", "ngày tạo", "ngay tao")),
+            DiaChi = GetCellValue(row, "dia_chi", "Ä‘á»‹a chá»‰", "dia chi", "address"),
+            PhuongXa = GetCellValue(row, "phuong_xa", "phÆ°á»ng/xÃ£", "phuong xa", "ward"),
+            QuanHuyen = GetCellValue(row, "quan_huyen", "quáº­n/huyá»‡n", "quan huyen", "district"),
+            TinhThanh = GetCellValue(row, "tinh_thanh", "tá»‰nh/thÃ nh", "tinh thanh", "province"),
+            MaSoThue = GetCellValue(row, "ma_so_thue", "mÃ£ sá»‘ thuáº¿", "ma so thue", "tax code"),
+            NguoiLienHe = GetCellValue(row, "nguoi_lien_he", "ngÆ°á»i liÃªn há»‡", "lien he", "contact"),
+            GhiChu = GetCellValue(row, "ghi_chu", "ghi chÃº", "note"),
+            KhuVuc = GetCellValue(row, "khu_vuc", "khu vá»±c", "khu vuc", "region"),
+            SoCccd = GetCellValue(row, "so_cmnd_cccd", "sá»‘ cmnd/cccd", "so cmnd cccd", "cmnd", "cccd"),
+            NhomNhaCungCapTen = GetCellValue(row, "nhom_nha_cung_cap", "nhÃ³m nhÃ  cung cáº¥p", "nhom ncc", "nhÃ³m"),
+            TenCongTy = GetCellValue(row, "cong_ty", "cÃ´ng ty", "ten cong ty"),
+            NguoiTaoTen = GetCellValue(row, "nguoi_tao", "ngÆ°á»i táº¡o", "nguoi tao", "nguoi_tao_ten"),
+            NgayTao = ParseNgayTaiFile(GetCellValue(row, "ngay_tao", "ngÃ y táº¡o", "ngay tao")),
             NgayNhapExcel = DateTime.Now,
             TrangThai = trangThai,
             NoCanTraHienTaiExcel = noCanTra,
@@ -8035,34 +8061,34 @@ LIMIT 500;
     }
 
     // ==========================================
-    // QUẢN LÝ NHÓM SẢN PHẨM & ĐƠN VỊ TÍNH
+    // QUáº¢N LÃ NHÃ“M Sáº¢N PHáº¨M & ÄÆ N Vá»Š TÃNH
     // Xem Services/DatabaseService.DanhMuc.cs
     // ==========================================
 
     // ==========================================
-    // PHIẾU NHẬP HÀNG
+    // PHIáº¾U NHáº¬P HÃ€NG
     // ==========================================
 
     /// <summary>
-    /// Sinh mã phiếu nhập tự động dạng PN000001, PN000002, PN000003...
-    /// Số thứ tự lấy từ MAX của phần số trong các mã ĐÚNG ĐỊNH DẠNG:
-    ///   - Mã mới          : PN000001    (bỏ 2 ký tự "PN", phần còn lại "000001")
-    ///   - Mã cũ có ngày  : PN260929-001 (bỏ "PN", lấy đoạn sau dấu '-' cuối: "001")
-    /// Mọi mã lệch định dạng (NULL, rỗng, chứa chữ) bị loại bằng REGEXP nên dữ liệu
-    /// rác không làm sai/hỏng số thứ tự và không làm ứng dụng bị lỗi.
+    /// Sinh mÃ£ phiáº¿u nháº­p tá»± Ä‘á»™ng dáº¡ng PN000001, PN000002, PN000003...
+    /// Sá»‘ thá»© tá»± láº¥y tá»« MAX cá»§a pháº§n sá»‘ trong cÃ¡c mÃ£ ÄÃšNG Äá»ŠNH Dáº NG:
+    ///   - MÃ£ má»›i          : PN000001    (bá» 2 kÃ½ tá»± "PN", pháº§n cÃ²n láº¡i "000001")
+    ///   - MÃ£ cÅ© cÃ³ ngÃ y  : PN260929-001 (bá» "PN", láº¥y Ä‘oáº¡n sau dáº¥u '-' cuá»‘i: "001")
+    /// Má»i mÃ£ lá»‡ch Ä‘á»‹nh dáº¡ng (NULL, rá»—ng, chá»©a chá»¯) bá»‹ loáº¡i báº±ng REGEXP nÃªn dá»¯ liá»‡u
+    /// rÃ¡c khÃ´ng lÃ m sai/há»ng sá»‘ thá»© tá»± vÃ  khÃ´ng lÃ m á»©ng dá»¥ng bá»‹ lá»—i.
     /// </summary>
     public async Task<string> TaoMaPhieuNhapMoiAsync()
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.PurchasesCreate, "Bạn không có quyền tạo phiếu nhập hàng.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.PurchasesCreate, "Báº¡n khÃ´ng cÃ³ quyá»n táº¡o phiáº¿u nháº­p hÃ ng.");
         await using var connection = await OpenAsync();
 
-        // SUBSTRING(ma, 3) bỏ đúng 2 ký tự tiền tố "PN" (SQL đếm từ 1).
-        // SUBSTRING_INDEX(..., '-', -1) lấy đoạn sau dấu '-' cuối cùng để vẫn lấy
-        // đúng số thứ tự với mã cũ dạng PNyyMMdd-NNN.
+        // SUBSTRING(ma, 3) bá» Ä‘Ãºng 2 kÃ½ tá»± tiá»n tá»‘ "PN" (SQL Ä‘áº¿m tá»« 1).
+        // SUBSTRING_INDEX(..., '-', -1) láº¥y Ä‘oáº¡n sau dáº¥u '-' cuá»‘i cÃ¹ng Ä‘á»ƒ váº«n láº¥y
+        // Ä‘Ãºng sá»‘ thá»© tá»± vá»›i mÃ£ cÅ© dáº¡ng PNyyMMdd-NNN.
         //
-        // CAST(... AS SIGNED) để giá trị trả về luôn nằm trong kiểu long.
-        // Nếu dùng AS UNSIGNED, chuỗi bắt đầu bằng '-' sẽ ra số khổng lồ và làm
-        // ExecuteScalarAsync<long> ném exception.
+        // CAST(... AS SIGNED) Ä‘á»ƒ giÃ¡ trá»‹ tráº£ vá» luÃ´n náº±m trong kiá»ƒu long.
+        // Náº¿u dÃ¹ng AS UNSIGNED, chuá»—i báº¯t Ä‘áº§u báº±ng '-' sáº½ ra sá»‘ khá»•ng lá»“ vÃ  lÃ m
+        // ExecuteScalarAsync<long> nÃ©m exception.
         const string maxSuffixSql = """
         SELECT COALESCE(
             MAX(CAST(SUBSTRING_INDEX(SUBSTRING(TRIM(ma_phieu_nhap), 3), '-', -1) AS SIGNED)),
@@ -8074,11 +8100,11 @@ LIMIT 500;
 
         var maxSuffix = await connection.ExecuteScalarAsync<long?>(maxSuffixSql) ?? 0L;
 
-        // Database chưa có phiếu nào (hoặc mã toàn sai định dạng) => bắt đầu từ PN000001.
+        // Database chÆ°a cÃ³ phiáº¿u nÃ o (hoáº·c mÃ£ toÃ n sai Ä‘á»‹nh dáº¡ng) => báº¯t Ä‘áº§u tá»« PN000001.
         var nextNumber = maxSuffix > 0 ? maxSuffix + 1 : 1L;
 
-        // ma_phieu_nhap có UNIQUE KEY uk_pnh_ma: nếu mã vừa sinh trùng
-        // (ví dụ 2 máy cùng mở màn hình) thì tăng tiếp tới khi ra mã còn trống.
+        // ma_phieu_nhap cÃ³ UNIQUE KEY uk_pnh_ma: náº¿u mÃ£ vá»«a sinh trÃ¹ng
+        // (vÃ­ dá»¥ 2 mÃ¡y cÃ¹ng má»Ÿ mÃ n hÃ¬nh) thÃ¬ tÄƒng tiáº¿p tá»›i khi ra mÃ£ cÃ²n trá»‘ng.
         for (var i = 0; i < 100; i++)
         {
             var candidate = "PN" + nextNumber.ToString("D6", CultureInfo.InvariantCulture);
@@ -8094,7 +8120,7 @@ LIMIT 500;
         }
 
         throw new InvalidOperationException(
-            "Không sinh được mã phiếu nhập: đã thử 100 lần liên tiếp mà mã vẫn bị trùng.");
+            "KhÃ´ng sinh Ä‘Æ°á»£c mÃ£ phiáº¿u nháº­p: Ä‘Ã£ thá»­ 100 láº§n liÃªn tiáº¿p mÃ  mÃ£ váº«n bá»‹ trÃ¹ng.");
     }
 
     public async Task<IReadOnlyList<PhieuNhapHang>> GetPhieuNhapHangAsync(
@@ -8149,13 +8175,13 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Lấy danh sách phiếu nhập theo trang cho báo cáo và màn "Danh sách phiếu nhập".
-    /// Hỗ trợ tìm kiếm theo mã phiếu, mã NCC, tên NCC; lọc theo tình trạng thanh toán,
-    /// khoảng thời gian nhập và trạng thái phiếu (đã nhập / lưu tạm).
-    /// Chỉ đọc dữ liệu của trang hiện tại (LIMIT/OFFSET) kèm tổng số bản ghi,
-    /// không tải toàn bộ bảng lên giao diện.
-    /// Các tham số lọc ngày/trạng thái là tuỳ chọn để giữ tương thích với các
-    /// nơi gọi cũ (chỉ truyền 4 tham số).
+    /// Láº¥y danh sÃ¡ch phiáº¿u nháº­p theo trang cho bÃ¡o cÃ¡o vÃ  mÃ n "Danh sÃ¡ch phiáº¿u nháº­p".
+    /// Há»— trá»£ tÃ¬m kiáº¿m theo mÃ£ phiáº¿u, mÃ£ NCC, tÃªn NCC; lá»c theo tÃ¬nh tráº¡ng thanh toÃ¡n,
+    /// khoáº£ng thá»i gian nháº­p vÃ  tráº¡ng thÃ¡i phiáº¿u (Ä‘Ã£ nháº­p / lÆ°u táº¡m).
+    /// Chá»‰ Ä‘á»c dá»¯ liá»‡u cá»§a trang hiá»‡n táº¡i (LIMIT/OFFSET) kÃ¨m tá»•ng sá»‘ báº£n ghi,
+    /// khÃ´ng táº£i toÃ n bá»™ báº£ng lÃªn giao diá»‡n.
+    /// CÃ¡c tham sá»‘ lá»c ngÃ y/tráº¡ng thÃ¡i lÃ  tuá»³ chá»n Ä‘á»ƒ giá»¯ tÆ°Æ¡ng thÃ­ch vá»›i cÃ¡c
+    /// nÆ¡i gá»i cÅ© (chá»‰ truyá»n 4 tham sá»‘).
     /// </summary>
     public async Task<(IReadOnlyList<PhieuNhapHang> Items, int TongSoBanGhi)> GetPhieuNhapHangPagedAsync(
         string? search,
@@ -8264,10 +8290,10 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Đọc đầy đủ một phiếu nhập theo khoá chính phieu_nhap_hang.id để hiển thị
-    /// cửa sổ "Xem chi tiết": header + toàn bộ dòng hàng trong
-    /// chi_tiet_phieu_nhap_hang (nối san_pham/don_vi_tinh để lấy đơn vị tính).
-    /// Trả về null nếu không tìm thấy phiếu. Chỉ đọc, không sửa.
+    /// Äá»c Ä‘áº§y Ä‘á»§ má»™t phiáº¿u nháº­p theo khoÃ¡ chÃ­nh phieu_nhap_hang.id Ä‘á»ƒ hiá»ƒn thá»‹
+    /// cá»­a sá»• "Xem chi tiáº¿t": header + toÃ n bá»™ dÃ²ng hÃ ng trong
+    /// chi_tiet_phieu_nhap_hang (ná»‘i san_pham/don_vi_tinh Ä‘á»ƒ láº¥y Ä‘Æ¡n vá»‹ tÃ­nh).
+    /// Tráº£ vá» null náº¿u khÃ´ng tÃ¬m tháº¥y phiáº¿u. Chá»‰ Ä‘á»c, khÃ´ng sá»­a.
     /// </summary>
     public async Task<PhieuNhapHangDetail?> GetPhieuNhapHangDetailAsync(uint phieuNhapId)
     {
@@ -8276,8 +8302,8 @@ LIMIT 500;
 
         await using var connection = await OpenAsync();
 
-        // Hai cột so_hoa_don_dau_vao / ma_dat_hang_nhap là tuỳ chọn (database cũ
-        // chưa có); chỉ thêm vào câu SQL khi thực sự tồn tại.
+        // Hai cá»™t so_hoa_don_dau_vao / ma_dat_hang_nhap lÃ  tuá»³ chá»n (database cÅ©
+        // chÆ°a cÃ³); chá»‰ thÃªm vÃ o cÃ¢u SQL khi thá»±c sá»± tá»“n táº¡i.
         var hasExtraColumns = await HasPhieuNhapExtraColumnsAsync();
         var hasPhuongThuc = await EnsurePhieuNhapPhuongThucColumnAsync();
 
@@ -8348,15 +8374,15 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Hoàn thành phiếu nhập: lưu header, toàn bộ dòng chi tiết, cộng tồn kho,
-    /// ghi lịch sử nhập xuất kho và cập nhật lại giá vốn bình quân — tất cả trong
-    /// một transaction, hoặc rollback trọn vẹn nếu có bước nào lỗi.
+    /// HoÃ n thÃ nh phiáº¿u nháº­p: lÆ°u header, toÃ n bá»™ dÃ²ng chi tiáº¿t, cá»™ng tá»“n kho,
+    /// ghi lá»‹ch sá»­ nháº­p xuáº¥t kho vÃ  cáº­p nháº­t láº¡i giÃ¡ vá»‘n bÃ¬nh quÃ¢n â€” táº¥t cáº£ trong
+    /// má»™t transaction, hoáº·c rollback trá»n váº¹n náº¿u cÃ³ bÆ°á»›c nÃ o lá»—i.
     /// </summary>
     public async Task<uint> LuuPhieuNhapHangAsync(
         PhieuNhapHang phieu,
         IReadOnlyList<ChiTietPhieuNhapHang> items)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.PurchasesCreate, "Bạn không có quyền lưu phiếu nhập hàng.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.PurchasesCreate, "Báº¡n khÃ´ng cÃ³ quyá»n lÆ°u phiáº¿u nháº­p hÃ ng.");
         if (phieu is null)
             throw new ArgumentNullException(nameof(phieu));
 
@@ -8368,12 +8394,12 @@ LIMIT 500;
             .ToList();
 
         if (dongHopLe.Count == 0)
-            throw new InvalidOperationException("Phiếu nhập chưa có hàng hóa nào hợp lệ.");
+            throw new InvalidOperationException("Phiáº¿u nháº­p chÆ°a cÃ³ hÃ ng hÃ³a nÃ o há»£p lá»‡.");
 
-        // Chặn ở tầng service: mã phiếu rỗng hoặc sai định dạng tuyệt đối không được
-        // ghi xuống phieu_nhap_hang (ràng buộc UNIQUE uk_pnh_ma chỉ bắt được mã rỗng).
+        // Cháº·n á»Ÿ táº§ng service: mÃ£ phiáº¿u rá»—ng hoáº·c sai Ä‘á»‹nh dáº¡ng tuyá»‡t Ä‘á»‘i khÃ´ng Ä‘Æ°á»£c
+        // ghi xuá»‘ng phieu_nhap_hang (rÃ ng buá»™c UNIQUE uk_pnh_ma chá»‰ báº¯t Ä‘Æ°á»£c mÃ£ rá»—ng).
         if (string.IsNullOrWhiteSpace(phieu.MaPhieuNhap))
-            throw new InvalidOperationException("Mã phiếu nhập rỗng, không thể lưu phiếu nhập.");
+            throw new InvalidOperationException("MÃ£ phiáº¿u nháº­p rá»—ng, khÃ´ng thá»ƒ lÆ°u phiáº¿u nháº­p.");
 
         phieu.MaPhieuNhap = phieu.MaPhieuNhap.Trim();
 
@@ -8411,9 +8437,9 @@ LIMIT 500;
         try
         {
             // ============================================================
-            // 0. CHỐN GHI TRÙNG KHI BẤM "HOÀN THÀNH" NHIỀU LẦN
-            //    Đọc trạng thái hiện tại trong transaction để tồn kho
-            //    không bị cộng hai lần cho cùng một phiếu.
+            // 0. CHá»N GHI TRÃ™NG KHI Báº¤M "HOÃ€N THÃ€NH" NHIá»€U Láº¦N
+            //    Äá»c tráº¡ng thÃ¡i hiá»‡n táº¡i trong transaction Ä‘á»ƒ tá»“n kho
+            //    khÃ´ng bá»‹ cá»™ng hai láº§n cho cÃ¹ng má»™t phiáº¿u.
             // ============================================================
 
             var trangThaiHienTai = phieu.Id == 0
@@ -8428,11 +8454,11 @@ LIMIT 500;
                     new { phieu.Id },
                     transaction);
 
-            // Phiếu đã hoàn thành thì tồn kho đã được cộng một lần,
-            // không được cộng thêm lần nữa.
+            // Phiáº¿u Ä‘Ã£ hoÃ n thÃ nh thÃ¬ tá»“n kho Ä‘Ã£ Ä‘Æ°á»£c cá»™ng má»™t láº§n,
+            // khÃ´ng Ä‘Æ°á»£c cá»™ng thÃªm láº§n ná»¯a.
             if (trangThaiHienTai == "DA_NHAP_HANG")
                 throw new InvalidOperationException(
-                    "Phiếu nhập này đã hoàn thành trước đó. Tồn kho đã được cập nhật nên không thể hoàn thành lại.");
+                    "Phiáº¿u nháº­p nÃ y Ä‘Ã£ hoÃ n thÃ nh trÆ°á»›c Ä‘Ã³. Tá»“n kho Ä‘Ã£ Ä‘Æ°á»£c cáº­p nháº­t nÃªn khÃ´ng thá»ƒ hoÃ n thÃ nh láº¡i.");
 
             // ============================================================
             // 1. HEADER
@@ -8512,7 +8538,7 @@ LIMIT 500;
             }
 
             // ============================================================
-            // 2. CHI TIẾT PHIẾU NHẬP
+            // 2. CHI TIáº¾T PHIáº¾U NHáº¬P
             // ============================================================
 
             await connection.ExecuteAsync(
@@ -8566,7 +8592,7 @@ LIMIT 500;
             }
 
             // ============================================================
-            // 3. CẬP NHẬT TỒN KHO + LỊCH SỬ NHẬP XUẤT KHO
+            // 3. Cáº¬P NHáº¬T Tá»’N KHO + Lá»ŠCH Sá»¬ NHáº¬P XUáº¤T KHO
             // ============================================================
 
             await CapNhatTonKhoPhieuNhapAsync(
@@ -8576,9 +8602,9 @@ LIMIT 500;
                 dongHopLe);
 
             // ============================================================
-            // 4. CÔNG NỢ NHÀ CUNG CẤP
-            //    Ghi vào lich_su_cong_no_nha_cung_cap ngay trong giao dịch này
-            //    để số dư công nợ khách mới luôn khớp với phiếu vừa lưu.
+            // 4. CÃ”NG Ná»¢ NHÃ€ CUNG Cáº¤P
+            //    Ghi vÃ o lich_su_cong_no_nha_cung_cap ngay trong giao dá»‹ch nÃ y
+            //    Ä‘á»ƒ sá»‘ dÆ° cÃ´ng ná»£ khÃ¡ch má»›i luÃ´n khá»›p vá»›i phiáº¿u vá»«a lÆ°u.
             // ============================================================
 
             await GhiCongNoNhaCungCapPhieuNhapAsync(
@@ -8588,9 +8614,9 @@ LIMIT 500;
                 branchId);
 
             // ============================================================
-            // 5. SỔ QUỸ (PHIẾU CHI)
-            //    Nếu phiếu nhập có thanh toán tiền (DaThanhToan > 0), ghi
-            //    phiếu chi tương ứng vào sổ quỹ để số dư quỹ tự động giảm đúng nguồn tiền.
+            // 5. Sá»” QUá»¸ (PHIáº¾U CHI)
+            //    Náº¿u phiáº¿u nháº­p cÃ³ thanh toÃ¡n tiá»n (DaThanhToan > 0), ghi
+            //    phiáº¿u chi tÆ°Æ¡ng á»©ng vÃ o sá»• quá»¹ Ä‘á»ƒ sá»‘ dÆ° quá»¹ tá»± Ä‘á»™ng giáº£m Ä‘Ãºng nguá»“n tiá»n.
             // ============================================================
 
             await GhiPhieuChiNhapHangAsync(
@@ -8605,11 +8631,11 @@ LIMIT 500;
             await transaction.CommitAsync();
 
             _ = LogSubAccountActivityAsync(
-                "Nhập hàng",
+                "Nháº­p hÃ ng",
                 "PHIEU_NHAP",
                 phieu.Id,
                 phieu.MaPhieuNhap,
-                $"Nhập hàng hóa {phieu.MaPhieuNhap} (Tổng tiền nhập: {phieu.TongTienNhap:N0} đ)",
+                $"Nháº­p hÃ ng hÃ³a {phieu.MaPhieuNhap} (Tá»•ng tiá»n nháº­p: {phieu.TongTienNhap:N0} Ä‘)",
                 phieu.TongTienNhap);
 
             return phieu.Id;
@@ -8622,11 +8648,11 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Ghi sổ cái công nợ nhà cung cấp cho một phiếu nhập, trong CÙNG transaction
-    /// với lần lưu phiếu: một dòng ghi khoản phải trả khi nhập hàng và một dòng
-    /// ghi khoản đã trả nếu phiếu có ghi "đã thanh toán".
-    /// Tổng ghi nợ - ghi có của mỗi phiếu luôn bằng <c>phieu.ConNo</c> nên số dư
-    /// công nợ khớp với cột con_no trên đầu phiếu.
+    /// Ghi sá»• cÃ¡i cÃ´ng ná»£ nhÃ  cung cáº¥p cho má»™t phiáº¿u nháº­p, trong CÃ™NG transaction
+    /// vá»›i láº§n lÆ°u phiáº¿u: má»™t dÃ²ng ghi khoáº£n pháº£i tráº£ khi nháº­p hÃ ng vÃ  má»™t dÃ²ng
+    /// ghi khoáº£n Ä‘Ã£ tráº£ náº¿u phiáº¿u cÃ³ ghi "Ä‘Ã£ thanh toÃ¡n".
+    /// Tá»•ng ghi ná»£ - ghi cÃ³ cá»§a má»—i phiáº¿u luÃ´n báº±ng <c>phieu.ConNo</c> nÃªn sá»‘ dÆ°
+    /// cÃ´ng ná»£ khá»›p vá»›i cá»™t con_no trÃªn Ä‘áº§u phiáº¿u.
     /// </summary>
     private static async Task GhiCongNoNhaCungCapPhieuNhapAsync(
         MySqlConnection connection,
@@ -8637,14 +8663,14 @@ LIMIT 500;
         if (phieu.NhaCungCapId is not uint nccId || nccId == 0)
             return;
 
-        // Chống ghi trùng khi một phiếu được sửa rồi hoàn thành lại:
-        // xoá các dòng cũ của chính mã phiếu này trước khi ghi lại.
+        // Chá»‘ng ghi trÃ¹ng khi má»™t phiáº¿u Ä‘Æ°á»£c sá»­a rá»“i hoÃ n thÃ nh láº¡i:
+        // xoÃ¡ cÃ¡c dÃ²ng cÅ© cá»§a chÃ­nh mÃ£ phiáº¿u nÃ y trÆ°á»›c khi ghi láº¡i.
         await connection.ExecuteAsync(
             "DELETE FROM lich_su_cong_no_nha_cung_cap WHERE ma_chung_tu = @MaChungTu;",
             new { phieu.MaPhieuNhap },
             transaction);
 
-        // Khoản mua làm tăng nợ phải trả, nên ghi nợ.
+        // Khoáº£n mua lÃ m tÄƒng ná»£ pháº£i tráº£, nÃªn ghi ná»£.
         if (phieu.TongTienNhap > 0)
         {
             await GhiMotDongCongNoNhaCungCapAsync(
@@ -8658,10 +8684,10 @@ LIMIT 500;
                 0,
                 phieu.ThoiGianNhap,
                 phieu.NguoiNhapId,
-                $"Nhập hàng tạo khoản phải trả {phieu.TongTienNhap:N0} cho phiếu {phieu.MaPhieuNhap}");
+                $"Nháº­p hÃ ng táº¡o khoáº£n pháº£i tráº£ {phieu.TongTienNhap:N0} cho phiáº¿u {phieu.MaPhieuNhap}");
         }
 
-        // Khoản đã trả làm giảm nợ phải trả, nên ghi có.
+        // Khoáº£n Ä‘Ã£ tráº£ lÃ m giáº£m ná»£ pháº£i tráº£, nÃªn ghi cÃ³.
         if (phieu.DaThanhToan > 0)
         {
             await GhiMotDongCongNoNhaCungCapAsync(
@@ -8675,14 +8701,14 @@ LIMIT 500;
                 phieu.DaThanhToan,
                 phieu.ThoiGianNhap,
                 phieu.NguoiNhapId,
-                $"Đã thanh toán {phieu.DaThanhToan:N0} cho phiếu {phieu.MaPhieuNhap}");
+                $"ÄÃ£ thanh toÃ¡n {phieu.DaThanhToan:N0} cho phiáº¿u {phieu.MaPhieuNhap}");
         }
     }
 
     /// <summary>
-    /// Ghi phiếu Chi trong sổ quỹ cho một phiếu nhập hàng có thanh toán tiền (DaThanhToan > 0),
-    /// dùng CHUNG connection và transaction với lần ghi phiếu nhập.
-    /// Giúp sổ quỹ và các quỹ tiền mặt/ngân hàng phản ánh chính xác nguồn tiền chi trả khi nhập hàng.
+    /// Ghi phiáº¿u Chi trong sá»• quá»¹ cho má»™t phiáº¿u nháº­p hÃ ng cÃ³ thanh toÃ¡n tiá»n (DaThanhToan > 0),
+    /// dÃ¹ng CHUNG connection vÃ  transaction vá»›i láº§n ghi phiáº¿u nháº­p.
+    /// GiÃºp sá»• quá»¹ vÃ  cÃ¡c quá»¹ tiá»n máº·t/ngÃ¢n hÃ ng pháº£n Ã¡nh chÃ­nh xÃ¡c nguá»“n tiá»n chi tráº£ khi nháº­p hÃ ng.
     /// </summary>
     private static async Task GhiPhieuChiNhapHangAsync(
         MySqlConnection connection,
@@ -8693,7 +8719,7 @@ LIMIT 500;
         bool coCotNguoiNopNhanGhiChu,
         bool coCotPhieuNhap)
     {
-        // 1. Dọn dẹp phiếu chi cũ nếu phiếu nhập được cập nhật lại / hoàn thành lại
+        // 1. Dá»n dáº¹p phiáº¿u chi cÅ© náº¿u phiáº¿u nháº­p Ä‘Æ°á»£c cáº­p nháº­t láº¡i / hoÃ n thÃ nh láº¡i
         if (coCotPhieuNhap)
         {
             await connection.ExecuteAsync(
@@ -8717,18 +8743,18 @@ LIMIT 500;
                 transaction);
         }
 
-        // 2. Nếu phiếu có thanh toán tiền (> 0), tạo phiếu chi mới
+        // 2. Náº¿u phiáº¿u cÃ³ thanh toÃ¡n tiá»n (> 0), táº¡o phiáº¿u chi má»›i
         if (phieu.DaThanhToan > 0)
         {
             var maPhieuChi = await SinhMaPhieuChiTrongGiaoDichAsync(connection, transaction);
 
-            // Phiếu chi thanh toán nhập hàng luôn thuộc loại "Chi nhà cung cấp".
+            // Phiáº¿u chi thanh toÃ¡n nháº­p hÃ ng luÃ´n thuá»™c loáº¡i "Chi nhÃ  cung cáº¥p".
             var idNhomChiNhaCungCap = await LayIdNhomChiPhiTheoMaAsync(connection, transaction, "CHI_NHA_CUNG_CAP");
 
             var phuongThuc = ChuanHoaPhuongThuc(phieu.PhuongThucThanhToan);
-            var noiDung = $"Thanh toán tiền nhập hàng - phiếu {phieu.MaPhieuNhap}";
+            var noiDung = $"Thanh toÃ¡n tiá»n nháº­p hÃ ng - phiáº¿u {phieu.MaPhieuNhap}";
             var tenNcc = string.IsNullOrWhiteSpace(phieu.TenNhaCungCap) ? phieu.NhaCungCapId?.ToString() : phieu.TenNhaCungCap;
-            var ghiChu = $"Chi trả tiền nhập hàng cho nhà cung cấp {tenNcc} theo phiếu nhập {phieu.MaPhieuNhap}.";
+            var ghiChu = $"Chi tráº£ tiá»n nháº­p hÃ ng cho nhÃ  cung cáº¥p {tenNcc} theo phiáº¿u nháº­p {phieu.MaPhieuNhap}.";
 
             string sql;
             if (coCotPhieuNhap && coCotNguoiNopNhanGhiChu)
@@ -8804,8 +8830,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Ghi một dòng vào sổ công nợ nhà cung cấp, tự tính lại số dư cộng dồn
-    /// (đọc khoá dòng hiện tại để hai phiếu song song không ghi đè số dư của nhau).
+    /// Ghi má»™t dÃ²ng vÃ o sá»• cÃ´ng ná»£ nhÃ  cung cáº¥p, tá»± tÃ­nh láº¡i sá»‘ dÆ° cá»™ng dá»“n
+    /// (Ä‘á»c khoÃ¡ dÃ²ng hiá»‡n táº¡i Ä‘á»ƒ hai phiáº¿u song song khÃ´ng ghi Ä‘Ã¨ sá»‘ dÆ° cá»§a nhau).
     /// </summary>
     private static async Task GhiMotDongCongNoNhaCungCapAsync(
         MySqlConnection connection,
@@ -8970,7 +8996,7 @@ LIMIT 500;
 
             var tonSau = tonTruoc + item.SoLuong;
 
-            // Giá vốn bình quân = (tồn cũ * giá cũ + lượng nhập * giá nhập) / tồn sau
+            // GiÃ¡ vá»‘n bÃ¬nh quÃ¢n = (tá»“n cÅ© * giÃ¡ cÅ© + lÆ°á»£ng nháº­p * giÃ¡ nháº­p) / tá»“n sau
             var giaVonBinhQuan = tonSau > 0
                 ? (tonTruoc * giaVonCu + item.SoLuong * item.DonGiaNhap) / tonSau
                 : item.DonGiaNhap;
@@ -9055,8 +9081,8 @@ LIMIT 500;
     };
 
     /// <summary>
-    /// Hai cột so_hoa_don_dau_vao / ma_dat_hang_nhap là tuỳ chọn.
-    /// Kiểm tra information_schema một lần để database cũ vẫn chạy được.
+    /// Hai cá»™t so_hoa_don_dau_vao / ma_dat_hang_nhap lÃ  tuá»³ chá»n.
+    /// Kiá»ƒm tra information_schema má»™t láº§n Ä‘á»ƒ database cÅ© váº«n cháº¡y Ä‘Æ°á»£c.
     /// </summary>
     private async Task<bool> HasPhieuNhapExtraColumnsAsync()
     {
@@ -9087,8 +9113,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Bảo đảm bảng phieu_nhap_hang có cột phuong_thuc_thanh_toan để lưu nguồn tiền chi trả
-    /// (TIEN_MAT, CHUYEN_KHOAN...). Nếu database cũ chưa có thì tự động ALTER TABLE.
+    /// Báº£o Ä‘áº£m báº£ng phieu_nhap_hang cÃ³ cá»™t phuong_thuc_thanh_toan Ä‘á»ƒ lÆ°u nguá»“n tiá»n chi tráº£
+    /// (TIEN_MAT, CHUYEN_KHOAN...). Náº¿u database cÅ© chÆ°a cÃ³ thÃ¬ tá»± Ä‘á»™ng ALTER TABLE.
     /// </summary>
     private async Task<bool> EnsurePhieuNhapPhuongThucColumnAsync()
     {
@@ -9128,8 +9154,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Bảo đảm bảng phieu_chi có cột liên kết phiếu nhập hàng:
-    /// phieu_nhap_hang_id và ma_phieu_nhap.
+    /// Báº£o Ä‘áº£m báº£ng phieu_chi cÃ³ cá»™t liÃªn káº¿t phiáº¿u nháº­p hÃ ng:
+    /// phieu_nhap_hang_id vÃ  ma_phieu_nhap.
     /// </summary>
     private async Task<bool> EnsurePhieuQuyPhieuNhapColumnsAsync()
     {
@@ -9181,15 +9207,15 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Bảng <c>phieu_chi</c> dùng chung cho cả phiếu thu và phiếu chi. Ngoài cột
-    /// <c>noi_dung</c>, sổ quỹ cần tách riêng <c>nguoi_nop_nhan</c> (người nộp với
-    /// phiếu thu, người nhận với phiếu chi) và <c>ghi_chu</c>; trước đây hai thông
-    /// tin này bị dồn chung vào <c>noi_dung</c> nên không hiển thị tách biệt được.
+    /// Báº£ng <c>phieu_chi</c> dÃ¹ng chung cho cáº£ phiáº¿u thu vÃ  phiáº¿u chi. NgoÃ i cá»™t
+    /// <c>noi_dung</c>, sá»• quá»¹ cáº§n tÃ¡ch riÃªng <c>nguoi_nop_nhan</c> (ngÆ°á»i ná»™p vá»›i
+    /// phiáº¿u thu, ngÆ°á»i nháº­n vá»›i phiáº¿u chi) vÃ  <c>ghi_chu</c>; trÆ°á»›c Ä‘Ã¢y hai thÃ´ng
+    /// tin nÃ y bá»‹ dá»“n chung vÃ o <c>noi_dung</c> nÃªn khÃ´ng hiá»ƒn thá»‹ tÃ¡ch biá»‡t Ä‘Æ°á»£c.
     /// <para>
-    /// Hai cột là bắt buộc nên hàm này tự thêm vào database cũ thay vì chỉ báo lỗi.
-    /// Việc kiểm tra chỉ làm một lần rồi cache. Nếu tài khoản MySQL không có quyền
-    /// ALTER TABLE thì hàm trả về false và các câu SQL sổ quỹ tự bỏ qua hai cột này
-    /// để ứng dụng vẫn chạy được với dữ liệu cũ.
+    /// Hai cá»™t lÃ  báº¯t buá»™c nÃªn hÃ m nÃ y tá»± thÃªm vÃ o database cÅ© thay vÃ¬ chá»‰ bÃ¡o lá»—i.
+    /// Viá»‡c kiá»ƒm tra chá»‰ lÃ m má»™t láº§n rá»“i cache. Náº¿u tÃ i khoáº£n MySQL khÃ´ng cÃ³ quyá»n
+    /// ALTER TABLE thÃ¬ hÃ m tráº£ vá» false vÃ  cÃ¡c cÃ¢u SQL sá»• quá»¹ tá»± bá» qua hai cá»™t nÃ y
+    /// Ä‘á»ƒ á»©ng dá»¥ng váº«n cháº¡y Ä‘Æ°á»£c vá»›i dá»¯ liá»‡u cÅ©.
     /// </para>
     /// </summary>
     private async Task<bool> EnsurePhieuQuyExtraColumnsAsync()
@@ -9217,7 +9243,7 @@ LIMIT 500;
                 return true;
             }
 
-            // ADD COLUMN không có IF NOT EXISTS trên MySQL nên phải kiểm tra từng cột.
+            // ADD COLUMN khÃ´ng cÃ³ IF NOT EXISTS trÃªn MySQL nÃªn pháº£i kiá»ƒm tra tá»«ng cá»™t.
             if (count == 0)
             {
                 await connection.ExecuteAsync(
@@ -9231,7 +9257,7 @@ LIMIT 500;
         }
         catch
         {
-            // Không có quyền ALTER hoặc mạng lỗi: chạy tiếp với cấu trúc cũ.
+            // KhÃ´ng cÃ³ quyá»n ALTER hoáº·c máº¡ng lá»—i: cháº¡y tiáº¿p vá»›i cáº¥u trÃºc cÅ©.
             _hasPhieuQuyExtraColumns = false;
         }
 
@@ -9239,11 +9265,11 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Bảo đảm <c>phieu_chi</c> có 2 cột liên kết hóa đơn bán hàng:
-    /// <c>hoa_don_ban_hang_id</c> (UNIQUE) và <c>ma_hoa_don</c>.
-    /// Phiếu thu sinh ra khi bán hàng sẽ gắn vào đây nên mỗi hóa đơn chỉ có
-    /// tối đa một phiếu thu — UNIQUE index chặn trùng ngay ở tầng database, không
-    /// phụ thuộc code kiểm tra của ứng dụng.
+    /// Báº£o Ä‘áº£m <c>phieu_chi</c> cÃ³ 2 cá»™t liÃªn káº¿t hÃ³a Ä‘Æ¡n bÃ¡n hÃ ng:
+    /// <c>hoa_don_ban_hang_id</c> (UNIQUE) vÃ  <c>ma_hoa_don</c>.
+    /// Phiáº¿u thu sinh ra khi bÃ¡n hÃ ng sáº½ gáº¯n vÃ o Ä‘Ã¢y nÃªn má»—i hÃ³a Ä‘Æ¡n chá»‰ cÃ³
+    /// tá»‘i Ä‘a má»™t phiáº¿u thu â€” UNIQUE index cháº·n trÃ¹ng ngay á»Ÿ táº§ng database, khÃ´ng
+    /// phá»¥ thuá»™c code kiá»ƒm tra cá»§a á»©ng dá»¥ng.
     /// </summary>
     private async Task<bool> EnsurePhieuQuyHoaDonColumnsAsync()
     {
@@ -9272,7 +9298,7 @@ LIMIT 500;
                     daCoMaHoaDon = true;
             }
 
-            // MySQL không có ADD COLUMN IF NOT EXISTS nên phải kiểm tra từng cột.
+            // MySQL khÃ´ng cÃ³ ADD COLUMN IF NOT EXISTS nÃªn pháº£i kiá»ƒm tra tá»«ng cá»™t.
             if (!daCoHoaDonId)
             {
                 await connection.ExecuteAsync(
@@ -9294,8 +9320,8 @@ LIMIT 500;
 
             if (coIndex == 0)
             {
-                // Cột cho phép NULL nên phiếu thu/chi tay vẫn insert bình thường,
-                // chỉ mỗi hóa đơn bán hàng mới bị giới hạn 1 phiếu thu.
+                // Cá»™t cho phÃ©p NULL nÃªn phiáº¿u thu/chi tay váº«n insert bÃ¬nh thÆ°á»ng,
+                // chá»‰ má»—i hÃ³a Ä‘Æ¡n bÃ¡n hÃ ng má»›i bá»‹ giá»›i háº¡n 1 phiáº¿u thu.
                 await connection.ExecuteAsync(
                     "CREATE UNIQUE INDEX uk_phieu_chi_hoa_don ON phieu_chi (hoa_don_ban_hang_id);");
             }
@@ -9304,8 +9330,8 @@ LIMIT 500;
         }
         catch
         {
-            // Thiếu quyền ALTER: vẫn chạy tiếp, code sẽ tự kiểm tra trùng
-            // bằng SELECT trước khi INSERT.
+            // Thiáº¿u quyá»n ALTER: váº«n cháº¡y tiáº¿p, code sáº½ tá»± kiá»ƒm tra trÃ¹ng
+            // báº±ng SELECT trÆ°á»›c khi INSERT.
             _hasPhieuQuyHoaDonColumns = false;
         }
 
@@ -9313,10 +9339,10 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Trả về id của một loại thu/chi theo mã (<c>nhom_chi_phi.ma_nhom</c>),
-    /// <c>null</c> nếu danh mục chưa tồn tại. Dùng để gắn đúng loại
-    /// "Thu khách hàng" / "Chi nhà cung cấp" cho các phiếu quỹ do hệ thống tự
-    /// sinh (bán hàng, thu nợ khách hàng, thanh toán nhập hàng).
+    /// Tráº£ vá» id cá»§a má»™t loáº¡i thu/chi theo mÃ£ (<c>nhom_chi_phi.ma_nhom</c>),
+    /// <c>null</c> náº¿u danh má»¥c chÆ°a tá»“n táº¡i. DÃ¹ng Ä‘á»ƒ gáº¯n Ä‘Ãºng loáº¡i
+    /// "Thu khÃ¡ch hÃ ng" / "Chi nhÃ  cung cáº¥p" cho cÃ¡c phiáº¿u quá»¹ do há»‡ thá»‘ng tá»±
+    /// sinh (bÃ¡n hÃ ng, thu ná»£ khÃ¡ch hÃ ng, thanh toÃ¡n nháº­p hÃ ng).
     /// </summary>
     private static async Task<uint?> LayIdNhomChiPhiTheoMaAsync(
         MySqlConnection connection,
@@ -9330,14 +9356,14 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Gắn loại thu/chi cho các phiếu quỹ cũ do hệ thống tự sinh nhưng còn để
-    /// <c>nhom_chi_phi_id = NULL</c>: phiếu thu bán hàng / thu nợ khách hàng
-    /// (mã hóa đơn, liên kết hóa đơn hoặc nội dung "Thu nợ...") và phiếu chi
-    /// thanh toán nhập hàng (liên kết phiếu nhập). Nhờ vậy bộ lọc
-    /// "Thu khách hàng" / "Chi nhà cung cấp" lọc đúng cả dữ liệu cũ.
+    /// Gáº¯n loáº¡i thu/chi cho cÃ¡c phiáº¿u quá»¹ cÅ© do há»‡ thá»‘ng tá»± sinh nhÆ°ng cÃ²n Ä‘á»ƒ
+    /// <c>nhom_chi_phi_id = NULL</c>: phiáº¿u thu bÃ¡n hÃ ng / thu ná»£ khÃ¡ch hÃ ng
+    /// (mÃ£ hÃ³a Ä‘Æ¡n, liÃªn káº¿t hÃ³a Ä‘Æ¡n hoáº·c ná»™i dung "Thu ná»£...") vÃ  phiáº¿u chi
+    /// thanh toÃ¡n nháº­p hÃ ng (liÃªn káº¿t phiáº¿u nháº­p). Nhá» váº­y bá»™ lá»c
+    /// "Thu khÃ¡ch hÃ ng" / "Chi nhÃ  cung cáº¥p" lá»c Ä‘Ãºng cáº£ dá»¯ liá»‡u cÅ©.
     /// <para>
-    /// Chỉ chạy một lần, chỉ đụng các dòng đang NULL nên chạy lại vẫn an toàn
-    /// và không bao giờ ghi đè loại mà người dùng đã chọn.
+    /// Chá»‰ cháº¡y má»™t láº§n, chá»‰ Ä‘á»¥ng cÃ¡c dÃ²ng Ä‘ang NULL nÃªn cháº¡y láº¡i váº«n an toÃ n
+    /// vÃ  khÃ´ng bao giá» ghi Ä‘Ã¨ loáº¡i mÃ  ngÆ°á»i dÃ¹ng Ä‘Ã£ chá»n.
     /// </para>
     /// </summary>
     private async Task EnsureSoQuyNhomChiPhiChoPhieuCuAsync()
@@ -9358,13 +9384,13 @@ LIMIT 500;
 
             if (idThuKhachHang is uint idThu && idThu > 0)
             {
-                // Phiếu thu bán hàng có liên kết hóa đơn hoặc mã hóa đơn; phiếu
-                // thu nợ có nội dung bắt đầu bằng "Thu nợ".
+                // Phiáº¿u thu bÃ¡n hÃ ng cÃ³ liÃªn káº¿t hÃ³a Ä‘Æ¡n hoáº·c mÃ£ hÃ³a Ä‘Æ¡n; phiáº¿u
+                // thu ná»£ cÃ³ ná»™i dung báº¯t Ä‘áº§u báº±ng "Thu ná»£".
                 var nhanDienKhachHang = coCotHoaDon
                     ? "(pc.hoa_don_ban_hang_id IS NOT NULL"
                       + " OR NULLIF(TRIM(pc.ma_hoa_don), '') IS NOT NULL"
-                      + " OR COALESCE(pc.noi_dung, '') LIKE 'Thu nợ%')"
-                    : "COALESCE(pc.noi_dung, '') LIKE 'Thu nợ%'";
+                      + " OR COALESCE(pc.noi_dung, '') LIKE 'Thu ná»£%')"
+                    : "COALESCE(pc.noi_dung, '') LIKE 'Thu ná»£%'";
 
                 await connection.ExecuteAsync(
                     $"""
@@ -9383,7 +9409,7 @@ LIMIT 500;
             {
                 var nhanDienNhaCungCap = coCotPhieuNhap
                     ? "pc.phieu_nhap_hang_id IS NOT NULL"
-                    : "COALESCE(pc.noi_dung, '') LIKE 'Thanh toán%nhập hàng%'";
+                    : "COALESCE(pc.noi_dung, '') LIKE 'Thanh toÃ¡n%nháº­p hÃ ng%'";
 
                 await connection.ExecuteAsync(
                     $"""
@@ -9398,14 +9424,14 @@ LIMIT 500;
         }
         catch
         {
-            // Best-effort: lỗi migration không được làm hỏng việc nạp sổ quỹ.
+            // Best-effort: lá»—i migration khÃ´ng Ä‘Æ°á»£c lÃ m há»ng viá»‡c náº¡p sá»• quá»¹.
         }
     }
 
     /// <summary>
-    /// Bảo đảm bảng hoa_don_ban_hang có 3 cột:
+    /// Báº£o Ä‘áº£m báº£ng hoa_don_ban_hang cÃ³ 3 cá»™t:
     /// so_dien_thoai, dia_chi, in_kem_thong_tin.
-    /// Nếu database chưa có thì tự động ALTER TABLE trước khi mở transaction.
+    /// Náº¿u database chÆ°a cÃ³ thÃ¬ tá»± Ä‘á»™ng ALTER TABLE trÆ°á»›c khi má»Ÿ transaction.
     /// </summary>
     private async Task<bool> EnsureHoaDonContactColumnsAsync()
     {
@@ -9466,17 +9492,17 @@ LIMIT 500;
     }
 
     // ================================================================
-    // SỔ QUỸ - PHIẾU THU / PHIẾU CHI
-    // Database hiện có bảng `phieu_chi` (chưa có bảng `phieu_thu`),
-    // nên cả dãy mã PT và PC đều lấy số thứ tự lớn nhất từ `phieu_chi`.
+    // Sá»” QUá»¸ - PHIáº¾U THU / PHIáº¾U CHI
+    // Database hiá»‡n cÃ³ báº£ng `phieu_chi` (chÆ°a cÃ³ báº£ng `phieu_thu`),
+    // nÃªn cáº£ dÃ£y mÃ£ PT vÃ  PC Ä‘á»u láº¥y sá»‘ thá»© tá»± lá»›n nháº¥t tá»« `phieu_chi`.
     // ================================================================
 
     /// <summary>
-    /// Sinh mã phiếu sổ quỹ tự động: "PT0001", "PT0002"... hoặc "PC0001", "PC0002"...
-    /// Số thứ tự lấy từ MAX phần số của các mã ĐÚNG ĐỊNH DẠNG có cùng tiền tố
-    /// (không dùng COUNT(*) để tránh trùng khi dữ liệu bị xóa).
-    /// Mã NULL/rỗng/không đúng định dạng bị loại bằng REGEXP nên dữ liệu rác không làm hỏng số thứ tự.
-    /// Mọi lỗi kết nối đều được nuốt và trả về mã mặc định để ứng dụng không bị crash.
+    /// Sinh mÃ£ phiáº¿u sá»• quá»¹ tá»± Ä‘á»™ng: "PT0001", "PT0002"... hoáº·c "PC0001", "PC0002"...
+    /// Sá»‘ thá»© tá»± láº¥y tá»« MAX pháº§n sá»‘ cá»§a cÃ¡c mÃ£ ÄÃšNG Äá»ŠNH Dáº NG cÃ³ cÃ¹ng tiá»n tá»‘
+    /// (khÃ´ng dÃ¹ng COUNT(*) Ä‘á»ƒ trÃ¡nh trÃ¹ng khi dá»¯ liá»‡u bá»‹ xÃ³a).
+    /// MÃ£ NULL/rá»—ng/khÃ´ng Ä‘Ãºng Ä‘á»‹nh dáº¡ng bá»‹ loáº¡i báº±ng REGEXP nÃªn dá»¯ liá»‡u rÃ¡c khÃ´ng lÃ m há»ng sá»‘ thá»© tá»±.
+    /// Má»i lá»—i káº¿t ná»‘i Ä‘á»u Ä‘Æ°á»£c nuá»‘t vÃ  tráº£ vá» mÃ£ máº·c Ä‘á»‹nh Ä‘á»ƒ á»©ng dá»¥ng khÃ´ng bá»‹ crash.
     /// </summary>
     public async Task<string> TaoMaPhieuQuyMoiAsync(string tienTo)
     {
@@ -9488,8 +9514,8 @@ LIMIT 500;
         {
             await using var connection = await OpenAsync();
 
-            // REGEXP loại bỏ mã rỗng / sai định dạng (VD "PCxxxx").
-            // Collation utf8mb4_unicode_ci nên 'pt0001' cũng khớp với 'PT0001'.
+            // REGEXP loáº¡i bá» mÃ£ rá»—ng / sai Ä‘á»‹nh dáº¡ng (VD "PCxxxx").
+            // Collation utf8mb4_unicode_ci nÃªn 'pt0001' cÅ©ng khá»›p vá»›i 'PT0001'.
             var maxSuffix = await connection.ExecuteScalarAsync<long?>(
                 """
                 SELECT COALESCE(MAX(CAST(SUBSTRING(TRIM(ma_phieu_chi), 3) AS SIGNED)), 0)
@@ -9499,11 +9525,11 @@ LIMIT 500;
                 """,
                 new { Prefix = prefix }) ?? 0L;
 
-            // Chưa có phiếu nào (hoặc mã toàn sai định dạng) => bắt đầu từ 0001.
+            // ChÆ°a cÃ³ phiáº¿u nÃ o (hoáº·c mÃ£ toÃ n sai Ä‘á»‹nh dáº¡ng) => báº¯t Ä‘áº§u tá»« 0001.
             var nextNumber = maxSuffix > 0 ? maxSuffix + 1 : 1L;
 
-            // ma_phieu_chi có UNIQUE KEY: nếu mã vừa sinh trùng (2 máy cùng mở màn hình)
-            // thì tăng tiếp cho tới khi ra mã còn trống.
+            // ma_phieu_chi cÃ³ UNIQUE KEY: náº¿u mÃ£ vá»«a sinh trÃ¹ng (2 mÃ¡y cÃ¹ng má»Ÿ mÃ n hÃ¬nh)
+            // thÃ¬ tÄƒng tiáº¿p cho tá»›i khi ra mÃ£ cÃ²n trá»‘ng.
             for (var i = 0; i < 100; i++)
             {
                 var candidate = prefix + nextNumber.ToString("D4", CultureInfo.InvariantCulture);
@@ -9522,24 +9548,24 @@ LIMIT 500;
         }
         catch
         {
-            // Không chặn người dùng vì lỗi mạng/database.
+            // KhÃ´ng cháº·n ngÆ°á»i dÃ¹ng vÃ¬ lá»—i máº¡ng/database.
             return prefix + "0001";
         }
     }
 
-    /// <summary>Trạng thái chứng từ đã hủy: không được tính vào tổng thu/tổng chi của quỹ.</summary>
+    /// <summary>Tráº¡ng thÃ¡i chá»©ng tá»« Ä‘Ã£ há»§y: khÃ´ng Ä‘Æ°á»£c tÃ­nh vÃ o tá»•ng thu/tá»•ng chi cá»§a quá»¹.</summary>
     public const string TrangThaiPhieuHuy = "HUY";
 
     /// <summary>
-    /// Trạng thái chứng tư đã hoàn tất: duy nhất được tính vào quỹ.
-    /// Xem <see cref="LuuPhieuQuyAsync"/> đang ghi trạng thái này.
+    /// Tráº¡ng thÃ¡i chá»©ng tÆ° Ä‘Ã£ hoÃ n táº¥t: duy nháº¥t Ä‘Æ°á»£c tÃ­nh vÃ o quá»¹.
+    /// Xem <see cref="LuuPhieuQuyAsync"/> Ä‘ang ghi tráº¡ng thÃ¡i nÃ y.
     /// </summary>
     public const string TrangThaiPhieuHoanThanh = "HOAN_THANH";
 
     /// <summary>
-    /// FROM + JOIN dùng chung cho mọi truy vấn sổ quỹ.
-    /// Phiếu thu và phiếu chi cùng nằm trong bảng <c>phieu_chi</c>, loại phiếu
-    /// được phân biệt bằng tiền tố mã (PTxxxx / PCxxxx).
+    /// FROM + JOIN dÃ¹ng chung cho má»i truy váº¥n sá»• quá»¹.
+    /// Phiáº¿u thu vÃ  phiáº¿u chi cÃ¹ng náº±m trong báº£ng <c>phieu_chi</c>, loáº¡i phiáº¿u
+    /// Ä‘Æ°á»£c phÃ¢n biá»‡t báº±ng tiá»n tá»‘ mÃ£ (PTxxxx / PCxxxx).
     /// </summary>
     private const string SoQuyFrom = """
     FROM phieu_chi pc
@@ -9548,10 +9574,10 @@ LIMIT 500;
     """;
 
     /// <summary>
-    /// Danh sách cột lấy từ <see cref="SoQuyFrom"/>.
-    /// Bản đầy đủ dùng khi database đã có <c>nguoi_nop_nhan</c> và <c>ghi_chu</c>;
-    /// bản rút gọn dùng khi chưa thêm được (xem
-    /// <c>EnsurePhieuQuyExtraColumnsAsync</c>) để ứng dụng vẫn chạy với dữ liệu cũ.
+    /// Danh sÃ¡ch cá»™t láº¥y tá»« <see cref="SoQuyFrom"/>.
+    /// Báº£n Ä‘áº§y Ä‘á»§ dÃ¹ng khi database Ä‘Ã£ cÃ³ <c>nguoi_nop_nhan</c> vÃ  <c>ghi_chu</c>;
+    /// báº£n rÃºt gá»n dÃ¹ng khi chÆ°a thÃªm Ä‘Æ°á»£c (xem
+    /// <c>EnsurePhieuQuyExtraColumnsAsync</c>) Ä‘á»ƒ á»©ng dá»¥ng váº«n cháº¡y vá»›i dá»¯ liá»‡u cÅ©.
     /// </summary>
     private const string SoQuyCotChonDayDu = """
             pc.ma_phieu_chi AS MaPhieu,
@@ -9584,19 +9610,19 @@ LIMIT 500;
     private static string LayCotChonSoQuy(bool coCotMoi) => coCotMoi ? SoQuyCotChonDayDu : SoQuyCotChonRutGon;
 
     /// <summary>
-    /// Dựng điều kiện WHERE cho sổ quỹ. Cùng một hàm được dùng cho cả
-    /// COUNT (phân trang), SELECT (danh sách) và SUM (thống kê) nên
-    /// danh sách với thống kê không thể lệch nhau.
+    /// Dá»±ng Ä‘iá»u kiá»‡n WHERE cho sá»• quá»¹. CÃ¹ng má»™t hÃ m Ä‘Æ°á»£c dÃ¹ng cho cáº£
+    /// COUNT (phÃ¢n trang), SELECT (danh sÃ¡ch) vÃ  SUM (thá»‘ng kÃª) nÃªn
+    /// danh sÃ¡ch vá»›i thá»‘ng kÃª khÃ´ng thá»ƒ lá»‡ch nhau.
     /// <para>
-    /// Mọi điều kiện đều gắn tham số nên không có chuyện dán chuỗi từ người dùng
-    /// vào SQL. Khoảng thời gian và khoảng tiền có thể tắt riêng vì quỹ đầu kỳ
-    /// cần tới tận các phiếu trước mốc thời gian nhưng không được lọc theo số tiền.
+    /// Má»i Ä‘iá»u kiá»‡n Ä‘á»u gáº¯n tham sá»‘ nÃªn khÃ´ng cÃ³ chuyá»‡n dÃ¡n chuá»—i tá»« ngÆ°á»i dÃ¹ng
+    /// vÃ o SQL. Khoáº£ng thá»i gian vÃ  khoáº£ng tiá»n cÃ³ thá»ƒ táº¯t riÃªng vÃ¬ quá»¹ Ä‘áº§u ká»³
+    /// cáº§n tá»›i táº­n cÃ¡c phiáº¿u trÆ°á»›c má»‘c thá»i gian nhÆ°ng khÃ´ng Ä‘Æ°á»£c lá»c theo sá»‘ tiá»n.
     /// </para>
     /// <para>
-    /// <paramref name="apDungBoLocHienThi"/> = false để bỏ toàn bộ các bộ lọc chỉ
-    /// dùng cho việc xem danh sách (tìm kiếm, loại chứng từ, loại thu/chi, người
-    /// tạo, trạng thái, khoảng tiền). Thẻ tổng quan của sổ quỹ dùng chế độ này để
-    /// tồn quỹ luôn đúng số dư thực tế, không bị bóp méo khi người dùng lọc bảng.
+    /// <paramref name="apDungBoLocHienThi"/> = false Ä‘á»ƒ bá» toÃ n bá»™ cÃ¡c bá»™ lá»c chá»‰
+    /// dÃ¹ng cho viá»‡c xem danh sÃ¡ch (tÃ¬m kiáº¿m, loáº¡i chá»©ng tá»«, loáº¡i thu/chi, ngÆ°á»i
+    /// táº¡o, tráº¡ng thÃ¡i, khoáº£ng tiá»n). Tháº» tá»•ng quan cá»§a sá»• quá»¹ dÃ¹ng cháº¿ Ä‘á»™ nÃ y Ä‘á»ƒ
+    /// tá»“n quá»¹ luÃ´n Ä‘Ãºng sá»‘ dÆ° thá»±c táº¿, khÃ´ng bá»‹ bÃ³p mÃ©o khi ngÆ°á»i dÃ¹ng lá»c báº£ng.
     /// </para>
     /// </summary>
     private static string TaoDieuKienSoQuy(
@@ -9609,7 +9635,7 @@ LIMIT 500;
 
         if (apDungBoLocHienThi)
         {
-            // Ô tìm kiếm: mã phiếu, nội dung, ghi chú, người nộp/nhận, người tạo, tên loại thu/chi.
+            // Ã” tÃ¬m kiáº¿m: mÃ£ phiáº¿u, ná»™i dung, ghi chÃº, ngÆ°á»i ná»™p/nháº­n, ngÆ°á»i táº¡o, tÃªn loáº¡i thu/chi.
             var timKiem = new StringBuilder();
             timKiem.Append(
                 "(@TimKiem = ''"
@@ -9618,7 +9644,7 @@ LIMIT 500;
                 + " OR COALESCE(nd.ho_ten, '') LIKE @TimKiemLike"
                 + " OR COALESCE(ncp.ten_nhom, '') LIKE @TimKiemLike");
 
-            // Hai cột này chỉ tồn tại khi migration đã chạy thành công.
+            // Hai cá»™t nÃ y chá»‰ tá»“n táº¡i khi migration Ä‘Ã£ cháº¡y thÃ nh cÃ´ng.
             if (coCotNguoiNopNhanGhiChu)
             {
                 timKiem.Append(" OR COALESCE(pc.nguoi_nop_nhan, '') LIKE @TimKiemLike");
@@ -9628,14 +9654,14 @@ LIMIT 500;
             timKiem.Append(")");
             dieuKien.Add(timKiem.ToString());
 
-            // Loại chứng từ: 0 = cả hai, 1 = chỉ phiếu thu, 2 = chỉ phiếu chi.
+            // Loáº¡i chá»©ng tá»«: 0 = cáº£ hai, 1 = chá»‰ phiáº¿u thu, 2 = chá»‰ phiáº¿u chi.
             dieuKien.Add(
                 "(@LoaiChungTu = 0"
                 + " OR (@LoaiChungTu = 1 AND pc.ma_phieu_chi LIKE 'PT%')"
                 + " OR (@LoaiChungTu = 2 AND pc.ma_phieu_chi LIKE 'PC%'))");
         }
 
-        // Quỹ: so khớp đúng mã phương thức đang có trong bảng phieu_chi.
+        // Quá»¹: so khá»›p Ä‘Ãºng mÃ£ phÆ°Æ¡ng thá»©c Ä‘ang cÃ³ trong báº£ng phieu_chi.
         dieuKien.Add("(@PhuongThuc = '' OR pc.phuong_thuc = @PhuongThuc)");
 
         if (apDungKhoangThoiGian)
@@ -9646,7 +9672,7 @@ LIMIT 500;
 
         if (apDungBoLocHienThi)
         {
-            // Các nhóm lựa chọn nhiều mục gửi lên dạng danh sách id cách nhau bằng dấu phẩy.
+            // CÃ¡c nhÃ³m lá»±a chá»n nhiá»u má»¥c gá»­i lÃªn dáº¡ng danh sÃ¡ch id cÃ¡ch nhau báº±ng dáº¥u pháº©y.
             dieuKien.Add(
                 "(@LoaiThuChiIds = ''"
                 + " OR FIND_IN_SET(CAST(pc.nhom_chi_phi_id AS CHAR), @LoaiThuChiIds) > 0)");
@@ -9664,7 +9690,7 @@ LIMIT 500;
         return string.Join(" AND ", dieuKien);
     }
 
-    /// <summary>Gom bộ lọc thành đúng bộ tham số mà các câu SQL kia đang mong đợi.</summary>
+    /// <summary>Gom bá»™ lá»c thÃ nh Ä‘Ãºng bá»™ tham sá»‘ mÃ  cÃ¡c cÃ¢u SQL kia Ä‘ang mong Ä‘á»£i.</summary>
     private static object TaoThamSoSoQuy(SoQuyBoLoc loc, bool apDungKhoangTien)
     {
         var timKiem = (loc.TimKiem ?? "").Trim();
@@ -9685,8 +9711,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Lấy một trang phiếu của sổ quỹ theo bộ lọc, kèm tổng số phiếu khớp bộ lọc
-    /// để phân trng. Chỉ đọc đúng <c>pageSize</c> dòng, không kéo toàn bộ bảng về.
+    /// Láº¥y má»™t trang phiáº¿u cá»§a sá»• quá»¹ theo bá»™ lá»c, kÃ¨m tá»•ng sá»‘ phiáº¿u khá»›p bá»™ lá»c
+    /// Ä‘á»ƒ phÃ¢n trng. Chá»‰ Ä‘á»c Ä‘Ãºng <c>pageSize</c> dÃ²ng, khÃ´ng kÃ©o toÃ n bá»™ báº£ng vá».
     /// </summary>
     public async Task<(IReadOnlyList<SoQuyGiaoDich> Items, int TongSoBanGhi)> GetSoQuyPhieuPagedAsync(
         SoQuyBoLoc loc,
@@ -9695,8 +9721,8 @@ LIMIT 500;
     {
         loc ??= new SoQuyBoLoc();
 
-        // Gắn loại cho các phiếu tự sinh còn NULL trước khi lọc, để bộ lọc
-        // "Thu khách hàng" / "Chi nhà cung cấp" áp đúng cả dữ liệu cũ.
+        // Gáº¯n loáº¡i cho cÃ¡c phiáº¿u tá»± sinh cÃ²n NULL trÆ°á»›c khi lá»c, Ä‘á»ƒ bá»™ lá»c
+        // "Thu khÃ¡ch hÃ ng" / "Chi nhÃ  cung cáº¥p" Ã¡p Ä‘Ãºng cáº£ dá»¯ liá»‡u cÅ©.
         await EnsureSoQuyNhomChiPhiChoPhieuCuAsync();
 
         var coCotMoi = await EnsurePhieuQuyExtraColumnsAsync();
@@ -9738,8 +9764,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Chuyển dòng kết quả SQL thành đối tượng hiển thị.
-    /// Dùng chung cho danh sách phân trang và xuất Excel nên hai nơi không thể lệch nhau.
+    /// Chuyá»ƒn dÃ²ng káº¿t quáº£ SQL thÃ nh Ä‘á»‘i tÆ°á»£ng hiá»ƒn thá»‹.
+    /// DÃ¹ng chung cho danh sÃ¡ch phÃ¢n trang vÃ  xuáº¥t Excel nÃªn hai nÆ¡i khÃ´ng thá»ƒ lá»‡ch nhau.
     /// </summary>
     private static List<SoQuyGiaoDich> ChuyenThanhGiaoDich(IEnumerable<SoQuyPhieuRow> rows)
     {
@@ -9752,11 +9778,11 @@ LIMIT 500;
             items.Add(new SoQuyGiaoDich
             {
                 MaPhieu = maPhieu,
-                // Phiếu thu và phiếu chi cùng nằm trong bảng phieu_chi nên loại
-                // phiếu được suy ra từ tiền tố mã (PTxxxx / PCxxxx).
+                // Phiáº¿u thu vÃ  phiáº¿u chi cÃ¹ng náº±m trong báº£ng phieu_chi nÃªn loáº¡i
+                // phiáº¿u Ä‘Æ°á»£c suy ra tá»« tiá»n tá»‘ mÃ£ (PTxxxx / PCxxxx).
                 LaThu = maPhieu.StartsWith("PT", StringComparison.OrdinalIgnoreCase),
-                // Người nộp/nhận là thông tin riêng của phiếu (cột nguoi_nop_nhan),
-                // còn người tạo là nhân viên thao tác (FK nguoi_thuc_hien_id).
+                // NgÆ°á»i ná»™p/nháº­n lÃ  thÃ´ng tin riÃªng cá»§a phiáº¿u (cá»™t nguoi_nop_nhan),
+                // cÃ²n ngÆ°á»i táº¡o lÃ  nhÃ¢n viÃªn thao tÃ¡c (FK nguoi_thuc_hien_id).
                 NguoiNopNhan = row.NguoiNopNhan ?? "",
                 NguoiTao = row.NguoiTao ?? "",
                 NoiDung = row.NoiDung ?? "",
@@ -9773,8 +9799,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Lấy chi tiết một phiếu thu/chi để mở màn hình chi tiết.
-    /// Chỉ đọc đúng một dòng theo mã phiếu nên không ảnh hưởng hiệu năng.
+    /// Láº¥y chi tiáº¿t má»™t phiáº¿u thu/chi Ä‘á»ƒ má»Ÿ mÃ n hÃ¬nh chi tiáº¿t.
+    /// Chá»‰ Ä‘á»c Ä‘Ãºng má»™t dÃ²ng theo mÃ£ phiáº¿u nÃªn khÃ´ng áº£nh hÆ°á»Ÿng hiá»‡u nÄƒng.
     /// </summary>
     public async Task<SoQuyChiTiet?> GetSoQuyChiTietAsync(string maPhieu)
     {
@@ -9820,12 +9846,12 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Hủy phiếu: chỉ chuyển sang trạng thái HUY khi phiếu đang HOAN_THANH.
-    /// Trả về số dòng được cập nhật (0 = phiếu không tồn tại hoặc đã hủy).
+    /// Há»§y phiáº¿u: chá»‰ chuyá»ƒn sang tráº¡ng thÃ¡i HUY khi phiáº¿u Ä‘ang HOAN_THANH.
+    /// Tráº£ vá» sá»‘ dÃ²ng Ä‘Æ°á»£c cáº­p nháº­t (0 = phiáº¿u khÃ´ng tá»“n táº¡i hoáº·c Ä‘Ã£ há»§y).
     /// </summary>
     public async Task<int> HuyPhieuQuyAsync(string maPhieu)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CashBookCancel, "Bạn không có quyền hủy phiếu thu/chi.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CashBookCancel, "Báº¡n khÃ´ng cÃ³ quyá»n há»§y phiáº¿u thu/chi.");
         if (string.IsNullOrWhiteSpace(maPhieu))
             return 0;
 
@@ -9848,20 +9874,20 @@ LIMIT 500;
 
         if (affected > 0)
         {
-            _ = LogSubAccountActivityAsync("Hủy sổ quỹ", "SO_QUY", null, maPhieu.Trim(), $"Hủy phiếu sổ quỹ {maPhieu.Trim()}");
+            _ = LogSubAccountActivityAsync("Há»§y sá»• quá»¹", "SO_QUY", null, maPhieu.Trim(), $"Há»§y phiáº¿u sá»• quá»¹ {maPhieu.Trim()}");
         }
 
         return affected;
     }
 
     /// <summary>
-    /// Hủy nhiều phiếu cùng lúc trong một transaction: hoặc cả nhóm thành công,
-    /// hoặc không phiếu nào bị đổi. Dùng cho thao tác chọn nhiều trên danh sách.
-    /// Trả về số phiếu thực sự chuyển sang trạng thái hủy (những phiếu đã hủy trước đó không tính).
+    /// Há»§y nhiá»u phiáº¿u cÃ¹ng lÃºc trong má»™t transaction: hoáº·c cáº£ nhÃ³m thÃ nh cÃ´ng,
+    /// hoáº·c khÃ´ng phiáº¿u nÃ o bá»‹ Ä‘á»•i. DÃ¹ng cho thao tÃ¡c chá»n nhiá»u trÃªn danh sÃ¡ch.
+    /// Tráº£ vá» sá»‘ phiáº¿u thá»±c sá»± chuyá»ƒn sang tráº¡ng thÃ¡i há»§y (nhá»¯ng phiáº¿u Ä‘Ã£ há»§y trÆ°á»›c Ä‘Ã³ khÃ´ng tÃ­nh).
     /// </summary>
     public async Task<int> HuyNhieuPhieuQuyAsync(IReadOnlyCollection<string> maPhieus)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CashBookCancel, "Bạn không có quyền hủy phiếu thu/chi.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CashBookCancel, "Báº¡n khÃ´ng cÃ³ quyá»n há»§y phiáº¿u thu/chi.");
         var danhSach = maPhieus
             .Where(ma => !string.IsNullOrWhiteSpace(ma))
             .Select(ma => ma.Trim())
@@ -9903,9 +9929,9 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Lấy toàn bộ phiếu khớp bộ lọc để xuất Excel (không phân trang).
-    /// Dùng đúng điều kiện WHERE với danh sách nên file xuất ra luôn khớp
-    /// với những gì người dùng đang nhìn thấy trên màn hình.
+    /// Láº¥y toÃ n bá»™ phiáº¿u khá»›p bá»™ lá»c Ä‘á»ƒ xuáº¥t Excel (khÃ´ng phÃ¢n trang).
+    /// DÃ¹ng Ä‘Ãºng Ä‘iá»u kiá»‡n WHERE vá»›i danh sÃ¡ch nÃªn file xuáº¥t ra luÃ´n khá»›p
+    /// vá»›i nhá»¯ng gÃ¬ ngÆ°á»i dÃ¹ng Ä‘ang nhÃ¬n tháº¥y trÃªn mÃ n hÃ¬nh.
     /// </summary>
     public async Task<IReadOnlyList<SoQuyGiaoDich>> GetSoQuyPhieuExportAsync(SoQuyBoLoc loc)
     {
@@ -9933,7 +9959,7 @@ LIMIT 500;
         return ChuyenThanhGiaoDich(rows);
     }
 
-    /// <summary>Trộn bộ tham số lọc với LIMIT/OFFSET thành một đối tượng duy nhất.</summary>
+    /// <summary>Trá»™n bá»™ tham sá»‘ lá»c vá»›i LIMIT/OFFSET thÃ nh má»™t Ä‘á»‘i tÆ°á»£ng duy nháº¥t.</summary>
     private static Dictionary<string, object?> GopThamSo(
         object thamSoLoc,
         int limit,
@@ -9951,13 +9977,13 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Thống kê sổ quỹ: quỹ đầu kỳ, tổng thu, tổng chi, tồn quỹ, tổng số phiếu.
-    /// Bốn thẻ chỉ số luôn tính trên CẢ phiếu thu lẫn phiếu chi, chỉ theo kỳ thời
-    /// gian và quỹ đang chọn, nên tồn quỹ luôn là số dư thực tế chứ không bị
-    /// bóp méo khi người dùng lọc loại chứng từ / tìm kiếm / loại thu chi / người
-    /// tạo / khoảng tiền (các bộ lọc đó chỉ ảnh hưởng danh sách bên dưới).
-    /// Tổng thu/tổng chi chỉ cộng phiếu <see cref="TrangThaiPhieuHoanThanh"/> nên
-    /// phiếu đã hủy không làm thay đổi quỹ.
+    /// Thá»‘ng kÃª sá»• quá»¹: quá»¹ Ä‘áº§u ká»³, tá»•ng thu, tá»•ng chi, tá»“n quá»¹, tá»•ng sá»‘ phiáº¿u.
+    /// Bá»‘n tháº» chá»‰ sá»‘ luÃ´n tÃ­nh trÃªn Cáº¢ phiáº¿u thu láº«n phiáº¿u chi, chá»‰ theo ká»³ thá»i
+    /// gian vÃ  quá»¹ Ä‘ang chá»n, nÃªn tá»“n quá»¹ luÃ´n lÃ  sá»‘ dÆ° thá»±c táº¿ chá»© khÃ´ng bá»‹
+    /// bÃ³p mÃ©o khi ngÆ°á»i dÃ¹ng lá»c loáº¡i chá»©ng tá»« / tÃ¬m kiáº¿m / loáº¡i thu chi / ngÆ°á»i
+    /// táº¡o / khoáº£ng tiá»n (cÃ¡c bá»™ lá»c Ä‘Ã³ chá»‰ áº£nh hÆ°á»Ÿng danh sÃ¡ch bÃªn dÆ°á»›i).
+    /// Tá»•ng thu/tá»•ng chi chá»‰ cá»™ng phiáº¿u <see cref="TrangThaiPhieuHoanThanh"/> nÃªn
+    /// phiáº¿u Ä‘Ã£ há»§y khÃ´ng lÃ m thay Ä‘á»•i quá»¹.
     /// </summary>
     public async Task<SoQuyTongHop> GetSoQuyTongHopTheoLocAsync(SoQuyBoLoc loc)
     {
@@ -9969,9 +9995,9 @@ LIMIT 500;
 
             await using var connection = await OpenAsync();
 
-            // Thẻ tổng quan bỏ qua các bộ lọc chỉ dùng để xem danh sách
-            // (loại chứng từ, tìm kiếm, loại thu/chi, người tạo, trạng thái,
-            // khoảng tiền) để quỹ đầu kỳ và tồn quỹ luôn là số dư thực tế.
+            // Tháº» tá»•ng quan bá» qua cÃ¡c bá»™ lá»c chá»‰ dÃ¹ng Ä‘á»ƒ xem danh sÃ¡ch
+            // (loáº¡i chá»©ng tá»«, tÃ¬m kiáº¿m, loáº¡i thu/chi, ngÆ°á»i táº¡o, tráº¡ng thÃ¡i,
+            // khoáº£ng tiá»n) Ä‘á»ƒ quá»¹ Ä‘áº§u ká»³ vÃ  tá»“n quá»¹ luÃ´n lÃ  sá»‘ dÆ° thá»±c táº¿.
             var dieuKienDauKy = TaoDieuKienSoQuy(
                 apDungKhoangThoiGian: false,
                 apDungKhoangTien: false,
@@ -9984,8 +10010,8 @@ LIMIT 500;
                 coCotMoi,
                 apDungBoLocHienThi: false);
 
-            // Quỹ đầu kỳ chỉ có nghĩa khi đang giới hạn bởi mốc bắt đầu: gom tất cả
-            // phiếu trước mốc đó, thu trừ chi.
+            // Quá»¹ Ä‘áº§u ká»³ chá»‰ cÃ³ nghÄ©a khi Ä‘ang giá»›i háº¡n bá»Ÿi má»‘c báº¯t Ä‘áº§u: gom táº¥t cáº£
+            // phiáº¿u trÆ°á»›c má»‘c Ä‘Ã³, thu trá»« chi.
             var sql = $"""
             SELECT
                 (
@@ -10012,15 +10038,15 @@ LIMIT 500;
 
             var row = await connection.QueryFirstOrDefaultAsync<SoQuyTongHopRow>(sql, parameters);
 
-            // Tổng số phiếu phải khớp danh sách đang hiển thị nên đếm theo đúng
-            // bộ lọc hiển thị (gồm cả phiếu đã hủy).
+            // Tá»•ng sá»‘ phiáº¿u pháº£i khá»›p danh sÃ¡ch Ä‘ang hiá»ƒn thá»‹ nÃªn Ä‘áº¿m theo Ä‘Ãºng
+            // bá»™ lá»c hiá»ƒn thá»‹ (gá»“m cáº£ phiáº¿u Ä‘Ã£ há»§y).
             var dieuKienDem = TaoDieuKienSoQuy(apDungKhoangThoiGian: true, apDungKhoangTien: true, coCotMoi);
             var thamSoDem = TaoThamSoSoQuy(loc, apDungKhoangTien: true);
 
-            // Cộng số dư quỹ đầu kỳ do người dùng khai báo (bảng so_quy_dau_ky)
-            // vào quỹ đầu kỳ để tồn quỹ luôn phản ánh đúng tiền thực có.
-            // Chỉ cộng những khai báo có ngày đầu kỳ không vượt quá mốc bắt đầu
-            // của kỳ đang xem, để khai báo của kỳ sau không làm lệch số.
+            // Cá»™ng sá»‘ dÆ° quá»¹ Ä‘áº§u ká»³ do ngÆ°á»i dÃ¹ng khai bÃ¡o (báº£ng so_quy_dau_ky)
+            // vÃ o quá»¹ Ä‘áº§u ká»³ Ä‘á»ƒ tá»“n quá»¹ luÃ´n pháº£n Ã¡nh Ä‘Ãºng tiá»n thá»±c cÃ³.
+            // Chá»‰ cá»™ng nhá»¯ng khai bÃ¡o cÃ³ ngÃ y Ä‘áº§u ká»³ khÃ´ng vÆ°á»£t quÃ¡ má»‘c báº¯t Ä‘áº§u
+            // cá»§a ká»³ Ä‘ang xem, Ä‘á»ƒ khai bÃ¡o cá»§a ká»³ sau khÃ´ng lÃ m lá»‡ch sá»‘.
             var soDuQuyDauKy = await GetTongSoDuQuyDauKyAsync(loc.PhuongThuc, loc.TuNgay);
 
             var quyDauKy = (row?.QuyDauKy ?? 0m) + soDuQuyDauKy;
@@ -10028,9 +10054,9 @@ LIMIT 500;
             var tongChi = row?.TongChi ?? 0m;
             var tonQuy = quyDauKy + tongThu - tongChi;
 
-            // Bốn thẻ tổng quan luôn phản ánh đúng số liệu của kỳ đang xem:
-            // quỹ đầu kỳ + tổng thu - tổng chi = tồn quỹ. Chip "loại chứng từ"
-            // chỉ lọc danh sách bên dưới, không bóp méo số liệu của kỳ.
+            // Bá»‘n tháº» tá»•ng quan luÃ´n pháº£n Ã¡nh Ä‘Ãºng sá»‘ liá»‡u cá»§a ká»³ Ä‘ang xem:
+            // quá»¹ Ä‘áº§u ká»³ + tá»•ng thu - tá»•ng chi = tá»“n quá»¹. Chip "loáº¡i chá»©ng tá»«"
+            // chá»‰ lá»c danh sÃ¡ch bÃªn dÆ°á»›i, khÃ´ng bÃ³p mÃ©o sá»‘ liá»‡u cá»§a ká»³.
             return new SoQuyTongHop
             {
                 QuyDauKy = quyDauKy,
@@ -10044,14 +10070,14 @@ LIMIT 500;
         }
         catch
         {
-            // Tổng quỹ chỉ để hiển thị: lỗi truy vấn không được chặn màn hình.
+            // Tá»•ng quá»¹ chá»‰ Ä‘á»ƒ hiá»ƒn thá»‹: lá»—i truy váº¥n khÃ´ng Ä‘Æ°á»£c cháº·n mÃ n hÃ¬nh.
             return new SoQuyTongHop();
         }
     }
 
     /// <summary>
-    /// Các quỹ thực sự đang có dữ liệu trong bảng phieu_chi.
-    /// Không tự thêm lựa chọn "ngân hàng"/"ví điện tử" khi database chưa có.
+    /// CÃ¡c quá»¹ thá»±c sá»± Ä‘ang cÃ³ dá»¯ liá»‡u trong báº£ng phieu_chi.
+    /// KhÃ´ng tá»± thÃªm lá»±a chá»n "ngÃ¢n hÃ ng"/"vÃ­ Ä‘iá»‡n tá»­" khi database chÆ°a cÃ³.
     /// </summary>
     public async Task<IReadOnlyList<SoQuyLuaChon>> GetSoQuyQuyOptionsAsync()
     {
@@ -10081,9 +10107,9 @@ LIMIT 500;
     private static bool _daDamBaoNhomChiPhiMacDinh;
 
     /// <summary>
-    /// Bảo đảm hai danh mục "Thu khách hàng" và "Chi nhà cung cấp" luôn có trong
-    /// bảng <c>nhom_chi_phi</c> để người dùng chọn khi tạo phiếu thu/chi thủ công
-    /// và dùng làm tiêu chí lọc ở sổ quỹ. Mục nào đã tồn tại thì bỏ qua.
+    /// Báº£o Ä‘áº£m hai danh má»¥c "Thu khÃ¡ch hÃ ng" vÃ  "Chi nhÃ  cung cáº¥p" luÃ´n cÃ³ trong
+    /// báº£ng <c>nhom_chi_phi</c> Ä‘á»ƒ ngÆ°á»i dÃ¹ng chá»n khi táº¡o phiáº¿u thu/chi thá»§ cÃ´ng
+    /// vÃ  dÃ¹ng lÃ m tiÃªu chÃ­ lá»c á»Ÿ sá»• quá»¹. Má»¥c nÃ o Ä‘Ã£ tá»“n táº¡i thÃ¬ bá» qua.
     /// </summary>
     public async Task EnsureNhomChiPhiMacDinhAsync()
     {
@@ -10102,8 +10128,8 @@ LIMIT 500;
 
             var nhomMacDinh = new[]
             {
-                new { MaNhom = "THU_KHACH_HANG", TenNhom = "Thu khách hàng" },
-                new { MaNhom = "CHI_NHA_CUNG_CAP", TenNhom = "Chi nhà cung cấp" }
+                new { MaNhom = "THU_KHACH_HANG", TenNhom = "Thu khÃ¡ch hÃ ng" },
+                new { MaNhom = "CHI_NHA_CUNG_CAP", TenNhom = "Chi nhÃ  cung cáº¥p" }
             };
 
             await connection.ExecuteAsync(sql, nhomMacDinh);
@@ -10117,8 +10143,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Các loại thu/chi thực tế đang có trong bảng nhom_chi_phi.
-    /// Bảng này rỗng thì bộ lọc hiển thị rỗng, không bịa thêm loại giả.
+    /// CÃ¡c loáº¡i thu/chi thá»±c táº¿ Ä‘ang cÃ³ trong báº£ng nhom_chi_phi.
+    /// Báº£ng nÃ y rá»—ng thÃ¬ bá»™ lá»c hiá»ƒn thá»‹ rá»—ng, khÃ´ng bá»‹a thÃªm loáº¡i giáº£.
     /// </summary>
     public async Task<IReadOnlyList<SoQuyLuaChonItem>> GetSoQuyLoaiThuChiOptionsAsync()
     {
@@ -10128,8 +10154,8 @@ LIMIT 500;
 
             await using var connection = await OpenAsync();
 
-            // Dapper khớp tên cột theo đúng tên thuộc tính (bỏ qua dấu gạch dưới),
-            // nên phải đặt alias là TenNhom chứ không để tên cột là ten_nhom.
+            // Dapper khá»›p tÃªn cá»™t theo Ä‘Ãºng tÃªn thuá»™c tÃ­nh (bá» qua dáº¥u gáº¡ch dÆ°á»›i),
+            // nÃªn pháº£i Ä‘áº·t alias lÃ  TenNhom chá»© khÃ´ng Ä‘á»ƒ tÃªn cá»™t lÃ  ten_nhom.
             const string sql = """
             SELECT id, ten_nhom AS TenNhom
             FROM nhom_chi_phi
@@ -10152,8 +10178,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Tên hiển thị của một mã loại thu/chi trong bảng nhom_chi_phi.
-    /// Trả về r��ng nếu id không tồn tại (phiếu cũ chưa gán nhóm).
+    /// TÃªn hiá»ƒn thá»‹ cá»§a má»™t mÃ£ loáº¡i thu/chi trong báº£ng nhom_chi_phi.
+    /// Tráº£ vá» rï¿½ï¿½ng náº¿u id khÃ´ng tá»“n táº¡i (phiáº¿u cÅ© chÆ°a gÃ¡n nhÃ³m).
     /// </summary>
     public async Task<string> GetTenNhomChiPhiAsync(int id)
     {
@@ -10171,14 +10197,14 @@ LIMIT 500;
         }
     }
 
-    /// <summary>Người dùng thực tế trong bảng nguoi_dung, dùng cho bộ lọc "Người tạo".</summary>
+    /// <summary>NgÆ°á»i dÃ¹ng thá»±c táº¿ trong báº£ng nguoi_dung, dÃ¹ng cho bá»™ lá»c "NgÆ°á»i táº¡o".</summary>
     public async Task<IReadOnlyList<SoQuyLuaChonItem>> GetSoQuyNguoiTaoOptionsAsync()
     {
         try
         {
             await using var connection = await OpenAsync();
 
-            // Dùng chung kiểu dòng với nhom_chi_phi, xem chú thích alias bên trên.
+            // DÃ¹ng chung kiá»ƒu dÃ²ng vá»›i nhom_chi_phi, xem chÃº thÃ­ch alias bÃªn trÃªn.
             const string sql = """
             SELECT id, ho_ten AS TenNhom
             FROM nguoi_dung
@@ -10201,19 +10227,19 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Đổi mã phương thức trong database sang nhãn tiếng Việt.
-    /// Mã lạ thì hiện nguyên văn, không bịa nghĩa.
+    /// Äá»•i mÃ£ phÆ°Æ¡ng thá»©c trong database sang nhÃ£n tiáº¿ng Viá»‡t.
+    /// MÃ£ láº¡ thÃ¬ hiá»‡n nguyÃªn vÄƒn, khÃ´ng bá»‹a nghÄ©a.
     /// </summary>
     private static string TenHienThiPhuongThuc(string ma) => ma.Trim().ToUpperInvariant() switch
     {
-        "TIEN_MAT" => "Tiền mặt",
-        "CHUYEN_KHOAN" or "CHUYEN_KHOAN_NGAN_HANG" or "NGAN_HANG" => "Ngân hàng",
-        "THE" or "THE_TIN_DUNG" => "Thẻ",
-        "VI_DIEN_TU" or "VI" => "Ví điện tử",
+        "TIEN_MAT" => "Tiá»n máº·t",
+        "CHUYEN_KHOAN" or "CHUYEN_KHOAN_NGAN_HANG" or "NGAN_HANG" => "NgÃ¢n hÃ ng",
+        "THE" or "THE_TIN_DUNG" => "Tháº»",
+        "VI_DIEN_TU" or "VI" => "VÃ­ Ä‘iá»‡n tá»­",
         _ => ma
     };
 
-    /// <summary>Dòng kết quả truy vấn sổ quỹ (chỉ dùng nội bộ DatabaseService).</summary>
+    /// <summary>DÃ²ng káº¿t quáº£ truy váº¥n sá»• quá»¹ (chá»‰ dÃ¹ng ná»™i bá»™ DatabaseService).</summary>
     private sealed class SoQuyPhieuRow
     {
         public string MaPhieu { get; set; } = "";
@@ -10224,27 +10250,27 @@ LIMIT 500;
         public DateTime ThoiGian { get; set; }
 
         /// <summary>
-        /// Nhân viên thao tác (FK nguoi_thuc_hien_id), tức người tạo chứng từ.
-        /// Không phải người nộp/nhận — thông tin đó nằm ở cột riêng.
+        /// NhÃ¢n viÃªn thao tÃ¡c (FK nguoi_thuc_hien_id), tá»©c ngÆ°á»i táº¡o chá»©ng tá»«.
+        /// KhÃ´ng pháº£i ngÆ°á»i ná»™p/nháº­n â€” thÃ´ng tin Ä‘Ã³ náº±m á»Ÿ cá»™t riÃªng.
         /// </summary>
         public string NguoiTao { get; set; } = "";
 
         public string TrangThai { get; set; } = "";
         public string TenLoai { get; set; } = "";
 
-        /// <summary>Khóa ngoại tới nhom_chi_phi, cần cho form sửa để chọn lại loại.</summary>
+        /// <summary>KhÃ³a ngoáº¡i tá»›i nhom_chi_phi, cáº§n cho form sá»­a Ä‘á»ƒ chá»n láº¡i loáº¡i.</summary>
         public uint? NhomChiPhiId { get; set; }
         public string PhuongThuc { get; set; } = "";
     }
 
-    /// <summary>Danh mục chuẩn hóa dùng để tra cứu khi validate file nhập.</summary>
+    /// <summary>Danh má»¥c chuáº©n hÃ³a dÃ¹ng Ä‘á»ƒ tra cá»©u khi validate file nháº­p.</summary>
     private sealed class SoQuyChuanHoaRow
     {
         public uint Id { get; set; }
         public string Ten { get; set; } = "";
     }
 
-    /// <summary>Dòng kết quả tổng hợp sổ quỹ (chỉ dùng nội bộ DatabaseService).</summary>
+    /// <summary>DÃ²ng káº¿t quáº£ tá»•ng há»£p sá»• quá»¹ (chá»‰ dÃ¹ng ná»™i bá»™ DatabaseService).</summary>
     private sealed class SoQuyTongHopRow
     {
         public decimal QuyDauKy { get; set; }
@@ -10253,7 +10279,7 @@ LIMIT 500;
         public int TongSoPhieu { get; set; }
     }
 
-    /// <summary>Cặp id + tên dùng chung cho nhom_chi_phi và nguoi_dung.</summary>
+    /// <summary>Cáº·p id + tÃªn dÃ¹ng chung cho nhom_chi_phi vÃ  nguoi_dung.</summary>
     private sealed class SoQuyTenNhomRow
     {
         public uint Id { get; set; }
@@ -10261,9 +10287,9 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Tra cứu một lần danh mục cần cho bước validate file nhập.
-    /// Trả về cả chiều id -&gt; tên và tên đã bỏ dấu -&gt; id để dòng trong file chỉ cần
-    /// ghi tên loại / tên người tạo cũng tra khớp được, không query từng dòng.
+    /// Tra cá»©u má»™t láº§n danh má»¥c cáº§n cho bÆ°á»›c validate file nháº­p.
+    /// Tráº£ vá» cáº£ chiá»u id -&gt; tÃªn vÃ  tÃªn Ä‘Ã£ bá» dáº¥u -&gt; id Ä‘á»ƒ dÃ²ng trong file chá»‰ cáº§n
+    /// ghi tÃªn loáº¡i / tÃªn ngÆ°á»i táº¡o cÅ©ng tra khá»›p Ä‘Æ°á»£c, khÃ´ng query tá»«ng dÃ²ng.
     /// </summary>
     public async Task<SoQuyImportDanhMuc> GetSoQuyImportDanhMucAsync()
     {
@@ -10299,7 +10325,7 @@ LIMIT 500;
                 danhMuc.NguoiDungTheoTen[ChuanHoaChuoi(row.Ten)] = row.Id;
             }
 
-            // Quỹ lấy từ chính dữ liệu đang có, không tự thêm mã mới.
+            // Quá»¹ láº¥y tá»« chÃ­nh dá»¯ liá»‡u Ä‘ang cÃ³, khÃ´ng tá»± thÃªm mÃ£ má»›i.
             const string sqlQuy = """
             SELECT phuong_thuc AS Ten
             FROM phieu_chi
@@ -10319,8 +10345,8 @@ LIMIT 500;
                 danhMuc.QuyTheoTen[ChuanHoaChuoi(TenHienThiPhuongThuc(maChuanHoa))] = maChuanHoa;
             }
 
-            // Nếu database còn chưa có phiếu nào thì vẫn cho phép dùng giá trị mặc định
-            // của cột phuong_thuc, vẫn là dữ liệu thật của database chứ không phải bịa thêm.
+            // Náº¿u database cÃ²n chÆ°a cÃ³ phiáº¿u nÃ o thÃ¬ váº«n cho phÃ©p dÃ¹ng giÃ¡ trá»‹ máº·c Ä‘á»‹nh
+            // cá»§a cá»™t phuong_thuc, váº«n lÃ  dá»¯ liá»‡u tháº­t cá»§a database chá»© khÃ´ng pháº£i bá»‹a thÃªm.
             if (danhMuc.QuyTheoMa.Count == 0)
             {
                 danhMuc.QuyTheoMa[danhMuc.PhuongThucMacDinh] = TenHienThiPhuongThuc(danhMuc.PhuongThucMacDinh);
@@ -10329,16 +10355,16 @@ LIMIT 500;
         }
         catch
         {
-            // Để danh mục rỗng: mọi dòng cần tra cứu sẽ báo lỗi ở bước validate,
-            // người dùng thấy ngay trong bước xem trước thay vì ghi sai dữ liệu.
+            // Äá»ƒ danh má»¥c rá»—ng: má»i dÃ²ng cáº§n tra cá»©u sáº½ bÃ¡o lá»—i á»Ÿ bÆ°á»›c validate,
+            // ngÆ°á»i dÃ¹ng tháº¥y ngay trong bÆ°á»›c xem trÆ°á»›c thay vÃ¬ ghi sai dá»¯ liá»‡u.
         }
 
         return danhMuc;
     }
 
     /// <summary>
-    /// Lấy tập mã phiếu đã tồn tại trong database. Dùng cho bước xem trước để biết
-    /// dòng nào trùng mã, tránh gọi vòng lặp "SELECT từng dòng".
+    /// Láº¥y táº­p mÃ£ phiáº¿u Ä‘Ã£ tá»“n táº¡i trong database. DÃ¹ng cho bÆ°á»›c xem trÆ°á»›c Ä‘á»ƒ biáº¿t
+    /// dÃ²ng nÃ o trÃ¹ng mÃ£, trÃ¡nh gá»i vÃ²ng láº·p "SELECT tá»«ng dÃ²ng".
     /// </summary>
     public async Task<HashSet<string>> GetSoQuyMaPhieuTonTaiAsync(IReadOnlyCollection<string> maPhieus)
     {
@@ -10355,7 +10381,7 @@ LIMIT 500;
 
         await using var connection = await OpenAsync();
 
-        // Chia nhỏ để câu IN không vượt quá giới hạn tham số của MySQL.
+        // Chia nhá» Ä‘á»ƒ cÃ¢u IN khÃ´ng vÆ°á»£t quÃ¡ giá»›i háº¡n tham sá»‘ cá»§a MySQL.
         const int khoi = 500;
 
         for (var i = 0; i < danhSach.Count; i += khoi)
@@ -10377,16 +10403,16 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Ghi hàng loạt phiếu sổ quỹ trong một transaction.
-    /// Một dòng lỗi khiến toàn bộ lượt ghi được rollback để không để lại dữ liệu nửa vời.
-    /// Tiến độ được báo sau mỗi lô để thanh tiến trên UI không bị đứng.
+    /// Ghi hÃ ng loáº¡t phiáº¿u sá»• quá»¹ trong má»™t transaction.
+    /// Má»™t dÃ²ng lá»—i khiáº¿n toÃ n bá»™ lÆ°á»£t ghi Ä‘Æ°á»£c rollback Ä‘á»ƒ khÃ´ng Ä‘á»ƒ láº¡i dá»¯ liá»‡u ná»­a vá»i.
+    /// Tiáº¿n Ä‘á»™ Ä‘Æ°á»£c bÃ¡o sau má»—i lÃ´ Ä‘á»ƒ thanh tiáº¿n trÃªn UI khÃ´ng bá»‹ Ä‘á»©ng.
     /// </summary>
     public async Task<SoQuyImportResult> NhapPhieuQuyAsync(
         IReadOnlyList<SoQuyImportRow> dongGhi,
         XuLyPhieuTrung xuLyTrung,
         Func<SoQuyImportProgress, Task>? baoTienDo = null)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CashBookImport, "Bạn không có quyền import sổ quỹ.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CashBookImport, "Báº¡n khÃ´ng cÃ³ quyá»n import sá»• quá»¹.");
         var ketQua = new SoQuyImportResult
         {
             XuLyTrung = xuLyTrung
@@ -10402,7 +10428,7 @@ LIMIT 500;
             var chiNhanhId = Session.CurrentUser?.ChiNhanhId ?? 1;
             var tongSoDong = dongGhi.Count;
 
-            // Số thứ tự mã tự sinh: đọc MAX một lần rồi cấp phát liên tục trong bộ nhớ.
+            // Sá»‘ thá»© tá»± mÃ£ tá»± sinh: Ä‘á»c MAX má»™t láº§n rá»“i cáº¥p phÃ¡t liÃªn tá»¥c trong bá»™ nhá»›.
             var soThuTuThu = await DocSoThuTuMaPhieuQuyAsync(connection, transaction, "PT");
             var soThuTuChi = await DocSoThuTuMaPhieuQuyAsync(connection, transaction, "PC");
 
@@ -10414,7 +10440,7 @@ LIMIT 500;
 
                 if (maPhieu.Length == 0)
                 {
-                    // File không ghi mã phiếu thì hệ thống tự cấp.
+                    // File khÃ´ng ghi mÃ£ phiáº¿u thÃ¬ há»‡ thá»‘ng tá»± cáº¥p.
                     maPhieu = dong.LaThu
                         ? "PT" + (soThuTuThu++).ToString("D4", CultureInfo.InvariantCulture)
                         : "PC" + (soThuTuChi++).ToString("D4", CultureInfo.InvariantCulture);
@@ -10458,7 +10484,7 @@ LIMIT 500;
                         dong,
                         phuongThuc: dong.PhuongThuc), transaction);
 
-                    // UPDATE không sinh mã mới nên vẫn cần nới số thứ tự về sau mã vừa dùng.
+                    // UPDATE khÃ´ng sinh mÃ£ má»›i nÃªn váº«n cáº§n ná»›i sá»‘ thá»© tá»± vá» sau mÃ£ vá»«a dÃ¹ng.
                     if (maPhieu.StartsWith("PT", StringComparison.OrdinalIgnoreCase))
                         soThuTuThu = Math.Max(soThuTuThu, ParseSoThuTuMaPhieu(maPhieu, "PT") + 1);
                     else if (maPhieu.StartsWith("PC", StringComparison.OrdinalIgnoreCase))
@@ -10471,12 +10497,12 @@ LIMIT 500;
                     else
                     {
                         ketQua.SoLoi++;
-                        ketQua.DanhSachLoi.Add(new SoQuyImportError(dong.SoDongExcel, dong.MaPhieu, "Không tìm thấy phiếu để cập nhật."));
+                        ketQua.DanhSachLoi.Add(new SoQuyImportError(dong.SoDongExcel, dong.MaPhieu, "KhÃ´ng tÃ¬m tháº¥y phiáº¿u Ä‘á»ƒ cáº­p nháº­t."));
                     }
                 }
                 else if (dong.MaPhieuDaTonTai)
                 {
-                    // Giữ dữ liệu cũ hoặc bỏ qua dòng trùng: hai cách này đều không ghi.
+                    // Giá»¯ dá»¯ liá»‡u cÅ© hoáº·c bá» qua dÃ²ng trÃ¹ng: hai cÃ¡ch nÃ y Ä‘á»u khÃ´ng ghi.
                     ketQua.SoBoQua++;
                 }
                 else
@@ -10494,7 +10520,7 @@ LIMIT 500;
                 if (baoTienDo is not null)
                     await baoTienDo(new SoQuyImportProgress
                     {
-                        GiaiDoan = "Đang ghi phiếu",
+                        GiaiDoan = "Äang ghi phiáº¿u",
                         DaXuLy = dongDaXuLy,
                         TongSo = tongSoDong
                     });
@@ -10508,11 +10534,11 @@ LIMIT 500;
         {
             await transaction.RollbackAsync();
 
-            // Lỗi này chặn cả lượt ghi vì có thể là hết quyền, mất kết nối, trùng mã...
-            // Rollback sạch thì báo người dùng chứ không ghi tiếp.
+            // Lá»—i nÃ y cháº·n cáº£ lÆ°á»£t ghi vÃ¬ cÃ³ thá»ƒ lÃ  háº¿t quyá»n, máº¥t káº¿t ná»‘i, trÃ¹ng mÃ£...
+            // Rollback sáº¡ch thÃ¬ bÃ¡o ngÆ°á»i dÃ¹ng chá»© khÃ´ng ghi tiáº¿p.
             ketQua.DaRollback = true;
             ketQua.DaHuy = true;
-            ketQua.CanhBao.Add($"Đã rollback toàn bộ lượt nhập: {ex.Message}");
+            ketQua.CanhBao.Add($"ÄÃ£ rollback toÃ n bá»™ lÆ°á»£t nháº­p: {ex.Message}");
             ketQua.SoThemMoi = 0;
             ketQua.SoCapNhat = 0;
             ketQua.SoLoi++;
@@ -10522,7 +10548,7 @@ LIMIT 500;
         }
     }
 
-    /// <summary>Gom tham số chung cho INSERT và UPDATE của một dòng phiếu nhập từ file.</summary>
+    /// <summary>Gom tham sá»‘ chung cho INSERT vÃ  UPDATE cá»§a má»™t dÃ²ng phiáº¿u nháº­p tá»« file.</summary>
     private static object TaoThamSoGhiPhieu(
         string maPhieu,
         uint chiNhanhId,
@@ -10546,8 +10572,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Đọc số thứ tự lớn nhất của một tiền tố mã phiếu, dùng để cấp mã tự sinh khi
-    /// nhập hàng loạt (tránh gọi SELECT cho từng dòng).
+    /// Äá»c sá»‘ thá»© tá»± lá»›n nháº¥t cá»§a má»™t tiá»n tá»‘ mÃ£ phiáº¿u, dÃ¹ng Ä‘á»ƒ cáº¥p mÃ£ tá»± sinh khi
+    /// nháº­p hÃ ng loáº¡t (trÃ¡nh gá»i SELECT cho tá»«ng dÃ²ng).
     /// </summary>
     private static async Task<long> DocSoThuTuMaPhieuQuyAsync(
         MySqlConnection connection,
@@ -10567,7 +10593,7 @@ LIMIT 500;
         return maxSuffix > 0 ? maxSuffix + 1 : 1L;
     }
 
-    /// <summary>Lấy phần số của mã phiếu, trả về 0 nếu mã không đúng định dạng.</summary>
+    /// <summary>Láº¥y pháº§n sá»‘ cá»§a mÃ£ phiáº¿u, tráº£ vá» 0 náº¿u mÃ£ khÃ´ng Ä‘Ãºng Ä‘á»‹nh dáº¡ng.</summary>
     private static long ParseSoThuTuMaPhieu(string maPhieu, string tienTo)
     {
         var phanConLai = maPhieu.Trim();
@@ -10581,8 +10607,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Bỏ dấu và viết thường để so khớp tên loại thu/chi, tên người và tên quỹ
-    /// giữa file nhập và database, không phụ thuộc khác biệt hoa/thường hay dấu tiếng Việt.
+    /// Bá» dáº¥u vÃ  viáº¿t thÆ°á»ng Ä‘á»ƒ so khá»›p tÃªn loáº¡i thu/chi, tÃªn ngÆ°á»i vÃ  tÃªn quá»¹
+    /// giá»¯a file nháº­p vÃ  database, khÃ´ng phá»¥ thuá»™c khÃ¡c biá»‡t hoa/thÆ°á»ng hay dáº¥u tiáº¿ng Viá»‡t.
     /// </summary>
     internal static string ChuanHoaChuoi(string? giaTri)
     {
@@ -10601,7 +10627,7 @@ LIMIT 500;
         }).ToArray());
     }
 
-    /// <summary>Tổng hợp số tiền trên các phiếu nhập hàng (chỉ dùng nội bộ DatabaseService).</summary>
+    /// <summary>Tá»•ng há»£p sá»‘ tiá»n trÃªn cÃ¡c phiáº¿u nháº­p hÃ ng (chá»‰ dÃ¹ng ná»™i bá»™ DatabaseService).</summary>
     private sealed class NhaCungCapPhieuTongHopRow
     {
         public int SoPhieuNhap { get; set; }
@@ -10610,7 +10636,7 @@ LIMIT 500;
         public decimal TongConNoPhieuNhap { get; set; }
     }
 
-    /// <summary>Tổng hợp sổ cái công nợ (chỉ dùng nội bộ DatabaseService).</summary>
+    /// <summary>Tá»•ng há»£p sá»• cÃ¡i cÃ´ng ná»£ (chá»‰ dÃ¹ng ná»™i bá»™ DatabaseService).</summary>
     private sealed class NhaCungCapCongNoTongHopRow
     {
         public int SoLanGhiCongNo { get; set; }
@@ -10619,14 +10645,14 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Lưu 1 phiếu thu (PTxxxx) hoặc phiếu chi (PCxxxx) của sổ quỹ.
-    /// Cột số <c>so_tien</c> luôn nhận giá trị decimal thô, không nhận chuỗi đã định dạng.
-    /// Không nuốt exception: lỗi UNIQUE/connection được ném ra để ViewModel hiển thị cho người dùng.
+    /// LÆ°u 1 phiáº¿u thu (PTxxxx) hoáº·c phiáº¿u chi (PCxxxx) cá»§a sá»• quá»¹.
+    /// Cá»™t sá»‘ <c>so_tien</c> luÃ´n nháº­n giÃ¡ trá»‹ decimal thÃ´, khÃ´ng nháº­n chuá»—i Ä‘Ã£ Ä‘á»‹nh dáº¡ng.
+    /// KhÃ´ng nuá»‘t exception: lá»—i UNIQUE/connection Ä‘Æ°á»£c nÃ©m ra Ä‘á»ƒ ViewModel hiá»ƒn thá»‹ cho ngÆ°á»i dÃ¹ng.
     /// <para>
-    /// Ánh xạ cột: <c>chi_nhanh_id</c> lấy chi nhánh của người đang đăng nhập,
-    /// <c>nhom_chi_phi_id</c> là loại thu/chi, <c>phuong_thuc</c> là mã quỹ,
-    /// <c>nguoi_thuc_hien_id</c> là người tạo, còn <c>nguoi_nop_nhan</c> và
-    /// <c>ghi_chu</c> là hai thông tin riêng của từng phiếu.
+    /// Ãnh xáº¡ cá»™t: <c>chi_nhanh_id</c> láº¥y chi nhÃ¡nh cá»§a ngÆ°á»i Ä‘ang Ä‘Äƒng nháº­p,
+    /// <c>nhom_chi_phi_id</c> lÃ  loáº¡i thu/chi, <c>phuong_thuc</c> lÃ  mÃ£ quá»¹,
+    /// <c>nguoi_thuc_hien_id</c> lÃ  ngÆ°á»i táº¡o, cÃ²n <c>nguoi_nop_nhan</c> vÃ 
+    /// <c>ghi_chu</c> lÃ  hai thÃ´ng tin riÃªng cá»§a tá»«ng phiáº¿u.
     /// </para>
     /// </summary>
     public async Task LuuPhieuQuyAsync(
@@ -10641,23 +10667,23 @@ LIMIT 500;
         string? ghiChu)
     {
         if (string.IsNullOrWhiteSpace(maPhieu))
-            throw new InvalidOperationException("Thiếu mã phiếu khi lưu sổ quỹ.");
+            throw new InvalidOperationException("Thiáº¿u mÃ£ phiáº¿u khi lÆ°u sá»• quá»¹.");
 
         var laPhieuThu = maPhieu.StartsWith("PT", StringComparison.OrdinalIgnoreCase);
         Quyen.RequirePermission(
             Session.CurrentUser,
             laPhieuThu ? PermissionKeys.CashBookCreateReceipt : PermissionKeys.CashBookCreatePayment,
-            laPhieuThu ? "Bạn không có quyền tạo phiếu thu." : "Bạn không có quyền tạo phiếu chi.");
+            laPhieuThu ? "Báº¡n khÃ´ng cÃ³ quyá»n táº¡o phiáº¿u thu." : "Báº¡n khÃ´ng cÃ³ quyá»n táº¡o phiáº¿u chi.");
 
         if (soTien <= 0)
-            throw new InvalidOperationException("Số tiền phải lớn hơn 0.");
+            throw new InvalidOperationException("Sá»‘ tiá»n pháº£i lá»›n hÆ¡n 0.");
 
         var coCotMoi = await EnsurePhieuQuyExtraColumnsAsync();
 
         await using var connection = await OpenAsync();
 
-        // Cột tùy chọn được ghép vào danh sách hàng/cột; mọi giá trị vẫn đi qua tham số
-        // nên không có chuyện dán chuỗi của người dùng vào SQL.
+        // Cá»™t tÃ¹y chá»n Ä‘Æ°á»£c ghÃ©p vÃ o danh sÃ¡ch hÃ ng/cá»™t; má»i giÃ¡ trá»‹ váº«n Ä‘i qua tham sá»‘
+        // nÃªn khÃ´ng cÃ³ chuyá»‡n dÃ¡n chuá»—i cá»§a ngÆ°á»i dÃ¹ng vÃ o SQL.
         var danhSachCot = "(ma_phieu_chi, chi_nhanh_id, nhom_chi_phi_id, so_tien, phuong_thuc, noi_dung";
         var danhSachGiaTri = "(@MaPhieu, @ChiNhanhId, @NhomChiPhiId, @SoTien, @PhuongThuc, @NoiDung";
 
@@ -10678,7 +10704,7 @@ LIMIT 500;
             ChiNhanhId = Session.CurrentUser?.ChiNhanhId ?? 1,
             NhomChiPhiId = nhomChiPhiId,
             SoTien = soTien,
-            // Rỗng thì để MySQL lấy giá trị mặc định của cột (TIEN_MAT).
+            // Rá»—ng thÃ¬ Ä‘á»ƒ MySQL láº¥y giÃ¡ trá»‹ máº·c Ä‘á»‹nh cá»§a cá»™t (TIEN_MAT).
             PhuongThuc = string.IsNullOrWhiteSpace(phuongThuc) ? null : phuongThuc.Trim().ToUpperInvariant(),
             NoiDung = string.IsNullOrWhiteSpace(noiDung) ? null : noiDung.Trim(),
             NguoiNopNhan = Truncate150(nguoiNopNhan),
@@ -10689,15 +10715,15 @@ LIMIT 500;
         });
 
         _ = LogSubAccountActivityAsync(
-            laPhieuThu ? "Thu tiền" : "Chi tiền",
+            laPhieuThu ? "Thu tiá»n" : "Chi tiá»n",
             "SO_QUY",
             null,
             maPhieu.Trim(),
-            noiDung ?? (laPhieuThu ? $"Lập phiếu thu {maPhieu.Trim()}" : $"Lập phiếu chi {maPhieu.Trim()}"),
+            noiDung ?? (laPhieuThu ? $"Láº­p phiáº¿u thu {maPhieu.Trim()}" : $"Láº­p phiáº¿u chi {maPhieu.Trim()}"),
             laPhieuThu ? soTien : -soTien);
     }
 
-    /// <summary>Cắt chuỗi cho vừa độ dài của cột varchar(150) của nguoi_nop_nhan.</summary>
+    /// <summary>Cáº¯t chuá»—i cho vá»«a Ä‘á»™ dÃ i cá»§a cá»™t varchar(150) cá»§a nguoi_nop_nhan.</summary>
     private static string? Truncate150(string? giaTri)
     {
         if (string.IsNullOrWhiteSpace(giaTri))
@@ -10709,10 +10735,10 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Sửa một phiếu đang hiệu lực. Cho sửa được cả loại thu/chi, quỹ, người nộp/nhận,
-    /// nội dung và ghi chú vì đều là thông tin của phiếu; không cho sửa mã phiếu,
-    /// người tạo và trạng thái vì đó là dữ liệu sinh ra lúc tạo chứng từ.
-    /// Trả về số dòng được cập nhật (0 = phiếu không tồn tại hoặc đã hủy).
+    /// Sá»­a má»™t phiáº¿u Ä‘ang hiá»‡u lá»±c. Cho sá»­a Ä‘Æ°á»£c cáº£ loáº¡i thu/chi, quá»¹, ngÆ°á»i ná»™p/nháº­n,
+    /// ná»™i dung vÃ  ghi chÃº vÃ¬ Ä‘á»u lÃ  thÃ´ng tin cá»§a phiáº¿u; khÃ´ng cho sá»­a mÃ£ phiáº¿u,
+    /// ngÆ°á»i táº¡o vÃ  tráº¡ng thÃ¡i vÃ¬ Ä‘Ã³ lÃ  dá»¯ liá»‡u sinh ra lÃºc táº¡o chá»©ng tá»«.
+    /// Tráº£ vá» sá»‘ dÃ²ng Ä‘Æ°á»£c cáº­p nháº­t (0 = phiáº¿u khÃ´ng tá»“n táº¡i hoáº·c Ä‘Ã£ há»§y).
     /// </summary>
     public async Task<int> SuaPhieuQuyAsync(
         string maPhieu,
@@ -10724,19 +10750,19 @@ LIMIT 500;
         string? noiDung,
         string? ghiChu)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CashBookEdit, "Bạn không có quyền sửa phiếu thu/chi.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.CashBookEdit, "Báº¡n khÃ´ng cÃ³ quyá»n sá»­a phiáº¿u thu/chi.");
         if (string.IsNullOrWhiteSpace(maPhieu))
-            throw new InvalidOperationException("Thiếu mã phiếu khi sửa sổ quỹ.");
+            throw new InvalidOperationException("Thiáº¿u mÃ£ phiáº¿u khi sá»­a sá»• quá»¹.");
 
         if (soTien <= 0)
-            throw new InvalidOperationException("Số tiền phải lớn hơn 0.");
+            throw new InvalidOperationException("Sá»‘ tiá»n pháº£i lá»›n hÆ¡n 0.");
 
         var coCotMoi = await EnsurePhieuQuyExtraColumnsAsync();
 
         await using var connection = await OpenAsync();
 
-        // Hai cột mới chỉ xuất hiện trong câu UPDATE khi migration đã chạy, tránh lỗi
-        // "Unknown column" với database cũ. Giá trị vẫn đi qua tham số.
+        // Hai cá»™t má»›i chá»‰ xuáº¥t hiá»‡n trong cÃ¢u UPDATE khi migration Ä‘Ã£ cháº¡y, trÃ¡nh lá»—i
+        // "Unknown column" vá»›i database cÅ©. GiÃ¡ trá»‹ váº«n Ä‘i qua tham sá»‘.
         var capNhatCotMoi = coCotMoi ? ", nguoi_nop_nhan = @NguoiNopNhan, ghi_chu = @GhiChu" : "";
 
         var sql = $"""
@@ -10768,11 +10794,11 @@ LIMIT 500;
         {
             var laThu = maPhieu.StartsWith("PT", StringComparison.OrdinalIgnoreCase);
             _ = LogSubAccountActivityAsync(
-                "Sửa sổ quỹ",
+                "Sá»­a sá»• quá»¹",
                 "SO_QUY",
                 null,
                 maPhieu.Trim(),
-                $"Cập nhật phiếu {maPhieu.Trim()}: {noiDung}",
+                $"Cáº­p nháº­t phiáº¿u {maPhieu.Trim()}: {noiDung}",
                 laThu ? soTien : -soTien);
         }
 
@@ -10827,30 +10853,30 @@ LIMIT 500;
         }
     }
 
-    // Phần truy vấn danh sách nhân viên (hồ sơ nhân sự) nằm trong file partial
-    // DatabaseService.NhanVien.cs để gom những thay đổi liên quan tới màn
-    // "Quản lý nhân viên" về một chỗ.
+    // Pháº§n truy váº¥n danh sÃ¡ch nhÃ¢n viÃªn (há»“ sÆ¡ nhÃ¢n sá»±) náº±m trong file partial
+    // DatabaseService.NhanVien.cs Ä‘á»ƒ gom nhá»¯ng thay Ä‘á»•i liÃªn quan tá»›i mÃ n
+    // "Quáº£n lÃ½ nhÃ¢n viÃªn" vá» má»™t chá»—.
 
     /// <summary>
-    /// Kiểm tra ràng buộc trước khi xóa nhân viên:
-    /// - Không cho xóa tài khoản ID = 1 hoặc Quản trị viên.
-    /// - Không cho tự xóa tài khoản của chính người đang thao tác.
-    /// - Kiểm tra xem nhân viên đã từng lập hóa đơn, phiếu nhập hay phiếu thu/chi chưa.
+    /// Kiá»ƒm tra rÃ ng buá»™c trÆ°á»›c khi xÃ³a nhÃ¢n viÃªn:
+    /// - KhÃ´ng cho xÃ³a tÃ i khoáº£n ID = 1 hoáº·c Quáº£n trá»‹ viÃªn.
+    /// - KhÃ´ng cho tá»± xÃ³a tÃ i khoáº£n cá»§a chÃ­nh ngÆ°á»i Ä‘ang thao tÃ¡c.
+    /// - Kiá»ƒm tra xem nhÃ¢n viÃªn Ä‘Ã£ tá»«ng láº­p hÃ³a Ä‘Æ¡n, phiáº¿u nháº­p hay phiáº¿u thu/chi chÆ°a.
     /// </summary>
     public async Task<(bool CanDelete, string? Reason)> KiemTraXoaNhanVienAsync(uint nhanVienId)
     {
         if (nhanVienId == 1)
-            return (false, "Không thể xóa tài khoản Quản trị viên mặc định của hệ thống.");
+            return (false, "KhÃ´ng thá»ƒ xÃ³a tÃ i khoáº£n Quáº£n trá»‹ viÃªn máº·c Ä‘á»‹nh cá»§a há»‡ thá»‘ng.");
 
         if (Session.CurrentUser != null && nhanVienId == Session.CurrentUser.Id)
-            return (false, "Bạn không thể tự xóa tài khoản của chính mình đang đăng nhập.");
+            return (false, "Báº¡n khÃ´ng thá»ƒ tá»± xÃ³a tÃ i khoáº£n cá»§a chÃ­nh mÃ¬nh Ä‘ang Ä‘Äƒng nháº­p.");
 
         if (await IsQuanTriAsync(nhanVienId))
-            return (false, "Không thể xóa tài khoản có chức vụ / vai trò Quản trị viên.");
+            return (false, "KhÃ´ng thá»ƒ xÃ³a tÃ i khoáº£n cÃ³ chá»©c vá»¥ / vai trÃ² Quáº£n trá»‹ viÃªn.");
 
         await using var connection = await OpenAsync();
 
-        // 1. Kiểm tra hóa đơn bán hàng
+        // 1. Kiá»ƒm tra hÃ³a Ä‘Æ¡n bÃ¡n hÃ ng
         try
         {
             var hasHoaDonCol = await connection.ExecuteScalarAsync<int>(
@@ -10862,13 +10888,13 @@ LIMIT 500;
                     new { Id = nhanVienId });
                 if (soHoaDon > 0)
                 {
-                    return (false, $"Nhân viên này đã lập {soHoaDon} hóa đơn trong hệ thống. Để bảo toàn lịch sử bán hàng và kế toán, không thể xóa tài khoản. Bạn có thể sử dụng chức năng Khóa nhân viên.");
+                    return (false, $"NhÃ¢n viÃªn nÃ y Ä‘Ã£ láº­p {soHoaDon} hÃ³a Ä‘Æ¡n trong há»‡ thá»‘ng. Äá»ƒ báº£o toÃ n lá»‹ch sá»­ bÃ¡n hÃ ng vÃ  káº¿ toÃ¡n, khÃ´ng thá»ƒ xÃ³a tÃ i khoáº£n. Báº¡n cÃ³ thá»ƒ sá»­ dá»¥ng chá»©c nÄƒng KhÃ³a nhÃ¢n viÃªn.");
                 }
             }
         }
         catch { }
 
-        // 2. Kiểm tra phiếu nhập hàng
+        // 2. Kiá»ƒm tra phiáº¿u nháº­p hÃ ng
         try
         {
             var hasPhieuNhapCol = await connection.ExecuteScalarAsync<int>(
@@ -10880,13 +10906,13 @@ LIMIT 500;
                     new { Id = nhanVienId });
                 if (soPhieuNhap > 0)
                 {
-                    return (false, $"Nhân viên này đã lập {soPhieuNhap} phiếu nhập hàng trong hệ thống. Để bảo toàn lịch sử kho hàng, không thể xóa tài khoản. Bạn có thể sử dụng chức năng Khóa nhân viên.");
+                    return (false, $"NhÃ¢n viÃªn nÃ y Ä‘Ã£ láº­p {soPhieuNhap} phiáº¿u nháº­p hÃ ng trong há»‡ thá»‘ng. Äá»ƒ báº£o toÃ n lá»‹ch sá»­ kho hÃ ng, khÃ´ng thá»ƒ xÃ³a tÃ i khoáº£n. Báº¡n cÃ³ thá»ƒ sá»­ dá»¥ng chá»©c nÄƒng KhÃ³a nhÃ¢n viÃªn.");
                 }
             }
         }
         catch { }
 
-        // 3. Kiểm tra phiếu chi / thu
+        // 3. Kiá»ƒm tra phiáº¿u chi / thu
         try
         {
             var hasPhieuChiCol = await connection.ExecuteScalarAsync<int>(
@@ -10898,7 +10924,7 @@ LIMIT 500;
                     new { Id = nhanVienId });
                 if (soPhieuChi > 0)
                 {
-                    return (false, $"Nhân viên này đã lập {soPhieuChi} phiếu thu / chi trong hệ thống. Để bảo toàn chứng từ thu chi, không thể xóa tài khoản. Bạn có thể sử dụng chức năng Khóa nhân viên.");
+                    return (false, $"NhÃ¢n viÃªn nÃ y Ä‘Ã£ láº­p {soPhieuChi} phiáº¿u thu / chi trong há»‡ thá»‘ng. Äá»ƒ báº£o toÃ n chá»©ng tá»« thu chi, khÃ´ng thá»ƒ xÃ³a tÃ i khoáº£n. Báº¡n cÃ³ thá»ƒ sá»­ dá»¥ng chá»©c nÄƒng KhÃ³a nhÃ¢n viÃªn.");
                 }
             }
         }
@@ -10908,14 +10934,14 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Xóa an toàn nhân viên có kiểm tra đầy đủ quyền và ràng buộc nghiệp vụ.
+    /// XÃ³a an toÃ n nhÃ¢n viÃªn cÃ³ kiá»ƒm tra Ä‘áº§y Ä‘á»§ quyá»n vÃ  rÃ ng buá»™c nghiá»‡p vá»¥.
     /// </summary>
     public async Task XoaNhanVienAnToanAsync(uint nhanVienId)
     {
         var (canDelete, reason) = await KiemTraXoaNhanVienAsync(nhanVienId);
         if (!canDelete)
         {
-            throw new InvalidOperationException(reason ?? "Không thể xóa nhân viên này.");
+            throw new InvalidOperationException(reason ?? "KhÃ´ng thá»ƒ xÃ³a nhÃ¢n viÃªn nÃ y.");
         }
 
         await DeleteUserAsync(nhanVienId, Session.CurrentUser?.Id);
@@ -10952,9 +10978,9 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Tài khoản này có quyền được gán riêng hay không.
-    /// Nếu cột phan_quyen_rieng đã tồn tại thì dùng cột đó (xử lý được cả trường hợp
-    /// quản trị bỏ chọn tất cả). Nếu chưa chạy migration thì lùi về cách đếm dòng
+    /// TÃ i khoáº£n nÃ y cÃ³ quyá»n Ä‘Æ°á»£c gÃ¡n riÃªng hay khÃ´ng.
+    /// Náº¿u cá»™t phan_quyen_rieng Ä‘Ã£ tá»“n táº¡i thÃ¬ dÃ¹ng cá»™t Ä‘Ã³ (xá»­ lÃ½ Ä‘Æ°á»£c cáº£ trÆ°á»ng há»£p
+    /// quáº£n trá»‹ bá» chá»n táº¥t cáº£). Náº¿u chÆ°a cháº¡y migration thÃ¬ lÃ¹i vá» cÃ¡ch Ä‘áº¿m dÃ²ng
     /// trong nguoi_dung_quyen.
     /// </summary>
     private async Task<bool> CoQuyenGanRiengAsync(uint userId)
@@ -10985,8 +11011,8 @@ LIMIT 500;
         {
             await using var connection = await OpenAsync();
 
-            // Đã có quyền gán riêng cho tài khoản => dùng đúng danh sách này,
-            // không cộng thêm quyền kế thừa từ vai trò.
+            // ÄÃ£ cÃ³ quyá»n gÃ¡n riÃªng cho tÃ i khoáº£n => dÃ¹ng Ä‘Ãºng danh sÃ¡ch nÃ y,
+            // khÃ´ng cá»™ng thÃªm quyá»n káº¿ thá»«a tá»« vai trÃ².
             var hasExplicit = await CoQuyenGanRiengAsync(userId);
 
             var sql = hasExplicit
@@ -11038,9 +11064,9 @@ LIMIT 500;
     private static bool _daDamBaoDanhMucQuyen;
 
     /// <summary>
-    /// Bảo đảm bảng <c>quyen</c> có đủ mọi mã quyền trong <see cref="PermissionCatalog"/>.
-    /// Nhờ vậy cây phân quyền luôn có Id &gt; 0 và không bị mất quyền khi lưu.
-    /// Chạy idempotent, an toàn khi gọi lại nhiều lần.
+    /// Báº£o Ä‘áº£m báº£ng <c>quyen</c> cÃ³ Ä‘á»§ má»i mÃ£ quyá»n trong <see cref="PermissionCatalog"/>.
+    /// Nhá» váº­y cÃ¢y phÃ¢n quyá»n luÃ´n cÃ³ Id &gt; 0 vÃ  khÃ´ng bá»‹ máº¥t quyá»n khi lÆ°u.
+    /// Cháº¡y idempotent, an toÃ n khi gá»i láº¡i nhiá»u láº§n.
     /// </summary>
     public async Task EnsurePermissionCatalogAsync()
     {
@@ -11053,7 +11079,7 @@ LIMIT 500;
         {
             await using var connection = await OpenAsync();
 
-            // Bảo đảm các bảng phân quyền tồn tại (database cũ chưa chạy migration).
+            // Báº£o Ä‘áº£m cÃ¡c báº£ng phÃ¢n quyá»n tá»“n táº¡i (database cÅ© chÆ°a cháº¡y migration).
             await connection.ExecuteAsync("""
             CREATE TABLE IF NOT EXISTS `quyen` (
               `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -11159,7 +11185,7 @@ LIMIT 500;
                 }
             }
 
-            // Bảo đảm cột phan_quyen_rieng tồn tại trong bảng nguoi_dung
+            // Báº£o Ä‘áº£m cá»™t phan_quyen_rieng tá»“n táº¡i trong báº£ng nguoi_dung
             var coColPhanQuyenRieng = await connection.ExecuteScalarAsync<bool>("""
                 SELECT COUNT(1) > 0 FROM information_schema.columns
                 WHERE table_schema = DATABASE()
@@ -11175,14 +11201,14 @@ LIMIT 500;
                 catch { }
             }
 
-            // Dọn dẹp tài khoản kiểm thử nếu có
+            // Dá»n dáº¹p tÃ i khoáº£n kiá»ƒm thá»­ náº¿u cÃ³
             try
             {
                 await connection.ExecuteAsync("DELETE ndvt, ndq, nd FROM nguoi_dung nd LEFT JOIN nguoi_dung_vai_tro ndvt ON ndvt.nguoi_dung_id = nd.id LEFT JOIN nguoi_dung_quyen ndq ON ndq.nguoi_dung_id = nd.id WHERE nd.ten_dang_nhap = 'repro_test_x'");
             }
             catch { }
 
-            // Đồng bộ quyền mặc định theo vai trò vào vai_tro_quyen cho tất cả vai trò
+            // Äá»“ng bá»™ quyá»n máº·c Ä‘á»‹nh theo vai trÃ² vÃ o vai_tro_quyen cho táº¥t cáº£ vai trÃ²
             foreach (var kvp in PermissionCatalog.DefaultRolePermissions)
             {
                 var roleId = await connection.ExecuteScalarAsync<uint?>(
@@ -11193,7 +11219,7 @@ LIMIT 500;
                 {
                     if (string.Equals(kvp.Key, Quyen.QuanTri, StringComparison.OrdinalIgnoreCase))
                     {
-                        // QUAN_TRI luôn có tất cả quyền
+                        // QUAN_TRI luÃ´n cÃ³ táº¥t cáº£ quyá»n
                         await connection.ExecuteAsync(
                             "INSERT IGNORE INTO vai_tro_quyen (vai_tro_id, quyen_id) SELECT @RoleId, q.id FROM quyen q",
                             new { RoleId = roleId.Value });
@@ -11216,7 +11242,7 @@ LIMIT 500;
         }
         catch (Exception ex)
         {
-            // Không chặn đăng nhập nếu danh mục quyền chưa đồng bộ được.
+            // KhÃ´ng cháº·n Ä‘Äƒng nháº­p náº¿u danh má»¥c quyá»n chÆ°a Ä‘á»“ng bá»™ Ä‘Æ°á»£c.
             Helpers.SafeLog.WriteError("EnsurePermissionCatalogAsync", ex);
         }
     }
@@ -11258,7 +11284,7 @@ LIMIT 500;
         return items.ToList();
     }
 
-    /// <summary>Tài khoản đang có ít nhất một quyền được gán riêng (không kế thừa vai trò).</summary>
+    /// <summary>TÃ i khoáº£n Ä‘ang cÃ³ Ã­t nháº¥t má»™t quyá»n Ä‘Æ°á»£c gÃ¡n riÃªng (khÃ´ng káº¿ thá»«a vai trÃ²).</summary>
     public async Task<bool> HasExplicitUserPermissionsAsync(uint userId)
     {
         await using var connection = await OpenAsync();
@@ -11309,7 +11335,7 @@ LIMIT 500;
 
     public async Task SaveUserPermissionsAsync(uint userId, IEnumerable<uint> permissionIds, uint? actorId = null)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersAssignPermission, "Bạn không có quyền phân quyền tài khoản.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersAssignPermission, "Báº¡n khÃ´ng cÃ³ quyá»n phÃ¢n quyá»n tÃ i khoáº£n.");
         await using var connection = await OpenAsync();
         await using var tx = await connection.BeginTransactionAsync();
         try
@@ -11332,7 +11358,7 @@ LIMIT 500;
 
     public async Task SaveRolePermissionsAsync(uint roleId, IEnumerable<uint> permissionIds, uint? actorId = null)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersAssignPermission, "Bạn không có quyền phân quyền vai trò.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersAssignPermission, "Báº¡n khÃ´ng cÃ³ quyá»n phÃ¢n quyá»n vai trÃ².");
         await using var connection = await OpenAsync();
         await using var tx = await connection.BeginTransactionAsync();
         try
@@ -11354,7 +11380,7 @@ LIMIT 500;
 
     public async Task<uint> CreateUserAsync(UserCreateDto dto, uint? actorId = null)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersCreate, "Bạn không có quyền tạo tài khoản.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersCreate, "Báº¡n khÃ´ng cÃ³ quyá»n táº¡o tÃ i khoáº£n.");
         await using var connection = await OpenAsync();
         await using var tx = await connection.BeginTransactionAsync();
         try
@@ -11408,9 +11434,9 @@ LIMIT 500;
 
     public async Task UpdateUserAsync(UserEditDto dto, uint? actorId = null)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersEdit, "Bạn không có quyền sửa tài khoản.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersEdit, "Báº¡n khÃ´ng cÃ³ quyá»n sá»­a tÃ i khoáº£n.");
 
-        // Không cho bỏ vai trò QUAN_TRI của chính mình hoặc của tài khoản Admin khác.
+        // KhÃ´ng cho bá» vai trÃ² QUAN_TRI cá»§a chÃ­nh mÃ¬nh hoáº·c cá»§a tÃ i khoáº£n Admin khÃ¡c.
         if (dto.Id == Session.CurrentUser?.Id && await IsQuanTriAsync(dto.Id))
         {
             var vanConQuanTri = false;
@@ -11430,7 +11456,7 @@ LIMIT 500;
 
             if (!vanConQuanTri)
             {
-                throw new InvalidOperationException("Bạn không thể tự bỏ vai trò QUAN_TRI của chính mình.");
+                throw new InvalidOperationException("Báº¡n khÃ´ng thá»ƒ tá»± bá» vai trÃ² QUAN_TRI cá»§a chÃ­nh mÃ¬nh.");
             }
         }
 
@@ -11480,7 +11506,7 @@ LIMIT 500;
             "SELECT ma_vai_tro FROM vai_tro WHERE id = @Id", new { Id = roleId });
     }
 
-    /// <summary>Tài khoản có vai trò QUAN_TRI hay không.</summary>
+    /// <summary>TÃ i khoáº£n cÃ³ vai trÃ² QUAN_TRI hay khÃ´ng.</summary>
     public async Task<bool> IsQuanTriAsync(uint userId)
     {
         await using var connection = await OpenAsync();
@@ -11504,32 +11530,32 @@ LIMIT 500;
 
         if (await IsQuanTriAsync(userId))
         {
-            throw new InvalidOperationException($"Không thể {hanhDong} tài khoản có vai trò QUAN_TRI.");
+            throw new InvalidOperationException($"KhÃ´ng thá»ƒ {hanhDong} tÃ i khoáº£n cÃ³ vai trÃ² QUAN_TRI.");
         }
     }
 
     public async Task LockUserAsync(uint userId, uint? actorId = null)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersLock, "Bạn không có quyền khóa tài khoản.");
-        await BaoVeQuanTriAsync(userId, "khóa");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersLock, "Báº¡n khÃ´ng cÃ³ quyá»n khÃ³a tÃ i khoáº£n.");
+        await BaoVeQuanTriAsync(userId, "khÃ³a");
         await using var connection = await OpenAsync();
         await connection.ExecuteAsync("UPDATE nguoi_dung SET trang_thai = 0, ngay_cap_nhat = NOW() WHERE id = @Id", new { Id = userId });
     }
 
     public async Task UnlockUserAsync(uint userId, uint? actorId = null)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersUnlock, "Bạn không có quyền mở khóa tài khoản.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersUnlock, "Báº¡n khÃ´ng cÃ³ quyá»n má»Ÿ khÃ³a tÃ i khoáº£n.");
         await using var connection = await OpenAsync();
         await connection.ExecuteAsync("UPDATE nguoi_dung SET trang_thai = 1, ngay_cap_nhat = NOW() WHERE id = @Id", new { Id = userId });
     }
 
     public async Task DeleteUserAsync(uint userId, uint? actorId = null)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersDelete, "Bạn không có quyền xóa tài khoản.");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersDelete, "Báº¡n khÃ´ng cÃ³ quyá»n xÃ³a tÃ i khoáº£n.");
         await using var connection = await OpenAsync();
-        // Không xóa admin (id=1 thường) - phòng ngừa
-        if (userId == 1) throw new InvalidOperationException("Không thể xóa tài khoản Admin mặc định.");
-        await BaoVeQuanTriAsync(userId, "xóa");
+        // KhÃ´ng xÃ³a admin (id=1 thÆ°á»ng) - phÃ²ng ngá»«a
+        if (userId == 1) throw new InvalidOperationException("KhÃ´ng thá»ƒ xÃ³a tÃ i khoáº£n Admin máº·c Ä‘á»‹nh.");
+        await BaoVeQuanTriAsync(userId, "xÃ³a");
         await connection.ExecuteAsync("DELETE FROM nguoi_dung_vai_tro WHERE nguoi_dung_id = @UserId", new { UserId = userId });
         await connection.ExecuteAsync("DELETE FROM nguoi_dung_quyen WHERE nguoi_dung_id = @UserId", new { UserId = userId });
         await connection.ExecuteAsync("DELETE FROM nguoi_dung WHERE id = @Id", new { Id = userId });
@@ -11537,8 +11563,8 @@ LIMIT 500;
 
     public async Task ResetPasswordAsync(uint userId, string newPassword, uint? actorId = null)
     {
-        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersResetPassword, "Bạn không có quyền đặt lại mật khẩu.");
-        if (string.IsNullOrWhiteSpace(newPassword)) throw new ArgumentException("Mật khẩu không được để trống");
+        Quyen.RequirePermission(Session.CurrentUser, PermissionKeys.UsersResetPassword, "Báº¡n khÃ´ng cÃ³ quyá»n Ä‘áº·t láº¡i máº­t kháº©u.");
+        if (string.IsNullOrWhiteSpace(newPassword)) throw new ArgumentException("Máº­t kháº©u khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng");
         await using var connection = await OpenAsync();
         var hashed = BCrypt.Net.BCrypt.HashPassword(newPassword);
         await connection.ExecuteAsync("UPDATE nguoi_dung SET mat_khau = @MatKhau, ngay_cap_nhat = NOW() WHERE id = @Id", new { Id = userId, MatKhau = hashed });
@@ -11682,7 +11708,7 @@ LIMIT 500;
     }
     #endregion
 
-    #region Chi Tiết Giá Đối Tác
+    #region Chi Tiáº¿t GiÃ¡ Äá»‘i TÃ¡c
     public async Task<IReadOnlyList<ChiTietGiaDoiTac>> GetChiTietGiaDoiTacAsync(uint doiTacId)
     {
         await using var connection = await OpenAsync();
@@ -11745,17 +11771,17 @@ LIMIT 500;
     }
     #endregion
 
-    #region Hàng Tồn Đầu Kỳ
+    #region HÃ ng Tá»“n Äáº§u Ká»³
     /// <summary>
-    /// Lấy danh sách kho hàng / chi nhánh hiện có từ cơ sở dữ liệu.
-    /// Tương thích cả bảng kho_hang (SakePro) và chi_nhanh (ShopHoa).
+    /// Láº¥y danh sÃ¡ch kho hÃ ng / chi nhÃ¡nh hiá»‡n cÃ³ tá»« cÆ¡ sá»Ÿ dá»¯ liá»‡u.
+    /// TÆ°Æ¡ng thÃ­ch cáº£ báº£ng kho_hang (SakePro) vÃ  chi_nhanh (ShopHoa).
     /// </summary>
     public async Task<IReadOnlyList<ProductOption>> GetDanhSachKhoAsync()
     {
         await using var connection = await OpenAsync();
         try
         {
-            // 1. Thử lấy từ bảng kho_hang (SakePro schema)
+            // 1. Thá»­ láº¥y tá»« báº£ng kho_hang (SakePro schema)
             bool hasKhoHang = await connection.ExecuteScalarAsync<int>(
                 "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'kho_hang';") > 0;
             if (hasKhoHang)
@@ -11770,7 +11796,7 @@ LIMIT 500;
 
         try
         {
-            // 2. Thử lấy từ bảng chi_nhanh
+            // 2. Thá»­ láº¥y tá»« báº£ng chi_nhanh
             bool hasChiNhanh = await connection.ExecuteScalarAsync<int>(
                 "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'chi_nhanh';") > 0;
             if (hasChiNhanh)
@@ -11783,15 +11809,15 @@ LIMIT 500;
         }
         catch { }
 
-        // Mặc định fallback
+        // Máº·c Ä‘á»‹nh fallback
         return new List<ProductOption>
         {
-            new() { Id = 1, Name = "Kho Tổng (Mặc định)" }
+            new() { Id = 1, Name = "Kho Tá»•ng (Máº·c Ä‘á»‹nh)" }
         };
     }
 
     /// <summary>
-    /// Lấy thông tin tồn đầu kỳ đã lưu trước đó của sản phẩm theo kho và ngày (nếu có).
+    /// Láº¥y thÃ´ng tin tá»“n Ä‘áº§u ká»³ Ä‘Ã£ lÆ°u trÆ°á»›c Ä‘Ã³ cá»§a sáº£n pháº©m theo kho vÃ  ngÃ y (náº¿u cÃ³).
     /// </summary>
     public async Task<ChiTietHangHoaDauKy?> LayHangTonDauKyCuaSanPhamAsync(uint khoHangId, uint sanPhamId, DateTime ngayDauKy)
     {
@@ -11824,7 +11850,7 @@ LIMIT 500;
             }
             else
             {
-                // Fallback từ bảng ton_kho
+                // Fallback tá»« báº£ng ton_kho
                 bool hasTonKho = await connection.ExecuteScalarAsync<int>(
                     "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'ton_kho';") > 0;
 
@@ -11837,7 +11863,7 @@ LIMIT 500;
                         so_luong_ton AS SoLuong,
                         gia_von_binh_quan AS GiaVon,
                         (so_luong_ton * gia_von_binh_quan) AS ThanhTien,
-                        'Tồn đầu kỳ' AS NoiDung
+                        'Tá»“n Ä‘áº§u ká»³' AS NoiDung
                     FROM ton_kho
                     WHERE chi_nhanh_id = @KhoHangId AND san_pham_id = @SanPhamId
                     LIMIT 1;
@@ -11850,16 +11876,16 @@ LIMIT 500;
         }
         catch (Exception ex)
         {
-            SafeLog.WriteError("Lỗi LayHangTonDauKyCuaSanPhamAsync", ex);
+            SafeLog.WriteError("Lá»—i LayHangTonDauKyCuaSanPhamAsync", ex);
         }
 
         return null;
     }
 
     /// <summary>
-    /// Lưu thông tin tồn đầu kỳ của sản phẩm vào hệ thống.
-    /// Tự động cập nhật bảng chi_tiet_hang_hoa_dau_ky, ton_kho, san_pham
-    /// và ghi nhật ký lịch sử kho mà không gây cộng dồn 2 lần khi thao tác lại.
+    /// LÆ°u thÃ´ng tin tá»“n Ä‘áº§u ká»³ cá»§a sáº£n pháº©m vÃ o há»‡ thá»‘ng.
+    /// Tá»± Ä‘á»™ng cáº­p nháº­t báº£ng chi_tiet_hang_hoa_dau_ky, ton_kho, san_pham
+    /// vÃ  ghi nháº­t kÃ½ lá»‹ch sá»­ kho mÃ  khÃ´ng gÃ¢y cá»™ng dá»“n 2 láº§n khi thao tÃ¡c láº¡i.
     /// </summary>
     public async Task<bool> LuuHangTonDauKyAsync(
         uint khoHangId,
@@ -11870,18 +11896,18 @@ LIMIT 500;
         string? noiDung)
     {
         if (khoHangId == 0)
-            throw new ArgumentException("Kho hàng không hợp lệ.", nameof(khoHangId));
+            throw new ArgumentException("Kho hÃ ng khÃ´ng há»£p lá»‡.", nameof(khoHangId));
 
         if (sanPhamId == 0)
-            throw new ArgumentException("Hàng hóa chưa được chọn.", nameof(sanPhamId));
+            throw new ArgumentException("HÃ ng hÃ³a chÆ°a Ä‘Æ°á»£c chá»n.", nameof(sanPhamId));
 
         if (soLuong < 0)
-            throw new ArgumentException("Số lượng không được âm.", nameof(soLuong));
+            throw new ArgumentException("Sá»‘ lÆ°á»£ng khÃ´ng Ä‘Æ°á»£c Ã¢m.", nameof(soLuong));
 
         if (giaVon < 0)
-            throw new ArgumentException("Giá vốn không được âm.", nameof(giaVon));
+            throw new ArgumentException("GiÃ¡ vá»‘n khÃ´ng Ä‘Æ°á»£c Ã¢m.", nameof(giaVon));
 
-        noiDung = string.IsNullOrWhiteSpace(noiDung) ? "Tồn đầu kỳ" : noiDung.Trim();
+        noiDung = string.IsNullOrWhiteSpace(noiDung) ? "Tá»“n Ä‘áº§u ká»³" : noiDung.Trim();
         decimal thanhTien = Math.Round(soLuong * giaVon, 2, MidpointRounding.AwayFromZero);
 
         await using var connection = await OpenAsync();
@@ -11889,7 +11915,7 @@ LIMIT 500;
 
         try
         {
-            // 1. Quản lý kỳ kế toán (nếu database có bảng ky_ke_toan)
+            // 1. Quáº£n lÃ½ ká»³ káº¿ toÃ¡n (náº¿u database cÃ³ báº£ng ky_ke_toan)
             uint kyKeToanId = 1;
             bool hasKyKeToan = await connection.ExecuteScalarAsync<int>(
                 "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'ky_ke_toan';",
@@ -11911,7 +11937,7 @@ LIMIT 500;
                 {
                     var dauThang = new DateTime(ngayDauKy.Year, ngayDauKy.Month, 1);
                     var cuoiThang = dauThang.AddMonths(1).AddDays(-1);
-                    var tenKy = $"Tháng {ngayDauKy.Month} Năm {ngayDauKy.Year}";
+                    var tenKy = $"ThÃ¡ng {ngayDauKy.Month} NÄƒm {ngayDauKy.Year}";
                     const string insertKySql = """
                         INSERT INTO ky_ke_toan (ma_ky, ten_ky, ngay_bat_dau_ky, ngay_ket_thuc_ky, trang_thai_khoa_so)
                         VALUES (@MaKy, @TenKy, @BatDau, @KetThuc, 0);
@@ -11927,14 +11953,14 @@ LIMIT 500;
                 }
             }
 
-            // 2. Lưu vào bảng chi_tiet_hang_hoa_dau_ky (schema SakePro) nếu có
+            // 2. LÆ°u vÃ o báº£ng chi_tiet_hang_hoa_dau_ky (schema SakePro) náº¿u cÃ³
             bool hasChiTietDauKy = await connection.ExecuteScalarAsync<int>(
                 "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'chi_tiet_hang_hoa_dau_ky';",
                 transaction: transaction) > 0;
 
             if (hasChiTietDauKy)
             {
-                // Kiểm tra trùng theo quy tắc: cùng kho, hàng, kỳ kế toán
+                // Kiá»ƒm tra trÃ¹ng theo quy táº¯c: cÃ¹ng kho, hÃ ng, ká»³ káº¿ toÃ¡n
                 var existingId = await connection.ExecuteScalarAsync<uint?>(
                     """
                     SELECT id FROM chi_tiet_hang_hoa_dau_ky
@@ -11946,7 +11972,7 @@ LIMIT 500;
 
                 if (existingId.HasValue && existingId.Value > 0)
                 {
-                    // Cập nhật lại bản ghi cũ, không cộng dồn hai lần
+                    // Cáº­p nháº­t láº¡i báº£n ghi cÅ©, khÃ´ng cá»™ng dá»“n hai láº§n
                     await connection.ExecuteAsync(
                         """
                         UPDATE chi_tiet_hang_hoa_dau_ky
@@ -11968,7 +11994,7 @@ LIMIT 500;
                 }
                 else
                 {
-                    // Thêm bản ghi mới
+                    // ThÃªm báº£n ghi má»›i
                     await connection.ExecuteAsync(
                         """
                         INSERT INTO chi_tiet_hang_hoa_dau_ky
@@ -11990,7 +12016,7 @@ LIMIT 500;
                 }
             }
 
-            // 3. Cập nhật tồn kho vào bảng ton_kho
+            // 3. Cáº­p nháº­t tá»“n kho vÃ o báº£ng ton_kho
             bool hasTonKho = await connection.ExecuteScalarAsync<int>(
                 "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'ton_kho';",
                 transaction: transaction) > 0;
@@ -12008,7 +12034,7 @@ LIMIT 500;
                     tonTruoc = ToDecimal(tonRow.so_luong_ton);
                 }
 
-                // Ghi đè số lượng tồn đầu kỳ (tránh cộng dồn 2 lần)
+                // Ghi Ä‘Ã¨ sá»‘ lÆ°á»£ng tá»“n Ä‘áº§u ká»³ (trÃ¡nh cá»™ng dá»“n 2 láº§n)
                 await connection.ExecuteAsync(
                     """
                     INSERT INTO ton_kho (chi_nhanh_id, san_pham_id, so_luong_ton, gia_von_binh_quan, ngay_cap_nhat)
@@ -12028,7 +12054,7 @@ LIMIT 500;
                     transaction: transaction);
             }
 
-            // 4. Đồng bộ vào bảng san_pham
+            // 4. Äá»“ng bá»™ vÃ o báº£ng san_pham
             bool hasSanPham = await connection.ExecuteScalarAsync<int>(
                 "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'san_pham';",
                 transaction: transaction) > 0;
@@ -12052,7 +12078,7 @@ LIMIT 500;
                     transaction: transaction);
             }
 
-            // 5. Ghi nhật ký lịch sử nhập xuất kho
+            // 5. Ghi nháº­t kÃ½ lá»‹ch sá»­ nháº­p xuáº¥t kho
             bool hasLichSu = await connection.ExecuteScalarAsync<int>(
                 "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'lich_su_nhap_xuat_kho';",
                 transaction: transaction) > 0;
@@ -12111,11 +12137,11 @@ LIMIT 500;
             await transaction.CommitAsync();
 
             _ = LogSubAccountActivityAsync(
-                "Thêm hàng tồn đầu kỳ",
+                "ThÃªm hÃ ng tá»“n Ä‘áº§u ká»³",
                 "SAN_PHAM",
                 sanPhamId,
                 $"TDK_{ngayDauKy:yyyyMMdd}",
-                $"Cập nhật tồn đầu kỳ: SL = {soLuong:N0}, Giá vốn = {giaVon:N0}, KhoId = {khoHangId}. {noiDung}",
+                $"Cáº­p nháº­t tá»“n Ä‘áº§u ká»³: SL = {soLuong:N0}, GiÃ¡ vá»‘n = {giaVon:N0}, KhoId = {khoHangId}. {noiDung}",
                 thanhTien);
 
             return true;
@@ -12123,15 +12149,15 @@ LIMIT 500;
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            SafeLog.WriteError("Lỗi LuuHangTonDauKyAsync", ex);
+            SafeLog.WriteError("Lá»—i LuuHangTonDauKyAsync", ex);
             throw;
         }
     }
     #endregion
 
-    #region Công Nợ Đầu Kỳ
+    #region CÃ´ng Ná»£ Äáº§u Ká»³
     /// <summary>
-    /// Đảm bảo bảng chi_tiet_cong_no_dau_ky tồn tại để lưu vết cấu trúc dữ liệu đầu kỳ đồng bộ.
+    /// Äáº£m báº£o báº£ng chi_tiet_cong_no_dau_ky tá»“n táº¡i Ä‘á»ƒ lÆ°u váº¿t cáº¥u trÃºc dá»¯ liá»‡u Ä‘áº§u ká»³ Ä‘á»“ng bá»™.
     /// </summary>
     private async Task EnsureBangCongNoDauKyAsync(MySqlConnection connection, MySqlTransaction transaction)
     {
@@ -12140,7 +12166,7 @@ LIMIT 500;
             const string createSql = """
             CREATE TABLE IF NOT EXISTS chi_tiet_cong_no_dau_ky (
                 id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                loai_doi_tac VARCHAR(20) NOT NULL COMMENT 'KHACH_HANG hoặc NHA_CUNG_CAP',
+                loai_doi_tac VARCHAR(20) NOT NULL COMMENT 'KHACH_HANG hoáº·c NHA_CUNG_CAP',
                 doi_tac_id INT UNSIGNED NOT NULL,
                 ma_doi_tac VARCHAR(50) NULL,
                 ten_doi_tac VARCHAR(255) NULL,
@@ -12161,12 +12187,12 @@ LIMIT 500;
         }
         catch (Exception ex)
         {
-            SafeLog.WriteError("Không tạo được bảng chi_tiet_cong_no_dau_ky", ex);
+            SafeLog.WriteError("KhÃ´ng táº¡o Ä‘Æ°á»£c báº£ng chi_tiet_cong_no_dau_ky", ex);
         }
     }
 
     /// <summary>
-    /// Lấy danh sách đối tác (Khách hàng hoặc Nhà cung cấp) dùng cho ô tìm kiếm AutoCompleteBox.
+    /// Láº¥y danh sÃ¡ch Ä‘á»‘i tÃ¡c (KhÃ¡ch hÃ ng hoáº·c NhÃ  cung cáº¥p) dÃ¹ng cho Ã´ tÃ¬m kiáº¿m AutoCompleteBox.
     /// </summary>
     public async Task<IReadOnlyList<DoiTacOption>> GetDanhSachDoiTacCongNoAsync(string loaiDoiTac, string? search = null)
     {
@@ -12210,7 +12236,7 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Tra cứu công nợ đầu kỳ đã khai báo trước đó của đối tác (nếu có).
+    /// Tra cá»©u cÃ´ng ná»£ Ä‘áº§u ká»³ Ä‘Ã£ khai bÃ¡o trÆ°á»›c Ä‘Ã³ cá»§a Ä‘á»‘i tÃ¡c (náº¿u cÃ³).
     /// </summary>
     public async Task<ChiTietCongNoDauKy?> LayCongNoDauKyCuaDoiTacAsync(string loaiDoiTac, uint doiTacId, DateTime ngayDauKy)
     {
@@ -12219,7 +12245,7 @@ LIMIT 500;
 
         try
         {
-            // 1. Thử lấy từ chi_tiet_cong_no_dau_ky
+            // 1. Thá»­ láº¥y tá»« chi_tiet_cong_no_dau_ky
             bool hasBangDauKy = await connection.ExecuteScalarAsync<int>(
                 "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'chi_tiet_cong_no_dau_ky';") > 0;
 
@@ -12253,7 +12279,7 @@ LIMIT 500;
                     return record;
             }
 
-            // 2. Fallback từ lịch sử công nợ
+            // 2. Fallback tá»« lá»‹ch sá»­ cÃ´ng ná»£
             if (loaiDoiTac == "KHACH_HANG")
             {
                 const string sqlKh = """
@@ -12323,16 +12349,16 @@ LIMIT 500;
         }
         catch (Exception ex)
         {
-            SafeLog.WriteError("Lỗi LayCongNoDauKyCuaDoiTacAsync", ex);
+            SafeLog.WriteError("Lá»—i LayCongNoDauKyCuaDoiTacAsync", ex);
         }
 
         return null;
     }
 
     /// <summary>
-    /// Lưu thông tin công nợ đầu kỳ của đối tác (Khách hàng / Nhà cung cấp).
-    /// Đảm bảo tính nhất quán qua Transaction, tự cập nhật sổ cái công nợ tương ứng,
-    /// chống cộng dồn hai lần khi người dùng thao tác lại, không tạo phiếu thu chi hay hóa đơn giả.
+    /// LÆ°u thÃ´ng tin cÃ´ng ná»£ Ä‘áº§u ká»³ cá»§a Ä‘á»‘i tÃ¡c (KhÃ¡ch hÃ ng / NhÃ  cung cáº¥p).
+    /// Äáº£m báº£o tÃ­nh nháº¥t quÃ¡n qua Transaction, tá»± cáº­p nháº­t sá»• cÃ¡i cÃ´ng ná»£ tÆ°Æ¡ng á»©ng,
+    /// chá»‘ng cá»™ng dá»“n hai láº§n khi ngÆ°á»i dÃ¹ng thao tÃ¡c láº¡i, khÃ´ng táº¡o phiáº¿u thu chi hay hÃ³a Ä‘Æ¡n giáº£.
     /// </summary>
     public async Task<bool> LuuCongNoDauKyAsync(ChiTietCongNoDauKy item)
     {
@@ -12340,20 +12366,20 @@ LIMIT 500;
             throw new ArgumentNullException(nameof(item));
 
         if (item.DoiTacId == 0)
-            throw new ArgumentException("Chưa chọn đối tác công nợ.", nameof(item.DoiTacId));
+            throw new ArgumentException("ChÆ°a chá»n Ä‘á»‘i tÃ¡c cÃ´ng ná»£.", nameof(item.DoiTacId));
 
         if (item.SoTien < 0)
-            throw new ArgumentException("Số tiền công nợ không được âm.", nameof(item.SoTien));
+            throw new ArgumentException("Sá»‘ tiá»n cÃ´ng ná»£ khÃ´ng Ä‘Æ°á»£c Ã¢m.", nameof(item.SoTien));
 
         var loaiDoiTac = (item.LoaiDoiTac ?? "KHACH_HANG").Trim().ToUpperInvariant();
         var branchId = item.ChiNhanhId > 0 ? item.ChiNhanhId : (Session.CurrentUser?.ChiNhanhId ?? 1);
         var userId = Session.CurrentUser?.Id;
         var ngayDauKy = item.NgayDauKy.Date;
 
-        var ghiChuDayDu = string.IsNullOrWhiteSpace(item.NoiDung) ? "Nợ đầu kỳ" : item.NoiDung.Trim();
+        var ghiChuDayDu = string.IsNullOrWhiteSpace(item.NoiDung) ? "Ná»£ Ä‘áº§u ká»³" : item.NoiDung.Trim();
         if (item.NgayHenTra.HasValue)
         {
-            ghiChuDayDu += $" (Hạn trả: {item.NgayHenTra.Value:dd/MM/yyyy})";
+            ghiChuDayDu += $" (Háº¡n tráº£: {item.NgayHenTra.Value:dd/MM/yyyy})";
         }
 
         await using var connection = await OpenAsync();
@@ -12366,11 +12392,11 @@ LIMIT 500;
             if (loaiDoiTac == "KHACH_HANG")
             {
                 // ==============================================================
-                // 1. CÔNG NỢ KHÁCH HÀNG (PHẢI THU KHÁCH HÀNG)
+                // 1. CÃ”NG Ná»¢ KHÃCH HÃ€NG (PHáº¢I THU KHÃCH HÃ€NG)
                 // ==============================================================
                 var maChungTu = $"CNDK_{item.MaDoiTac}";
 
-                // Kiểm tra xem khách hàng này đã có dòng công nợ đầu kỳ chưa (FOR UPDATE để an toàn)
+                // Kiá»ƒm tra xem khÃ¡ch hÃ ng nÃ y Ä‘Ã£ cÃ³ dÃ²ng cÃ´ng ná»£ Ä‘áº§u ká»³ chÆ°a (FOR UPDATE Ä‘á»ƒ an toÃ n)
                 const string checkExistingKhSql = """
                 SELECT id, ghi_no, so_du 
                 FROM lich_su_cong_no_khach_hang 
@@ -12391,7 +12417,7 @@ LIMIT 500;
                     decimal oldGhiNo = ToDecimal(existingRow.ghi_no);
                     decimal delta = item.SoTien - oldGhiNo;
 
-                    // Cập nhật lại bản ghi đầu kỳ đã có (chống cộng dồn 2 lần)
+                    // Cáº­p nháº­t láº¡i báº£n ghi Ä‘áº§u ká»³ Ä‘Ã£ cÃ³ (chá»‘ng cá»™ng dá»“n 2 láº§n)
                     await connection.ExecuteAsync(
                         """
                         UPDATE lich_su_cong_no_khach_hang
@@ -12413,7 +12439,7 @@ LIMIT 500;
                         },
                         transaction: transaction);
 
-                    // Nếu có chênh lệch delta và có các dòng phát sinh sau đó, điều chỉnh số dư an toàn
+                    // Náº¿u cÃ³ chÃªnh lá»‡ch delta vÃ  cÃ³ cÃ¡c dÃ²ng phÃ¡t sinh sau Ä‘Ã³, Ä‘iá»u chá»‰nh sá»‘ dÆ° an toÃ n
                     if (delta != 0)
                     {
                         await connection.ExecuteAsync(
@@ -12433,7 +12459,7 @@ LIMIT 500;
                 }
                 else
                 {
-                    // Lấy số dư công nợ hiện có trước khi thêm
+                    // Láº¥y sá»‘ dÆ° cÃ´ng ná»£ hiá»‡n cÃ³ trÆ°á»›c khi thÃªm
                     var currentDebt = await connection.ExecuteScalarAsync<decimal>(
                         """
                         SELECT COALESCE(SUM(ghi_no - ghi_co), 0)
@@ -12475,14 +12501,14 @@ LIMIT 500;
                         transaction: transaction);
                 }
 
-                // Lưu ý: KHÔNG đồng bộ cột no_can_thu_hien_tai ở đây vì công nợ đầu kỳ
-                // đã được ghi nhận vào sổ cái lich_su_cong_no_khach_hang. Nếu vừa ghi sổ cái
-                // vừa gán cột nền tảng sẽ khiến số dư bị cộng hai lần ở màn hình công nợ.
+                // LÆ°u Ã½: KHÃ”NG Ä‘á»“ng bá»™ cá»™t no_can_thu_hien_tai á»Ÿ Ä‘Ã¢y vÃ¬ cÃ´ng ná»£ Ä‘áº§u ká»³
+                // Ä‘Ã£ Ä‘Æ°á»£c ghi nháº­n vÃ o sá»• cÃ¡i lich_su_cong_no_khach_hang. Náº¿u vá»«a ghi sá»• cÃ¡i
+                // vá»«a gÃ¡n cá»™t ná»n táº£ng sáº½ khiáº¿n sá»‘ dÆ° bá»‹ cá»™ng hai láº§n á»Ÿ mÃ n hÃ¬nh cÃ´ng ná»£.
             }
             else
             {
                 // ==============================================================
-                // 2. CÔNG NỢ NHÀ CUNG CẤP (PHẢI TRẢ NHÀ CUNG CẤP)
+                // 2. CÃ”NG Ná»¢ NHÃ€ CUNG Cáº¤P (PHáº¢I TRáº¢ NHÃ€ CUNG Cáº¤P)
                 // ==============================================================
                 var maChungTu = $"CNDK_{item.MaDoiTac}";
 
@@ -12596,13 +12622,13 @@ LIMIT 500;
                         transaction: transaction);
                 }
 
-                // Lưu ý: KHÔNG đồng bộ cột no_can_tra_hien_tai ở đây vì công nợ đầu kỳ
-                // đã được ghi nhận vào sổ cái lich_su_cong_no_nha_cung_cap. Vừa ghi sổ cái
-                // vừa gán cột nền tảng sẽ khiến số dư nhà cung cấp bị cộng hai lần.
+                // LÆ°u Ã½: KHÃ”NG Ä‘á»“ng bá»™ cá»™t no_can_tra_hien_tai á»Ÿ Ä‘Ã¢y vÃ¬ cÃ´ng ná»£ Ä‘áº§u ká»³
+                // Ä‘Ã£ Ä‘Æ°á»£c ghi nháº­n vÃ o sá»• cÃ¡i lich_su_cong_no_nha_cung_cap. Vá»«a ghi sá»• cÃ¡i
+                // vá»«a gÃ¡n cá»™t ná»n táº£ng sáº½ khiáº¿n sá»‘ dÆ° nhÃ  cung cáº¥p bá»‹ cá»™ng hai láº§n.
             }
 
             // ==============================================================
-            // 3. GHI LƯU VÀO BẢNG chi_tiet_cong_no_dau_ky ĐỒNG BỘ
+            // 3. GHI LÆ¯U VÃ€O Báº¢NG chi_tiet_cong_no_dau_ky Äá»’NG Bá»˜
             // ==============================================================
             const string upsertDauKySql = """
             INSERT INTO chi_tiet_cong_no_dau_ky
@@ -12655,11 +12681,11 @@ LIMIT 500;
             await transaction.CommitAsync();
 
             _ = LogSubAccountActivityAsync(
-                "Thêm công nợ đầu kỳ",
+                "ThÃªm cÃ´ng ná»£ Ä‘áº§u ká»³",
                 loaiDoiTac == "KHACH_HANG" ? "KHACH_HANG" : "NHA_CUNG_CAP",
                 item.DoiTacId,
                 item.MaDoiTac,
-                $"Khai báo công nợ đầu kỳ: {item.SoTien:N0} đ cho đối tác {item.TenDoiTac} ({loaiDoiTac}). {item.NoiDung}",
+                $"Khai bÃ¡o cÃ´ng ná»£ Ä‘áº§u ká»³: {item.SoTien:N0} Ä‘ cho Ä‘á»‘i tÃ¡c {item.TenDoiTac} ({loaiDoiTac}). {item.NoiDung}",
                 item.SoTien);
 
             return true;
@@ -12667,15 +12693,15 @@ LIMIT 500;
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            SafeLog.WriteError("Lỗi LuuCongNoDauKyAsync", ex);
+            SafeLog.WriteError("Lá»—i LuuCongNoDauKyAsync", ex);
             throw;
         }
     }
     #endregion
 
-    #region Khuyến Mãi
+    #region Khuyáº¿n MÃ£i
     /// <summary>
-    /// Đảm bảo các bảng khuyến mãi tồn tại trong cơ sở dữ liệu.
+    /// Äáº£m báº£o cÃ¡c báº£ng khuyáº¿n mÃ£i tá»“n táº¡i trong cÆ¡ sá»Ÿ dá»¯ liá»‡u.
     /// </summary>
     public async Task EnsureBangKhuyenMaiAsync(MySqlConnection connection, MySqlTransaction? transaction = null)
     {
@@ -12690,7 +12716,10 @@ LIMIT 500;
                 ngay_ket_thuc DATETIME NOT NULL,
                 nhom_khach_hang_id INT UNSIGNED NULL,
                 trang_thai VARCHAR(50) NOT NULL DEFAULT 'DANG_HOAT_DONG',
-                loai_khuyen_mai VARCHAR(50) NOT NULL DEFAULT 'THEO_HANG_HOA',
+                loai_khuyen_mai VARCHAR(50) NOT NULL DEFAULT 'PRODUCT_DISCOUNT',
+                gia_tri_don_toi_thieu DECIMAL(15,2) NOT NULL DEFAULT 0,
+                loai_giam_gia VARCHAR(20) NOT NULL DEFAULT 'PHAN_TRAM',
+                gia_tri_giam DECIMAL(15,2) NOT NULL DEFAULT 0,
                 ghi_chu TEXT NULL,
                 chi_nhanh_id INT UNSIGNED NOT NULL DEFAULT 1,
                 nguoi_tao_id INT UNSIGNED NULL,
@@ -12721,8 +12750,8 @@ LIMIT 500;
 
             await connection.ExecuteAsync(createTableSql, transaction: transaction);
 
-            // Bảng đã tồn tại ở phiên bản cũ (tên cột khác) thì CREATE TABLE IF
-            // NOT EXISTS không làm gì, nên phải tự kiểm tra và bổ sung còn thiếu.
+            // Báº£ng Ä‘Ã£ tá»“n táº¡i á»Ÿ phiÃªn báº£n cÅ© (tÃªn cá»™t khÃ¡c) thÃ¬ CREATE TABLE IF
+            // NOT EXISTS khÃ´ng lÃ m gÃ¬, nÃªn pháº£i tá»± kiá»ƒm tra vÃ  bá»• sung cÃ²n thiáº¿u.
             if (transaction is null)
             {
                 await EnsureCotBangKhuyenMaiAsync(connection);
@@ -12730,18 +12759,18 @@ LIMIT 500;
         }
         catch (Exception ex)
         {
-            SafeLog.WriteError("Không tạo được bảng khuyến mãi", ex);
+            SafeLog.WriteError("KhÃ´ng táº¡o Ä‘Æ°á»£c báº£ng khuyáº¿n mÃ£i", ex);
         }
     }
 
     /// <summary>
-    /// Tự kiểm tra và BỔ SUNG các cột còn thiếu cho hai bảng khuyến mãi.
+    /// Tá»± kiá»ƒm tra vÃ  Bá»” SUNG cÃ¡c cá»™t cÃ²n thiáº¿u cho hai báº£ng khuyáº¿n mÃ£i.
     /// <para>
-    /// Database cũ dùng tên cột khác (chuong_trinh_khuyen_mai: thoi_gian_bat_dau /
-    /// thoi_gian_ket_thuc / doi_tac_id / trang_thai dạng tinyint; chi_tiet_khuyen_mai:
+    /// Database cÅ© dÃ¹ng tÃªn cá»™t khÃ¡c (chuong_trinh_khuyen_mai: thoi_gian_bat_dau /
+    /// thoi_gian_ket_thuc / doi_tac_id / trang_thai dáº¡ng tinyint; chi_tiet_khuyen_mai:
     /// hang_hoa_id / hang_hoa_tang_id / so_luong_hang_tang / phan_tram_giam_gia /
-    /// so_tien_giam). Thay vì bắt người dùng chạy lại script xoá bảng (mất dữ
-    /// liệu), hàm này thêm cột mới rồi chuyển dữ liệu sang — không xoá gì.
+    /// so_tien_giam). Thay vÃ¬ báº¯t ngÆ°á»i dÃ¹ng cháº¡y láº¡i script xoÃ¡ báº£ng (máº¥t dá»¯
+    /// liá»‡u), hÃ m nÃ y thÃªm cá»™t má»›i rá»“i chuyá»ƒn dá»¯ liá»‡u sang â€” khÃ´ng xoÃ¡ gÃ¬.
     /// </para>
     /// </summary>
     private async Task EnsureCotBangKhuyenMaiAsync(MySqlConnection connection)
@@ -12779,7 +12808,7 @@ LIMIT 500;
                     "UPDATE chuong_trinh_khuyen_mai SET ngay_ket_thuc = thoi_gian_ket_thuc WHERE ngay_ket_thuc IS NULL;");
             }
 
-            // Hai cột ngày không được để trống: gán ngày mặc định rồi siết lại.
+            // Hai cá»™t ngÃ y khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng: gÃ¡n ngÃ y máº·c Ä‘á»‹nh rá»“i siáº¿t láº¡i.
             await connection.ExecuteAsync(
                 "UPDATE chuong_trinh_khuyen_mai SET ngay_bat_dau = '2000-01-01 00:00:00' WHERE ngay_bat_dau IS NULL;");
             await connection.ExecuteAsync(
@@ -12801,7 +12830,7 @@ LIMIT 500;
                     "UPDATE chuong_trinh_khuyen_mai SET nhom_khach_hang_id = doi_tac_id WHERE nhom_khach_hang_id IS NULL;");
             }
 
-            // trang_thai: bản cũ dùng tinyint, bản mới dùng chuỗi trạng thái.
+            // trang_thai: báº£n cÅ© dÃ¹ng tinyint, báº£n má»›i dÃ¹ng chuá»—i tráº¡ng thÃ¡i.
             if (!cotChuongTrinh.ContainsKey("trang_thai"))
             {
                 await connection.ExecuteAsync(
@@ -12822,7 +12851,33 @@ LIMIT 500;
             if (!cotChuongTrinh.ContainsKey("loai_khuyen_mai"))
             {
                 await connection.ExecuteAsync(
-                    "ALTER TABLE chuong_trinh_khuyen_mai ADD COLUMN loai_khuyen_mai VARCHAR(50) NOT NULL DEFAULT 'THEO_HANG_HOA' AFTER trang_thai;");
+                    "ALTER TABLE chuong_trinh_khuyen_mai ADD COLUMN loai_khuyen_mai VARCHAR(50) NOT NULL DEFAULT 'PRODUCT_DISCOUNT' AFTER trang_thai;");
+            }
+
+            // Chuyá»ƒn mÃ£ loáº¡i khuyáº¿n mÃ£i cÅ© sang bá»™ mÃ£ dÃ¹ng chung má»›i.
+            await connection.ExecuteAsync(
+                "UPDATE chuong_trinh_khuyen_mai SET loai_khuyen_mai = 'ORDER_DISCOUNT' WHERE loai_khuyen_mai = 'THEO_HOA_DON';");
+            await connection.ExecuteAsync(
+                "UPDATE chuong_trinh_khuyen_mai SET loai_khuyen_mai = 'BUY_X_GET_Y' WHERE loai_khuyen_mai = 'TANG_KEM';");
+            await connection.ExecuteAsync(
+                "UPDATE chuong_trinh_khuyen_mai SET loai_khuyen_mai = 'PRODUCT_DISCOUNT' WHERE loai_khuyen_mai = 'THEO_HANG_HOA';");
+
+            if (!cotChuongTrinh.ContainsKey("gia_tri_don_toi_thieu"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chuong_trinh_khuyen_mai ADD COLUMN gia_tri_don_toi_thieu DECIMAL(15,2) NOT NULL DEFAULT 0 AFTER loai_khuyen_mai;");
+            }
+
+            if (!cotChuongTrinh.ContainsKey("loai_giam_gia"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chuong_trinh_khuyen_mai ADD COLUMN loai_giam_gia VARCHAR(20) NOT NULL DEFAULT 'PHAN_TRAM' AFTER gia_tri_don_toi_thieu;");
+            }
+
+            if (!cotChuongTrinh.ContainsKey("gia_tri_giam"))
+            {
+                await connection.ExecuteAsync(
+                    "ALTER TABLE chuong_trinh_khuyen_mai ADD COLUMN gia_tri_giam DECIMAL(15,2) NOT NULL DEFAULT 0 AFTER loai_giam_gia;");
             }
 
             if (!cotChuongTrinh.ContainsKey("ghi_chu"))
@@ -12960,10 +13015,10 @@ LIMIT 500;
                     "ALTER TABLE chi_tiet_khuyen_mai ADD COLUMN ghi_chu VARCHAR(255) NULL AFTER ten_san_pham_tang;");
             }
 
-            // Bảng cũ khai báo hang_hoa_id / don_vi_tinh_id là NOT NULL (kèm khoá
-            // ngoại sang bảng hàng hóa cũ). Ứng dụng chỉ ghi bộ cột mới
-            // san_pham_* nên hai cột cũ phải cho phép NULL, nếu không lưu
-            // khuyến mãi sẽ lỗi "doesn't have a default value" / khoá ngoại.
+            // Báº£ng cÅ© khai bÃ¡o hang_hoa_id / don_vi_tinh_id lÃ  NOT NULL (kÃ¨m khoÃ¡
+            // ngoáº¡i sang báº£ng hÃ ng hÃ³a cÅ©). á»¨ng dá»¥ng chá»‰ ghi bá»™ cá»™t má»›i
+            // san_pham_* nÃªn hai cá»™t cÅ© pháº£i cho phÃ©p NULL, náº¿u khÃ´ng lÆ°u
+            // khuyáº¿n mÃ£i sáº½ lá»—i "doesn't have a default value" / khoÃ¡ ngoáº¡i.
             await NoptCotCuKhuyenMaiAsync(connection, cotChiTiet, "hang_hoa_id");
             await NoptCotCuKhuyenMaiAsync(connection, cotChiTiet, "don_vi_tinh_id");
         }
@@ -12974,9 +13029,9 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Cho phép một cột cũ của bảng chi tiết khuyến mãi (đang khai báo NOT NULL
-    /// và có khoá ngoại sang bảng hàng hóa cũ) nhận giá trị NULL, để ứng dụng mới
-    /// chỉ cần ghi bộ cột "san_pham_*" mà vẫn lưu được khuyến mãi.
+    /// Cho phÃ©p má»™t cá»™t cÅ© cá»§a báº£ng chi tiáº¿t khuyáº¿n mÃ£i (Ä‘ang khai bÃ¡o NOT NULL
+    /// vÃ  cÃ³ khoÃ¡ ngoáº¡i sang báº£ng hÃ ng hÃ³a cÅ©) nháº­n giÃ¡ trá»‹ NULL, Ä‘á»ƒ á»©ng dá»¥ng má»›i
+    /// chá»‰ cáº§n ghi bá»™ cá»™t "san_pham_*" mÃ  váº«n lÆ°u Ä‘Æ°á»£c khuyáº¿n mÃ£i.
     /// </summary>
     private static async Task NoptCotCuKhuyenMaiAsync(
         MySqlConnection connection,
@@ -13013,7 +13068,7 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Đọc danh sách cột (tên -> kiểu dữ liệu) của một bảng trong database hiện tại.
+    /// Äá»c danh sÃ¡ch cá»™t (tÃªn -> kiá»ƒu dá»¯ liá»‡u) cá»§a má»™t báº£ng trong database hiá»‡n táº¡i.
     /// </summary>
     private static async Task<Dictionary<string, string>> DocCotBangAsync(
         MySqlConnection connection,
@@ -13031,7 +13086,7 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Sinh mã chương trình khuyến mãi tự động theo ngày: KM{yyyyMMdd}{001}.
+    /// Sinh mÃ£ chÆ°Æ¡ng trÃ¬nh khuyáº¿n mÃ£i tá»± Ä‘á»™ng theo ngÃ y: KM{yyyyMMdd}{001}.
     /// </summary>
     public async Task<string> SinhMaKhuyenMaiMoiAsync()
     {
@@ -13063,7 +13118,7 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Kiểm tra xem mã chương trình khuyến mãi đã tồn tại chưa.
+    /// Kiá»ƒm tra xem mÃ£ chÆ°Æ¡ng trÃ¬nh khuyáº¿n mÃ£i Ä‘Ã£ tá»“n táº¡i chÆ°a.
     /// </summary>
     public async Task<bool> KiemTraMaKhuyenMaiTonTaiAsync(string ma, uint? excludeId = null)
     {
@@ -13084,7 +13139,7 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Lưu chương trình khuyến mãi và các dòng chi tiết hàng hóa (hỗ trợ tạo mới hoặc cập nhật) bằng Transaction.
+    /// LÆ°u chÆ°Æ¡ng trÃ¬nh khuyáº¿n mÃ£i vÃ  cÃ¡c dÃ²ng chi tiáº¿t hÃ ng hÃ³a (há»— trá»£ táº¡o má»›i hoáº·c cáº­p nháº­t) báº±ng Transaction.
     /// </summary>
     public async Task<uint> LuuChuongTrinhKhuyenMaiAsync(ChuongTrinhKhuyenMai ct, IReadOnlyList<ChiTietKhuyenMai> chiTiets)
     {
@@ -13092,10 +13147,10 @@ LIMIT 500;
             throw new ArgumentNullException(nameof(ct));
 
         if (string.IsNullOrWhiteSpace(ct.TenChuongTrinh))
-            throw new ArgumentException("Tên chương trình khuyến mãi không được để trống.", nameof(ct.TenChuongTrinh));
+            throw new ArgumentException("TÃªn chÆ°Æ¡ng trÃ¬nh khuyáº¿n mÃ£i khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.", nameof(ct.TenChuongTrinh));
 
         if (ct.NgayKetThuc < ct.NgayBatDau)
-            throw new ArgumentException("Ngày kết thúc không được trước ngày bắt đầu.", nameof(ct.NgayKetThuc));
+            throw new ArgumentException("NgÃ y káº¿t thÃºc khÃ´ng Ä‘Æ°á»£c trÆ°á»›c ngÃ y báº¯t Ä‘áº§u.", nameof(ct.NgayKetThuc));
 
         var branchId = ct.ChiNhanhId > 0 ? ct.ChiNhanhId : (Session.CurrentUser?.ChiNhanhId ?? 1);
         var userId = Session.CurrentUser?.Id;
@@ -13110,7 +13165,7 @@ LIMIT 500;
 
             if (chuongTrinhId == 0)
             {
-                // Kiểm tra trùng mã
+                // Kiá»ƒm tra trÃ¹ng mÃ£
                 var exists = await connection.ExecuteScalarAsync<int>(
                     "SELECT COUNT(*) FROM chuong_trinh_khuyen_mai WHERE ma_chuong_trinh = @Ma;",
                     new { Ma = ct.MaChuongTrinh.Trim() },
@@ -13118,7 +13173,7 @@ LIMIT 500;
 
                 if (exists)
                 {
-                    // Nếu trùng thì tự sinh mã mới
+                    // Náº¿u trÃ¹ng thÃ¬ tá»± sinh mÃ£ má»›i
                     ct.MaChuongTrinh = await SinhMaKhuyenMaiMoiAsync();
                 }
 
@@ -13126,13 +13181,15 @@ LIMIT 500;
                 INSERT INTO chuong_trinh_khuyen_mai
                 (
                     ma_chuong_trinh, ten_chuong_trinh, ngay_bat_dau, ngay_ket_thuc,
-                    nhom_khach_hang_id, trang_thai, loai_khuyen_mai, ghi_chu,
+                    trang_thai, loai_khuyen_mai, gia_tri_don_toi_thieu,
+                    loai_giam_gia, gia_tri_giam, ghi_chu,
                     chi_nhanh_id, nguoi_tao_id
                 )
                 VALUES
                 (
                     @MaChuongTrinh, @TenChuongTrinh, @NgayBatDau, @NgayKetThuc,
-                    @NhomKhachHangId, @TrangThai, @LoaiKhuyenMai, @GhiChu,
+                    @TrangThai, @LoaiKhuyenMai, @GiaTriDonToiThieu,
+                    @LoaiGiamGia, @GiaTriGiam, @GhiChu,
                     @ChiNhanhId, @NguoiTaoId
                 );
                 SELECT LAST_INSERT_ID();
@@ -13146,9 +13203,11 @@ LIMIT 500;
                         ct.TenChuongTrinh,
                         ct.NgayBatDau,
                         ct.NgayKetThuc,
-                        ct.NhomKhachHangId,
                         ct.TrangThai,
                         ct.LoaiKhuyenMai,
+                        ct.GiaTriDonToiThieu,
+                        ct.LoaiGiamGia,
+                        ct.GiaTriGiam,
                         ct.GhiChu,
                         ChiNhanhId = branchId,
                         NguoiTaoId = userId
@@ -13164,9 +13223,11 @@ LIMIT 500;
                     ten_chuong_trinh = @TenChuongTrinh,
                     ngay_bat_dau = @NgayBatDau,
                     ngay_ket_thuc = @NgayKetThuc,
-                    nhom_khach_hang_id = @NhomKhachHangId,
                     trang_thai = @TrangThai,
                     loai_khuyen_mai = @LoaiKhuyenMai,
+                    gia_tri_don_toi_thieu = @GiaTriDonToiThieu,
+                    loai_giam_gia = @LoaiGiamGia,
+                    gia_tri_giam = @GiaTriGiam,
                     ghi_chu = @GhiChu,
                     chi_nhanh_id = @ChiNhanhId
                 WHERE id = @Id;
@@ -13180,23 +13241,25 @@ LIMIT 500;
                         ct.TenChuongTrinh,
                         ct.NgayBatDau,
                         ct.NgayKetThuc,
-                        ct.NhomKhachHangId,
                         ct.TrangThai,
                         ct.LoaiKhuyenMai,
+                        ct.GiaTriDonToiThieu,
+                        ct.LoaiGiamGia,
+                        ct.GiaTriGiam,
                         ct.GhiChu,
                         ChiNhanhId = branchId,
                         ct.Id
                     },
                     transaction: transaction);
 
-                // Xóa chi tiết cũ trước khi ghi lại
+                // XÃ³a chi tiáº¿t cÅ© trÆ°á»›c khi ghi láº¡i
                 await connection.ExecuteAsync(
                     "DELETE FROM chi_tiet_khuyen_mai WHERE chuong_trinh_id = @ChuongTrinhId;",
                     new { ChuongTrinhId = chuongTrinhId },
                     transaction: transaction);
             }
 
-            // Ghi các dòng chi tiết hàng hóa áp dụng
+            // Ghi cÃ¡c dÃ²ng chi tiáº¿t hÃ ng hÃ³a Ã¡p dá»¥ng
             if (chiTiets != null && chiTiets.Count > 0)
             {
                 const string insertDetailSql = """
@@ -13240,11 +13303,11 @@ LIMIT 500;
             await transaction.CommitAsync();
 
             _ = LogSubAccountActivityAsync(
-                "Khuyến mãi",
+                "Khuyáº¿n mÃ£i",
                 "CHUONG_TRINH_KHUYEN_MAI",
                 chuongTrinhId,
                 ct.MaChuongTrinh,
-                $"Lưu chương trình khuyến mãi: {ct.TenChuongTrinh} ({chiTiets?.Count ?? 0} sản phẩm)",
+                $"LÆ°u chÆ°Æ¡ng trÃ¬nh khuyáº¿n mÃ£i: {ct.TenChuongTrinh} ({chiTiets?.Count ?? 0} sáº£n pháº©m)",
                 0);
 
             return chuongTrinhId;
@@ -13252,13 +13315,13 @@ LIMIT 500;
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            SafeLog.WriteError("Lỗi LuuChuongTrinhKhuyenMaiAsync", ex);
+            SafeLog.WriteError("Lá»—i LuuChuongTrinhKhuyenMaiAsync", ex);
             throw;
         }
     }
 
     /// <summary>
-    /// Lấy danh sách các chương trình khuyến mãi trong hệ thống.
+    /// Láº¥y danh sÃ¡ch cÃ¡c chÆ°Æ¡ng trÃ¬nh khuyáº¿n mÃ£i trong há»‡ thá»‘ng.
     /// </summary>
     public async Task<IReadOnlyList<ChuongTrinhKhuyenMai>> GetDanhSachKhuyenMaiAsync(
         string? search = null,
@@ -13276,15 +13339,17 @@ LIMIT 500;
             km.ten_chuong_trinh AS TenChuongTrinh,
             km.ngay_bat_dau AS NgayBatDau,
             km.ngay_ket_thuc AS NgayKetThuc,
-            km.nhom_khach_hang_id AS NhomKhachHangId,
-            nkh.ten_nhom AS TenNhomKhachHang,
+            NULL AS NhomKhachHangId,
+            NULL AS TenNhomKhachHang,
             km.trang_thai AS TrangThai,
             km.loai_khuyen_mai AS LoaiKhuyenMai,
+            COALESCE(km.gia_tri_don_toi_thieu, 0) AS GiaTriDonToiThieu,
+            COALESCE(km.loai_giam_gia, 'PHAN_TRAM') AS LoaiGiamGia,
+            COALESCE(km.gia_tri_giam, 0) AS GiaTriGiam,
             km.ghi_chu AS GhiChu,
             km.chi_nhanh_id AS ChiNhanhId,
             km.ngay_tao AS NgayTao
         FROM chuong_trinh_khuyen_mai km
-        LEFT JOIN nhom_khach_hang nkh ON nkh.id = km.nhom_khach_hang_id
         WHERE 1 = 1
         """;
 
@@ -13336,7 +13401,13 @@ LIMIT 500;
 
         var list = (await connection.QueryAsync<ChuongTrinhKhuyenMai>(sql, param)).AsList();
 
-        // Nạp số lượng sản phẩm áp dụng và tóm tắt ưu đãi cho mỗi chương trình
+        // Chuáº©n hÃ³a loáº¡i khuyáº¿n mÃ£i cÅ©
+        foreach (var item in list)
+        {
+            item.LoaiKhuyenMai = ShopHoa.Models.KhuyenMaiLoai.ChuanHoa(item.LoaiKhuyenMai);
+        }
+
+        // Náº¡p sá»‘ lÆ°á»£ng sáº£n pháº©m Ã¡p dá»¥ng vÃ  tÃ³m táº¯t Æ°u Ä‘Ã£i cho má»—i chÆ°Æ¡ng trÃ¬nh
         if (list.Count > 0)
         {
             const string countSql = "SELECT chuong_trinh_id AS CtId, COUNT(*) AS SoLuong FROM chi_tiet_khuyen_mai GROUP BY chuong_trinh_id;";
@@ -13367,25 +13438,33 @@ LIMIT 500;
                         item.DanhSachChiTiet.Add(new ChiTietKhuyenMai());
                 }
 
-                if (details.TryGetValue(item.Id, out var det))
+                if (string.Equals(item.LoaiKhuyenMai, ShopHoa.Models.KhuyenMaiLoai.TheoDonHang, StringComparison.OrdinalIgnoreCase))
+                {
+                    item.TomTatUuDai = item.GiaTriGiam > 0
+                        ? (string.Equals(item.LoaiGiamGia, "PHAN_TRAM", StringComparison.OrdinalIgnoreCase)
+                            ? $"Giáº£m {item.GiaTriGiam:0.##}% cho Ä‘Æ¡n tá»« {item.GiaTriDonToiThieu:N0} Ä‘"
+                            : $"Giáº£m {item.GiaTriGiam:N0} Ä‘ cho Ä‘Æ¡n tá»« {item.GiaTriDonToiThieu:N0} Ä‘")
+                        : "Giáº£m giÃ¡ theo tá»•ng Ä‘Æ¡n hÃ ng";
+                }
+                else if (details.TryGetValue(item.Id, out var det))
                 {
                     if (det.SoLuongTang > 0)
                     {
-                        var tenTang = string.IsNullOrWhiteSpace(det.TenSanPhamTang) ? "sản phẩm" : det.TenSanPhamTang;
-                        item.TomTatUuDai = $"Tặng {det.SoLuongTang:0.##} {tenTang} ({item.SoLuongSanPham} mặt hàng)";
+                        var tenTang = string.IsNullOrWhiteSpace(det.TenSanPhamTang) ? "sáº£n pháº©m" : det.TenSanPhamTang;
+                        item.TomTatUuDai = $"Mua Ä‘á»§ táº·ng {det.SoLuongTang:0.##} {tenTang} ({item.SoLuongSanPham} sáº£n pháº©m)";
                     }
-                    else if (det.LoaiGiamGia == "PHAN_TRAM")
+                    else if (string.Equals(det.LoaiGiamGia, "PHAN_TRAM", StringComparison.OrdinalIgnoreCase))
                     {
-                        item.TomTatUuDai = det.GiaTriGiam > 0 ? $"Giảm {det.GiaTriGiam:0.##}% ({item.SoLuongSanPham} mặt hàng)" : $"{item.SoLuongSanPham} mặt hàng";
+                        item.TomTatUuDai = det.GiaTriGiam > 0 ? $"Giáº£m {det.GiaTriGiam:0.##}% ({item.SoLuongSanPham} sáº£n pháº©m)" : $"{item.SoLuongSanPham} sáº£n pháº©m";
                     }
                     else
                     {
-                        item.TomTatUuDai = det.GiaTriGiam > 0 ? $"Giảm {det.GiaTriGiam:N0} đ ({item.SoLuongSanPham} mặt hàng)" : $"{item.SoLuongSanPham} mặt hàng";
+                        item.TomTatUuDai = det.GiaTriGiam > 0 ? $"Giáº£m {det.GiaTriGiam:N0} Ä‘ ({item.SoLuongSanPham} sáº£n pháº©m)" : $"{item.SoLuongSanPham} sáº£n pháº©m";
                     }
                 }
                 else
                 {
-                    item.TomTatUuDai = item.SoLuongSanPham > 0 ? $"{item.SoLuongSanPham} mặt hàng áp dụng" : "Toàn bộ danh mục";
+                    item.TomTatUuDai = item.SoLuongSanPham > 0 ? $"{item.SoLuongSanPham} sáº£n pháº©m Ã¡p dá»¥ng" : "ChÆ°a cáº¥u hÃ¬nh Æ°u Ä‘Ã£i";
                 }
             }
         }
@@ -13394,7 +13473,7 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Lấy chi tiết các sản phẩm áp dụng trong một chương trình khuyến mãi.
+    /// Láº¥y chi tiáº¿t cÃ¡c sáº£n pháº©m Ã¡p dá»¥ng trong má»™t chÆ°Æ¡ng trÃ¬nh khuyáº¿n mÃ£i.
     /// </summary>
     public async Task<IReadOnlyList<ChiTietKhuyenMai>> GetChiTietKhuyenMaiAsync(uint chuongTrinhId)
     {
@@ -13408,7 +13487,7 @@ LIMIT 500;
             ct.san_pham_id AS SanPhamId,
             ct.ma_san_pham AS MaSanPham,
             ct.ten_san_pham AS TenSanPham,
-            COALESCE(ct.don_vi_tinh, dvt.ten_don_vi, 'Cái') AS DonViTinh,
+            COALESCE(ct.don_vi_tinh, dvt.ten_don_vi, 'CÃ¡i') AS DonViTinh,
             COALESCE(sp.gia_ban, 0) AS GiaBanHienTai,
             ct.so_luong_mua AS SoLuongMua,
             ct.loai_giam_gia AS LoaiGiamGia,
@@ -13434,7 +13513,7 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Xóa một chương trình khuyến mãi.
+    /// XÃ³a má»™t chÆ°Æ¡ng trÃ¬nh khuyáº¿n mÃ£i.
     /// </summary>
     public async Task<bool> XoaChuongTrinhKhuyenMaiAsync(uint chuongTrinhId)
     {
@@ -13459,15 +13538,15 @@ LIMIT 500;
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            SafeLog.WriteError("Lỗi XoaChuongTrinhKhuyenMaiAsync", ex);
+            SafeLog.WriteError("Lá»—i XoaChuongTrinhKhuyenMaiAsync", ex);
             throw;
         }
     }
     #endregion
 
-    #region Sổ Quỹ Đầu Kỳ
+    #region Sá»• Quá»¹ Äáº§u Ká»³
     /// <summary>
-    /// Đảm bảo bảng so_quy_dau_ky tồn tại để lưu số dư quỹ đầu kỳ do người dùng khai báo.
+    /// Äáº£m báº£o báº£ng so_quy_dau_ky tá»“n táº¡i Ä‘á»ƒ lÆ°u sá»‘ dÆ° quá»¹ Ä‘áº§u ká»³ do ngÆ°á»i dÃ¹ng khai bÃ¡o.
     /// </summary>
     public async Task EnsureBangSoQuyDauKyAsync(MySqlConnection connection, MySqlTransaction? transaction = null)
     {
@@ -13493,12 +13572,12 @@ LIMIT 500;
         }
         catch (Exception ex)
         {
-            SafeLog.WriteError("Không tạo được bảng so_quy_dau_ky", ex);
+            SafeLog.WriteError("KhÃ´ng táº¡o Ä‘Æ°á»£c báº£ng so_quy_dau_ky", ex);
         }
     }
 
     /// <summary>
-    /// Lấy danh sách các bản ghi số dư quỹ đầu kỳ của chi nhánh hiện tại.
+    /// Láº¥y danh sÃ¡ch cÃ¡c báº£n ghi sá»‘ dÆ° quá»¹ Ä‘áº§u ká»³ cá»§a chi nhÃ¡nh hiá»‡n táº¡i.
     /// </summary>
     public async Task<IReadOnlyList<SoQuyDauKy>> GetDanhSachSoQuyDauKyAsync(string? search = null)
     {
@@ -13535,8 +13614,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Lưu (thêm mới hoặc cập nhật) một bản ghi số dư quỹ đầu kỳ.
-    /// Mỗi quỹ chỉ có một số dư cho mỗi ngày nên dùng khóa duy nhất (phuong_thuc, ngay_dau_ky, chi_nhanh_id).
+    /// LÆ°u (thÃªm má»›i hoáº·c cáº­p nháº­t) má»™t báº£n ghi sá»‘ dÆ° quá»¹ Ä‘áº§u ká»³.
+    /// Má»—i quá»¹ chá»‰ cÃ³ má»™t sá»‘ dÆ° cho má»—i ngÃ y nÃªn dÃ¹ng khÃ³a duy nháº¥t (phuong_thuc, ngay_dau_ky, chi_nhanh_id).
     /// </summary>
     public async Task<uint> LuuSoQuyDauKyAsync(SoQuyDauKy item)
     {
@@ -13544,16 +13623,16 @@ LIMIT 500;
             throw new ArgumentNullException(nameof(item));
 
         if (item.NgayDauKy == default)
-            throw new ArgumentException("Ngày đầu kỳ không được để trống.", nameof(item.NgayDauKy));
+            throw new ArgumentException("NgÃ y Ä‘áº§u ká»³ khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.", nameof(item.NgayDauKy));
 
         if (string.IsNullOrWhiteSpace(item.PhuongThuc))
-            throw new ArgumentException("Vui lòng chọn quỹ cho số dư đầu kỳ.", nameof(item.PhuongThuc));
+            throw new ArgumentException("Vui lÃ²ng chá»n quá»¹ cho sá»‘ dÆ° Ä‘áº§u ká»³.", nameof(item.PhuongThuc));
 
         var branchId = item.ChiNhanhId > 0 ? item.ChiNhanhId : (Session.CurrentUser?.ChiNhanhId ?? 1);
         var userId = Session.CurrentUser?.Id;
         var phuongThuc = item.PhuongThuc.Trim().ToUpperInvariant();
         var ngay = item.NgayDauKy.Date;
-        var noiDung = string.IsNullOrWhiteSpace(item.NoiDung) ? "Số dư quỹ đầu kỳ" : item.NoiDung.Trim();
+        var noiDung = string.IsNullOrWhiteSpace(item.NoiDung) ? "Sá»‘ dÆ° quá»¹ Ä‘áº§u ká»³" : item.NoiDung.Trim();
 
         await using var connection = await OpenAsync();
         await EnsureBangSoQuyDauKyAsync(connection);
@@ -13609,7 +13688,7 @@ LIMIT 500;
         return item.Id;
     }
 
-    /// <summary>Xóa một bản ghi số dư quỹ đầu kỳ.</summary>
+    /// <summary>XÃ³a má»™t báº£n ghi sá»‘ dÆ° quá»¹ Ä‘áº§u ká»³.</summary>
     public async Task<bool> XoaSoQuyDauKyAsync(uint id)
     {
         await using var connection = await OpenAsync();
@@ -13623,12 +13702,12 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Tổng số dư quỹ đầu kỳ của chi nhánh hiện tại (tùy chọn lọc theo một quỹ
-    /// và theo mốc ngày). Dùng để cộng vào "quỹ đầu kỳ" khi tính tồn quỹ.
+    /// Tá»•ng sá»‘ dÆ° quá»¹ Ä‘áº§u ká»³ cá»§a chi nhÃ¡nh hiá»‡n táº¡i (tÃ¹y chá»n lá»c theo má»™t quá»¹
+    /// vÃ  theo má»‘c ngÃ y). DÃ¹ng Ä‘á»ƒ cá»™ng vÃ o "quá»¹ Ä‘áº§u ká»³" khi tÃ­nh tá»“n quá»¹.
     /// <para>
-    /// <paramref name="ngayDauKyToiDa"/> giới hạn lấy những khai báo có ngày đầu kỳ
-    /// không vượt quá mốc đang xem. Nhờ vậy khi xem một kỳ thì quỹ đầu kỳ chỉ cộng
-    /// những khai báo đã có trước kỳ đó, còn khai báo của kỳ sau không làm lệch số.
+    /// <paramref name="ngayDauKyToiDa"/> giá»›i háº¡n láº¥y nhá»¯ng khai bÃ¡o cÃ³ ngÃ y Ä‘áº§u ká»³
+    /// khÃ´ng vÆ°á»£t quÃ¡ má»‘c Ä‘ang xem. Nhá» váº­y khi xem má»™t ká»³ thÃ¬ quá»¹ Ä‘áº§u ká»³ chá»‰ cá»™ng
+    /// nhá»¯ng khai bÃ¡o Ä‘Ã£ cÃ³ trÆ°á»›c ká»³ Ä‘Ã³, cÃ²n khai bÃ¡o cá»§a ká»³ sau khÃ´ng lÃ m lá»‡ch sá»‘.
     /// </para>
     /// </summary>
     public async Task<decimal> GetTongSoDuQuyDauKyAsync(string? phuongThuc = null, DateTime? ngayDauKyToiDa = null)
@@ -13658,15 +13737,15 @@ LIMIT 500;
         }
         catch (Exception ex)
         {
-            SafeLog.WriteError("Lỗi GetTongSoDuQuyDauKyAsync", ex);
+            SafeLog.WriteError("Lá»—i GetTongSoDuQuyDauKyAsync", ex);
             return 0m;
         }
     }
 
     /// <summary>
-    /// Các bản ghi số dư quỹ đầu kỳ đã khai báo cho đúng một mốc ngày đầu kỳ.
-    /// Dùng cho màn Sổ quỹ để biết kỳ đang xem đã khởi tạo quỹ chưa và điền sẵn
-    /// số tiền vào ô nhập khi sửa lại.
+    /// CÃ¡c báº£n ghi sá»‘ dÆ° quá»¹ Ä‘áº§u ká»³ Ä‘Ã£ khai bÃ¡o cho Ä‘Ãºng má»™t má»‘c ngÃ y Ä‘áº§u ká»³.
+    /// DÃ¹ng cho mÃ n Sá»• quá»¹ Ä‘á»ƒ biáº¿t ká»³ Ä‘ang xem Ä‘Ã£ khá»Ÿi táº¡o quá»¹ chÆ°a vÃ  Ä‘iá»n sáºµn
+    /// sá»‘ tiá»n vÃ o Ã´ nháº­p khi sá»­a láº¡i.
     /// </summary>
     public async Task<IReadOnlyList<SoQuyDauKy>> GetSoQuyDauKyTheoKyAsync(DateTime ngayDauKy, string? phuongThuc = null)
     {
@@ -13704,15 +13783,15 @@ LIMIT 500;
         }
         catch (Exception ex)
         {
-            SafeLog.WriteError("Lỗi GetSoQuyDauKyTheoKyAsync", ex);
+            SafeLog.WriteError("Lá»—i GetSoQuyDauKyTheoKyAsync", ex);
             return Array.Empty<SoQuyDauKy>();
         }
     }
 
     /// <summary>
-    /// Toàn bộ các bản ghi số dư quỹ đầu kỳ đã khai báo, tuỳ chọn lọc theo quỹ
-    /// và theo mốc ngày tối đa. Dùng cho màn Sổ quỹ khi xem "toàn thời gian"
-    /// để biết quỹ đầu kỳ đã có khai báo nào hay chưa.
+    /// ToÃ n bá»™ cÃ¡c báº£n ghi sá»‘ dÆ° quá»¹ Ä‘áº§u ká»³ Ä‘Ã£ khai bÃ¡o, tuá»³ chá»n lá»c theo quá»¹
+    /// vÃ  theo má»‘c ngÃ y tá»‘i Ä‘a. DÃ¹ng cho mÃ n Sá»• quá»¹ khi xem "toÃ n thá»i gian"
+    /// Ä‘á»ƒ biáº¿t quá»¹ Ä‘áº§u ká»³ Ä‘Ã£ cÃ³ khai bÃ¡o nÃ o hay chÆ°a.
     /// </summary>
     public async Task<IReadOnlyList<SoQuyDauKy>> GetSoQuyDauKyListAsync(
         string? phuongThuc = null,
@@ -13757,14 +13836,14 @@ LIMIT 500;
         }
         catch (Exception ex)
         {
-            SafeLog.WriteError("Lỗi GetSoQuyDauKyListAsync", ex);
+            SafeLog.WriteError("Lá»—i GetSoQuyDauKyListAsync", ex);
             return Array.Empty<SoQuyDauKy>();
         }
     }
 
     /// <summary>
-    /// Xoá số dư quỹ đầu kỳ đã khai báo cho một quỹ tại một mốc ngày.
-    /// Dùng khi người dùng muốn bỏ khai báo của một kỳ trên màn Sổ quỹ.
+    /// XoÃ¡ sá»‘ dÆ° quá»¹ Ä‘áº§u ká»³ Ä‘Ã£ khai bÃ¡o cho má»™t quá»¹ táº¡i má»™t má»‘c ngÃ y.
+    /// DÃ¹ng khi ngÆ°á»i dÃ¹ng muá»‘n bá» khai bÃ¡o cá»§a má»™t ká»³ trÃªn mÃ n Sá»• quá»¹.
     /// </summary>
     public async Task<bool> XoaSoQuyDauKyTheoKyAsync(DateTime ngayDauKy, string phuongThuc)
     {
@@ -13791,15 +13870,15 @@ LIMIT 500;
         }
         catch (Exception ex)
         {
-            SafeLog.WriteError("Lỗi XoaSoQuyDauKyTheoKyAsync", ex);
+            SafeLog.WriteError("Lá»—i XoaSoQuyDauKyTheoKyAsync", ex);
             return false;
         }
     }
     #endregion
 
-    #region Thiết Lập Giá Khách Hàng
+    #region Thiáº¿t Láº­p GiÃ¡ KhÃ¡ch HÃ ng
     /// <summary>
-    /// Đảm bảo bảng lưu trữ thiết lập giá riêng cho khách hàng (gia_ban_khach_hang) tồn tại.
+    /// Äáº£m báº£o báº£ng lÆ°u trá»¯ thiáº¿t láº­p giÃ¡ riÃªng cho khÃ¡ch hÃ ng (gia_ban_khach_hang) tá»“n táº¡i.
     /// </summary>
     public async Task EnsureBangGiaKhachHangAsync(MySqlConnection connection, MySqlTransaction? transaction = null)
     {
@@ -13826,12 +13905,12 @@ LIMIT 500;
         }
         catch (Exception ex)
         {
-            SafeLog.WriteError("Không tạo được bảng gia_ban_khach_hang", ex);
+            SafeLog.WriteError("KhÃ´ng táº¡o Ä‘Æ°á»£c báº£ng gia_ban_khach_hang", ex);
         }
     }
 
     /// <summary>
-    /// Lấy danh sách các mặt hàng đã được thiết lập giá riêng cho một khách hàng.
+    /// Láº¥y danh sÃ¡ch cÃ¡c máº·t hÃ ng Ä‘Ã£ Ä‘Æ°á»£c thiáº¿t láº­p giÃ¡ riÃªng cho má»™t khÃ¡ch hÃ ng.
     /// </summary>
     public async Task<IReadOnlyList<GiaBanKhachHangItem>> GetBangGiaKhachHangAsync(
         uint khachHangId,
@@ -13848,9 +13927,9 @@ LIMIT 500;
             gb.san_pham_id AS SanPhamId,
             sp.ma_san_pham AS MaSanPham,
             sp.ten_san_pham AS TenSanPham,
-            COALESCE(dvt.ten_don_vi, 'Cái') AS DonViTinh,
+            COALESCE(dvt.ten_don_vi, 'CÃ¡i') AS DonViTinh,
             sp.don_vi_tinh_id AS DonViTinhId,
-            COALESCE(nsp.ten_nhom, sp.nhom_hang_3_cap_excel, 'Chưa phân nhóm') AS NhomSanPham,
+            COALESCE(nsp.ten_nhom, sp.nhom_hang_3_cap_excel, 'ChÆ°a phÃ¢n nhÃ³m') AS NhomSanPham,
             sp.nhom_san_pham_id AS NhomSanPhamId,
             COALESCE(sp.gia_ban, 0) AS GiaGoc,
             gb.gia_rieng AS GiaRieng,
@@ -13898,8 +13977,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Thêm hoặc cập nhật giá bán riêng cho một sản phẩm của khách hàng.
-    /// Không làm thay đổi giá bán chung của sản phẩm trong bảng san_pham.
+    /// ThÃªm hoáº·c cáº­p nháº­t giÃ¡ bÃ¡n riÃªng cho má»™t sáº£n pháº©m cá»§a khÃ¡ch hÃ ng.
+    /// KhÃ´ng lÃ m thay Ä‘á»•i giÃ¡ bÃ¡n chung cá»§a sáº£n pháº©m trong báº£ng san_pham.
     /// </summary>
     public async Task<bool> LuuGiaBanKhachHangAsync(
         uint khachHangId,
@@ -13909,10 +13988,10 @@ LIMIT 500;
         DateTime? ngayApDung = null)
     {
         if (khachHangId == 0 || sanPhamId == 0)
-            throw new ArgumentException("Mã khách hàng và mã sản phẩm không hợp lệ.");
+            throw new ArgumentException("MÃ£ khÃ¡ch hÃ ng vÃ  mÃ£ sáº£n pháº©m khÃ´ng há»£p lá»‡.");
 
         if (giaRieng < 0)
-            throw new ArgumentException("Giá bán riêng không được nhỏ hơn 0.");
+            throw new ArgumentException("GiÃ¡ bÃ¡n riÃªng khÃ´ng Ä‘Æ°á»£c nhá» hÆ¡n 0.");
 
         await using var connection = await OpenAsync();
         await EnsureBangGiaKhachHangAsync(connection);
@@ -13945,18 +14024,18 @@ LIMIT 500;
             });
 
         _ = LogSubAccountActivityAsync(
-            "Thiết lập giá",
+            "Thiáº¿t láº­p giÃ¡",
             "GIA_BAN_KHACH_HANG",
             khachHangId,
             $"SP{sanPhamId}",
-            $"Thiết lập giá bán riêng: {giaRieng:N0} đ cho sản phẩm #{sanPhamId} (Khách #{khachHangId})",
+            $"Thiáº¿t láº­p giÃ¡ bÃ¡n riÃªng: {giaRieng:N0} Ä‘ cho sáº£n pháº©m #{sanPhamId} (KhÃ¡ch #{khachHangId})",
             giaRieng);
 
         return affected > 0;
     }
 
     /// <summary>
-    /// Xóa thiết lập giá bán riêng để mặt hàng quay về áp dụng giá chung.
+    /// XÃ³a thiáº¿t láº­p giÃ¡ bÃ¡n riÃªng Ä‘á»ƒ máº·t hÃ ng quay vá» Ã¡p dá»¥ng giÃ¡ chung.
     /// </summary>
     public async Task<bool> XoaGiaBanKhachHangAsync(uint id)
     {
@@ -13971,7 +14050,7 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Lấy giá bán riêng của một sản phẩm đối với khách hàng (phục vụ kiểm tra nhanh khi bán hàng).
+    /// Láº¥y giÃ¡ bÃ¡n riÃªng cá»§a má»™t sáº£n pháº©m Ä‘á»‘i vá»›i khÃ¡ch hÃ ng (phá»¥c vá»¥ kiá»ƒm tra nhanh khi bÃ¡n hÃ ng).
     /// </summary>
     public async Task<decimal?> LayGiaRiengKhachHangAsync(uint khachHangId, uint sanPhamId)
     {
@@ -14001,8 +14080,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Lấy tất cả giá riêng của khách hàng dưới dạng từ điển { SanPhamId => GiaRieng }
-    /// để áp dụng tự động cho giỏ hàng khi chọn khách hàng.
+    /// Láº¥y táº¥t cáº£ giÃ¡ riÃªng cá»§a khÃ¡ch hÃ ng dÆ°á»›i dáº¡ng tá»« Ä‘iá»ƒn { SanPhamId => GiaRieng }
+    /// Ä‘á»ƒ Ã¡p dá»¥ng tá»± Ä‘á»™ng cho giá» hÃ ng khi chá»n khÃ¡ch hÃ ng.
     /// </summary>
     public async Task<Dictionary<uint, decimal>> LayTatCaGiaRiengKhachHangAsync(uint khachHangId)
     {
@@ -14032,14 +14111,14 @@ LIMIT 500;
         }
         catch (Exception ex)
         {
-            SafeLog.WriteError("Lỗi LayTatCaGiaRiengKhachHangAsync", ex);
+            SafeLog.WriteError("Lá»—i LayTatCaGiaRiengKhachHangAsync", ex);
         }
 
         return result;
     }
 
     /// <summary>
-    /// Lấy danh sách khách hàng thuộc một nhóm khách hàng cụ thể.
+    /// Láº¥y danh sÃ¡ch khÃ¡ch hÃ ng thuá»™c má»™t nhÃ³m khÃ¡ch hÃ ng cá»¥ thá»ƒ.
     /// </summary>
     public async Task<IReadOnlyList<KhachHang>> GetKhachHangTheoNhomAsync(uint nhomId)
     {
@@ -14064,8 +14143,8 @@ LIMIT 500;
     }
 
     /// <summary>
-    /// Thiết lập giá riêng hàng loạt cho nhiều khách hàng và nhiều sản phẩm cùng lúc.
-    /// Dùng transaction đảm bảo toàn vẹn.
+    /// Thiáº¿t láº­p giÃ¡ riÃªng hÃ ng loáº¡t cho nhiá»u khÃ¡ch hÃ ng vÃ  nhiá»u sáº£n pháº©m cÃ¹ng lÃºc.
+    /// DÃ¹ng transaction Ä‘áº£m báº£o toÃ n váº¹n.
     /// </summary>
     public async Task<int> LuuGiaBanKhachHangHangLoatAsync(
         IReadOnlyList<uint> khachHangIds,
@@ -14125,11 +14204,11 @@ LIMIT 500;
             await transaction.CommitAsync();
 
             _ = LogSubAccountActivityAsync(
-                "Thiết lập giá theo nhóm",
+                "Thiáº¿t láº­p giÃ¡ theo nhÃ³m",
                 "GIA_BAN_KHACH_HANG",
                 null,
                 null,
-                $"Thiết lập giá riêng cho {khachHangIds.Count} khách hàng với {danhSachGia.Count} sản phẩm ({totalSaved} bản ghi)",
+                $"Thiáº¿t láº­p giÃ¡ riÃªng cho {khachHangIds.Count} khÃ¡ch hÃ ng vá»›i {danhSachGia.Count} sáº£n pháº©m ({totalSaved} báº£n ghi)",
                 null);
 
             return totalSaved;
@@ -14137,12 +14216,13 @@ LIMIT 500;
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            SafeLog.WriteError("Lỗi LuuGiaBanKhachHangHangLoatAsync", ex);
+            SafeLog.WriteError("Lá»—i LuuGiaBanKhachHangHangLoatAsync", ex);
             throw;
         }
     }
 
     #endregion
 }
+
 
 

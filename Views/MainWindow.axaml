@@ -1392,23 +1392,6 @@
               </Grid>
             </Button>
 
-            <!-- SỐ LIỆU -->
-            <Button Classes="menu">
-              <Button.Flyout>
-                <MenuFlyout Placement="RightEdgeAlignedTop">
-                  <MenuItem Header="🔄 Kết chuyển hàng hóa..."
-                            Command="{Binding KetChuyenHangHoaCommand}" />
-                  <MenuItem Header="⚖ Kết chuyển công nợ..."
-                            Command="{Binding KetChuyenCongNoCommand}" />
-                </MenuFlyout>
-              </Button.Flyout>
-              <Grid ColumnDefinitions="24,*,Auto">
-                <TextBlock Text="📊" FontSize="14" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Text="Số liệu" VerticalAlignment="Center" Margin="6,0,0,0" />
-                <TextBlock Grid.Column="2" Text="▸" FontSize="11" Foreground="#85C7B7" VerticalAlignment="Center" Margin="0,0,4,0" />
-              </Grid>
-            </Button>
-
             <!-- KHUYẾN MÃI -->
             <Button Classes="menu" Classes.active="{Binding IsDanhSachKhuyenMaiSelected}">
               <Button.Flyout>
@@ -1482,8 +1465,7 @@
             </Border>
 
             <!-- QUẢN TRỊ -->
-            <!-- Gộp các chức năng quản trị về một nhóm, đặt "Quản lý tài khoản"
-                 và "Quản lý nhân viên" lên đầu để dễ tìm. -->
+            <!-- Gộp các chức năng quản trị + trợ giúp vào một nhóm -->
             <Button Classes="menu">
               <Button.Flyout>
                 <MenuFlyout Placement="RightEdgeAlignedTop">
@@ -1501,7 +1483,7 @@
                             Command="{Binding ChonMenuCommand}"
                             CommandParameter="Thông tin tiệm"
                             IsVisible="{Binding CanViewStoreInfo}" />
-                  <MenuItem Header="📂 Cài đặt danh mục..."
+                  <MenuItem Header="🗂 Cài đặt danh mục..."
                             Command="{Binding MoCaiDatDanhMucCommand}"
                             IsVisible="{Binding CanViewSettings}" />
                   <MenuItem Header="📦 Thêm tồn đầu kỳ..."
@@ -1510,12 +1492,15 @@
                   <Separator />
                   <MenuItem Header="🔌 Cài đặt kết nối Database..."
                             Command="{Binding MoCaiDatDatabaseCommand}" />
-                  <MenuItem Header="🔒 Đổi mật khẩu..."
+                  <MenuItem Header="🔑 Đổi mật khẩu..."
                             Command="{Binding MoDoiMatKhauCommand}" />
+                  <Separator />
+                  <MenuItem Header="❓ Trợ giúp &amp; Phím tắt (F1)"
+                            Command="{Binding MoTroGiupCommand}" />
                 </MenuFlyout>
               </Button.Flyout>
               <Grid ColumnDefinitions="24,*,Auto">
-                <TextBlock Text="🛠️" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Text="⚙️" FontSize="14" VerticalAlignment="Center" />
                 <TextBlock Grid.Column="1" Text="Quản trị" VerticalAlignment="Center" Margin="6,0,0,0" />
                 <TextBlock Grid.Column="2" Text="▸" FontSize="11" Foreground="#85C7B7" VerticalAlignment="Center" Margin="0,0,4,0" />
               </Grid>

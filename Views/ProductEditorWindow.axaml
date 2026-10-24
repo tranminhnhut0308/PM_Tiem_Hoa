@@ -1,10 +1,10 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="ShopHoa.Views.ProductEditorWindow"
-        Width="750"
-        Height="680"
-        MinWidth="700"
-        MinHeight="600"
+        Width="820"
+        Height="720"
+        MinWidth="820"
+        MinHeight="640"
         Title="Thêm hàng hóa mới"
         WindowStartupLocation="CenterOwner"
         Background="#F0F5FA"
@@ -127,7 +127,7 @@
                     </Grid>
 
                     <!-- Hàng 2: Mã hàng + Barcode -->
-                    <Grid ColumnDefinitions="100,2*,80,3*" ColumnSpacing="10">
+                    <Grid ColumnDefinitions="100,2*,80,2*,90" ColumnSpacing="10">
                         <TextBlock Classes="fieldLabel" Text="Mã hàng"/>
                         <TextBox Grid.Column="1"
                                  Name="MaSanPhamTextBox"
@@ -139,6 +139,13 @@
                                  Name="BarcodeTextBox"
                                  Classes="classicInput"
                                  Watermark="Mã vạch sản phẩm"/>
+                        <Button Grid.Column="4"
+                                Name="GenerateBarcodeButton"
+                                Classes="actionBtn"
+                                Height="30"
+                                Padding="10,0"
+                                Content="Tạo mã"
+                                Click="GenerateBarcodeButton_OnClick"/>
                     </Grid>
 
                     <!-- Hàng 3: Tên hàng -->
@@ -157,113 +164,130 @@
                             CornerRadius="4"
                             Padding="8,6"
                             Margin="0,4,0,4">
-                        <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                            <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6" MinWidth="760">
 
-                            <!-- Cấp 1: Đơn vị gốc -->
-                            <Grid ColumnDefinitions="90,130,55,65,60,*,50,*,50,*" ColumnSpacing="5">
-                                <TextBlock Classes="fieldLabel" Text="Đơn vị gốc"/>
-                                <ComboBox Grid.Column="1"
-                                          Name="DonViTinhComboBox"
-                                          Classes="classicCombo"
-                                          HorizontalAlignment="Stretch"
-                                          PlaceholderText="Chọn ĐVT"/>
+                                <!-- Cấp 1: Đơn vị gốc -->
+                                <Grid ColumnDefinitions="90,150,70,80,70,110,70,110,70,110" ColumnSpacing="6">
+                                    <TextBlock Classes="fieldLabel" Text="Đơn vị gốc"/>
+                                    <ComboBox Grid.Column="1"
+                                              Name="DonViTinhComboBox"
+                                              Classes="classicCombo"
+                                              MinWidth="150"
+                                              HorizontalAlignment="Stretch"
+                                              PlaceholderText="Chọn ĐVT"/>
 
-                                <TextBlock Grid.Column="2" Classes="fieldLabel" Text="Quy đổi" HorizontalAlignment="Right"/>
-                                <TextBox Grid.Column="3"
-                                         Name="QuyDoiGocTextBox"
-                                         Classes="numberInput"
-                                         Text="1"
-                                         IsReadOnly="True"
-                                         Background="#E6EDF5"/>
+                                    <TextBlock Grid.Column="2" Classes="fieldLabel" Text="Quy đổi" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Column="3"
+                                             Name="QuyDoiGocTextBox"
+                                             Classes="numberInput"
+                                             MinWidth="80"
+                                             Text="1"
+                                             IsReadOnly="True"
+                                             Background="#E6EDF5"/>
 
-                                <TextBlock Grid.Column="4" Classes="fieldLabel" Text="Giá nhập" HorizontalAlignment="Right"/>
-                                <TextBox Grid.Column="5"
-                                         Name="GiaVonTextBox"
-                                         Classes="numberInput"
-                                         Text="0"/>
+                                    <TextBlock Grid.Column="4" Classes="fieldLabel" Text="Giá nhập" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Column="5"
+                                             Name="GiaVonTextBox"
+                                             Classes="numberInput"
+                                             MinWidth="110"
+                                             Text="0"/>
 
-                                <TextBlock Grid.Column="6" Classes="fieldLabel" Text="Giá lẻ" HorizontalAlignment="Right"/>
-                                <TextBox Grid.Column="7"
-                                         Name="GiaBanTextBox"
-                                         Classes="numberInput"
-                                         Text="0"/>
+                                    <TextBlock Grid.Column="6" Classes="fieldLabel" Text="Giá lẻ" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Column="7"
+                                             Name="GiaBanTextBox"
+                                             Classes="numberInput"
+                                             MinWidth="110"
+                                             Text="0"/>
 
-                                <TextBlock Grid.Column="8" Classes="fieldLabel" Text="Giá sỉ" HorizontalAlignment="Right"/>
-                                <TextBox Grid.Column="9"
-                                         Name="GiaSiTextBox"
-                                         Classes="numberInput"
-                                         Text="0"/>
+                                    <TextBlock Grid.Column="8" Classes="fieldLabel" Text="Giá sỉ" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Column="9"
+                                             Name="GiaSiTextBox"
+                                             Classes="numberInput"
+                                             MinWidth="110"
+                                             Text="0"/>
+                                </Grid>
+
+                                <!-- Cấp 2: Đơn vị cấp 2 -->
+                                <Grid Grid.Row="1" ColumnDefinitions="90,150,70,80,70,110,70,110,70,110" ColumnSpacing="6">
+                                    <TextBlock Classes="fieldLabel" Text="Đơn vị cấp 2"/>
+                                    <ComboBox Grid.Column="1"
+                                              Name="DonViTinhCap2ComboBox"
+                                              Classes="classicCombo"
+                                              MinWidth="150"
+                                              HorizontalAlignment="Stretch"
+                                              PlaceholderText="Chọn ĐVT"/>
+
+                                    <TextBlock Grid.Column="2" Classes="fieldLabel" Text="Quy đổi" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Column="3"
+                                             Name="QuyDoiCap2TextBox"
+                                             Classes="numberInput"
+                                             MinWidth="80"
+                                             Text="0"/>
+
+                                    <TextBlock Grid.Column="4" Classes="fieldLabel" Text="Giá nhập" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Column="5"
+                                             Name="GiaNhapCap2TextBox"
+                                             Classes="numberInput"
+                                             MinWidth="110"
+                                             Text="0"/>
+
+                                    <TextBlock Grid.Column="6" Classes="fieldLabel" Text="Giá lẻ" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Column="7"
+                                             Name="GiaLeCap2TextBox"
+                                             Classes="numberInput"
+                                             MinWidth="110"
+                                             Text="0"/>
+
+                                    <TextBlock Grid.Column="8" Classes="fieldLabel" Text="Giá sỉ" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Column="9"
+                                             Name="GiaSiCap2TextBox"
+                                             Classes="numberInput"
+                                             MinWidth="110"
+                                             Text="0"/>
+                                </Grid>
+
+                                <!-- Cấp 3: Đơn vị cấp 3 -->
+                                <Grid Grid.Row="2" ColumnDefinitions="90,150,70,80,70,110,70,110,70,110" ColumnSpacing="6">
+                                    <TextBlock Classes="fieldLabel" Text="Đơn vị cấp 3"/>
+                                    <ComboBox Grid.Column="1"
+                                              Name="DonViTinhCap3ComboBox"
+                                              Classes="classicCombo"
+                                              MinWidth="150"
+                                              HorizontalAlignment="Stretch"
+                                              PlaceholderText="Chọn ĐVT"/>
+
+                                    <TextBlock Grid.Column="2" Classes="fieldLabel" Text="Quy đổi" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Column="3"
+                                             Name="QuyDoiCap3TextBox"
+                                             Classes="numberInput"
+                                             MinWidth="80"
+                                             Text="0"/>
+
+                                    <TextBlock Grid.Column="4" Classes="fieldLabel" Text="Giá nhập" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Column="5"
+                                             Name="GiaNhapCap3TextBox"
+                                             Classes="numberInput"
+                                             MinWidth="110"
+                                             Text="0"/>
+
+                                    <TextBlock Grid.Column="6" Classes="fieldLabel" Text="Giá lẻ" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Column="7"
+                                             Name="GiaLeCap3TextBox"
+                                             Classes="numberInput"
+                                             MinWidth="110"
+                                             Text="0"/>
+
+                                    <TextBlock Grid.Column="8" Classes="fieldLabel" Text="Giá sỉ" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Column="9"
+                                             Name="GiaSiCap3TextBox"
+                                             Classes="numberInput"
+                                             MinWidth="110"
+                                             Text="0"/>
+                                </Grid>
+
                             </Grid>
-
-                            <!-- Cấp 2: Đơn vị cấp 2 -->
-                            <Grid Grid.Row="1" ColumnDefinitions="90,130,55,65,60,*,50,*,50,*" ColumnSpacing="5">
-                                <TextBlock Classes="fieldLabel" Text="Đơn vị cấp 2"/>
-                                <ComboBox Grid.Column="1"
-                                          Name="DonViTinhCap2ComboBox"
-                                          Classes="classicCombo"
-                                          HorizontalAlignment="Stretch"
-                                          PlaceholderText="Chọn ĐVT"/>
-
-                                <TextBlock Grid.Column="2" Classes="fieldLabel" Text="Quy đổi" HorizontalAlignment="Right"/>
-                                <TextBox Grid.Column="3"
-                                         Name="QuyDoiCap2TextBox"
-                                         Classes="numberInput"
-                                         Text="0"/>
-
-                                <TextBlock Grid.Column="4" Classes="fieldLabel" Text="Giá nhập" HorizontalAlignment="Right"/>
-                                <TextBox Grid.Column="5"
-                                         Name="GiaNhapCap2TextBox"
-                                         Classes="numberInput"
-                                         Text="0"/>
-
-                                <TextBlock Grid.Column="6" Classes="fieldLabel" Text="Giá lẻ" HorizontalAlignment="Right"/>
-                                <TextBox Grid.Column="7"
-                                         Name="GiaLeCap2TextBox"
-                                         Classes="numberInput"
-                                         Text="0"/>
-
-                                <TextBlock Grid.Column="8" Classes="fieldLabel" Text="Giá sỉ" HorizontalAlignment="Right"/>
-                                <TextBox Grid.Column="9"
-                                         Name="GiaSiCap2TextBox"
-                                         Classes="numberInput"
-                                         Text="0"/>
-                            </Grid>
-
-                            <!-- Cấp 3: Đơn vị cấp 3 -->
-                            <Grid Grid.Row="2" ColumnDefinitions="90,130,55,65,60,*,50,*,50,*" ColumnSpacing="5">
-                                <TextBlock Classes="fieldLabel" Text="Đơn vị cấp 3"/>
-                                <ComboBox Grid.Column="1"
-                                          Name="DonViTinhCap3ComboBox"
-                                          Classes="classicCombo"
-                                          HorizontalAlignment="Stretch"
-                                          PlaceholderText="Chọn ĐVT"/>
-
-                                <TextBlock Grid.Column="2" Classes="fieldLabel" Text="Quy đổi" HorizontalAlignment="Right"/>
-                                <TextBox Grid.Column="3"
-                                         Name="QuyDoiCap3TextBox"
-                                         Classes="numberInput"
-                                         Text="0"/>
-
-                                <TextBlock Grid.Column="4" Classes="fieldLabel" Text="Giá nhập" HorizontalAlignment="Right"/>
-                                <TextBox Grid.Column="5"
-                                         Name="GiaNhapCap3TextBox"
-                                         Classes="numberInput"
-                                         Text="0"/>
-
-                                <TextBlock Grid.Column="6" Classes="fieldLabel" Text="Giá lẻ" HorizontalAlignment="Right"/>
-                                <TextBox Grid.Column="7"
-                                         Name="GiaLeCap3TextBox"
-                                         Classes="numberInput"
-                                         Text="0"/>
-
-                                <TextBlock Grid.Column="8" Classes="fieldLabel" Text="Giá sỉ" HorizontalAlignment="Right"/>
-                                <TextBox Grid.Column="9"
-                                         Name="GiaSiCap3TextBox"
-                                         Classes="numberInput"
-                                         Text="0"/>
-                            </Grid>
-
-                        </Grid>
+                        </ScrollViewer>
                     </Border>
 
                     <!-- Hàng: Quy cách | Trọng lượng (Kg) -->

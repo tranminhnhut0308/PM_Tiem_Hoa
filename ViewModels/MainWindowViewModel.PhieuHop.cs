@@ -27,7 +27,9 @@ public partial class MainWindowViewModel
     // ---------------- Hub Nhập hàng ----------------
 
     /// <summary>True = đang xem tab "Danh sách phiếu nhập", False = tab "Tạo phiếu nhập".</summary>
-    [ObservableProperty] private bool isPhieuNhapTabDanhSach = true;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsPhieuNhapTabTaoPhieu))]
+    private bool isPhieuNhapTabDanhSach = true;
 
     /// <summary>Tên loại phiếu nhập đang chọn (hiển thị trên ComboBox).</summary>
     [ObservableProperty] private string phieuNhapLoaiTen = "Nhập từ nhà cung cấp";
@@ -64,7 +66,9 @@ public partial class MainWindowViewModel
     // ---------------- Hub Xuất hàng ----------------
 
     /// <summary>True = đang xem tab "Danh sách phiếu xuất", False = tab "Tạo phiếu xuất".</summary>
-    [ObservableProperty] private bool isPhieuXuatTabDanhSach = true;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsPhieuXuatTabTaoPhieu))]
+    private bool isPhieuXuatTabDanhSach = true;
 
     /// <summary>Tên loại phiếu xuất đang chọn (hiển thị trên ComboBox).</summary>
     [ObservableProperty] private string phieuXuatLoaiTen = "Xuất hủy / hao hụt / hết hạn";

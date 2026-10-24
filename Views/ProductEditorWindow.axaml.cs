@@ -231,6 +231,12 @@ public partial class ProductEditorWindow : Window
         Close(true);
     }
 
+    private void GenerateBarcodeButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (_cheDoXem) return;
+        BarcodeTextBox.Text = GenerateProductCode();
+    }
+
     private void CancelButton_OnClick(object? sender, RoutedEventArgs e)
     {
         Close(false);
